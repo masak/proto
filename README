@@ -1,0 +1,55 @@
+proto -- making your life slightly easier
+
+Proto is a hyper-lightweight dependency tracking and module installation
+system. Its only purpose is to help you set up a running environment where
+you can play with Perl 6 modules with as little hassle and as few questions
+as possible. It is not to be taken seriously in any way. It is not a full-
+fledged module installation system. It is a prototype; in fact, its very name
+was chosen to indicate this fact. The conditions under which it can work are
+temporary -- the mechanism by which it ties together modules is a short-term
+hack in Rakudo Perl 6. Nothing lasts forever, but that holds especially true
+for this installer.
+
+What proto will do for you:
+
+1. Install Parrot
+2. Install Rakudo
+3. Install Perl 6 modules
+
+The first two are merely a convenience; it's the third one for which proto
+was built. The command
+
+  % ./proto install <module>
+
+will look among its list of registered modules for <module>, and download and
+build whatever it finds. Should the downloaded module happen to explicitly
+depend on other modules, these will be downloaded and built before the
+dependent module is built. And so on, until it all bottoms out.
+
+The update command
+
+  % ./proto update <module>
+
+will check the module <module> and all that depend on it for updates, and
+rebuild them in the required order. Omit the name of the module, and all your
+installed modules will be updated.
+
+Removing a module is as simple as
+
+  % ./proto uninstall <module>
+
+Since a module's dependencies may change over time, it's up to the module to
+declare its current dependencies. It does this in a file called 'deps.proto' in
+its root directory. This file may contain empty lines (which are ignored),
+and lines with a single word containing only alphanumerics, dashes and
+underscores. With the exception of line-end '#' comments à la Perl, all other
+lines are reported as syntax errors, with build panic as a result.
+
+If a dependency cycle is detected during the download process, the install
+is aborted and the dependency cycle is described. It might still be possible
+to install all modules despite the cycle, but the mere fact that there's a
+cycle merits human attention.
+
+There are many things which proto does not do. Even so, it is the hope of its
+author that it might be of some use, and make Perl 6 poets bold in splitting
+up their work into logical independent units.

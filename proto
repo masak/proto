@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# This bootstrapping script assumes as little as possible about the user's
+# setup. It tries to establish, one after another, the following things:
+#
+# 1. That Perl, svn and git are installed
+# 2. That $PARROT_DIR is set.
+# 3. That $PARROT_DIR points to a directory containing Parrot.
+# 4. That it contains a 'parrot' executable.
+# 5. That the $PARROT_DIR/languages/rakudo directory exists.
+# 6. That it contains a 'perl6.pbc' file.
+
+# 1. Check Perl, git and svn
+if (which -s perl); then
+    echo -n
+else
+    echo "Cannot find 'perl'. You need to install that first."
+    echo "Go to http://www.perl.org and follow the instructions there."
+    exit 1;
+fi
+
+if (which -s git); then
+    echo -n
+else
+    echo "Cannot find 'git'. You need to install that first."
+    # TODO: Find git homepage
+    exit 1;
+fi
+
+if (which -s svn); then
+    echo -n
+else
+    echo "Cannot find 'svn'. You need to install that first."
+    # TODO: Find svn homepage
+    exit 1;
+fi
+
+# 2. Check $PARROT_DIR
+if [[ -z $PARROT_DIR ]]; then
+    echo "You don't have \$PARROT_DIR set."
+    # TODO: Have a short chat with the user and maybe download Parrot
+    exit 1;
+fi
+
+# 3. Check that it's a Parrot dir
+if [[ !(-e $PARROT_DIR/README) ||
+      $(head -n1 $PARROT_DIR/README) != 'This is Parrot'* ]]; then
+    echo "Your \$PARROT_DIR variable doesn't seem to point to a Parrot installation."
+    # TODO: Either just die here, or same as 1.
+    exit 1;
+fi
+
+# 4. Check whether it contains a Parrot executable
+if [[ !(-e $PARROT_DIR/parrot) ]]; then
+    echo "Building Parrot..."
+    cd $PARROT_DIR
+    if [[ -e Makefile ]]; then
+        make realclean > make.log 2>&1 
+    fi
+    perl Makefile.PL  >> make.log 2>&1
+    make              >> make.log 2>&1
+    if (($? != 0)); then
+        echo "The build process failed. See make_result for details."
+        exit 1;
+    fi
+    if [[ !(-e parrot) ]]; then
+        echo "Build succeeded strangely. Giving up. See make_result for details."
+        exit 1;
+    fi
+    rm -f make.log
+fi
+
+# 5. Check whether the languages/rakudo dir exists
+if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
+    echo "Downloading Perl 6..."
+    # TODO: Download Rakudo from github
+    exit 0;
+fi
+
+# 6. Check whether it contains a 'perl6.pbc' file
+if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
+    echo "Building Perl 6..."
+    cd $PARROT_DIR/languages/rakudo
+    if [[ -e Makefile ]]; then
+        make realclean > make.log 2>&1
+    fi
+    perl Configure.pl >> make.log 2>&1
+    make              >> make.log 2>&1
+    if (($? != 0)); then
+        echo "The build process failed. See make_result for details."
+        exit 1;
+    fi
+    if [[ !(-e perl6.pbc) ]]; then
+        echo "Build succeeded strangely. Giving up. See make_result for details."
+    fi
+    rm -f make.log
+fi
+
+echo "Parrot and Perl 6 are present and built."
