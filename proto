@@ -53,7 +53,7 @@ if [[ -z $PARROT_DIR ||
     fi
     DIRNAME=`basename $TARFILE .tar.gz`
     if [[ !(-d $DIRNAME) ]]; then
-        echo "Download succeeded strangely. Giving up. See download.log for details."
+        echo "Download failed. See download.log for details."
         exit 1;
     fi
     export PARROT_DIR=`pwd`/$DIRNAME
@@ -75,11 +75,11 @@ if [[ !(-e $PARROT_DIR/parrot) ]]; then
     make              >> make.log 2>&1
     echo ''
     if (($? != 0)); then
-        echo "The build process failed. See make.log for details."
+        echo "Build failed. See make.log for details."
         exit 1;
     fi
     if [[ !(-e parrot) ]]; then
-        echo "Build succeeded strangely. Giving up. See make.log for details."
+        echo "Build failed. See make.log for details."
         exit 1;
     fi
     rm -f make.log
@@ -96,7 +96,7 @@ if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
         exit 1;
     fi
     if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
-        echo "Download succeeded strangely. Giving up. See download.log for details."
+        echo "Download failed. See download.log for details."
         exit 1;
     fi
     rm -f download.log
@@ -113,11 +113,11 @@ if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
     make              >> make.log 2>&1
     echo ''
     if (($? != 0)); then
-        echo "The build process failed. See make.log for details."
+        echo "Build failed. See make.log for details."
         exit 1;
     fi
     if [[ !(-e perl6.pbc) ]]; then
-        echo "Build succeeded strangely. Giving up. See make.log for details."
+        echo "Build failed. See make.log for details."
         exit 1;
     fi
     rm -f make.log
