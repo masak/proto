@@ -11,7 +11,7 @@
 # 6. That it contains a 'perl6.pbc' file.
 
 # 1. Check perl and git
-if (which -s perl); then
+if (which perl > /dev/null); then
     echo -n
 else
     echo "Cannot find 'perl'. You need to install that first."
@@ -20,7 +20,7 @@ else
     exit 1;
 fi
 
-if (which -s git); then
+if (which git > /dev/null); then
     echo -n
 else
     echo "Cannot find 'git'. You need to install that first."
