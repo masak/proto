@@ -173,7 +173,7 @@ fi
 
 PERL6="$PARROT_DIR/parrot $PARROT_DIR/languages/perl6/perl6.pbc"
 
-$PERL6 -e 'say "Perl 6 is installed."'
+$PERL6 -e 'say "Perl 6 is installed."' > /dev/null
 if (($? != 0)); then
     echo "Something is wrong with Perl 6. Cannot continue."
     exit 1;
