@@ -95,7 +95,7 @@ if [[ !(-e $PARROT_DIR/parrot) ]]; then
         exit 1;
     fi
     rm -f make.log
-    cd -
+    cd - > /dev/null
 fi
 
 # TODO: allow for the scenario coming soon where RAKUDO_DIR is outside
@@ -120,7 +120,7 @@ fi
 #         exit 1;
 #     fi
 #     rm -f download.log
-#     cd -
+#     cd - > /dev/null
 # fi
 # 
 # # 6. Check whether it contains a 'perl6.pbc' file
@@ -143,7 +143,7 @@ fi
 #         exit 1;
 #     fi
 #     rm -f make.log
-#     cd -
+#     cd - > /dev/null
 # fi
 
 if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
@@ -161,7 +161,7 @@ if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
         exit 1;
     fi
     rm -f make.log
-    cd -
+    cd - > /dev/null
     # Yes, this is indeed very much cheating. But it works.
     ln -s $PARROT_DIR/languages/perl6 $PARROT_DIR/languages/rakudo
 fi
