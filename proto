@@ -166,3 +166,7 @@ fi
 
 $PARROT_DIR/parrot $PARROT_DIR/languages/perl6/perl6.pbc \
      -e 'say "Perl 6 is installed."'
+if (($? != 0)); then
+    echo "Something is wrong with Perl 6. Cannot continue."
+    exit 1;
+fi
