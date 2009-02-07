@@ -68,7 +68,44 @@ sub install(*@projects) {
 }
 
 sub test(*@projects) {
-    not_implemented('test');
+    unless @projects {
+        say 'You have to specify what you want to test.';
+        # TODO: Maybe just test everything installed?
+        exit 1;
+    }
+    my $can_continue = True;
+    for @projects -> $project {
+        if !%project_info.exists($project) {
+            say "Project not found: '$project'";
+            $can_continue = False;
+        }
+        # TODO: Also need to check that projects are actually installed.
+    }
+    if !$can_continue {
+        say "Aborting...";
+        exit(1);
+    }
+    for @projects -> $project {
+        my %info = %project_info{$project};
+        # RAKUDO: This can be cleaned up when the backtick syntax lands
+        run( 'pwd > current_dir' );
+        my $current_dir = slurp('current_dir');
+        $current_dir .= subst( /\v+$/, '' );
+        run( 'rm -f current_dir' );
+        # RAKUDO: Doesn't support any other way to change the current working
+        #         directory. Improvising.
+        my $project_dir = %info.exists('main_subdir')
+                          ?? "$project/{%info<main_subdir>}"
+                          !! $project;
+        my $in_dir = "cd $project_dir";
+        # RAKUDO: Can't really figure out how to set environment variables
+        #         so they're visible by later commands. Doing like this
+        #         instead.
+        my $p6l = "env PERL6LIB=$current_dir/$project_dir/lib";
+        print "Building $project... ";
+        run( "$in_dir; $p6l make test" );
+    }
+
 }
 
 sub update(*@projects) {
