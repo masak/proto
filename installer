@@ -1,6 +1,12 @@
 #!perl6
 use v6;
 
+my %project_info =
+    november => {
+        installcmd  => 'git clone git://github.com/viklund/november.git',
+        main_subdir => 'p6w',
+    };
+
 given @*ARGS.shift {
     when undef       { exit; }
     when 'install'   { install(@*ARGS) }
@@ -14,8 +20,33 @@ sub install(*@projects) {
         say 'You have to specify what you want to install.';
         exit 1;
     }
+    my $can_continue = True;
     for @projects -> $project {
-        say "Not found: $project";
+        if !%project_info.exists($project) {
+            say "Project not found: '$project'";
+            $can_continue = False;
+        }
+    }
+    if !$can_continue {
+        say "Aborting...";
+        exit(1);
+    }
+    for @projects -> $project {
+        my %info = %project_info{$project};
+        print "Downloading $project... ";
+        run( %info<installcmd> ~ ' > download.log 2>&1' );
+        say '';
+        run( 'rm -f download.log' );
+        # RAKUDO: Doesn't support any other way to change the current working
+        #         directory. Improvising.
+        my $cwd = %info.exists('main_subdir')
+                  ?? "cd $project/{%info<main_subdir>}"
+                  !! "cd $project";
+        print "Building $project... ";
+        run( "$cwd; yes '' | perl Makefile.PL > make.log 2>\&1" );
+        run( "$cwd; make >> make.log 2>\&1" );
+        say '';
+        run( "$cwd; rm -f make.log" );
     }
 }
 
