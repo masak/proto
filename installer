@@ -16,7 +16,8 @@ my %project_info =
 given @*ARGS.shift {
     when undef       { exit; }
     when 'install'   { install(@*ARGS) }
-    when 'upgrade'   { upgrade(@*ARGS) }
+    when 'test'      { test(@*ARGS)    }
+    when 'update'    { update(@*ARGS) }
     when 'uninstall' { uninstall(@*ARGS) }
     default          { say "Unrecognized subcommand '$_'. See the README." }
 }
@@ -66,10 +67,18 @@ sub install(*@projects) {
     }
 }
 
-sub upgrade(*@projects) {
-    say "The 'upgrade' subcommand is not implemented yet.";
+sub test(*@projects) {
+    not_implemented('test');
+}
+
+sub update(*@projects) {
+    not_implemented('update');
 }
 
 sub uninstall(*@projects) {
-    say "The 'uninstall' subcommand is not implemented yet.";
+    not_implemented('uninstall');
+}
+
+sub not_implemented($subcommand) {
+    say "The '$subcommand' subcommand is not implemented yet.";
 }
