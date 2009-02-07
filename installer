@@ -5,8 +5,10 @@ my %project_info =
     november => {
         installcmd  => 'git clone git://github.com/viklund/november.git',
         main_subdir => 'p6w',
-    }
-    # TODO: add druid
+    },
+    druid => {
+        installcmd => 'git clone git://github.com/masak/druid.git',
+    },
     # TODO: add perl6-examples
     # TODO: add web
 ;
@@ -41,16 +43,26 @@ sub install(*@projects) {
         run( %info<installcmd> ~ ' > download.log 2>&1' );
         say '';
         run( 'rm -f download.log' );
+        # RAKUDO: This can be cleaned up when the backtick syntax lands
+        run( 'pwd > current_dir' );
+        my $current_dir = slurp('current_dir');
+        $current_dir .= subst( /\v+$/, '' );
+        run( 'rm -f current_dir' );
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
-        my $cwd = %info.exists('main_subdir')
-                  ?? "cd $project/{%info<main_subdir>}"
-                  !! "cd $project";
+        my $project_dir = %info.exists('main_subdir')
+                          ?? "$project/{%info<main_subdir>}"
+                          !! $project;
+        my $in_dir = "cd $project_dir";
+        # RAKUDO: Can't really figure out how to set environment variables
+        #         so they're visible by later commands. Doing like this
+        #         instead.
+        my $p6l = "env PERL6LIB=$current_dir/$project_dir/lib";
         print "Building $project... ";
-        run( "$cwd; yes '' | perl Makefile.PL > make.log 2>\&1" );
-        run( "$cwd; make >> make.log 2>\&1" );
+        run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
+        run( "$in_dir; $p6l make >> make.log 2>\&1" );
         say '';
-        run( "$cwd; rm -f make.log" );
+        run( "$in_dir; rm -f make.log" );
     }
 }
 
