@@ -38,15 +38,20 @@ fi
 #     exit 1;
 # fi
 
+# TODO: Figure out a way to find the latest release of Parrot, instead
+#       of hardcoding it here.
+VERSION='0.9.0'
+
 # 2. Check $PARROT_DIR
 # 3. Check that it's a Parrot dir
+if [[ -z $PARROT_DIR && -d parrot-$VERSION ]]; then
+    PARROT_DIR=`pwd`/parrot-$VERSION
+fi
+
 if [[ -z $PARROT_DIR ||
       !(-e $PARROT_DIR/README) ||
       $(head -n1 $PARROT_DIR/README) != 'This is Parrot'* ]]; then
     echo -n "Downloading Parrot... ";
-    # TODO: Figure out a way to find the latest release of Parrot, instead
-    #       of hardcoding it here.
-    VERSION='0.9.0'
     FTP_PATH="ftp.parrot.org/pub/parrot/releases/devel/$VERSION"
     TARFILE="parrot-$VERSION.tar.gz"
     wget ftp://$FTP_PATH/$TARFILE > download.log 2>&1
