@@ -106,11 +106,12 @@ fi
 if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
     echo -n "Building Perl 6... "
     cd $PARROT_DIR/languages/rakudo
+    echo -n > make.log
     if [[ -e Makefile ]]; then
-        make realclean > make.log 2>&1
+        make realclean >> make.log 2>&1
     fi
-    perl Configure.pl >> make.log 2>&1
-    make              >> make.log 2>&1
+    perl Configure.pl  >> make.log 2>&1
+    make               >> make.log 2>&1
     echo ''
     if (($? != 0)); then
         echo "Build failed. See make.log for details."
