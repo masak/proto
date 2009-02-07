@@ -164,6 +164,5 @@ if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
     cd -
 fi
 
-echo "Parrot and Perl 6 are present and built."
-# Consider letting perl6 announce its own success, for example:
-# perl6 -e 'say "Perl 6 (Rakudo) r{%*VM<config><revision>} is ready";'
+$PARROT_DIR/parrot $PARROT_DIR/languages/perl6/perl6.pbc \
+     -e 'say "Perl 6 is installed."'
