@@ -17,6 +17,14 @@ else
     echo "Cannot find 'perl'. You need to install that first."
     echo "Go to http://www.perl.org/get.html and follow the instructions there."
     # TODO: Maybe autodetect various packaging systems that can download perl
+    # candidates : http://en.wikipedia.org/wiki/Package_management_system
+    # *BSD: ports 
+    # OS X: fink / Macports
+    # Fedora / RedHat : yum / rpm
+    # Gentoo : Portage / emerge
+    # Solaris: IPS
+    # Ubuntu / Debian : dpkg / apt-get
+    # Windows : cygwin
     exit 1;
 fi
 
@@ -42,6 +50,7 @@ if [[ -z $PARROT_DIR ||
     FTP_PATH="ftp.parrot.org/pub/parrot/releases/devel/$VERSION"
     TARFILE="parrot-$VERSION.tar.gz"
     wget ftp://$FTP_PATH/$TARFILE > download.log 2>&1
+    # TODO: offer a git clone command option to get latest revision
     if (($? != 0)); then
         echo ''
         echo "The download failed. See download.log for details."
@@ -60,6 +69,7 @@ if [[ -z $PARROT_DIR ||
     fi
     export PARROT_DIR=`pwd`/$DIRNAME
     # TODO: Refine evil modification-without asking of .bash_profile
+    # particularly do not cause multiple PARROT_DIR lines to be appended
     cat >> ~/.bash_profile <<EOF
 export PARROT_DIR=`pwd`/$DIRNAME
 EOF
@@ -88,11 +98,13 @@ if [[ !(-e $PARROT_DIR/parrot) ]]; then
     cd -
 fi
 
+# TODO: allow for the scenario coming soon where RAKUDO_DIR is outside
+# the PARROT_DIR tree, as pmichaud++ has mentioned in #perl6.
+
 # NB: Commenting out the following two steps temporarily: when we use the
 #     0.9.0 release of Parrot, we cannot use git Rakudo, because of recent
 #     API changes. Later, I'll add an option to use bleeding-edge Parrot
 #     and Rakudo.
-
 # # 5. Check whether the languages/rakudo dir exists
 # if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
 #     echo -n "Downloading Perl 6... "
@@ -153,3 +165,5 @@ if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
 fi
 
 echo "Parrot and Perl 6 are present and built."
+# Consider letting perl6 announce its own success, for example:
+# perl6 -e 'say "Perl 6 (Rakudo) r{%*VM<config><revision>} is ready";'
