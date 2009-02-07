@@ -5,7 +5,11 @@ my %project_info =
     november => {
         installcmd  => 'git clone git://github.com/viklund/november.git',
         main_subdir => 'p6w',
-    };
+    }
+    # TODO: add druid
+    # TODO: add perl6-examples
+    # TODO: add web
+;
 
 given @*ARGS.shift {
     when undef       { exit; }
