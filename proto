@@ -162,6 +162,8 @@ if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
     fi
     rm -f make.log
     cd -
+    # Yes, this is indeed very much cheating. But it works.
+    ln -s $PARROT_DIR/languages/perl6 $PARROT_DIR/languages/rakudo
 fi
 
 PERL6="$PARROT_DIR/parrot $PARROT_DIR/languages/perl6/perl6.pbc"
