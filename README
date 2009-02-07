@@ -19,8 +19,15 @@ than wishful thinking. It is hoped that this notice might move downwards
 fairly quickly over the next few time units.]
 3. Install Perl 6 modules
 
-The first two are merely a convenience; it's the third one for which proto
-was built. The command
+To install Parrot and Rakudo, type the following at the prompt:
+
+  % source proto
+
+The 'source' is needed for proto to set environment variables for you. You can
+do this yourself if you prefer.
+
+Installation of Parrot and Rakudo is merely a convenience; what proto was
+really built for is installing modules. The command
 
   % ./proto install <module>
 
