@@ -14,9 +14,6 @@ What proto will do for you:
 
 1. Install Parrot
 2. Install Rakudo
-[Note: from here on, all the described features are currently nothing more
-than wishful thinking. It is hoped that this notice might move downwards
-fairly quickly over the next few time units.]
 3. Install Perl 6 modules
 
 To install Parrot and Rakudo, type the following at the prompt:
@@ -32,9 +29,15 @@ really built for is installing modules. The command
   % ./proto install <module>
 
 will look among its list of registered modules for <module>, and download and
-build whatever it finds. Should the downloaded module happen to explicitly
-depend on other modules, these will be downloaded and built before the
-dependent module is built. And so on, until it all bottoms out.
+build whatever it finds.
+
+[Note: from here on, all the described features are currently nothing more
+than wishful thinking. It is hoped that this notice might move downwards
+fairly quickly over the next few time units.]
+
+Should the downloaded module happen to explicitly depend on other modules,
+these will be downloaded and built before the dependent module is built. And so
+on, until it all bottoms out.
 
 The update command
 
