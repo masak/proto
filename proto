@@ -151,7 +151,11 @@ fi
 #     cd - > /dev/null
 # fi
 
-if test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
+if test ! -e $PARROT_DIR/languages/perl6/perl6.pir; then
+    echo "You already have Parrot installed, but it's a new one, not 0.9.0"
+    echo "We will eventually handle this case, but for now, let's just fail."
+    exit;
+elif test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
     echo -n "Building Perl 6... "
     cd $PARROT_DIR/languages/perl6
     echo -n > make.log
