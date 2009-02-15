@@ -44,7 +44,7 @@ VERSION='0.9.0'
 
 # 2. Check $PARROT_DIR
 # 3. Check that it's a Parrot dir
-if [[ -z $PARROT_DIR && -d parrot-$VERSION ]]; then
+if test -z $PARROT_DIR -a -d parrot-$VERSION; then
     PARROT_DIR=`pwd`/parrot-$VERSION
 fi
 
@@ -68,7 +68,7 @@ if [[ -z $PARROT_DIR ||
         exit 1;
     fi
     DIRNAME=`basename $TARFILE .tar.gz`
-    if [[ !(-d $DIRNAME) ]]; then
+    if test ! -d $DIRNAME; then
         echo "Download failed. See download.log for details."
         exit 1;
     fi
@@ -82,10 +82,10 @@ EOF
 fi
 
 # 4. Check whether it contains a Parrot executable
-if [[ !(-e $PARROT_DIR/parrot) ]]; then
+if test ! -e $PARROT_DIR/parrot; then
     echo -n "Building Parrot... "
     cd $PARROT_DIR
-    if [[ -e Makefile ]]; then
+    if test -e Makefile; then
         make realclean > make.log 2>&1 
     fi
     perl Makefile.PL  >> make.log 2>&1
@@ -95,7 +95,7 @@ if [[ !(-e $PARROT_DIR/parrot) ]]; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
-    if [[ !(-e parrot) ]]; then
+    if test ! -e parrot; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
@@ -151,7 +151,7 @@ fi
 #     cd - > /dev/null
 # fi
 
-if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
+if test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
     echo -n "Building Perl 6... "
     cd $PARROT_DIR/languages/perl6
     echo -n > make.log
@@ -161,7 +161,7 @@ if [[ !(-e $PARROT_DIR/languages/perl6/perl6.pbc) ]]; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
-    if [[ !(-e perl6.pbc) ]]; then
+    if test ! -e perl6.pbc; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
