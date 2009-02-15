@@ -106,56 +106,54 @@ fi
 # TODO: allow for the scenario coming soon where RAKUDO_DIR is outside
 # the PARROT_DIR tree, as pmichaud++ has mentioned in #perl6.
 
-# NB: Commenting out the following two steps temporarily: when we use the
+# NB: When we use the
 #     0.9.0 release of Parrot, we cannot use git Rakudo, because of recent
 #     API changes. Later, I'll add an option to use bleeding-edge Parrot
 #     and Rakudo.
-# # 5. Check whether the languages/rakudo dir exists
-# if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
-#     echo -n "Downloading Perl 6... "
-#     cd $PARROT_DIR/languages
-#     git clone git://github.com/rakudo/rakudo.git >> download.log 2>&1
-#     echo ''
-#     if (($? != 0)); then
-#         echo "The download failed. See download.log for details."
-#         exit 1;
-#     fi
-#     if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
-#         echo "Download failed. See download.log for details."
-#         exit 1;
-#     fi
-#     rm -f download.log
-#     cd - > /dev/null
-# fi
-# 
-# # 6. Check whether it contains a 'perl6.pbc' file
-# if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
-#     echo -n "Building Perl 6... "
-#     cd $PARROT_DIR/languages/rakudo
-#     echo -n > make.log
-#     if [[ -e Makefile ]]; then
-#         make realclean >> make.log 2>&1
-#     fi
-#     perl Configure.pl  >> make.log 2>&1
-#     make               >> make.log 2>&1
-#     echo ''
-#     if (($? != 0)); then
-#         echo "Build failed. See make.log for details."
-#         exit 1;
-#     fi
-#     if [[ !(-e perl6.pbc) ]]; then
-#         echo "Build failed. See make.log for details."
-#         exit 1;
-#     fi
-#     rm -f make.log
-#     cd - > /dev/null
-# fi
 
 if test ! -e $PARROT_DIR/languages/perl6/perl6.pir; then
-    echo "You already have Parrot installed, but it's a new one, not 0.9.0"
-    echo "We will eventually handle this case, but for now, let's just fail."
-    exit;
+    # # 5. Check whether the languages/rakudo dir exists
+    if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
+        echo -n "Downloading Perl 6... "
+        cd $PARROT_DIR/languages
+        git clone git://github.com/rakudo/rakudo.git >> download.log 2>&1
+        echo ''
+        if (($? != 0)); then
+            echo "The download failed. See download.log for details."
+            exit 1;
+        fi
+        if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
+            echo "Download failed. See download.log for details."
+            exit 1;
+        fi
+        rm -f download.log
+        cd - > /dev/null
+    fi
+
+     # 6. Check whether it contains a 'perl6.pbc' file (github Rakudo)
+     if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
+         echo -n "Building Perl 6... "
+         cd $PARROT_DIR/languages/rakudo
+         echo -n > make.log
+         if [[ -e Makefile ]]; then
+             make realclean >> make.log 2>&1
+         fi
+         perl Configure.pl  >> make.log 2>&1
+         make               >> make.log 2>&1
+         echo ''
+         if (($? != 0)); then
+             echo "Build failed. See make.log for details."
+             exit 1;
+         fi
+         if [[ !(-e perl6.pbc) ]]; then
+             echo "Build failed. See make.log for details."
+             exit 1;
+         fi
+         rm -f make.log
+         cd - > /dev/null
+    fi
 elif test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
+    # 6. Check whether it contains a 'perl6.pbc' file (parrot-0.9.0 Rakudo)
     echo -n "Building Perl 6... "
     cd $PARROT_DIR/languages/perl6
     echo -n > make.log
@@ -175,7 +173,7 @@ elif test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
     ln -s $PARROT_DIR/languages/perl6 $PARROT_DIR/languages/rakudo
 fi
 
-PERL6="$PARROT_DIR/parrot $PARROT_DIR/languages/perl6/perl6.pbc"
+PERL6="$PARROT_DIR/parrot $PARROT_DIR/languages/rakudo/perl6.pbc"
 
 $PERL6 -e 'say "Perl 6 is installed."' > /dev/null
 if (($? != 0)); then
