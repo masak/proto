@@ -12,6 +12,9 @@ my %project_info =
     perl6-examples => {
         installcmd => 'git clone git://github.com/eric256/perl6-examples.git',
     },
+    uri            => {
+        installcmd => 'git clone git://github.com/ihrd/uri.git',
+    },
     # TODO: add web
 ;
 
