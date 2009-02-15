@@ -45,13 +45,12 @@ sub install(*@projects) {
         print "Downloading $project... ";
         run( %info<installcmd> ~ ' > download.log 2>&1' );
         say '';
-#       unlink( 'download.log' ); # save a process fork
-        run( 'rm -f download.log' );
+        unlink( 'download.log' );
         # RAKUDO: This can be cleaned up when the backtick syntax lands
         run( 'pwd > current_dir' );
         my $current_dir = slurp('current_dir');
         $current_dir .= subst( /\v+$/, '' );
-#       unlink( 'current_dir' ); # save a process fork
+        unlink( 'current_dir' );
         run( 'rm -f current_dir' );
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
@@ -62,17 +61,12 @@ sub install(*@projects) {
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-# env may be redundant, export might be better
-#       my $p6l = "PERL6LIB=$current_dir/$project_dir/lib";
         my $p6l = "env PERL6LIB=$current_dir/$project_dir/lib";
         print "Building $project... ";
-# masak, were you thinking of conditionally doing something with the log?
-# if not, don't create it, send output to /dev/null and skip the cleanup.
         run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
         run( "$in_dir; $p6l make >> make.log 2>\&1" );
         say '';
-#       unlink( "$project_dir/make.log" ); # save a process fork
-        run( "$in_dir; rm -f make.log" );
+        unlink( "$project_dir/make.log" );
     }
 }
 
@@ -100,8 +94,7 @@ sub test(*@projects) {
         run( 'pwd > current_dir' );
         my $current_dir = slurp('current_dir');
         $current_dir .= subst( /\v+$/, '' );
-#       unlink( 'current_dir' ); # save a process fork
-        run( 'rm -f current_dir' );
+        unlink( 'current_dir' );
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my $project_dir = %info.exists('main_subdir')
@@ -127,6 +120,5 @@ sub uninstall(*@projects) {
 }
 
 sub not_implemented($subcommand) {
-#   say "The '$subcommand' subcommand is not implemented yet.";
     warn "The '$subcommand' subcommand is not implemented yet.";
 }
