@@ -4,18 +4,22 @@ use v6;
 my %project_info =
     november => {
         installcmd  => 'git clone git://github.com/viklund/november.git',
-        main_subdir => 'p6w',
     },
     druid => {
-        installcmd => 'git clone git://github.com/masak/druid.git',
+        installcmd  => 'git clone git://github.com/masak/druid.git',
     },
     perl6-examples => {
-        installcmd => 'git clone git://github.com/eric256/perl6-examples.git',
+        installcmd  => 'git clone git://github.com/eric256/perl6-examples.git',
     },
-    uri            => {
-        installcmd => 'git clone git://github.com/ihrd/uri.git',
+    uri => {
+        installcmd  => 'git clone git://github.com/ihrd/uri.git',
     },
-    # TODO: add web
+    web => {
+        installcmd  => 'git clone git://github.com/masak/web.git',
+    },
+    rakudo-prelude => {
+        installcmd  => 'svn co https://rakudo-prelude.googlecode.com/svn/trunk',
+    },
 ;
 
 given @*ARGS.shift {
