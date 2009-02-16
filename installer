@@ -1,25 +1,15 @@
 #!perl6
 use v6;
 
+        #installcmd  => 'git clone git://github.com/viklund/november.git',
+        #installcmd  => 'svn co https://rakudo-prelude.googlecode.com/svn/trunk',
 my %project_info =
-    november => {
-        installcmd  => 'git clone git://github.com/viklund/november.git',
-    },
-    druid => {
-        installcmd  => 'git clone git://github.com/masak/druid.git',
-    },
-    perl6-examples => {
-        installcmd  => 'git clone git://github.com/eric256/perl6-examples.git',
-    },
-    uri => {
-        installcmd  => 'git clone git://github.com/ihrd/uri.git',
-    },
-    web => {
-        installcmd  => 'git clone git://github.com/masak/web.git',
-    },
-    rakudo-prelude => {
-        installcmd  => 'svn co https://rakudo-prelude.googlecode.com/svn/trunk',
-    },
+    november => { :home<github>, :owner<viklund>, },
+    druid => { :home<github>, :owner<masak>, },
+    perl6-examples => { :home<github>, :owner<eric256> },
+    uri => { :home<github>, :owner<ihrd> },
+    web => { :home<github>, :owner<masak> },
+    rakudo-prelude => { :home<googlecode> },
 ;
 
 given @*ARGS.shift {
@@ -51,7 +41,18 @@ sub install(*@projects) {
     for @projects -> $project {
         my %info = %project_info{$project};
         print "Downloading $project... ";
-        run( %info<installcmd> ~ ' > download.log 2>&1' );
+        my $installcmd = %info<home> eq 'github'
+                         ?? sprintf 'git clone git://github.com/%s/%s.git %s',
+                                    %info<owner>,
+                                    %info<name> // $project,
+                                    $project
+                         !! %info<home> eq 'googlecode'
+                         ?? sprintf
+                              'svn co https://%s.googlecode.com/svn/trunk %s',
+                              %info<name> // $project,
+                              $project
+                         !! die "Unknown home type {%info<home>}";
+        run( "$installcmd > download.log 2>&1" );
         say '';
         unlink( 'download.log' );
         # RAKUDO: This can be cleaned up when the backtick syntax lands
