@@ -135,7 +135,7 @@ sub showdeps(*@projects) {
         exit 1;
     }
     for @projects -> $project {
-        if $project !~~ :d {
+        if "projects/$project" !~~ :d {
             say "$project is not installed.";
             next;
         }
