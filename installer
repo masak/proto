@@ -28,6 +28,7 @@ given @*ARGS.shift {
     when 'test'      { test(     @*ARGS) }
     when 'update'    { update(   @*ARGS) }
     when 'uninstall' { uninstall(@*ARGS) }
+    when 'showdeps'  { showdeps( @*ARGS) }
     default          { say "Unrecognized subcommand '$_'. See the README." }
 }
 
@@ -124,6 +125,38 @@ sub update(*@projects) {
 
 sub uninstall(*@projects) {
     not_implemented('uninstall');
+}
+
+sub showdeps(*@projects) {
+    unless @projects {
+        say "You have to specify which projects' dependencies to show.";
+        exit 1;
+    }
+    for @projects -> $project {
+        if $project !~~ :d {
+            say "$project is not installed.";
+            next;
+        }
+        my $deps_file = $project~'/deps.proto';
+        if $deps_file !~~ :e {
+            say "$project has no dependencies.";
+            next;
+        }
+        my &remove_line_ending_comment = { .subst(/ '#' .* $ /, '') };
+        my &line_is_nonempty = { $^line !~~ / ^ \s* $ / };
+        my @deps = slurp($deps_file)\
+                     .split("\n")\
+                     .map({remove_line_ending_comment($^line)})\
+                     .grep({line_is_nonempty($^line)});
+        if !@deps {
+            say "$project has no dependencies.";
+            next;
+        }
+        say $project, ':';
+        for @deps -> $dep {
+            say '  ', $dep;
+        }
+    }
 }
 
 sub not_implemented($subcommand) {
