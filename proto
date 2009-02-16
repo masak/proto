@@ -44,7 +44,7 @@ VERSION='0.9.0'
 
 # 2. Check $PARROT_DIR
 # 3. Check that it's a Parrot dir
-if test -z $PARROT_DIR -a -d parrot-$VERSION; then
+if [[ -z $PARROT_DIR && -d parrot-$VERSION ]]; then
     PARROT_DIR=`pwd`/parrot-$VERSION
 fi
 
@@ -68,7 +68,7 @@ if [[ -z $PARROT_DIR ||
         exit 1;
     fi
     DIRNAME=`basename $TARFILE .tar.gz`
-    if test ! -d $DIRNAME; then
+    if [[ !(-d $DIRNAME) ]]; then
         echo "Download failed. See download.log for details."
         exit 1;
     fi
@@ -82,10 +82,10 @@ EOF
 fi
 
 # 4. Check whether it contains a Parrot executable
-if test ! -e $PARROT_DIR/parrot; then
+if [[ !(-e $PARROT_DIR/parrot) ]]; then
     echo -n "Building Parrot... "
     cd $PARROT_DIR
-    if test -e Makefile; then
+    if [[ -e Makefile ]]; then
         make realclean > make.log 2>&1 
     fi
     perl Makefile.PL  >> make.log 2>&1
@@ -95,7 +95,7 @@ if test ! -e $PARROT_DIR/parrot; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
-    if test ! -e parrot; then
+    if [[ !(-e parrot) ]]; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
@@ -152,7 +152,7 @@ if test ! -e $PARROT_DIR/languages/perl6/perl6.pir; then
          rm -f make.log
          cd - > /dev/null
     fi
-elif test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
+elif [[ ! -e $PARROT_DIR/languages/perl6/perl6.pbc ]]; then
     # 6. Check whether it contains a 'perl6.pbc' file (parrot-0.9.0 Rakudo)
     echo -n "Building Perl 6... "
     cd $PARROT_DIR/languages/perl6
@@ -163,7 +163,7 @@ elif test ! -e $PARROT_DIR/languages/perl6/perl6.pbc; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
-    if test ! -e perl6.pbc; then
+    if [[ !(-e perl6.pbc) ]]; then
         echo "Build failed. See make.log for details."
         exit 1;
     fi
