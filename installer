@@ -41,16 +41,17 @@ sub install(*@projects) {
     for @projects -> $project {
         my %info = %project_info{$project};
         print "Downloading $project... ";
+        my $target_dir = "projects/$project";
         my $installcmd = %info<home> eq 'github'
                          ?? sprintf 'git clone git://github.com/%s/%s.git %s',
                                     %info<owner>,
                                     %info<name> // $project,
-                                    $project
+                                    $target_dir
                          !! %info<home> eq 'googlecode'
                          ?? sprintf
                               'svn co https://%s.googlecode.com/svn/trunk %s',
                               %info<name> // $project,
-                              $project
+                              $target_dir
                          !! die "Unknown home type {%info<home>}";
         run( "$installcmd > download.log 2>&1" );
         say '';
@@ -64,13 +65,13 @@ sub install(*@projects) {
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my $project_dir = %info.exists('main_subdir')
-                          ?? "$project/{%info<main_subdir>}"
-                          !! $project;
+                          ?? "$target_dir/{%info<main_subdir>}"
+                          !! $target_dir;
         my $in_dir = "cd $project_dir";
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-        my $p6l = "env PERL6LIB=$current_dir/$project_dir/lib";
+        my $p6l = "env PERL6LIB=$current_dir/$target_dir/lib";
         print "Building $project... ";
         run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
         run( "$in_dir; $p6l make >> make.log 2>\&1" );
@@ -107,13 +108,13 @@ sub test(*@projects) {
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my $project_dir = %info.exists('main_subdir')
-                          ?? "$project/{%info<main_subdir>}"
-                          !! $project;
+                          ?? "projects/$project/{%info<main_subdir>}"
+                          !! "projects/$project";
         my $in_dir = "cd $project_dir";
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-        my $p6l = "env PERL6LIB=$current_dir/$project_dir/lib";
+        my $p6l = "env PERL6LIB=$current_dir/projects/$project_dir/lib";
         print "Building $project... ";
         run( "$in_dir; $p6l make test" );
     }
@@ -138,7 +139,7 @@ sub showdeps(*@projects) {
             say "$project is not installed.";
             next;
         }
-        my $deps_file = $project~'/deps.proto';
+        my $deps_file = "projects/$project/deps.proto";
         if $deps_file !~~ :e {
             say "$project has no dependencies.";
             next;
