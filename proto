@@ -43,15 +43,19 @@ fi
 VERSION='0.9.0'
 
 # 2. Check $PARROT_DIR
-# 3. Check that it's a Parrot dir
-if [[ -z $PARROT_DIR && -d parrot-$VERSION ]]; then
-    PARROT_DIR=`pwd`/projects/parrot-$VERSION
+PWD=`pwd`
+export PWD # bash does this anyway, but other Bourne compatibles may not
+if [[ -z "$PARROT_DIR" ]]; then
+    PARROT_DIR=$PWD/projects/parrot-$VERSION
 fi
 
-if [[ -z $PARROT_DIR ||
-      !(-e $PARROT_DIR/README) ||
-      $(head -n1 $PARROT_DIR/README) != 'This is Parrot'* ]]; then
-    echo -n "Downloading Parrot... ";
+#echo "PWD: $PWD"
+#echo "PARROT_DIR: $PARROT_DIR"
+
+# 3. Check that it's a Parrot dir
+if [[ !(-e $PARROT_DIR/README) ||
+        $(head -n1 $PARROT_DIR/README) != "This is Parrot"* ]]; then
+    echo -n "Downloading Parrot...";
     FTP_PATH="ftp.parrot.org/pub/parrot/releases/devel/$VERSION"
     TARFILE="parrot-$VERSION.tar.gz"
     wget -O $TARFILE ftp://$FTP_PATH/$TARFILE > download.log 2>&1
@@ -63,7 +67,7 @@ if [[ -z $PARROT_DIR ||
     fi
     mkdir -p projects
     tar xzvf $TARFILE -C projects >> download.log 2>&1
-    echo ''
+    echo 'downloaded'
     if (($? != 0)); then
         echo "The download failed. See download.log for details."
         exit 1;
@@ -77,21 +81,21 @@ if [[ -z $PARROT_DIR ||
     # TODO: Refine evil modification-without asking of .bash_profile
     # particularly do not cause multiple PARROT_DIR lines to be appended
     cat >> ~/.bash_profile <<EOF
-export PARROT_DIR=`pwd`/$DIRNAME
+export PARROT_DIR=$PWD/$DIRNAME
 EOF
     rm -f $TARFILE download.log
 fi
 
 # 4. Check whether it contains a Parrot executable
 if [[ !(-e $PARROT_DIR/parrot) ]]; then
-    echo -n "Building Parrot... "
+    echo -n "Building Parrot..."
     cd $PARROT_DIR
     if [[ -e Makefile ]]; then
         make realclean > make.log 2>&1 
     fi
     perl Makefile.PL  >> make.log 2>&1
     make              >> make.log 2>&1
-    echo ''
+    echo 'built'
     if (($? != 0)); then
         echo "Build failed. See make.log for details."
         exit 1;
@@ -155,11 +159,11 @@ if test ! -e $PARROT_DIR/languages/perl6/perl6.pir; then
     fi
 elif [[ ! -e $PARROT_DIR/languages/perl6/perl6.pbc ]]; then
     # 6. Check whether it contains a 'perl6.pbc' file (parrot-0.9.0 Rakudo)
-    echo -n "Building Perl 6... "
+    echo -n "Building Perl 6..."
     cd $PARROT_DIR/languages/perl6
     echo -n > make.log
     make               >> make.log 2>&1
-    echo ''
+    echo 'built'
     if (($? != 0)); then
         echo "Build failed. See make.log for details."
         exit 1;

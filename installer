@@ -4,13 +4,17 @@ use v6;
         #installcmd  => 'git clone git://github.com/viklund/november.git',
         #installcmd  => 'svn co https://rakudo-prelude.googlecode.com/svn/trunk',
 my %project_info =
-    november => { :home<github>, :owner<viklund>, },
-    druid => { :home<github>, :owner<masak>, },
-    perl6-examples => { :home<github>, :owner<eric256> },
-    uri => { :home<github>, :owner<ihrd> },
-    web => { :home<github>, :owner<masak> },
-    rakudo-prelude => { :home<googlecode> },
+    november       => { :home<github>,     :owner<viklund>, },
+    html-template  => { :home<github>,     :owner<masak>, },
+    druid          => { :home<github>,     :owner<masak>, },
+    perl6-examples => { :home<github>,     :owner<eric256> },
+    uri            => { :home<github>,     :owner<ihrd> },
+    web            => { :home<github>,     :owner<masak> },
+    rakudo-prelude => { :home<googlecode> }
 ;
+
+my @build_queue = ();
+my $PWD = %*ENV<PWD>; # from proto script
 
 given @*ARGS.shift {
     when undef       { exit; }
@@ -38,46 +42,8 @@ sub install(*@projects) {
         say "Aborting...";
         exit(1);
     }
-    for @projects -> $project {
-        my %info = %project_info{$project};
-        print "Downloading $project... ";
-        my $target_dir = "projects/$project";
-        my $installcmd = %info<home> eq 'github'
-                         ?? sprintf 'git clone git://github.com/%s/%s.git %s',
-                                    %info<owner>,
-                                    %info<name> // $project,
-                                    $target_dir
-                         !! %info<home> eq 'googlecode'
-                         ?? sprintf
-                              'svn co https://%s.googlecode.com/svn/trunk %s',
-                              %info<name> // $project,
-                              $target_dir
-                         !! die "Unknown home type {%info<home>}";
-        run( "$installcmd > download.log 2>&1" );
-        say '';
-        unlink( 'download.log' );
-        # RAKUDO: This can be cleaned up when the backtick syntax lands
-        run( 'pwd > current_dir' );
-        my $current_dir = slurp('current_dir');
-        $current_dir .= subst( /\v+$/, '' );
-        unlink( 'current_dir' );
-        run( 'rm -f current_dir' );
-        # RAKUDO: Doesn't support any other way to change the current working
-        #         directory. Improvising.
-        my $project_dir = %info.exists('main_subdir')
-                          ?? "$target_dir/{%info<main_subdir>}"
-                          !! $target_dir;
-        my $in_dir = "cd $project_dir";
-        # RAKUDO: Can't really figure out how to set environment variables
-        #         so they're visible by later commands. Doing like this
-        #         instead.
-        my $p6l = "env PERL6LIB=$current_dir/$target_dir/lib";
-        print "Building $project... ";
-        run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
-        run( "$in_dir; $p6l make >> make.log 2>\&1" );
-        say '';
-        unlink( "$project_dir/make.log" );
-    }
+    for @projects    -> $project { download( $project ); }
+    for @build_queue -> $project { do_build( $project ); }
 }
 
 sub test(*@projects) {
@@ -100,11 +66,6 @@ sub test(*@projects) {
     }
     for @projects -> $project {
         my %info = %project_info{$project};
-        # RAKUDO: This can be cleaned up when the backtick syntax lands
-        run( 'pwd > current_dir' );
-        my $current_dir = slurp('current_dir');
-        $current_dir .= subst( /\v+$/, '' );
-        unlink( 'current_dir' );
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my $project_dir = %info.exists('main_subdir')
@@ -114,7 +75,7 @@ sub test(*@projects) {
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-        my $p6l = "env PERL6LIB=$current_dir/projects/$project_dir/lib";
+        my $p6l = "env PERL6LIB=$PWD/projects/$project_dir/lib";
         print "Building $project... ";
         run( "$in_dir; $p6l make test" );
     }
@@ -161,6 +122,77 @@ sub showdeps(*@projects) {
     }
 }
 
+sub download( Str $projectName ) {
+    if not defined %project_info{$projectName} {
+        say "proto installer does not know about project '$projectName'";
+        exit 1;
+    }
+    print "Downloading $projectName...";
+    my %info       = %project_info{$projectName};
+    my $name       = %info<name> // $projectName;
+    my $target_dir = "projects/$projectName";
+    my $command;
+    given %info<home> {
+        when 'github' {
+            $command = "git clone git://github.com/{%info<owner>}/$name.git $target_dir";
+        }
+        when 'googlecode' {
+            $command = "svn co https://$name.googlecode.com/svn/trunk $target_dir";
+        }
+        default { die "Unknown home type {%info<home>}"; }
+    }
+    run( "$command >/dev/null 2>/dev/null" );
+    say 'downloaded';
+    if is_file( "$target_dir/deps.proto" ) {
+        my $deps = slurp( "$target_dir/deps.proto" ).chomp;
+        for $deps.split("\n") -> $dep {
+            if not is_dir("projects/$dep") or not is_file("projects/$dep/Makefile") {
+                download( $dep );
+            }
+        }
+    }
+    push @build_queue, $projectName;
+}
+
+sub do_build( Str $projectName ) {
+    print "Building $projectName...";
+    # RAKUDO: Doesn't support any other way to change the current working
+    #         directory. Improvising.
+    my %info       = %project_info{$projectName};
+    my $target_dir  = "projects/$projectName";
+    my $project_dir = $target_dir;
+    if defined %info<main_subdir> { $project_dir = %info<main_subdir>; }
+    my $in_dir = "cd $project_dir";
+    # RAKUDO: Can't really figure out how to set environment variables
+    #         so they're visible by later commands. Doing like this
+    #         instead.
+    my $p6l = "env PERL6LIB=$PWD/$target_dir/lib";
+    run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
+    run( "$in_dir; $p6l make >> make.log 2>\&1" );
+    say 'built';
+#   unlink( "$project_dir/make.log" );
+}
+
 sub not_implemented($subcommand) {
     warn "The '$subcommand' subcommand is not implemented yet.";
+}
+
+sub is_file( Str $filename ) {
+    my $tempfile = "/tmp/installer_is_file.txt";
+    my $command = "ls -ld $filename >$tempfile 2>/dev/null";
+    run( $command );
+    my $ls_result = slurp( $tempfile );
+    unlink $tempfile;
+    my Bool $status = ? ($ls_result ~~ / ^ '-' /);
+    return $status;
+}
+
+sub is_dir( Str $dirname ) {
+    my $tempfile = "/tmp/installer_is_dir.txt";
+    my $command = "ls -ld $dirname >$tempfile 2>/dev/null";
+    run( $command );
+    my $ls_result = slurp( $tempfile );
+    unlink $tempfile;
+    my Bool $status = ? ($ls_result ~~ / ^ 'd' /);
+    return $status;
 }
