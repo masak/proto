@@ -1,8 +1,6 @@
 #!perl6
 use v6;
 
-        #installcmd  => 'git clone git://github.com/viklund/november.git',
-        #installcmd  => 'svn co https://rakudo-prelude.googlecode.com/svn/trunk',
 my %project_info =
     november => { :home<github>, :owner<viklund>, },
     druid => { :home<github>, :owner<masak>, },
