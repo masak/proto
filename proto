@@ -81,7 +81,11 @@ if [[ !(-e $PARROT_DIR/README) ||
     # TODO: Refine evil modification-without asking of .bash_profile
     # particularly do not cause multiple PARROT_DIR lines to be appended
     cat >> ~/.bash_profile <<EOF
+<<<<<<< HEAD:proto
 export PARROT_DIR=$PWD/$DIRNAME
+=======
+export PARROT_DIR=`pwd`/projects/$DIRNAME
+>>>>>>> 0b79829df1a49a21b68e5fb169b09e04e19c5154:proto
 EOF
     rm -f $TARFILE download.log
 fi
