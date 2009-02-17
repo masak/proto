@@ -77,7 +77,7 @@ if [[ -z $PARROT_DIR ||
     # TODO: Refine evil modification-without asking of .bash_profile
     # particularly do not cause multiple PARROT_DIR lines to be appended
     cat >> ~/.bash_profile <<EOF
-export PARROT_DIR=`pwd`/$DIRNAME
+export PARROT_DIR=`pwd`/projects/$DIRNAME
 EOF
     rm -f $TARFILE download.log
 fi
