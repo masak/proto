@@ -104,11 +104,12 @@ sub showdeps(*@projects) {
             next;
         }
         my &remove_line_ending_comment = { .subst(/ '#' .* $ /, '') };
-        my &line_is_nonempty = { $^line !~~ / ^ \s* $ / };
+        my &trim_spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $/, '') };
         my @deps = slurp($deps_file)\
                      .split("\n")\
                      .map({remove_line_ending_comment($^line)})\
-                     .grep({line_is_nonempty($^line)});
+                     .map({trim_spaces($^line)})\
+                     .grep({$^nonempty});
         if !@deps {
             say "$project has no dependencies.";
             next;
