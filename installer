@@ -131,12 +131,12 @@ sub download( Str $projectName ) {
     my $name       = %info<name> // $projectName;
     my $target_dir = "projects/$projectName";
     my $command;
-    given %info<home> {
+    $command = do given %info<home> {
         when 'github' {
-            $command = "git clone git://github.com/{%info<owner>}/$name.git $target_dir";
+            "git clone git://github.com/{%info<owner>}/$name.git $target_dir";
         }
         when 'googlecode' {
-            $command = "svn co https://$name.googlecode.com/svn/trunk $target_dir";
+            "svn co https://$name.googlecode.com/svn/trunk $target_dir";
         }
         default { die "Unknown home type {%info<home>}"; }
     }
