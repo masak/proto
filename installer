@@ -88,6 +88,9 @@ sub uninstall(*@projects) {
     not_implemented('uninstall');
 }
 
+# TODO: This sub should probably recursively show dependencies, and in such
+#       a way that a dependency found twice by different routes is only
+#       mentioned the second time -- its dependencies are not shown.
 sub showdeps(*@projects) {
     unless @projects {
         say "You have to specify which projects' dependencies to show.";
