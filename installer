@@ -8,6 +8,8 @@ my %project_info =
     perl6-examples => { :home<github>,     :owner<eric256> },
     uri            => { :home<github>,     :owner<ihrd> },
     web            => { :home<github>,     :owner<masak> },
+    svg            => { :home<github>,     :owner<masak> },
+    maya           => { :home<github>,     :owner<ihrd> },
     rakudo-prelude => { :home<googlecode> }
 ;
 
