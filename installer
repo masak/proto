@@ -149,8 +149,9 @@ sub download( Str $projectName ) {
     say 'downloaded';
     if is_file( "$target_dir/deps.proto" ) {
         my $deps = slurp( "$target_dir/deps.proto" ).chomp;
+        # XXX: Need to handle the syntax of deps.proto fully here. See showdeps
         for $deps.split("\n") -> $dep {
-            if not is_dir("projects/$dep") or not is_file("projects/$dep/Makefile") {
+            if !is_dir("projects/$dep") || !is_file("projects/$dep/Makefile") {
                 download( $dep );
             }
         }
@@ -171,6 +172,10 @@ sub do_build( Str $projectName ) {
     #         so they're visible by later commands. Doing like this
     #         instead.
     my $p6l = "env PERL6LIB=$PWD/$target_dir/lib";
+    # XXX: Need to have error handling here, and not continue if things go
+    #      haywire with the build. However, a project may not have a
+    #      Makefile.PL, and this needs to be considered a successful [sic]
+    #      outcome.
     run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
     run( "$in_dir; $p6l make >> make.log 2>\&1" );
     say 'built';
@@ -181,6 +186,7 @@ sub not_implemented($subcommand) {
     warn "The '$subcommand' subcommand is not implemented yet.";
 }
 
+# RAKUDO: Temporary workaround while we await :f
 sub is_file( Str $filename ) {
     my $tempfile = "/tmp/installer_is_file.txt";
     my $command = "ls -ld $filename >$tempfile 2>/dev/null";
@@ -191,6 +197,7 @@ sub is_file( Str $filename ) {
     return $status;
 }
 
+# RAKUDO: Temporary workaround while we await :d
 sub is_dir( Str $dirname ) {
     my $tempfile = "/tmp/installer_is_dir.txt";
     my $command = "ls -ld $dirname >$tempfile 2>/dev/null";
