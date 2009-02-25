@@ -10,6 +10,7 @@ my %project_info =
     web            => { :home<github>,     :owner<masak> },
     svg            => { :home<github>,     :owner<masak> },
     maya           => { :home<github>,     :owner<ihrd> },
+    form           => { :home<github>,     :owner<mattw> },
     rakudo-prelude => { :home<googlecode> }
 ;
 
