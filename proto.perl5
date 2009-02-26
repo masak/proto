@@ -1,0 +1,158 @@
+#!/usr/bin/perl
+
+# This bootstrapping script assumes as little as possible about the user's
+# setup. It tries to establish, one after another, the following things:
+#
+# 1. That perl and git are installed
+# 2. That $PARROT_DIR is set.
+# 3. That $PARROT_DIR points to a directory containing Parrot.
+# 4. That it contains a 'parrot' executable.
+# 5. That the $RAKUDO_DIR directory exists.
+# 6. That it contains a 'perl6.pbc' file.
+
+use feature ':5.10';
+use warnings;
+use strict;
+
+# 1. perl git and subversion installed
+my $git_version = qx{git --version};
+my $svn_version = qx{svn --version};
+# TODO: detect if either of these is missing, and install them.
+$git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
+$svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
+# say "proto bootstrap using perl $^V, $git_version, $svn_version";
+
+# 2. PARROT_DIR
+if ( not exists $ENV{'PARROT_DIR'} and exists $ENV{'RAKUDO_DIR'} ) {
+    # derive PARROT_DIR from RAKUDO_DIR : there are only 2 possibilities
+    if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*)/languages/rakudo$} ) {
+        # parrot contains rakudo
+        $ENV{'PARROT_DIR'} = $1;
+    }
+    else {
+        # rakudo contains parrot
+        $ENV{'PARROT_DIR'} = $ENV{'RAKUDO_DIR'} . '/parrot';
+    }
+    # say 'setting PARROT_DIR=' . $ENV{'PARROT_DIR'};
+}
+if ( not exists $ENV{'PARROT_DIR'} ) {
+    my $pwd = `pwd`; chomp $pwd;
+    $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
+    # say 'setting PARROT_DIR=' . $ENV{'PARROT_DIR'};
+}
+my $PARROT_DIR = $ENV{'PARROT_DIR'};
+
+# 3. parrot download
+my $parrot_version;
+while ( not ($parrot_version = parrot_version()) )
+{
+    if ( not exists $ENV{'RAKUDO_DIR'} ) {
+        # get parrot before rakudo
+        say "downloading parrot";
+        my $command = "svn checkout https://svn.parrot.org/parrot/trunk " .
+                      "$PARROT_DIR";
+        undef $!; qx( $command );
+        if ( $! ) { die "cannot check out parrot: $!"; }
+    }
+    else {
+        # get rakudo before parrot
+        say "downloading rakudo";
+        if ( $ENV{'RAKUDO_DIR'} =~ m{(.*)/\w+$} and -d $1 ) {
+            my $parent_dir = $1;
+            my $command = "mkdir -p $parent_dir && cd $parent_dir && " .
+                          "rm -rf rakudo && " .
+                          "git clone git://github.com/rakudo/rakudo.git";
+            qx( $command );
+        }
+        say "configuring rakudo to download parrot";
+        # invoke Rakudo's parrot autobuilder
+        my $command = "cd " . $ENV{'RAKUDO_DIR'} .
+                      " && perl Configure.pl --gen-parrot 2>&1";
+        qx( $command );
+    }
+}
+# say "parrot $parrot_version source is here";
+
+# 4. parrot executable
+if ( not -x "$PARROT_DIR/parrot" ) {
+    say "building parrot";
+    my $command = "cd $PARROT_DIR && perl Configure.pl && make 2>&1";
+    qx( $command );
+    if ( -x "$PARROT_DIR/parrot"  ) {
+        my $versionline = qx{$PARROT_DIR/parrot -v};
+        $versionline =~ s/Copyright.*//s;
+        print $versionline;
+    }
+    else {
+        die "failed building parrot: $!";
+    }
+}
+
+# 5. rakudo download
+if ( not exists $ENV{'RAKUDO_DIR'} ) {
+    # the classic rakudo location inside the parrot nest
+    $ENV{'RAKUDO_DIR'} = "$PARROT_DIR/languages/rakudo";
+}
+my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
+# say "RAKUDO_DIR = $RAKUDO_DIR";
+
+if ( not -d "$RAKUDO_DIR" ) {
+    say "downloading rakudo";
+    my $command = "cd $PARROT_DIR/languages && " .
+                  "git clone git://github.com/rakudo/rakudo.git";
+    qx( $command );
+}
+
+# 6. perl6.pbc
+if ( not -f "$RAKUDO_DIR/perl6.pbc" ) {
+    say "building perl6";
+    my $command = "cd $RAKUDO_DIR && perl Configure.pl && make 2>&1";
+    qx( $command );
+    if ( -f "$RAKUDO_DIR/perl6.pbc" ) {
+        my $versionlines = qx{$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc -v};
+        $versionlines =~ s/\nCopyright.*//s;
+        print $versionlines;
+    }
+    else {
+        die "failed building perl6: $!";
+    }
+}
+
+# There should be a runnable perl6, so hand over to the installer
+my $perl6 = "$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc";
+my $command = "$perl6 installer @ARGV";
+qx( $command );
+
+# utility code
+sub parrot_version {
+    my $file = "$PARROT_DIR/README";
+    my $parrot_version;
+    if ( -f $file ) {
+        open my $handle,'<',$file or die "cannot open $file";
+        undef $!; my $line;
+        if ( defined( $line = <$handle> ) and
+             $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
+            $parrot_version = $1;
+        }
+    }
+    return $parrot_version;
+}
+
+=pod
+
+=head1 NAME
+
+proto.perl5 - downloader and builder for Parrot and Rakudo
+
+=head1 ENVIRONMENT
+
+PARROT_DIR - if exported by the shell, specifies which parrot to run.
+
+RAKUDO_DIR - if exported by the shell, specifies which rakudo to run.
+
+If both variables are defined, the directories must be nested as either
+parrot/languages/rakudo or rakudo/parrot.
+
+=cut
+
+
