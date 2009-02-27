@@ -40,6 +40,7 @@ if ( !exists $ENV{'PARROT_DIR'} ) {
 }
 my $PARROT_DIR = $ENV{'PARROT_DIR'};
 
+my $silently = ' > /dev/null 2>&1';
 # 3. Parrot download
 my $parrot_version;
 while ( !($parrot_version = parrot_version()) )
@@ -47,8 +48,9 @@ while ( !($parrot_version = parrot_version()) )
     if ( !exists $ENV{'RAKUDO_DIR'} ) {
         # get parrot before rakudo
         print 'Downloading Parrot...';
-        my $command = 'svn checkout https://svn.parrot.org/parrot/trunk ' .
-                      $PARROT_DIR;
+        my $command = 'svn checkout https://svn.parrot.org/parrot/trunk '
+                      . $PARROT_DIR
+                      . $silently;
         system( $command ) == 0 or die "\nCouldn't check out Parrot: $?";
         print "downloaded\n";
     }
@@ -57,15 +59,16 @@ while ( !($parrot_version = parrot_version()) )
         print 'Downloading Rakudo...';
         if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*) / \w+ $}x && -d $1 ) {
             my $parent_dir = $1;
-            my $command = "mkdir -p $parent_dir && cd $parent_dir && " .
-                          "rm -rf rakudo && " .
-                          "git clone git://github.com/rakudo/rakudo.git";
+            my $command = "mkdir -p $parent_dir && cd $parent_dir && "
+                          . 'rm -rf rakudo && '
+                          . 'git clone git://github.com/rakudo/rakudo.git'
+                          . $silently;
             system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
             print "downloaded\n";
         }
         # invoke Rakudo's parrot autobuilder
         my $command = "cd " . $ENV{'RAKUDO_DIR'} .
-                      " && perl Configure.pl --gen-parrot 2>&1";
+                      " && perl Configure.pl --gen-parrot $silently";
         system( $command ) == 0
             or die "Couldn't configure Rakudo to fetch Parrot: $?";
     }
@@ -74,7 +77,7 @@ while ( !($parrot_version = parrot_version()) )
 # 4. Parrot executable
 if ( !-x "$PARROT_DIR/parrot" ) {
     print 'Building parrot...';
-    my $command = "cd $PARROT_DIR && perl Configure.pl && make 2>&1";
+    my $command = "(cd $PARROT_DIR && perl Configure.pl && make) $silently";
     system( $command ) == 0 or die "\nCouldn't build Parrot: $?";
     if ( !-x "$PARROT_DIR/parrot" ) {
         die "\nCouldn't build Parrot.";
@@ -91,8 +94,8 @@ my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
 
 if ( !-d $RAKUDO_DIR ) {
     print 'Downloading Perl 6...';
-    my $command = "cd $PARROT_DIR/languages && " .
-                  'git clone git://github.com/rakudo/rakudo.git';
+    my $command = "cd $PARROT_DIR/languages && "
+                  . "git clone git://github.com/rakudo/rakudo.git $silently";
     system( $command ) == 0 or die "\nCouldn't download Perl 6: $?";
     print "downloaded\n";
 }
@@ -100,7 +103,7 @@ if ( !-d $RAKUDO_DIR ) {
 # 6. perl6.pbc
 if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
     print 'Building Perl 6...';
-    my $command = "cd $RAKUDO_DIR && perl Configure.pl && make 2>&1";
+    my $command = "(cd $RAKUDO_DIR && perl Configure.pl && make) $silently";
     system( $command ) == 0 or die "\nCouldn't build Perl 6: $?";
     if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
         die "\nCouldn't build Perl 6.\n";
