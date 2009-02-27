@@ -34,7 +34,8 @@ if ( !exists $ENV{'PARROT_DIR'} && exists $ENV{'RAKUDO_DIR'} ) {
     }
 }
 if ( !exists $ENV{'PARROT_DIR'} ) {
-    my $pwd = `pwd`; chomp $pwd;
+    my $pwd = `pwd`;
+    chomp $pwd;
     $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
 }
 my $PARROT_DIR = $ENV{'PARROT_DIR'};
@@ -115,14 +116,14 @@ exec( $command );
 sub parrot_version {
     my $parrot_readme = "$PARROT_DIR/README";
     if ( -f $parrot_readme ) {
-        open my $handle, '<', $parrot_readme or return '???';
+        open my $handle, '<', $parrot_readme or return;
         if ( defined( my $line = <$handle> ) ) {
             if ( $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
                 return $1;
             }
         }
     }
-    return '???';
+    return;
 }
 
 =pod
