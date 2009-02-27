@@ -146,13 +146,13 @@ proto.perl5 - downloader and builder for Parrot and Rakudo
 
 =head1 ENVIRONMENT
 
-PARROT_DIR - if exported by the shell, specifies which parrot to run.
+PARROT_DIR - if exported by the shell, specifies where to look for an installed
+Parrot directory.
 
-RAKUDO_DIR - if exported by the shell, specifies which rakudo to run.
+RAKUDO_DIR - if exported by the shell, specifies where to look for an installed
+Rakudo directory.
 
 If both variables are defined, the directories must be nested as either
 parrot/languages/rakudo or rakudo/parrot.
 
 =cut
-
-
