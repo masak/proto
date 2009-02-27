@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/perl -w
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -7,180 +7,143 @@
 # 2. That $PARROT_DIR is set.
 # 3. That $PARROT_DIR points to a directory containing Parrot.
 # 4. That it contains a 'parrot' executable.
-# 5. That the $PARROT_DIR/languages/rakudo directory exists.
+# 5. That the $RAKUDO_DIR directory exists.
 # 6. That it contains a 'perl6.pbc' file.
 
-# 1. Check perl and git
-if command -v perl >/dev/null 2>&1; then
-    echo -n
-else
-    echo "Cannot find 'perl'. You need to install that first."
-    echo "Go to http://www.perl.org/get.html and follow the instructions there."
-    # TODO: Maybe autodetect various packaging systems that can download perl
-    # candidates : http://en.wikipedia.org/wiki/Package_management_system
-    # *BSD: ports 
-    # OS X: fink / Macports
-    # Fedora / RedHat : yum / rpm
-    # Gentoo : Portage / emerge
-    # Solaris: IPS
-    # Ubuntu / Debian : dpkg / apt-get
-    # Windows : cygwin
-    exit 1;
-fi
+use strict;
+++$|; # flush after every print
 
-# NB: No need to check for git until bleeding-edge Rakudo is used. See below.
+# 1. perl git and subversion installed
+my $git_version = qx{git --version};
+my $svn_version = qx{svn --version};
 
-# if command -v git >/dev/null 2>&1; then
-#     echo -n
-# else
-#     echo "Cannot find 'git'. You need to install that first."
-#     echo "Go to http://git-scm.com/download and follow the instructions there."
-#     exit 1;
-# fi
+# TODO: detect if either of these is missing, and install them.
+$git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
+$svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
 
-# TODO: Figure out a way to find the latest release of Parrot, instead
-#       of hardcoding it here.
-VERSION='0.9.0'
+# 2. PARROT_DIR
+if ( !exists $ENV{'PARROT_DIR'} && exists $ENV{'RAKUDO_DIR'} ) {
+    # derive PARROT_DIR from RAKUDO_DIR : there are only 2 possibilities
+    if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*)/languages/rakudo$} ) {
+        # parrot contains rakudo
+        $ENV{'PARROT_DIR'} = $1;
+    }
+    else {
+        # rakudo contains parrot
+        $ENV{'PARROT_DIR'} = $ENV{'RAKUDO_DIR'} . '/parrot';
+    }
+}
+if ( !exists $ENV{'PARROT_DIR'} ) {
+    my $pwd = `pwd`;
+    chomp $pwd;
+    $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
+}
+my $PARROT_DIR = $ENV{'PARROT_DIR'};
 
-# 2. Check $PARROT_DIR
-export PWD=`pwd` # bash does this anyway, but other Bourne compatibles may not
-if [[ -z "$PARROT_DIR" ]]; then
-    PARROT_DIR=$PWD/projects/parrot-$VERSION
-fi
+my $silently = ' > /dev/null 2>&1';
+# 3. Parrot download
+my $parrot_version;
+while ( !($parrot_version = parrot_version()) )
+{
+    if ( !exists $ENV{'RAKUDO_DIR'} ) {
+        # get parrot before rakudo
+        print 'Downloading Parrot...';
+        my $command = 'svn checkout https://svn.parrot.org/parrot/trunk '
+                      . $PARROT_DIR
+                      . $silently;
+        system( $command ) == 0 or die "\nCouldn't check out Parrot: $?";
+        print "downloaded\n";
+    }
+    else {
+        # get rakudo before parrot
+        print 'Downloading Rakudo...';
+        if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*) / \w+ $}x && -d $1 ) {
+            my $parent_dir = $1;
+            my $command = "mkdir -p $parent_dir && cd $parent_dir && "
+                          . 'rm -rf rakudo && '
+                          . 'git clone git://github.com/rakudo/rakudo.git'
+                          . $silently;
+            system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
+            print "downloaded\n";
+        }
+        # invoke Rakudo's parrot autobuilder
+        my $command = "cd " . $ENV{'RAKUDO_DIR'} .
+                      " && perl Configure.pl --gen-parrot $silently";
+        system( $command ) == 0
+            or die "Couldn't configure Rakudo to fetch Parrot: $?";
+    }
+}
 
-# 3. Check that it's a Parrot dir
-if [[ !(-e $PARROT_DIR/README) ||
-        $(head -n1 $PARROT_DIR/README) != "This is Parrot"* ]]; then
-    echo -n "Downloading Parrot...";
-    FTP_PATH="ftp.parrot.org/pub/parrot/releases/devel/$VERSION"
-    TARFILE="parrot-$VERSION.tar.gz"
-    wget -O $TARFILE ftp://$FTP_PATH/$TARFILE > download.log 2>&1
-    # TODO: offer a git clone command option to get latest revision
-    if (($? != 0)); then
-        echo ''
-        echo "The download failed. See download.log for details."
-        exit 1;
-    fi
-    mkdir -p projects
-    tar xzvf $TARFILE -C projects >> download.log 2>&1
-    echo 'downloaded'
-    if (($? != 0)); then
-        echo "The download failed. See download.log for details."
-        exit 1;
-    fi
-    DIRNAME=`basename $TARFILE .tar.gz`
-    if [[ !(-d "projects/$DIRNAME") ]]; then
-        echo "Download failed. See download.log for details."
-        exit 1;
-    fi
-    export PARROT_DIR=`pwd`/projects/$DIRNAME
-    # TODO: Refine evil modification-without asking of .bash_profile
-    # particularly do not cause multiple PARROT_DIR lines to be appended
-    cat >> ~/.bash_profile <<EOF
-    export PARROT_DIR=$PWD/projects/$DIRNAME
-EOF
-    rm -f $TARFILE download.log
-fi
+# 4. Parrot executable
+if ( !-x "$PARROT_DIR/parrot" ) {
+    print 'Building parrot...';
+    my $command = "(cd $PARROT_DIR && perl Configure.pl && make) $silently";
+    system( $command ) == 0 or die "\nCouldn't build Parrot: $?";
+    if ( !-x "$PARROT_DIR/parrot" ) {
+        die "\nCouldn't build Parrot.";
+    }
+    print "built\n";
+}
 
-# 4. Check whether it contains a Parrot executable
-if [[ !(-e $PARROT_DIR/parrot) ]]; then
-    echo -n "Building Parrot..."
-    cd $PARROT_DIR
-    if [[ -e Makefile ]]; then
-        make realclean > make.log 2>&1 
-    fi
-    perl Makefile.PL  >> make.log 2>&1
-    make              >> make.log 2>&1
-    echo 'built'
-    if (($? != 0)); then
-        echo "Build failed. See make.log for details."
-        exit 1;
-    fi
-    if [[ !(-e parrot) ]]; then
-        echo "Build failed. See make.log for details."
-        exit 1;
-    fi
-    rm -f make.log
-    cd - > /dev/null
-fi
+# 5. Rakudo download
+if ( !exists $ENV{'RAKUDO_DIR'} ) {
+    # the classic rakudo location inside the parrot nest
+    $ENV{'RAKUDO_DIR'} = "$PARROT_DIR/languages/rakudo";
+}
+my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
 
-# TODO: allow for the scenario coming soon where RAKUDO_DIR is outside
-# the PARROT_DIR tree, as pmichaud++ has mentioned in #perl6.
+if ( !-d $RAKUDO_DIR ) {
+    print 'Downloading Perl 6...';
+    my $command = "cd $PARROT_DIR/languages && "
+                  . "git clone git://github.com/rakudo/rakudo.git $silently";
+    system( $command ) == 0 or die "\nCouldn't download Perl 6: $?";
+    print "downloaded\n";
+}
 
-# NB: When we use the
-#     0.9.0 release of Parrot, we cannot use git Rakudo, because of recent
-#     API changes. Later, I'll add an option to use bleeding-edge Parrot
-#     and Rakudo.
-
-if test ! -e $PARROT_DIR/languages/perl6/perl6.pir; then
-    # # 5. Check whether the languages/rakudo dir exists
-    if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
-        echo -n "Downloading Perl 6... "
-        cd $PARROT_DIR/languages
-        git clone git://github.com/rakudo/rakudo.git >> download.log 2>&1
-        echo ''
-        if (($? != 0)); then
-            echo "The download failed. See download.log for details."
-            exit 1;
-        fi
-        if [[ !(-d $PARROT_DIR/languages/rakudo) ]]; then
-            echo "Download failed. See download.log for details."
-            exit 1;
-        fi
-        rm -f download.log
-        cd - > /dev/null
-    fi
-
-     # 6. Check whether it contains a 'perl6.pbc' file (github Rakudo)
-     if [[ !(-e $PARROT_DIR/languages/rakudo/perl6.pbc) ]]; then
-         echo -n "Building Perl 6... "
-         cd $PARROT_DIR/languages/rakudo
-         echo -n > make.log
-         if [[ -e Makefile ]]; then
-             make realclean >> make.log 2>&1
-         fi
-         perl Configure.pl  >> make.log 2>&1
-         make               >> make.log 2>&1
-         echo ''
-         if (($? != 0)); then
-             echo "Build failed. See make.log for details."
-             exit 1;
-         fi
-         if [[ !(-e perl6.pbc) ]]; then
-             echo "Build failed. See make.log for details."
-             exit 1;
-         fi
-         rm -f make.log
-         cd - > /dev/null
-    fi
-elif [[ ! -e $PARROT_DIR/languages/perl6/perl6.pbc ]]; then
-    # 6. Check whether it contains a 'perl6.pbc' file (parrot-0.9.0 Rakudo)
-    echo -n "Building Perl 6..."
-    cd $PARROT_DIR/languages/perl6
-    echo -n > make.log
-    make               >> make.log 2>&1
-    echo 'built'
-    if (($? != 0)); then
-        echo "Build failed. See make.log for details."
-        exit 1;
-    fi
-    if [[ !(-e perl6.pbc) ]]; then
-        echo "Build failed. See make.log for details."
-        exit 1;
-    fi
-    rm -f make.log
-    cd - > /dev/null
-    # Yes, this is indeed very much cheating. But it works.
-    ln -s $PARROT_DIR/languages/perl6 $PARROT_DIR/languages/rakudo
-fi
-
-PERL6="$PARROT_DIR/parrot $PARROT_DIR/languages/rakudo/perl6.pbc"
-
-$PERL6 -e 'say "Perl 6 is installed."' > /dev/null
-if (($? != 0)); then
-    echo "Something is wrong with Perl 6. Cannot continue."
-    exit 1;
-fi
+# 6. perl6.pbc
+if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+    print 'Building Perl 6...';
+    my $command = "(cd $RAKUDO_DIR && perl Configure.pl && make) $silently";
+    system( $command ) == 0 or die "\nCouldn't build Perl 6: $?";
+    if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+        die "\nCouldn't build Perl 6.\n";
+    }
+    print "built\n";
+}
 
 # Delegate to installer
-$PERL6 installer $*
+my $perl6 = "$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc";
+my $command = "$perl6 installer @ARGV";
+exec( $command );
+
+sub parrot_version {
+    my $parrot_readme = "$PARROT_DIR/README";
+    if ( -f $parrot_readme ) {
+        open my $handle, '<', $parrot_readme or return;
+        if ( defined( my $line = <$handle> ) ) {
+            if ( $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
+                return $1;
+            }
+        }
+    }
+    return;
+}
+
+=pod
+
+=head1 NAME
+
+proto.perl5 - downloader and builder for Parrot and Rakudo
+
+=head1 ENVIRONMENT
+
+PARROT_DIR - if exported by the shell, specifies where to look for an installed
+Parrot directory.
+
+RAKUDO_DIR - if exported by the shell, specifies where to look for an installed
+Rakudo directory.
+
+If both variables are defined, the directories must be nested as either
+parrot/languages/rakudo or rakudo/parrot.
+
+=cut
