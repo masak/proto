@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -10,18 +10,19 @@
 # 5. That the $RAKUDO_DIR directory exists.
 # 6. That it contains a 'perl6.pbc' file.
 
-use warnings;
 use strict;
+++$|; # flush after every print
 
 # 1. perl git and subversion installed
 my $git_version = qx{git --version};
 my $svn_version = qx{svn --version};
+
 # TODO: detect if either of these is missing, and install them.
 $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
 $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
 
 # 2. PARROT_DIR
-if ( not exists $ENV{'PARROT_DIR'} and exists $ENV{'RAKUDO_DIR'} ) {
+if ( !exists $ENV{'PARROT_DIR'} && exists $ENV{'RAKUDO_DIR'} ) {
     # derive PARROT_DIR from RAKUDO_DIR : there are only 2 possibilities
     if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*)/languages/rakudo$} ) {
         # parrot contains rakudo
@@ -32,104 +33,96 @@ if ( not exists $ENV{'PARROT_DIR'} and exists $ENV{'RAKUDO_DIR'} ) {
         $ENV{'PARROT_DIR'} = $ENV{'RAKUDO_DIR'} . '/parrot';
     }
 }
-if ( not exists $ENV{'PARROT_DIR'} ) {
+if ( !exists $ENV{'PARROT_DIR'} ) {
     my $pwd = `pwd`; chomp $pwd;
     $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
 }
 my $PARROT_DIR = $ENV{'PARROT_DIR'};
 
-# 3. parrot download
+# 3. Parrot download
 my $parrot_version;
-while ( not ($parrot_version = parrot_version()) )
+while ( !($parrot_version = parrot_version()) )
 {
-    if ( not exists $ENV{'RAKUDO_DIR'} ) {
+    if ( !exists $ENV{'RAKUDO_DIR'} ) {
         # get parrot before rakudo
-        print "downloading parrot\n";
-        my $command = "svn checkout https://svn.parrot.org/parrot/trunk " .
-                      "$PARROT_DIR";
-        undef $!; qx( $command );
-        if ( $! ) { die "cannot check out parrot: $!"; }
+        print 'Downloading Parrot...';
+        my $command = 'svn checkout https://svn.parrot.org/parrot/trunk ' .
+                      $PARROT_DIR;
+        system( $command ) == 0 or die "\nCouldn't check out Parrot: $?";
+        print "downloaded\n";
     }
     else {
         # get rakudo before parrot
-        print "downloading rakudo\n";
-        if ( $ENV{'RAKUDO_DIR'} =~ m{(.*)/\w+$} and -d $1 ) {
+        print 'Downloading Rakudo...';
+        if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*) / \w+ $}x && -d $1 ) {
             my $parent_dir = $1;
             my $command = "mkdir -p $parent_dir && cd $parent_dir && " .
                           "rm -rf rakudo && " .
                           "git clone git://github.com/rakudo/rakudo.git";
-            qx( $command );
+            system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
+            print "downloaded\n";
         }
-        print "configuring rakudo to download parrot\n";
         # invoke Rakudo's parrot autobuilder
         my $command = "cd " . $ENV{'RAKUDO_DIR'} .
                       " && perl Configure.pl --gen-parrot 2>&1";
-        qx( $command );
+        system( $command ) == 0
+            or die "Couldn't configure Rakudo to fetch Parrot: $?";
     }
 }
 
-# 4. parrot executable
-if ( not -x "$PARROT_DIR/parrot" ) {
-    print "building parrot\n";
+# 4. Parrot executable
+if ( !-x "$PARROT_DIR/parrot" ) {
+    print 'Building parrot...';
     my $command = "cd $PARROT_DIR && perl Configure.pl && make 2>&1";
-    qx( $command );
-    if ( -x "$PARROT_DIR/parrot"  ) {
-        my $versionline = qx{$PARROT_DIR/parrot -v};
-        $versionline =~ s/Copyright.*//s;
-        print $versionline;
+    system( $command ) == 0 or die "\nCouldn't build Parrot: $?";
+    if ( !-x "$PARROT_DIR/parrot" ) {
+        die "\nCouldn't build Parrot.";
     }
-    else {
-        die "failed building parrot: $!";
-    }
+    print "built\n";
 }
 
-# 5. rakudo download
-if ( not exists $ENV{'RAKUDO_DIR'} ) {
+# 5. Rakudo download
+if ( !exists $ENV{'RAKUDO_DIR'} ) {
     # the classic rakudo location inside the parrot nest
     $ENV{'RAKUDO_DIR'} = "$PARROT_DIR/languages/rakudo";
 }
 my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
 
-if ( not -d "$RAKUDO_DIR" ) {
-    print "downloading rakudo\n";
+if ( !-d $RAKUDO_DIR ) {
+    print 'Downloading Perl 6...';
     my $command = "cd $PARROT_DIR/languages && " .
-                  "git clone git://github.com/rakudo/rakudo.git";
-    qx( $command );
+                  'git clone git://github.com/rakudo/rakudo.git';
+    system( $command ) == 0 or die "\nCouldn't download Perl 6: $?";
+    print "downloaded\n";
 }
 
 # 6. perl6.pbc
-if ( not -f "$RAKUDO_DIR/perl6.pbc" ) {
-    print "building perl6\n";
+if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+    print 'Building Perl 6...';
     my $command = "cd $RAKUDO_DIR && perl Configure.pl && make 2>&1";
-    qx( $command );
-    if ( -f "$RAKUDO_DIR/perl6.pbc" ) {
-        my $versionlines = qx{$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc -v};
-        $versionlines =~ s/\nCopyright.*//s;
-        print $versionlines;
+    system( $command ) == 0 or die "\nCouldn't build Perl 6: $?";
+    if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+        die "\nCouldn't build Perl 6.\n";
     }
-    else {
-        die "failed building perl6: $!";
-    }
+    print "built\n";
 }
 
-# There should be a runnable perl6, so hand over to the installer
+# Delegate to installer
 my $perl6 = "$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc";
 my $command = "$perl6 installer @ARGV";
-qx( $command );
+exec( $command );
 
-# utility code
 sub parrot_version {
-    my $file = "$PARROT_DIR/README";
-    my $parrot_version;
-    if ( -f $file ) {
-        open my $handle,'<',$file or die "cannot open $file";
-        undef $!; my $line;
-        if ( defined( $line = <$handle> ) and
-             $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
-            $parrot_version = $1;
+    my $parrot_readme = "$PARROT_DIR/README";
+    if ( -f $parrot_readme ) {
+        open my $handle, '<', $parrot_readme or return '???';
+        if ( defined( my $line = <$handle> ) ) {
+            if ( $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
+                return $1;
+            }
         }
     }
-    return $parrot_version;
+    return '???';
 }
 
 =pod
