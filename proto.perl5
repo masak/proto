@@ -10,7 +10,6 @@
 # 5. That the $RAKUDO_DIR directory exists.
 # 6. That it contains a 'perl6.pbc' file.
 
-use feature ':5.10';
 use warnings;
 use strict;
 
@@ -20,7 +19,6 @@ my $svn_version = qx{svn --version};
 # TODO: detect if either of these is missing, and install them.
 $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
 $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
-# say "proto bootstrap using perl $^V, $git_version, $svn_version";
 
 # 2. PARROT_DIR
 if ( not exists $ENV{'PARROT_DIR'} and exists $ENV{'RAKUDO_DIR'} ) {
@@ -33,12 +31,10 @@ if ( not exists $ENV{'PARROT_DIR'} and exists $ENV{'RAKUDO_DIR'} ) {
         # rakudo contains parrot
         $ENV{'PARROT_DIR'} = $ENV{'RAKUDO_DIR'} . '/parrot';
     }
-    # say 'setting PARROT_DIR=' . $ENV{'PARROT_DIR'};
 }
 if ( not exists $ENV{'PARROT_DIR'} ) {
     my $pwd = `pwd`; chomp $pwd;
     $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
-    # say 'setting PARROT_DIR=' . $ENV{'PARROT_DIR'};
 }
 my $PARROT_DIR = $ENV{'PARROT_DIR'};
 
@@ -48,7 +44,7 @@ while ( not ($parrot_version = parrot_version()) )
 {
     if ( not exists $ENV{'RAKUDO_DIR'} ) {
         # get parrot before rakudo
-        say "downloading parrot";
+        print "downloading parrot\n";
         my $command = "svn checkout https://svn.parrot.org/parrot/trunk " .
                       "$PARROT_DIR";
         undef $!; qx( $command );
@@ -56,7 +52,7 @@ while ( not ($parrot_version = parrot_version()) )
     }
     else {
         # get rakudo before parrot
-        say "downloading rakudo";
+        print "downloading rakudo\n";
         if ( $ENV{'RAKUDO_DIR'} =~ m{(.*)/\w+$} and -d $1 ) {
             my $parent_dir = $1;
             my $command = "mkdir -p $parent_dir && cd $parent_dir && " .
@@ -64,18 +60,17 @@ while ( not ($parrot_version = parrot_version()) )
                           "git clone git://github.com/rakudo/rakudo.git";
             qx( $command );
         }
-        say "configuring rakudo to download parrot";
+        print "configuring rakudo to download parrot\n";
         # invoke Rakudo's parrot autobuilder
         my $command = "cd " . $ENV{'RAKUDO_DIR'} .
                       " && perl Configure.pl --gen-parrot 2>&1";
         qx( $command );
     }
 }
-# say "parrot $parrot_version source is here";
 
 # 4. parrot executable
 if ( not -x "$PARROT_DIR/parrot" ) {
-    say "building parrot";
+    print "building parrot\n";
     my $command = "cd $PARROT_DIR && perl Configure.pl && make 2>&1";
     qx( $command );
     if ( -x "$PARROT_DIR/parrot"  ) {
@@ -94,10 +89,9 @@ if ( not exists $ENV{'RAKUDO_DIR'} ) {
     $ENV{'RAKUDO_DIR'} = "$PARROT_DIR/languages/rakudo";
 }
 my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
-# say "RAKUDO_DIR = $RAKUDO_DIR";
 
 if ( not -d "$RAKUDO_DIR" ) {
-    say "downloading rakudo";
+    print "downloading rakudo\n";
     my $command = "cd $PARROT_DIR/languages && " .
                   "git clone git://github.com/rakudo/rakudo.git";
     qx( $command );
@@ -105,7 +99,7 @@ if ( not -d "$RAKUDO_DIR" ) {
 
 # 6. perl6.pbc
 if ( not -f "$RAKUDO_DIR/perl6.pbc" ) {
-    say "building perl6";
+    print "building perl6\n";
     my $command = "cd $RAKUDO_DIR && perl Configure.pl && make 2>&1";
     qx( $command );
     if ( -f "$RAKUDO_DIR/perl6.pbc" ) {
