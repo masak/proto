@@ -7,8 +7,16 @@ my $config_file = 'config.proto';
 if ( !-e $config_file ) {
     create_default_config_file($config_file);
     die <<"EOMESSAGE";
+
+*** CONFIG FILE CREATED ***
+
 Greetings. I have created a file '$config_file' that you may want to review.
-When you feel ready, run '$0' again, and we'll get down to business.
+Next time you run '$0', these settings will be used to bootstrap your
+system into a working Perl 6 installation.
+
+If you're new to this, or if configure settings scare you, you probably want
+the default settings anyway.
+
 EOMESSAGE
 }
 if ( !-r $config_file ) {
