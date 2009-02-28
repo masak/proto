@@ -148,7 +148,13 @@ sub create_default_config_file {
     chomp $pwd;
 
     my $config_info = {
+        'config.proto version' => '2009-02-28',
         'Proto projects directory' => "$pwd/projects",
+        # TODO: These two should be set to 'release' by default
+        'Parrot revision' => 'bleeding',
+        'Rakudo revision' => 'bleeding',
+        'Test when building' => 'no',
+        'Test failure policy' => 'die',
     };
 
     if ( !defined $parrot_dir && defined $rakudo_dir ) {
