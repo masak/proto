@@ -45,9 +45,9 @@ my $silently = ' > /dev/null 2>&1';
 
 # 3. Parrot download
 my $parrot_version;
+my $rakudo_dir = $config_info->{'Rakudo directory'};
 while ( !($parrot_version = parrot_version($parrot_dir)) )
 {
-    my $rakudo_dir = $config_info->{'Rakudo directory'};
     if ( lc($config_info->{'Rakudo setup'}) =~ m/^ parrot/x ) {
         # get parrot before rakudo
         print 'Downloading Parrot...';
@@ -68,6 +68,10 @@ while ( !($parrot_version = parrot_version($parrot_dir)) )
                           . $silently;
             system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
             print "downloaded\n";
+        }
+        else {
+            die 'If you want to download Parrot within Rakudo, you need to'
+                . "\nspecify 'Rakudo directory' in the config file.\n";
         }
         print 'Downloading Parrot...';
         # invoke Rakudo's parrot autobuilder
@@ -90,8 +94,13 @@ if ( !-x "$parrot_dir/parrot" ) {
     print "built\n";
 }
 
-# 5. Rakudo download
-my $rakudo_dir = $config_info->{'Rakudo directory'};
+# 5. Rakudo download (according to Rakudo-in-Parrot)
+if ( !defined $rakudo_dir ) {
+    $rakudo_dir
+        = $config_info->{'Rakudo directory'} = "$parrot_dir/languages/rakudo";
+    DumpFile($config_file, $config_info)
+        or die "Couldn't create $config_file: $!\n";
+}
 if ( !-d $rakudo_dir ) {
     print 'Downloading Perl 6...';
     my $command = "cd $parrot_dir/languages && "
