@@ -1,4 +1,20 @@
 #!/usr/bin/perl -w
+use strict;
+
+use YAML::Syck;
+
+my $config_file = 'config.proto';
+if ( !-e $config_file ) {
+    create_default_config_file($config_file);
+    die <<"EOMESSAGE";
+Greetings. I have created a file '$config_file' that you may want to review.
+When you feel ready, run '$0' again, and we'll get down to business.
+EOMESSAGE
+}
+if ( !-r $config_file ) {
+    die "The file $config_file exists but is not readable. Cannot continue.\n";
+}
+my $config_info = LoadFile($config_file);
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -22,42 +38,29 @@ $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
 $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
 
 # 2. PARROT_DIR
-if ( !exists $ENV{'PARROT_DIR'} && exists $ENV{'RAKUDO_DIR'} ) {
-    # derive PARROT_DIR from RAKUDO_DIR : there are only 2 possibilities
-    if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*)/languages/rakudo$} ) {
-        # parrot contains rakudo
-        $ENV{'PARROT_DIR'} = $1;
-    }
-    else {
-        # rakudo contains parrot
-        $ENV{'PARROT_DIR'} = $ENV{'RAKUDO_DIR'} . '/parrot';
-    }
-}
-if ( !exists $ENV{'PARROT_DIR'} ) {
-    my $pwd = `pwd`;
-    chomp $pwd;
-    $ENV{'PARROT_DIR'} = "$pwd/projects/parrot";
-}
-my $PARROT_DIR = $ENV{'PARROT_DIR'};
+defined (my $parrot_dir = $config_info->{'Parrot directory'})
+    or die "Can't proceed if the Parrot directory is not set.";
 
 my $silently = ' > /dev/null 2>&1';
+
 # 3. Parrot download
 my $parrot_version;
-while ( !($parrot_version = parrot_version()) )
+while ( !($parrot_version = parrot_version($parrot_dir)) )
 {
-    if ( !exists $ENV{'RAKUDO_DIR'} ) {
+    my $rakudo_dir = $config_info->{'Rakudo directory'};
+    if ( lc($config_info->{'Rakudo setup'}) =~ m/^ parrot/x ) {
         # get parrot before rakudo
         print 'Downloading Parrot...';
         my $command = 'svn checkout https://svn.parrot.org/parrot/trunk '
-                      . $PARROT_DIR
+                      . $parrot_dir
                       . $silently;
         system( $command ) == 0 or die "\nCouldn't check out Parrot: $?";
         print "downloaded\n";
     }
     else {
         # get rakudo before parrot
-        print 'Downloading Rakudo...';
-        if ( $ENV{'RAKUDO_DIR'} =~ m{ (.*) / \w+ $}x && -d $1 ) {
+        print 'Downloading Perl 6...';
+        if ( $rakudo_dir =~ m{ (.*) / \w+ $}x && -d $1 ) {
             my $parent_dir = $1;
             my $command = "mkdir -p $parent_dir && cd $parent_dir && "
                           . 'rm -rf rakudo && '
@@ -66,58 +69,56 @@ while ( !($parrot_version = parrot_version()) )
             system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
             print "downloaded\n";
         }
+        print 'Downloading Parrot...';
         # invoke Rakudo's parrot autobuilder
-        my $command = "cd " . $ENV{'RAKUDO_DIR'} .
+        my $command = "cd " . $rakudo_dir .
                       " && perl Configure.pl --gen-parrot $silently";
         system( $command ) == 0
-            or die "Couldn't configure Rakudo to fetch Parrot: $?";
+            or die "\nCouldn't configure Rakudo to fetch Parrot: $?";
+        print "downloaded\n";
     }
 }
 
 # 4. Parrot executable
-if ( !-x "$PARROT_DIR/parrot" ) {
+if ( !-x "$parrot_dir/parrot" ) {
     print 'Building parrot...';
-    my $command = "(cd $PARROT_DIR && perl Configure.pl && make) $silently";
+    my $command = "(cd $parrot_dir && perl Configure.pl && make) $silently";
     system( $command ) == 0 or die "\nCouldn't build Parrot: $?";
-    if ( !-x "$PARROT_DIR/parrot" ) {
+    if ( !-x "$parrot_dir/parrot" ) {
         die "\nCouldn't build Parrot.";
     }
     print "built\n";
 }
 
 # 5. Rakudo download
-if ( !exists $ENV{'RAKUDO_DIR'} ) {
-    # the classic rakudo location inside the parrot nest
-    $ENV{'RAKUDO_DIR'} = "$PARROT_DIR/languages/rakudo";
-}
-my $RAKUDO_DIR = $ENV{'RAKUDO_DIR'};
-
-if ( !-d $RAKUDO_DIR ) {
+my $rakudo_dir = $config_info->{'Rakudo directory'};
+if ( !-d $rakudo_dir ) {
     print 'Downloading Perl 6...';
-    my $command = "cd $PARROT_DIR/languages && "
+    my $command = "cd $parrot_dir/languages && "
                   . "git clone git://github.com/rakudo/rakudo.git $silently";
     system( $command ) == 0 or die "\nCouldn't download Perl 6: $?";
     print "downloaded\n";
 }
 
 # 6. perl6.pbc
-if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+if ( !-f "$rakudo_dir/perl6.pbc" ) {
     print 'Building Perl 6...';
-    my $command = "(cd $RAKUDO_DIR && perl Configure.pl && make) $silently";
+    my $command = "(cd $rakudo_dir && perl Configure.pl && make) $silently";
     system( $command ) == 0 or die "\nCouldn't build Perl 6: $?";
-    if ( !-f "$RAKUDO_DIR/perl6.pbc" ) {
+    if ( !-f "$rakudo_dir/perl6.pbc" ) {
         die "\nCouldn't build Perl 6.\n";
     }
     print "built\n";
 }
 
 # Delegate to installer
-my $perl6 = "$PARROT_DIR/parrot $RAKUDO_DIR/perl6.pbc";
-my $command = "$perl6 installer @ARGV";
-exec( $command );
+my $perl6 = "$parrot_dir/parrot $rakudo_dir/perl6.pbc";
+exec( "$perl6 installer @ARGV" );
 
 sub parrot_version {
-    my $parrot_readme = "$PARROT_DIR/README";
+    my ($parrot_dir) = @_;
+
+    my $parrot_readme = "$parrot_dir/README";
     if ( -f $parrot_readme ) {
         open my $handle, '<', $parrot_readme or return;
         if ( defined( my $line = <$handle> ) ) {
@@ -127,6 +128,47 @@ sub parrot_version {
         }
     }
     return;
+}
+
+sub create_default_config_file {
+    my ($file_name) = @_;
+
+    my $parrot_dir = $ENV{'PARROT_DIR'};
+    my $rakudo_dir = $ENV{'RAKUDO_DIR'};
+    my $pwd = `pwd`;
+    chomp $pwd;
+
+    my $config_info = {
+        'Proto projects directory' => "$pwd/projects",
+    };
+
+    if ( !defined $parrot_dir && defined $rakudo_dir ) {
+        # derive the parrot_dir from rakudo_dir: there are only 2 possibilities
+        if ( $rakudo_dir =~ m{(.*)/languages/rakudo$} ) {
+            # Parrot contains Rakudo
+            $parrot_dir = $1;
+            $config_info->{'Rakudo setup'} = 'Parrot outermost';
+        }
+        else {
+            # rakudo contains parrot
+            $parrot_dir = $rakudo_dir . '/parrot';
+            $config_info->{'Rakudo setup'} = 'Rakudo outermost';
+        }
+    }
+    if ( !defined $parrot_dir ) {
+        $parrot_dir = "$pwd/projects/parrot";
+    }
+    if ( !defined $rakudo_dir ) {
+        # the classic rakudo location inside the parrot nest
+        $rakudo_dir = "$parrot_dir/languages/rakudo";
+        $config_info->{'Rakudo setup'} = 'Parrot outermost';
+    }
+
+    $config_info->{'Parrot directory'} = $parrot_dir;
+    $config_info->{'Rakudo directory'} = $rakudo_dir;
+
+    DumpFile($file_name, $config_info)
+        or die "Couldn't create $file_name: $!\n";
 }
 
 =pod
