@@ -40,7 +40,8 @@ sub install(*@projects) {
         }
     }
     if !$can_continue {
-        say "Aborting...";
+        say 'Try updating proto to get the latest list of projects.';
+        say 'Aborting...';
         exit(1);
     }
     for @projects    -> $project { download( $project ); }
@@ -130,6 +131,13 @@ sub showdeps(*@projects) {
 sub download( Str $projectName ) {
     if not defined %project_info{$projectName} {
         say "proto installer does not know about project '$projectName'";
+        say 'Try updating proto to get the latest list of projects.';
+        # TODO: It seems we can do better than this. A failed download does
+        #       not invalidate a whole installation process, only the
+        #       dependency tree in which it is a part. Passing information
+        #       upwards with exceptions would provide excellent error
+        #       diagnostics (either it failed because it wasn't found, or
+        #       because dependencies couldn't be installed).
         exit 1;
     }
     print "Downloading $projectName...";
@@ -169,6 +177,10 @@ sub do_build( Str $projectName ) {
     my $project_dir = $target_dir;
     if defined %info<main_subdir> { $project_dir = %info<main_subdir>; }
     my $in_dir = "cd $project_dir";
+    # XXX: Setting PERL6LIB to the lib/ in the current project is not enough.
+    #      It needs to have the lib/ dirs of all of the projects in the
+    #      transitive closure of all of its dependencies. This set of
+    #      paths needs to be build somewhere.
     # RAKUDO: Can't really figure out how to set environment variables
     #         so they're visible by later commands. Doing like this
     #         instead.
