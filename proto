@@ -165,7 +165,8 @@ sub create_default_config_file {
         'Rakudo revision' => 'bleeding',
         'Test when building' => 'no',
         'Test failure policy' => 'die',
-    }; #                              ^ there should be a law against these commas
+        'Perl 6 project developer' => 'no',
+    };
     my  $commentinfo = {
         '#' => [ "config.proto - written by the proto installer",
                  "you may edit values but please retain this file structure" ],
