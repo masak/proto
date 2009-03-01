@@ -26,10 +26,7 @@ What proto will do for you:
 
 To install Parrot and Rakudo, type the following at the prompt:
 
-  % source proto
-
-The 'source' is needed for proto to set environment variables for you. You can
-do this yourself if you prefer.
+  % ./proto
 
 Installation of Parrot and Rakudo is merely a convenience; what proto was
 really built for is installing modules. The command
