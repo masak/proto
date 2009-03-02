@@ -105,18 +105,7 @@ sub showdeps(*@projects) {
             say "$project is not installed.";
             next;
         }
-        my $deps_file = "projects/$project/deps.proto";
-        if $deps_file !~~ :e {
-            say "$project has no dependencies.";
-            next;
-        }
-        my &remove_line_ending_comment = { .subst(/ '#' .* $ /, '') };
-        my &trim_spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $/, '') };
-        my @deps = slurp($deps_file)\
-                     .split("\n")\
-                     .map({remove_line_ending_comment($^line)})\
-                     .map({trim_spaces($^line)})\
-                     .grep({$^nonempty});
+        my @deps = get_deps( "projects/$project/deps.proto" );
         if !@deps {
             say "$project has no dependencies.";
             next;
@@ -157,9 +146,7 @@ sub download( Str $projectName ) {
     run( "$command >/dev/null 2>/dev/null" );
     say 'downloaded';
     if is_file( "$target_dir/deps.proto" ) {
-        my $deps = slurp( "$target_dir/deps.proto" ).chomp;
-        # XXX: Need to handle the syntax of deps.proto fully here. See showdeps
-        for $deps.split("\n") -> $dep {
+        for get_deps( "$target_dir/deps.proto" ) -> $dep {
             if !is_dir("projects/$dep") || !is_file("projects/$dep/Makefile") {
                 download( $dep );
             }
@@ -197,6 +184,17 @@ sub do_build( Str $projectName ) {
 
 sub not_implemented($subcommand) {
     warn "The '$subcommand' subcommand is not implemented yet.";
+}
+
+sub get_deps($deps-file) {
+    return if $deps-file !~~ :e;
+    my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
+    my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
+    return slurp($deps-file)\
+             .split("\n")\
+             .map({remove-line-ending-comment($^line)})\
+             .map({trim-spaces($^line)})\
+             .grep({$^keep-all-nonempty-lines});
 }
 
 # RAKUDO: Temporary workaround while we await :f
