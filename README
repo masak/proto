@@ -13,6 +13,11 @@ temporary -- the mechanism by which it ties together modules is a short-term
 hack in Rakudo Perl 6. Nothing lasts forever, but that holds especially true
 for this installer.
 
+Proto is terse, clear and no-nonsense. It doesn't spew output all over your
+terminal when building things. It doesn't have a lot of different flags. It
+tries to do one thing, and do it well: handle the dependencies between your
+projects.
+
 What proto will do for you:
 
 1. Install Parrot
@@ -67,5 +72,5 @@ to install all modules despite the cycle, but the mere fact that there's a
 cycle merits human attention.
 
 There are many things which proto does not do. Even so, it is the hope of its
-author that it might be of some use, and make Perl 6 poets bold in splitting
+authors that it might be of some use, and make Perl 6 poets bold in splitting
 up their work into logical independent units.
