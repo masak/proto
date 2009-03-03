@@ -185,20 +185,19 @@ sub do_build( Str $projectName ) {
     my $project_dir = $target_dir;
     if defined %info<main_subdir> { $project_dir = %info<main_subdir>; }
     my $in_dir = "cd $project_dir";
-    # XXX: Setting PERL6LIB to the lib/ in the current project is not enough.
-    #      It needs to have the lib/ dirs of all of the projects in the
-    #      transitive closure of all of its dependencies. This set of
-    #      paths needs to be build somewhere.
     # RAKUDO: Can't really figure out how to set environment variables
     #         so they're visible by later commands. Doing like this
     #         instead.
-    my $p6l = "env PERL6LIB=$PWD/$target_dir/lib";
+    my $p6lib
+        = 'env PERL6LIB='
+          ~ join ':', map { "$PWD/projects/$_/lib" },
+                          $projectName, get_deps_deeply( $projectName );
     # XXX: Need to have error handling here, and not continue if things go
     #      haywire with the build. However, a project may not have a
     #      Makefile.PL, and this needs to be considered a successful [sic]
     #      outcome.
-    run( "$in_dir; yes '' | $p6l perl Makefile.PL > make.log 2>\&1" );
-    run( "$in_dir; $p6l make >> make.log 2>\&1" );
+    run( "$in_dir; yes '' | $p6lib perl Makefile.PL > make.log 2>\&1" );
+    run( "$in_dir; $p6lib make >> make.log 2>\&1" );
     say 'built';
 #   unlink( "$project_dir/make.log" );
 }
@@ -216,6 +215,17 @@ sub get_deps($deps-file) {
              .map({remove-line-ending-comment($^line)})\
              .map({trim-spaces($^line)})\
              .grep({$^keep-all-nonempty-lines});
+}
+
+# XXX: Oops, it's inconsistent that this sub takes a project name while
+#      get_deps takes a file name. Should fix one of them; and since this one
+#      feels weird with a file name, maybe get_deps should take a project
+#      name too.
+sub get_deps_deeply($project) {
+    my $target_dir = "projects/$project";
+    # TODO: Make this one find the deps of the deps, and so on. We're off the
+    #       hook for now, since there are no known deps of deps.
+    return get_deps( "$target_dir/deps.proto" );
 }
 
 # RAKUDO: Temporary workaround while we await :f
