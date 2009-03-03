@@ -14,7 +14,6 @@ my %project_info =
     rakudo-prelude => { :home<googlecode> }
 ;
 
-my @build_queue = ();
 my $PWD = %*ENV<PWD>; # from proto script
 
 given @*ARGS.shift {
@@ -44,8 +43,27 @@ sub install(*@projects) {
         say 'Aborting...';
         exit(1);
     }
-    for @projects    -> $project { download( $project ); }
-    for @build_queue -> $project { do_build( $project ); }
+    for @projects -> $top-project {
+        my @download-queue = $top-project;
+        my @build-stack    = $top-project;
+
+        while @download-queue {
+            my $project = @download-queue.shift;
+
+            download($project);
+            my $target_dir = "projects/$project";
+            for get_deps( "$target_dir/deps.proto" ) -> $dep {
+                if !is_dir("projects/$dep") {
+                    @download-queue.push($dep);
+                    @build-stack.unshift($dep);
+                }
+            }
+        }
+
+        for @build-stack -> $project {
+            do_build($project);
+        }
+    }
 }
 
 sub test(*@projects) {
@@ -133,8 +151,8 @@ sub download( Str $projectName ) {
     my %info       = %project_info{$projectName};
     my $name       = %info<name> // $projectName;
     my $target_dir = "projects/$projectName";
-    my $command;
-    $command = do given %info<home> {
+    my $silently   = '>/dev/null 2>&1';
+    my $command = do given %info<home> {
         when 'github' {
             "git clone git://github.com/{%info<owner>}/$name.git $target_dir";
         }
@@ -143,16 +161,8 @@ sub download( Str $projectName ) {
         }
         default { die "Unknown home type {%info<home>}"; }
     }
-    run( "$command >/dev/null 2>/dev/null" );
+    run( "$command $silently" );
     say 'downloaded';
-    if is_file( "$target_dir/deps.proto" ) {
-        for get_deps( "$target_dir/deps.proto" ) -> $dep {
-            if !is_dir("projects/$dep") || !is_file("projects/$dep/Makefile") {
-                download( $dep );
-            }
-        }
-    }
-    push @build_queue, $projectName;
 }
 
 sub do_build( Str $projectName ) {
@@ -187,7 +197,7 @@ sub not_implemented($subcommand) {
 }
 
 sub get_deps($deps-file) {
-    return if $deps-file !~~ :e;
+    return if !is_file($deps-file);
     my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
     my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
     return slurp($deps-file)\
