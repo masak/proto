@@ -61,7 +61,7 @@ sub install(*@projects) {
             download($project);
             my $target_dir = "projects/$project";
             for get_deps( "$target_dir/deps.proto" ) -> $dep {
-                next if ++%seen-dep<<$dep>>;
+                next if %seen-dep<<$dep>>++;
                 if !is_dir("projects/$dep") {
                     @download-queue.push($dep);
                     @build-stack.unshift($dep);
