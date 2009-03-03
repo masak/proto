@@ -43,6 +43,14 @@ sub install(*@projects) {
         say 'Aborting...';
         exit(1);
     }
+    # TODO: Though the below traversal works, it seems much cooler to do builds
+    #       as soon as possible. Right now, in a dep tree looking like this:
+    #       :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D and then build
+    #       D-C-E-B-A. Though this works, one could conceive of a download
+    #       order A-B-C-D-E (top-down) and a build order C-D-B-E-A (bottom-up).
+    #       Those could even be interspersed build-soonest, making it
+    #       dA-dB-dC-bC-bD-bB-dE-bE-bA.
+    my %seen-dep;
     for @projects -> $top-project {
         my @download-queue = $top-project;
         my @build-stack    = $top-project;
@@ -53,10 +61,13 @@ sub install(*@projects) {
             download($project);
             my $target_dir = "projects/$project";
             for get_deps( "$target_dir/deps.proto" ) -> $dep {
+                next if ++%seen-dep<<$dep>>;
                 if !is_dir("projects/$dep") {
                     @download-queue.push($dep);
                     @build-stack.unshift($dep);
                 }
+                # TODO: If the dir is there, update and build instead of
+                #       downloading and building.
             }
         }
 
