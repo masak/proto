@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use YAML::Syck;
+# use YAML::Syck;
 
 my $config_file = 'config.proto';
 if ( !-e $config_file ) {
@@ -22,7 +22,8 @@ EOMESSAGE
 if ( !-r $config_file ) {
     die "The file $config_file exists but is not readable. Cannot continue.\n";
 }
-my $config_info = LoadFile($config_file);
+my ( $config_info, $commentinfo ) = LoadFile($config_file);
+DumpFile( 'config.proto.test', $config_info, $commentinfo );
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -35,7 +36,7 @@ my $config_info = LoadFile($config_file);
 # 6. That it contains a 'perl6.pbc' file.
 
 use strict;
-++$|; # flush after every print
+$| = 1; # flush after every print
 
 # 1. perl git and subversion installed
 my $git_version = qx{git --version};
@@ -106,7 +107,7 @@ if ( !-x "$parrot_dir/parrot" ) {
 if ( !defined $rakudo_dir ) {
     $rakudo_dir
         = $config_info->{'Rakudo directory'} = "$parrot_dir/languages/rakudo";
-    DumpFile($config_file, $config_info)
+    DumpFile($config_file, $config_info, $commentinfo )
         or die "Couldn't create $config_file: $!\n";
 }
 if ( !-d $rakudo_dir ) {
@@ -129,7 +130,8 @@ if ( !-f "$rakudo_dir/perl6.pbc" ) {
 }
 
 # Delegate to installer
-my $perl6 = "$parrot_dir/parrot $rakudo_dir/perl6.pbc";
+my $perl6 = "$parrot_dir/parrot $rakudo_dir/perl6.pbc"; # old faithful
+# my $perl6 = "$rakudo_dir/perl6";    # new hopefully stable fakexecutable
 exec( "$perl6 installer @ARGV" );
 
 sub parrot_version {
@@ -163,6 +165,11 @@ sub create_default_config_file {
         'Rakudo revision' => 'bleeding',
         'Test when building' => 'no',
         'Test failure policy' => 'die',
+    }; #                              ^ there should be a law against these commas
+    my  $commentinfo = {
+        '#' => [ "config.proto - written by the proto installer",
+                 "you may edit values but please retain this file structure" ],
+        'Parrot revision' => [ 'legitimate values are bleeding or release' ]
     };
 
     if ( !defined $parrot_dir && defined $rakudo_dir ) {
@@ -170,11 +177,13 @@ sub create_default_config_file {
         if ( $rakudo_dir =~ m{(.*)/languages/rakudo$} ) {
             # Parrot contains Rakudo
             $parrot_dir = $1;
+            $commentinfo->{'Rakudo setup'} = [ 'Rakudo installed in parrot/languages'];
             $config_info->{'Rakudo setup'} = 'Parrot outermost';
         }
         else {
             # rakudo contains parrot
             $parrot_dir = $rakudo_dir . '/parrot';
+            $commentinfo->{'Rakudo setup'} = [ 'Rakudo built with Configure --gen-parrot'];
             $config_info->{'Rakudo setup'} = 'Rakudo outermost';
         }
     }
@@ -190,8 +199,59 @@ sub create_default_config_file {
     $config_info->{'Parrot directory'} = $parrot_dir;
     $config_info->{'Rakudo directory'} = $rakudo_dir;
 
-    DumpFile($file_name, $config_info)
+    DumpFile($file_name, $config_info, $commentinfo )
         or die "Couldn't create $file_name: $!\n";
+}
+
+sub LoadFile {
+    my $filename = shift;
+    my $settings = { };
+    my $comments = { };
+    my @comments = ( );
+    open HANDLE, '<', $filename or die "cannot open $filename for read";
+    my $doc_sep_line = qr/^---/;
+    my $comment_line = qr/\#(.*)$/;
+    my $setting_line = qr/(.*):\s+(.*)/;
+    while ( my $line = <HANDLE> ) {
+        chomp $line;
+        if ( $line =~ $doc_sep_line ) {
+            $comments->{'#'} = [ @comments ];
+            @comments        = ( );
+        }
+        elsif ( $line =~ $comment_line ) {
+            push @comments, $1;
+        }
+        elsif ( $line =~ $setting_line ) {
+            $settings->{$1} = $2;
+            $comments->{$1} = [ @comments ];
+            @comments       = ( );
+        }
+    }
+    close HANDLE;
+    return wantarray ? ( $settings, $comments ) : $settings;
+}
+
+sub DumpFile {
+    my ( $filename, $settings, $comments ) = @_;
+    if ( not defined $comments ) { $comments = { }; }
+    open HANDLE, '>', $filename or die "cannot open $filename for write";
+    my $main_comments = $comments->{'#'};
+    if ( defined $main_comments ) {
+        for my $comment ( @$main_comments ) {
+            print HANDLE "#$comment\n";
+        }
+    }
+    print HANDLE "--- \n"; # YAML::Syck originally added that space - why?
+    for my $settingname ( sort keys %$settings ) {
+        my $setting_comments = $comments->{$settingname};
+        if ( defined $setting_comments ) {
+            for my $comment ( @$setting_comments ) {
+                print HANDLE "#$comment\n";
+             }
+        }
+        print HANDLE "$settingname: " . ${$settings}{$settingname} . "\n";
+    }
+    close HANDLE;
 }
 
 =pod
