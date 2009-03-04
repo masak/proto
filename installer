@@ -19,9 +19,9 @@ my $PWD = %*ENV<PWD>; # from proto script
 given @*ARGS.shift {
     when undef       { exit; }
     when 'install'   { install(  @*ARGS) }
-    when 'test'      { test(     @*ARGS) }
     when 'update'    { update(   @*ARGS) }
     when 'uninstall' { uninstall(@*ARGS) }
+    when 'test'      { test(     @*ARGS) }
     when 'showdeps'  { showdeps( @*ARGS) }
     default          { say "Unrecognized subcommand '$_'. See the README." }
 }
@@ -37,44 +37,47 @@ sub install(*@projects) {
             say "Project not found: '$project'";
             $can_continue = False;
         }
+        if is_dir("projects/$project") {
+            say "Won't install $project: already installed.";
+            $can_continue = False;
+        }
     }
     if !$can_continue {
         say 'Try updating proto to get the latest list of projects.';
         say 'Aborting...';
         exit(1);
     }
-    # TODO: Though the below traversal works, it seems much cooler to do builds
-    #       as soon as possible. Right now, in a dep tree looking like this:
-    #       :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D and then build
-    #       D-C-E-B-A. Though this works, one could conceive of a download
-    #       order A-B-C-D-E (top-down) and a build order C-D-B-E-A (bottom-up).
-    #       Those could even be interspersed build-soonest, making it
-    #       dA-dB-dC-bC-bD-bB-dE-bE-bA.
-    my %seen-dep;
-    for @projects -> $top-project {
-        my @download-queue = $top-project;
-        my @build-stack    = $top-project;
+    fetch-and-build-projects-and-their-deps(@projects);
+}
 
-        while @download-queue {
-            my $project = @download-queue.shift;
-
-            download($project);
-            my $target_dir = "projects/$project";
-            for get_deps( "$target_dir/deps.proto" ) -> $dep {
-                next if %seen-dep<<$dep>>++;
-                if !is_dir("projects/$dep") {
-                    @download-queue.push($dep);
-                    @build-stack.unshift($dep);
-                }
-                # TODO: If the dir is there, update and build instead of
-                #       downloading and building.
-            }
+sub update(*@projects) {
+    unless @projects {
+        # TODO: This should probably mean 'update everything', sore some value
+        #       of 'everything'. Either we'll require an 'all' pseudopackage
+        #       or we'll consider no package at all synonymous to 'all'.
+        say 'You have to specify what you want to install.';
+        exit 1;
+    }
+    my $can_continue = True;
+    for @projects -> $project {
+        if !%project_info.exists($project) {
+            say "No such project: '$project'";
+            $can_continue = False;
         }
-
-        for @build-stack -> $project {
-            do_build($project);
+        if !is_dir("projects/$project") {
+            say "Cannot update $project: not installed.";
+            $can_continue = False;
         }
     }
+    if !$can_continue {
+        say 'Aborting...';
+        exit(1);
+    }
+    fetch-and-build-projects-and-their-deps(@projects);
+}
+
+sub uninstall(*@projects) {
+    not_implemented('uninstall');
 }
 
 sub test(*@projects) {
@@ -113,14 +116,6 @@ sub test(*@projects) {
 
 }
 
-sub update(*@projects) {
-    not_implemented('update');
-}
-
-sub uninstall(*@projects) {
-    not_implemented('uninstall');
-}
-
 # TODO: This sub should probably recursively show dependencies, and in such
 #       a way that a dependency found twice by different routes is only
 #       mentioned the second time -- its dependencies are not shown.
@@ -146,9 +141,40 @@ sub showdeps(*@projects) {
     }
 }
 
-sub download( Str $projectName ) {
-    if not defined %project_info{$projectName} {
-        say "proto installer does not know about project '$projectName'";
+sub fetch-and-build-projects-and-their-deps(@projects) {
+    # TODO: Though the below traversal works, it seems much cooler to do builds
+    #       as soon as possible. Right now, in a dep tree looking like this:
+    #       :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D and then build
+    #       D-C-E-B-A. Though this works, one could conceive of a download
+    #       preorder A-B-C-D-E and a build postorder C-D-B-E-A.
+    #       Those could even be interspersed build-soonest, making it
+    #       dA-dB-dC-bC-bD-bB-dE-bE-bA.
+    my %seen-dep;
+    for @projects -> $top-project {
+        my @fetch-queue = $top-project;
+        my @build-stack = $top-project;
+
+        while @fetch-queue {
+            my $project = @fetch-queue.shift;
+
+            fetch($project);
+            my $target_dir = "projects/$project";
+            for get_deps( "$target_dir/deps.proto" ) -> $dep {
+                next if %seen-dep<<$dep>>++;
+                @fetch-queue.push($dep);
+                @build-stack.unshift($dep);
+            }
+        }
+
+        for @build-stack -> $project {
+            do_build($project);
+        }
+    }
+}
+
+sub fetch( Str $project ) {
+    if not defined %project_info{$project} {
+        say "proto installer does not know about project '$project'";
         say 'Try updating proto to get the latest list of projects.';
         # TODO: It seems we can do better than this. A failed download does
         #       not invalidate a whole installation process, only the
@@ -158,22 +184,37 @@ sub download( Str $projectName ) {
         #       because dependencies couldn't be installed).
         exit 1;
     }
-    print "Downloading $projectName...";
-    my %info       = %project_info{$projectName};
-    my $name       = %info<name> // $projectName;
-    my $target_dir = "projects/$projectName";
+    my $target_dir = "projects/$project";
+    my %info       = %project_info{$project};
     my $silently   = '>/dev/null 2>&1';
-    my $command = do given %info<home> {
-        when 'github' {
-            "git clone git://github.com/{%info<owner>}/$name.git $target_dir";
-        }
-        when 'googlecode' {
-            "svn co https://$name.googlecode.com/svn/trunk $target_dir";
-        }
-        default { die "Unknown home type {%info<home>}"; }
+    if is_dir( $target_dir ) {
+        print "Updating $project...";
+        my $indir = "cd $target_dir";
+        my $command = do given %info<home> {
+            when 'github'     { 'git pull' }
+            when 'googlecode' { 'svn up' }
+        };
+        run( "$indir; $command $silently" );
+        say 'updated';
     }
-    run( "$command $silently" );
-    say 'downloaded';
+    else {
+        print "Downloading $project...";
+        my $name       = %info<name> // $project;
+        my $command = do given %info<home> {
+            when 'github' {
+                sprintf 'git clone git://github.com/%s/%s.git %s',
+                        %info<owner>,
+                        $name,
+                        $target_dir;
+            }
+            when 'googlecode' {
+                "svn co https://$name.googlecode.com/svn/trunk $target_dir";
+            }
+            default { die "Unknown home type {%info<home>}"; }
+        };
+        run( "$command $silently" );
+        say 'downloaded';
+    }
 }
 
 sub do_build( Str $projectName ) {
