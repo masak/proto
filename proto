@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
 
-# use YAML::Syck;
-
 my $config_file = 'config.proto';
 if ( !-e $config_file ) {
     create_default_config_file($config_file);
@@ -23,7 +21,6 @@ if ( !-r $config_file ) {
     die "The file $config_file exists but is not readable. Cannot continue.\n";
 }
 my ( $config_info, $commentinfo ) = LoadFile($config_file);
-DumpFile( 'config.proto.test', $config_info, $commentinfo );
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -168,7 +165,7 @@ sub create_default_config_file {
         'Perl 6 project developer' => 'no',
     };
     my  $commentinfo = {
-        '#' => [ "config.proto - written by the proto installer",
+        '/' => [ "config.proto - written by the proto installer",
                  "you may edit values but please retain this file structure" ],
         'Parrot revision' => [ 'legitimate values are bleeding or release' ]
     };
@@ -209,11 +206,12 @@ sub LoadFile {
     my $settings = { };
     my $comments = { };
     my @comments = ( );
-    open HANDLE, '<', $filename or die "cannot open $filename for read";
+    open my $YAML_FILE, '<', $filename
+        or die "cannot open $filename for read: $!";
     my $doc_sep_line = qr/^---/;
     my $comment_line = qr/\#(.*)$/;
     my $setting_line = qr/(.*):\s+(.*)/;
-    while ( my $line = <HANDLE> ) {
+    while ( my $line = <$YAML_FILE> ) {
         chomp $line;
         if ( $line =~ $doc_sep_line ) {
             $comments->{'#'} = [ @comments ];
@@ -228,31 +226,32 @@ sub LoadFile {
             @comments       = ( );
         }
     }
-    close HANDLE;
+    close $YAML_FILE;
     return wantarray ? ( $settings, $comments ) : $settings;
 }
 
 sub DumpFile {
     my ( $filename, $settings, $comments ) = @_;
     if ( not defined $comments ) { $comments = { }; }
-    open HANDLE, '>', $filename or die "cannot open $filename for write";
-    my $main_comments = $comments->{'#'};
+    open my $YAML_FILE, '>', $filename
+        or die "cannot open $filename for write: $!";
+    my $main_comments = $comments->{'/'};
     if ( defined $main_comments ) {
         for my $comment ( @$main_comments ) {
-            print HANDLE "#$comment\n";
+            print {$YAML_FILE} "# $comment\n";
         }
     }
-    print HANDLE "--- \n"; # YAML::Syck originally added that space - why?
+    print {$YAML_FILE} "--- \n";
     for my $settingname ( sort keys %$settings ) {
         my $setting_comments = $comments->{$settingname};
         if ( defined $setting_comments ) {
             for my $comment ( @$setting_comments ) {
-                print HANDLE "#$comment\n";
+                print {$YAML_FILE} "# $comment\n";
              }
         }
-        print HANDLE "$settingname: " . ${$settings}{$settingname} . "\n";
+        print {$YAML_FILE} "$settingname: ", ${$settings}{$settingname}, "\n";
     }
-    close HANDLE;
+    close $YAML_FILE;
 }
 
 =pod
