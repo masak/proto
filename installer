@@ -52,7 +52,7 @@ sub install(*@projects) {
 
 sub update(*@projects) {
     unless @projects {
-        # TODO: This should probably mean 'update everything', sore some value
+        # TODO: This should probably mean 'update everything', for some value
         #       of 'everything'. Either we'll require an 'all' pseudopackage
         #       or we'll consider no package at all synonymous to 'all'.
         say 'You have to specify what you want to install.';
