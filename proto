@@ -20,7 +20,7 @@ EOMESSAGE
 if ( !-r $config_file ) {
     die "The file $config_file exists but is not readable. Cannot continue.\n";
 }
-my ( $config_info, $commentinfo ) = LoadFile($config_file);
+my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
 # This bootstrapping script assumes as little as possible about the user's
 # setup. It tries to establish, one after another, the following things:
@@ -104,7 +104,7 @@ if ( !-x "$parrot_dir/parrot" ) {
 if ( !defined $rakudo_dir ) {
     $rakudo_dir
         = $config_info->{'Rakudo directory'} = "$parrot_dir/languages/rakudo";
-    DumpFile($config_file, $config_info, $commentinfo )
+    save_config_file($config_file, $config_info, $commentinfo )
         or die "Couldn't create $config_file: $!\n";
 }
 if ( !-d $rakudo_dir ) {
@@ -267,15 +267,15 @@ sub create_default_config_file {
     $config_info->{'Parrot directory'} = $parrot_dir;
     $config_info->{'Rakudo directory'} = $rakudo_dir;
 
-    DumpFile($file_name, $config_info, $commentinfo )
+    save_config_file($file_name, $config_info, $commentinfo )
         or die "Couldn't create $file_name: $!\n";
 }
 
-sub LoadFile {
-    my $filename = shift;
-    my $settings = { };
-    my $comments = { };
-    my @comments = ( );
+sub load_config_file {
+    my ( $filename ) = @_;
+    my $settings = {};
+    my $comments = {};
+    my @collected_comments = ();
     open my $YAML_FILE, '<', $filename
         or die "cannot open $filename for read: $!";
     my $doc_sep_line = qr/^---/;
@@ -284,23 +284,23 @@ sub LoadFile {
     while ( my $line = <$YAML_FILE> ) {
         chomp $line;
         if ( $line =~ $doc_sep_line ) {
-            $comments->{'#'} = [ @comments ];
-            @comments        = ( );
+            $comments->{'/'} = [ @collected_comments ];
+            @collected_comments = ();
         }
         elsif ( $line =~ $comment_line ) {
-            push @comments, $1;
+            push @collected_comments, $1;
         }
         elsif ( $line =~ $setting_line ) {
             $settings->{$1} = $2;
-            $comments->{$1} = [ @comments ];
-            @comments       = ( );
+            $comments->{$1} = [ @collected_comments ];
+            @collected_comments = ();
         }
     }
     close $YAML_FILE;
     return wantarray ? ( $settings, $comments ) : $settings;
 }
 
-sub DumpFile {
+sub save_config_file {
     my ( $filename, $settings, $comments ) = @_;
     if ( not defined $comments ) { $comments = { }; }
     open my $YAML_FILE, '>', $filename
@@ -328,7 +328,7 @@ sub DumpFile {
 
 =head1 NAME
 
-proto.perl5 - downloader and builder for Parrot and Rakudo
+proto - downloader and builder for Parrot and Rakudo
 
 =head1 ENVIRONMENT
 
