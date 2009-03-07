@@ -149,6 +149,83 @@ sub parrot_version {
 sub create_default_config_file {
     my ($file_name) = @_;
 
+    my  $commentinfo = {
+        '/' => [ 'config.proto -- created by proto',
+                 'The file consists of a number of settings written as',
+                 'key/value pairs. You are welcome -- encouraged, even -- to',
+                 'edit the file manually, but please stick to a list of',
+                 'key/value pairs.' ],
+        'config.proto version'
+            => [ 'config.proto version -- the version number of this file.',
+                 'proto uses it to determine whether the file needs to be',
+                 'upgraded to a newer version. The value should never need',
+                 'to be edited manually.' ],
+        'Proto projects directory'
+            => [ 'Proto projects directory -- the path to a directory, which',
+                 'may or may not exist, which will contain the projects',
+                 'downloaded by proto, including (if needed) Parrot and',
+                 'Perl 6. If you set this to a different path after projects',
+                 'have already been installed, be aware that the old projects',
+                 'will have to be moved along if proto is to find them' ],
+        'Parrot directory'
+            => [ 'Parrot directory -- the path to the directory, which may',
+                 'or may not exist, where Parrot lives or will be installed.'
+               ],
+        'Parrot revision'
+            => [ 'Parrot revision -- the revision of Parrot to download, if',
+                 'no Parrot was found in $PARROT_DIR at startup. Allowed',
+                 'values are "release", "bleeding", and an integer (optionally',
+                 'preceded by the letter "r"). The value "bleeding" means to',
+                 'download the latest Parrot revision from SVN, whereas',
+                 '"release" means to download the latest release as a',
+                 'tarball.' ],
+        'Rakudo directory'
+            => [ 'Rakudo directory -- the path to the directory, which may',
+                 'or may not exist, where Rakudo lives or will be installed.'
+               ],
+        'Rakudo revision'
+            => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
+                 'download, if no such revision was found in $RAKUDO_DIR or',
+                 'other likely locations at startup. Allowed values are',
+                 '"release", "bleeding", and a hexadecimal integer of length',
+                 'up to 40. The value "bleeding" means to download the latest',
+                 'Rakudo Perl 6 revision from github, whereas "release" means',
+                 'to download the latest release as a tarball.' ],
+        'Rakudo setup'
+            => [ 'Rakudo setup -- there are two ways to install Rakudo Perl 6',
+                 'nowadays: either with Parrot outermost and Rakudo inside,',
+                 'or the other way around. The former way is the traditional',
+                 'way, used before Rakudo left the Parrot nest; the latter is',
+                 'targetted for Rakudo users who plan to use Parrot mostly to',
+                 'run Perl 6. Any value of this option that starts with',
+                 '"Parrot" (case insensitive) will be treated as "Parrot',
+                 'outermost" -- all others will be treated as "Rakudo',
+                 'outermost." Depending on the value of this setting, one of',
+                 'the settings "Rakudo directory" and "Parrot directory" may',
+                 'be ignored if it conflicts with the constraints of the',
+                 'relative paths of Parrot and Rakudo.' ],
+        'Test when building'
+            => [ 'Test when building -- when building projects that were just',
+                 'downloaded or updated, whether to also run the test suites',
+                 'of those projects. This option only controls whether the',
+                 'tests are actually run; the "Test failure policy"',
+                 'determines whether or not to halt the build process on',
+                 'a failing test suite. Values other than "yes" are treated',
+                 'as "no".' ],
+        'Test failure policy'
+            => [ 'Test failure policy -- what to do when tests fail in the',
+                 'test suites of projects that are being installed. Note that',
+                 'this option has no effect unless the option "Test when',
+                 'building" has been set to "yes". The value "die" of this',
+                 'option means that the build process halts whenever a test',
+                 'suite fails. Other values are treated as "keep going".' ],
+        'Perl 6 project developer'
+            => [ 'Perl 6 project developer -- when set, this option makes',
+                 'proto try to download read-write versions of project',
+                 'repositories, from which project development can be',
+                 'carried out. If such a download fails, proto falls back to',
+                 'downloading the project the usual way.' ],
+    };
     my $parrot_dir = $ENV{'PARROT_DIR'};
     my $rakudo_dir = $ENV{'RAKUDO_DIR'};
     my $pwd = `pwd`;
@@ -164,24 +241,17 @@ sub create_default_config_file {
         'Test failure policy' => 'die',
         'Perl 6 project developer' => 'no',
     };
-    my  $commentinfo = {
-        '/' => [ "config.proto - written by the proto installer",
-                 "you may edit values but please retain this file structure" ],
-        'Parrot revision' => [ 'legitimate values are bleeding or release' ]
-    };
 
     if ( !defined $parrot_dir && defined $rakudo_dir ) {
         # derive the parrot_dir from rakudo_dir: there are only 2 possibilities
         if ( $rakudo_dir =~ m{(.*)/languages/rakudo$} ) {
             # Parrot contains Rakudo
             $parrot_dir = $1;
-            $commentinfo->{'Rakudo setup'} = [ 'Rakudo installed in parrot/languages'];
             $config_info->{'Rakudo setup'} = 'Parrot outermost';
         }
         else {
             # rakudo contains parrot
             $parrot_dir = $rakudo_dir . '/parrot';
-            $commentinfo->{'Rakudo setup'} = [ 'Rakudo built with Configure --gen-parrot'];
             $config_info->{'Rakudo setup'} = 'Rakudo outermost';
         }
     }
