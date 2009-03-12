@@ -53,29 +53,31 @@ sub install(*@projects) {
 }
 
 sub update(*@projects) {
-    unless @projects {
-        # TODO: This should probably mean 'update everything', for some value
-        #       of 'everything'. Either we'll require an 'all' pseudopackage
-        #       or we'll consider no package at all synonymous to 'all'.
-        say 'You have to specify what you want to install.';
-        exit 1;
-    }
-    my $can_continue = True;
+    my @projects-to-update;
+    my $missing_projects = False;
     for @projects -> $project {
         if !%project_info.exists($project) {
             say "No such project: '$project'";
-            $can_continue = False;
+            $missing_projects = True;
         }
-        if !is_dir("projects/$project") {
+        elsif !is_dir("projects/$project") {
             say "Cannot update $project: not installed.";
-            $can_continue = False;
+        }
+        else {
+            @projects-to-update.push($project);
         }
     }
-    if !$can_continue {
-        say 'Aborting...';
+    if $missing_projects {
         exit(1);
     }
-    fetch-and-build-projects-and-their-deps(@projects);
+    if !@projects-to-update {
+        # TODO: This should probably mean 'update everything', for some value
+        #       of 'everything'. Either we'll require an 'all' pseudopackage
+        #       or we'll consider no package at all synonymous to 'all'.
+        say 'Nothing to update.';
+        exit(1);
+    }
+    fetch-and-build-projects-and-their-deps(@projects-to-update.uniq);
 }
 
 sub uninstall(*@projects) {
