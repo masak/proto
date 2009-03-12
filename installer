@@ -27,27 +27,29 @@ given @*ARGS.shift {
 }
 
 sub install(*@projects) {
-    unless @projects {
-        say 'You have to specify what you want to install.';
-        exit 1;
-    }
-    my $can_continue = True;
+    my @projects-to-install;
+    my $missing_projects = False;
     for @projects -> $project {
         if !%project_info.exists($project) {
             say "Project not found: '$project'";
-            $can_continue = False;
+            $missing_projects = True;
         }
-        if is_dir("projects/$project") {
+        elsif is_dir("projects/$project") {
             say "Won't install $project: already installed.";
-            $can_continue = False;
+        }
+        else {
+            @projects-to-install.push($project);
         }
     }
-    if !$can_continue {
+    if $missing_projects {
         say 'Try updating proto to get the latest list of projects.';
-        say 'Aborting...';
         exit(1);
     }
-    fetch-and-build-projects-and-their-deps(@projects);
+    if !@projects-to-install {
+        say 'Nothing to install.';
+        exit(1);
+    }
+    fetch-and-build-projects-and-their-deps(@projects-to-install.uniq);
 }
 
 sub update(*@projects) {
