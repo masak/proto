@@ -11,7 +11,6 @@ my %project_info =
     svg            => { :home<github>,     :owner<masak> },
     maya           => { :home<github>,     :owner<ihrd> },
     form           => { :home<github>,     :owner<mattw> },
-    rakudo-prelude => { :home<googlecode> }
 ;
 
 my $PWD = %*ENV<PWD>; # from proto script
