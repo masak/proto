@@ -1,0 +1,36 @@
+november:
+     home:  github
+     owner: viklund
+
+html-template:
+     home:  github
+     owner: masak
+
+druid:
+     home:  github
+     owner: masak
+
+perl6-examples:
+    home:   github
+    owner:  eric256 
+
+uri:
+    home:   github
+    owner:  ihrd
+
+web:
+    home:   github
+    owner:  masak
+
+svg:
+    home:   github
+    owner:  masak
+
+maya:
+    home:   github
+    owner:  ihrd
+
+form:
+    home:   github
+    owner:  mattw
+
