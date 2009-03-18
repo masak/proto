@@ -295,7 +295,7 @@ sub read-module-list(Str $filename) {
         when / ^ \s* ['#' | $ ] /   { next };
         when / ^ (\S+) \: \s* ['#' | $ ] / {
             if $current-name.defined {
-                %overall{$current-name} = %current;
+                %overall{$current-name} = %current.clone;
             }
             %current = ();
             $current-name = ~$0;
@@ -304,6 +304,9 @@ sub read-module-list(Str $filename) {
             %current{~$0} = ~$1;
         }
         default { warn "don't know how to parse the line «$_», ignoring it" };
+    }
+    if %current {
+        %overall{$current-name} = %current;
     }
 
     return %overall;
