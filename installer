@@ -23,7 +23,7 @@ sub install(*@projects) {
             say "Project not found: '$project'";
             $missing_projects = True;
         }
-        elsif is_dir("projects/$project") {
+        elsif "projects/$project" ~~ :d {
             say "Won't install $project: already installed.";
         }
         else {
@@ -49,7 +49,7 @@ sub update(*@projects) {
             say "No such project: '$project'";
             $missing_projects = True;
         }
-        elsif !is_dir("projects/$project") {
+        elsif "projects/$project" !~~ :d {
             say "Cannot update $project: not installed.";
         }
         else {
@@ -180,7 +180,7 @@ sub fetch( Str $project ) {
     my $target_dir = "projects/$project";
     my %info       = %project_info{$project};
     my $silently   = '>/dev/null 2>&1';
-    if is_dir( $target_dir ) {
+    if $target_dir ~~ :d {
         print "Updating $project...";
         my $indir = "cd $target_dir";
         my $command = do given %info<home> {
@@ -241,7 +241,7 @@ sub not_implemented($subcommand) {
 }
 
 sub get_deps($deps-file) {
-    return if !is_file($deps-file);
+    return unless $deps-file ~~ :f;
     my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
     my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
     return slurp($deps-file)\
@@ -260,28 +260,6 @@ sub get_deps_deeply($project) {
     # TODO: Make this one find the deps of the deps, and so on. We're off the
     #       hook for now, since there are no known deps of deps.
     return get_deps( "$target_dir/deps.proto" );
-}
-
-# RAKUDO: Temporary workaround while we await :f
-sub is_file( Str $filename ) {
-    my $tempfile = "/tmp/installer_is_file.txt";
-    my $command = "ls -ld $filename >$tempfile 2>/dev/null";
-    run( $command );
-    my $ls_result = slurp( $tempfile );
-    unlink $tempfile;
-    my Bool $status = ? ($ls_result ~~ / ^ '-' /);
-    return $status;
-}
-
-# RAKUDO: Temporary workaround while we await :d
-sub is_dir( Str $dirname ) {
-    my $tempfile = "/tmp/installer_is_dir.txt";
-    my $command = "ls -ld $dirname >$tempfile 2>/dev/null";
-    run( $command );
-    my $ls_result = slurp( $tempfile );
-    unlink $tempfile;
-    my Bool $status = ? ($ls_result ~~ / ^ 'd' /);
-    return $status;
 }
 
 sub read-module-list(Str $filename) {
