@@ -1,7 +1,8 @@
 #!perl6
 use v6;
 
-my %project_info = read-module-list('modules.list');
+my %config-info = load-config-file('config.proto');
+my %project_info = load-module-list('modules.list');
 
 my $PWD = %*ENV<PWD>; # from proto script
 
@@ -262,7 +263,7 @@ sub get_deps_deeply($project) {
     return get_deps( "$target_dir/deps.proto" );
 }
 
-sub read-module-list(Str $filename) {
+sub load-module-list(Str $filename) {
     my $fh = open($filename)
         or die "Can't open '$filename': $!";
 
@@ -288,6 +289,27 @@ sub read-module-list(Str $filename) {
     }
 
     return %overall;
+}
+
+# XXX: Removed all comment-handling code from the p6 version of this sub,
+#      on the theory that less code means less maintenance. Should we ever
+#      want to write back to the config.proto file from within this script,
+#      we'll need to add the comment-handling code back.
+sub load-config-file(Str $filename) {
+    my %settings;
+    # RAKUDO: Oslo doesn't have lines; have to wait till next month...
+    for slurp($filename).split("\n") {
+        when /^ '---'/ {
+            # do nothing
+        }
+        when / '#' (.*) $/ {
+            # do nothing
+        }
+        when / (.*) ':' \s+ (.*) / {
+            %settings{$0} = $1;
+        }
+    }
+    return %settings;
 }
 
 # vim: ft=perl6
