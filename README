@@ -48,12 +48,7 @@ will check the module <module> and all that depend on it for updates, and
 rebuild them in the required order. Omit the name of the module, and all your
 installed modules will be updated.
 
-Since a module's dependencies may change over time, it's up to the module to
-declare its current dependencies. It does this in a file called 'deps.proto' in
-its root directory. This file may contain empty lines (which are ignored),
-and lines with a single word containing only alphanumerics, dashes and
-underscores. With the exception of line-end '#' comments à la Perl, all other
-lines are reported as syntax errors, with build panic as a result.
+See the file PIONEER for how to set your project up with proto.
 
 [Note: from here on, all the described features are currently nothing more
 than wishful thinking. It is hoped that this notice might move downwards

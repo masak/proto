@@ -1,0 +1,52 @@
+If you have a Perl 6 project, it already conforms to the requirements posed by
+proto.
+
+With that said, there are some things that proto will do for you and your
+project, if you only adhere to a few easy-to-fulfill conventions:
+
+* Dependencies
+* Building
+* Running tests
+
+== Dependencies
+
+This is what proto was designed for; installing the projects you need and
+building them before builing your project.
+
+If you have dependencies, declare them in a file deps.proto in the root of
+your repository. The November wiki has a deps.proto that looks like this:
+
+html-template
+
+(That's one line, containing the word 'html-template'.)
+
+Things that proto expects to see in a deps.proto file:
+
+* Blank lines.
+* Lines with a single word containing only alphanumerics, dashes and
+  underscores.
+* Any of the above with trailing whitespace.
+* Any of the above with a trailing '#' comment.
+
+If it finds anything else, proto will halt and publicly ridicule you, the
+project developer, for not living up to an easy-to-fulfill convention.
+
+== Building
+
+As a bonus to installing, proto can build your project. There will always be
+a build step, regardless of how your repository looks. The steps performed by
+proto are
+
+$ perl Makefile.PL
+$ make
+
+Should Makefile.PL be missing, the above steps will not be performed, and the
+build process is considered successful (sic). If the above steps fail along
+the way, the build chain is halted.
+
+== Running tests
+
+Proto will attempt 'make test'; if there's no target 'test' in the Makefile,
+proto will try to run 'prove' recursively on your project's t/ directory, using
+perl6 as the executable. If prove is missing, or the t/ directory is missing,
+the testing will be considered successful.
