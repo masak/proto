@@ -37,7 +37,8 @@ else {
 say "PERL6       $perl6";
 # The perl6-examples/lib/SVG directory is one level below lib/, so trim
 # off the last / and directory name off PWD to make PERL6LIB.
-my $perl6lib = %*ENV<PWD>.subst( / \/ <-[/]>+ $ /, '' ); # trim slash then non slash at end
+my $perl6lib = %*ENV<PWD> ~ '/lib';
+#my $perl6lib = %*ENV<PWD>.subst( / \/ <-[/]>+ $ /, '' ); # trim slash then non slash at end
 say "PERL6LIB    $perl6lib";
 # The perl6-examples/bin directory is a sibling of PERL6LIB
 my $perl6bin = $perl6lib.subst( '/lib', '/bin' );
@@ -105,7 +106,7 @@ Makefile.pm - common code for Makefile builder and runner
 Where F<Configure.p6> generally has only these lines:
 
  # Configure.p6 - installer - see documentation in ../Configure.pm
- BEGIN { @*INC.push( '../..' ); } use Configure; # proto directory
+ use v6; BEGIN { @*INC.push( '../..' ); }; use Configure; # proto dir
 
 =head1 DESCRIPTION
 A Perl module often needs a Makefile to specify how to build, test and
