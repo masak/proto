@@ -85,6 +85,9 @@ all: \$(PIRS) lib/Test.pir
 %.pir: %.pm
 	\$(PERL6) --target=pir --output=\$@ \$<
 
+lib/Test.pir: \$(RAKUDO_DIR)/Test.pm \$(PERL6)
+	\$(PERL6) --target=pir --output=lib/Test.pir \$(RAKUDO_DIR)/Test.pm
+
 clean:
 	rm -f \$(PIRS)
 
@@ -99,7 +102,7 @@ EOF
 # following Perl 6 script:
 cat >Configure.p6 <<EOF
 # Configure.p6 - installer - see documentation in ../Configure.pm
-BEGIN { @*INC.push( '../..' ); } use Configure; # proto directory
+use v6; BEGIN { @*INC.push( '../..' ); }; use Configure; # proto dir
 EOF
 
 # Notify proto about dependencies on other modules. The installer will
