@@ -1,6 +1,9 @@
 # Configure.pm
 
-say "\nConfigure.pm is preparing to make your Makefile.\n";
+.say for
+    '',
+    'Configure.pm is preparing to make your Makefile.',
+    '';
 
 # Determine how this Configure.p6 was invoked, to write the same paths
 # and executables into the Makefile variables. The variables are:
@@ -50,21 +53,26 @@ say "RAKUDO_DIR  $rakudo_dir";
 
 # Read Makefile.in, edit, write Makefile
 my $maketext = slurp( 'Makefile.in' );
-$maketext .= subst( 'Makefile.in', 'Makefile' );
-$maketext .= subst( 'To be read', 'Written' );
-$maketext .= subst( 'replaces <TOKENS>', 'defined these' );
+$maketext .= subst( .key, .value ) for
+    'Makefile.in'       => 'Makefile',
+    'To be read'        => 'Written',
+    'replaces <TOKENS>' => 'defined these',
 # Maintainer note: keep the following in sync with pod#VARIABLES below
-$maketext .= subst( '<PERL6>',      $perl6 );
-$maketext .= subst( '<PERL6LIB>',   $perl6lib );
-$maketext .= subst( '<PERL6BIN>',   $perl6bin );
-$maketext .= subst( '<RAKUDO_DIR>', $rakudo_dir );
+    '<PERL6>'           => $perl6,
+    '<PERL6LIB>'        => $perl6lib,
+    '<PERL6BIN>'        => $perl6bin,
+    '<RAKUDO_DIR>'      => $rakudo_dir;
 squirt( 'Makefile', $maketext );
 
 # Job done.
-say "\nMakefile is ready, running 'make' on it.";
-run "make";
-say "Configure and 'make' have finished. Use 'make help' to view other options.";
-say "";
+.say for
+    '',
+    q[Makefile is ready, running 'make' on it.];
+run 'make";
+.say for
+    q[Configure and 'make' have finished. ]
+    ~ q[Use 'make help' to view other options.],
+    '';
 
 
 # The opposite of slurp
