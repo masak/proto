@@ -232,10 +232,10 @@ sub do_build( Str $projectName ) {
     #      haywire with the build. However, a project may not have a
     #      Makefile.PL or Configure.p6, and this needs to be considered
     #      a successful [sic] outcome.
-    if "Makefile.PL" ~~ :f {
+    if "$project_dir/Makefile.PL" ~~ :f {
         run( "$in_dir; yes '' | $p6lib perl Makefile.PL > make.log 2>\&1" );
     }
-    elsif "Configure.p6 ~~ :f {
+    elsif "$project_dir/Configure.p6" ~~ :f {
         run( "$in_dir; yes '' | $p6lib $perl6 Configure.p6 > make.log 2>\&1" );
     }
     run( "$in_dir; $p6lib make >> make.log 2>\&1" );

@@ -6,8 +6,8 @@
 # SYNOPSIS
 #
 #     # Create project for installation by proto: (without leading '# ')
-#     read -p 'Git username: ' GITUSER
-#     read -p 'Project name: ' PROJECT
+#     read -p "Git username: " GITUSER
+#     read -p "Project name: " PROJECT
 #     export GITUSER PROJECT
 #     cd /tmp                              # or your preferred directory
 #     git clone git://github.com/masak/proto.git
@@ -42,10 +42,14 @@ If 'Create' worked, continue with this script, otherwise type Control-C to exit.
 EOF
 
 # Skip these reads if they were already done as in SYNOPSIS above.
-if [ "$GITUSER" != "" && "$PROJECT" != "" ]; then
-    read -p 'Git username: ' GITUSER
-    read -p 'Project name: ' PROJECT
+if [ -z "$GITUSER" -a -z "$PROJECT" ]
+then
+    read -p "Git username: " GITUSER
+    read -p "Project name: " PROJECT
     export GITUSER PROJECT
+else
+    echo "Using '$GITUSER' as username and '$PROJECT' as project."
+    read -p "After the project has been created on github, press Enter..."
 fi
 
 # Begin with some steps from "Create New Repository" at github.com
