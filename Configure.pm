@@ -5,13 +5,16 @@ say "\nConfigure.pm is preparing to make your Makefile.\n";
 # Determine how this Configure.p6 was invoked, to write the same paths
 # and executables into the Makefile variables. The variables are:
 # PERL6       how to execute a Perl 6 script
-# PERL6LIB    initial value of @*INC, where use <module> searches
-# PERL6BIN    directory where executables such as prove reside
+# PERL6LIB    initial value of @*INC, where 'use <module>;' searches
+# PERL6BIN    directory where executables such as 'prove' reside
 # RAKUDO_DIR  (deprecated) currently the location of Rakudo's Test.pm
 
 my $parrot_dir = %*VM<config><build_dir>;
 my $rakudo_dir;
 my $perl6;
+
+regex parrot_in_rakudo { ( .* '/rakudo' ) '/parrot' }
+
 # There are two possible relationships between the parrot and rakudo
 # directories: rakudo/parrot or parrot/languages/rakudo
 if $parrot_dir ~~ / <parrot_in_rakudo> / {
@@ -24,7 +27,10 @@ elsif "$parrot_dir/languages/rakudo" ~~ :d {
     $rakudo_dir = "$parrot_dir/languages/rakudo";
 }
 else { # anything else 
-    say "PARROT_DIR unexpected $parrot_dir";
+    .say for
+        "Found a PARROT_DIR to be $parrot_dir",
+        'but there is no Rakudo nearby. Please contact the proto people.',
+        '';
     exit(1);
 }
 if "$rakudo_dir/perl6" ~~ :f or "$rakudo_dir/perl6.exe" ~~ :f {
@@ -35,10 +41,7 @@ else {
 }
 
 say "PERL6       $perl6";
-# The perl6-examples/lib/SVG directory is one level below lib/, so trim
-# off the last / and directory name off PWD to make PERL6LIB.
 my $perl6lib = %*ENV<PWD> ~ '/lib';
-#my $perl6lib = %*ENV<PWD>.subst( / \/ <-[/]>+ $ /, '' ); # trim slash then non slash at end
 say "PERL6LIB    $perl6lib";
 # The perl6-examples/bin directory is a sibling of PERL6LIB
 my $perl6bin = $perl6lib.subst( '/lib', '/bin' );
@@ -74,25 +77,19 @@ sub squirt( Str $filename, Str $text ) {
 
 # This Configure.pm can work with the following ways of starting up:
 # 1. The explicit way Parrot runs any Parrot Byte Code:
-#    my/parrot/parrot my/rakudo/perl6.pbc Configure.p6
+#    /my/parrot/parrot /my/rakudo/perl6.pbc Configure.p6
 # 2. The Rakudo "Fake Executable" made by pbc_to_exe:
-#    my/rakudo/perl6 Configure.p6
+#    /my/rakudo/perl6 Configure.p6
 # The rest are variations of 1. and 2. to sugar the command line:
-# 3. A shell script perl6 for 1: 'my/parrot/parrot my/rakudo/perl6.pbc $*':
-#    my/perl6 Configure.p6    # or 'perl6 Configure.p6' with search path
-# 4. A shell alias for 1: perl6='my/parrot/parrot my/rakudo/perl6.pbc':
+# 3. A shell script perl6 for 1: '/my/parrot/parrot /my/rakudo/perl6.pbc $*':
+#    /my/perl6 Configure.p6    # or 'perl6 Configure.p6' with search path
+# 4. A shell alias for 1: perl6='/my/parrot/parrot /my/rakudo/perl6.pbc':
 #    perl6 Configure.p6
-# 5. A symbolic link for 2: 'sudo ln -s /path/to/rakudo/perl6 /bin':
+# 5. A symbolic link for 2: 'sudo ln -s /my/rakudo/perl6 /bin':
 #    perl6 Configure.p6
 
-# Are there other ways to execute Perl 6 scripts? Please tell the maintainers.
-
-regex parrot_in_rakudo { ( .* '/rakudo' ) '/parrot' }
-# regex rakudo_in_parrot { .* '/parrot/languages/rakudo' }
-
-#regex rakudo_pbc { 'parrot ' <rakudo_dir> '/perl6.pbc Configure.p6' }
-#regex rakudo_dir { .* }
-#regex rakudo_exe { ( .* 'perl6' ) ' Configure.p6' }
+# Do you know of another way to execute Perl 6 scripts? Please tell the
+# maintainers.
 
 =begin pod
 
