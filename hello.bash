@@ -152,10 +152,11 @@ $PROJECT:
     home:   github
     owner:  $GITUSER
 
-8. Then you should be able to install your project:
+8. Then you should be able to install and test your project:
    ./proto install $PROJECT
+   ./proto test $PROJECT
 
-Now your work really starts :)
+Now hello.bash is finished, and your work really starts :)
 
 9. Replace proto/projects/$PROJECT/lib/Example/Hello.pm with your module file(s)
    and update SOURCES in proto/projects/$PROJECT/Makefile.in accordingly.
