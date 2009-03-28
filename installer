@@ -227,11 +227,17 @@ sub do_build( Str $projectName ) {
         = 'env PERL6LIB='
           ~ join ':', map { "$PWD/projects/$_/lib" },
                           $projectName, get_deps_deeply( $projectName );
+    my $perl6 = %config-info{'Rakudo directory'} ~ '/perl6';
     # XXX: Need to have error handling here, and not continue if things go
     #      haywire with the build. However, a project may not have a
-    #      Makefile.PL, and this needs to be considered a successful [sic]
-    #      outcome.
-    run( "$in_dir; yes '' | $p6lib perl Makefile.PL > make.log 2>\&1" );
+    #      Makefile.PL or Configure.p6, and this needs to be considered
+    #      a successful [sic] outcome.
+    if "Makefile.PL" ~~ :f {
+        run( "$in_dir; yes '' | $p6lib perl Makefile.PL > make.log 2>\&1" );
+    }
+    elsif "Configure.p6 ~~ :f {
+        run( "$in_dir; yes '' | $p6lib $perl6 Configure.p6 > make.log 2>\&1" );
+    }
     run( "$in_dir; $p6lib make >> make.log 2>\&1" );
     say 'built';
 #   unlink( "$project_dir/make.log" );

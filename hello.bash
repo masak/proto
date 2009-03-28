@@ -4,7 +4,24 @@
 # hello.bash - a canonical "hello, world!" project for proto
 #
 # SYNOPSIS
-# bash hello.bash      # creates and uploads everything in /tmp/hello
+#
+#     # Create project for installation by proto: (without leading '# ')
+#     read -p 'Git username: ' GITUSER
+#     read -p 'Project name: ' PROJECT
+#     export GITUSER PROJECT
+#     cd /tmp                              # or your preferred directory
+#     git clone git://github.com/masak/proto.git
+#     cd proto
+#     ./proto
+#     bash hello.bash
+#     cat >>modules.list <<EOF
+#     $PROJECT:
+#         home:   github
+#         owner:  $GITUSER
+#
+#     EOF
+#     ./proto install $PROJECT
+#     ./proto test $PROJECT
 #
 # DESCRIPTION
 # Implements proto's PIONEER plan in code
@@ -23,13 +40,13 @@ You first need to have done the following:
 If 'Create' worked, continue with this script, otherwise type Control-C to exit.
 
 EOF
-echo -n 'Git username :'
-read GITUSER
-echo -n 'Project name :'
-read PROJECT
-export GITUSER PROJECT
-#Currently using github username $GITUSER, project name $PROJECT.
-#Edit this script to change those.
+
+# Skip these reads if they were already done as in SYNOPSIS above.
+if [ "$GITUSER" != "" && "$PROJECT" != "" ]; then
+    read -p 'Git username: ' GITUSER
+    read -p 'Project name: ' PROJECT
+    export GITUSER PROJECT
+fi
 
 # Begin with some steps from "Create New Repository" at github.com
 cd /tmp
@@ -107,14 +124,14 @@ EOF
 
 # Notify proto about dependencies on other modules. The installer will
 # ensure that PERL6LIB can also find the content of their lib
-# directories so that 'use thatmodule;' Just Works.
+# directories so that 'use thatmodule;' just works.
 cat >deps.proto <<EOF
-form
+# project dependencies
 EOF
 
 # Some more steps from "Create New Repository" at github.com
 git add deps.proto Makefile* Configure.p6 lib/Example/* t/*
-git commit -m "created by hello.bash from masak's proto"
+git commit -m "created by masak's proto hello.bash"
 git remote add origin git@github.com:$GITUSER/$PROJECT.git
 git push origin master
 
