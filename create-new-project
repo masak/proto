@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # NAME
-# hello.bash - a canonical "hello, world!" project for proto
+# create-new-project - a project stubber for proto
 #
 # SYNOPSIS
 #
@@ -13,7 +13,7 @@
 #     git clone git://github.com/masak/proto.git
 #     cd proto
 #     ./proto
-#     bash hello.bash
+#     bash create-new-project
 #     cat >>modules.list <<EOF
 #     $PROJECT:
 #         home:   github
@@ -28,7 +28,7 @@
 
 cat <<EOF
 
-Hi, this is 'hello.bash', a project generator for the 'proto' installer.
+Hi, this is 'create-new-project', a project stubber for the 'proto' installer.
 You first need to have done the following:
 
 1. Create a github account           <https://github.com/signup/free>
@@ -74,7 +74,7 @@ class Example::Hello
 }
 =begin pod
 =head1 NAME
-Example::Hello - canonical "hello, world!" project for proto
+Example::Hello - canonical "hello, world!" example for proto
 =head1 AUTHOR
 $GITUSER ($GITUSER at github.com and @example.com)
 =end pod
@@ -136,7 +136,7 @@ EOF
 
 # Some more steps from "Create New Repository" at github.com
 git add deps.proto Makefile* Configure.p6 lib/Example/* t/*
-git commit -m "created by proto's hello.bash"
+git commit -m "created by proto's create-new-project"
 git remote add origin git@github.com:$GITUSER/$PROJECT.git
 git push origin master
 
@@ -157,7 +157,7 @@ $PROJECT:
    ./proto install $PROJECT
    ./proto test $PROJECT
 
-Now hello.bash is finished, and your work really starts :)
+Now create-new-project is finished, and your work really starts :)
 
 8. Replace proto/projects/$PROJECT/lib/Example/Hello.pm with your module file(s)
    and update SOURCES in proto/projects/$PROJECT/Makefile.in accordingly.
