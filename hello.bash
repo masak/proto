@@ -28,14 +28,17 @@
 
 cat <<EOF
 
-This is 'hello.bash', a project generator for masak's 'proto' installer.
+Hi, this is 'hello.bash', a project generator for the 'proto' installer.
 You first need to have done the following:
 
-1. Create a github account at https://github.com/signup/free
-2. Login to your github account: https://github.com/login
-3. Create a new repository: http://github.com/repositories/new
-4. Enter your Project Name, Description, optional Homepage and click Create.
-5. This script will take care of the 'Next steps:' part.
+1. Create a github account           <https://github.com/signup/free>
+2. Log in                            <https://github.com/login>
+3. Create a new repository           <http://github.com/repositories/new>
+4. Enter your Project Name,
+   Description, optional Homepage
+   and click Create.
+
+This script will then take care of the 'Next steps:' part.
 
 If 'Create' worked, continue with this script, otherwise type Control-C to exit.
 
@@ -49,7 +52,7 @@ then
     export GITUSER PROJECT
 else
     echo "Using '$GITUSER' as username and '$PROJECT' as project."
-    read -p "After the project has been created on github, press Enter..."
+    read -p "After you've followed the steps above, press Enter..."
 fi
 
 # Begin with some steps from "Create New Repository" at github.com
@@ -73,7 +76,7 @@ class Example::Hello
 =head1 NAME
 Example::Hello - canonical "hello, world!" project for proto
 =head1 AUTHOR
-$GITUSER ($GITUSER at github.com and @email.com)
+$GITUSER ($GITUSER at github.com and @example.com)
 =end pod
 EOF
 
@@ -112,8 +115,6 @@ lib/Test.pir: \$(RAKUDO_DIR)/Test.pm \$(PERL6)
 clean:
 	rm -f \$(PIRS)
 
-tests: test
-
 test: all
 	PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r --nocolor t/
 EOF
@@ -128,42 +129,44 @@ EOF
 
 # Notify proto about dependencies on other modules. The installer will
 # ensure that PERL6LIB can also find the content of their lib
-# directories so that 'use thatmodule;' just works.
+# directories so that 'use thatmodule;' Just Works.
 cat >deps.proto <<EOF
 # project dependencies
 EOF
 
 # Some more steps from "Create New Repository" at github.com
 git add deps.proto Makefile* Configure.p6 lib/Example/* t/*
-git commit -m "created by masak's proto hello.bash"
+git commit -m "created by proto's hello.bash"
 git remote add origin git@github.com:$GITUSER/$PROJECT.git
 git push origin master
 
 # Add these lines to proto's modules.list
 cat <<EOF
 
-6. If there were NO errors above, your repository on github should be ready:
+5. If there were NO errors above, your repository on github should be ready:
    in your browser click on "When you're done: Continue" or
    http://github.com/$GITUSER/$PROJECT/tree/master
 
-7. Ask a proto maintainer to add these lines to 'modules.list', or simply
+6. Ask a proto maintainer to add these lines to 'modules.list', or simply
    edit your local copy:
 $PROJECT:
     home:   github
     owner:  $GITUSER
 
-8. Then you should be able to install and test your project:
+7. Then you should be able to install and test your project:
    ./proto install $PROJECT
    ./proto test $PROJECT
 
 Now hello.bash is finished, and your work really starts :)
 
-9. Replace proto/projects/$PROJECT/lib/Example/Hello.pm with your module file(s)
+8. Replace proto/projects/$PROJECT/lib/Example/Hello.pm with your module file(s)
    and update SOURCES in proto/projects/$PROJECT/Makefile.in accordingly.
    Run 'perl Makefile.PL' after each change to Makefile.in.
-10. Add README, LICENCE and other instructions.
-11. Revise and extend proto/projects/$PROJECT/t/01-simple.t as well, and run
+9. Add README, LICENCE and other instructions.
+10. Revise and extend proto/projects/$PROJECT/t/01-simple.t as well, and run
     'make test' after every change that affects execution of your code.
-12. Use 'git push' early and often.
+11. Use 'git push' early and often.
+
+On behalf of the 'proto' developers, this script wishes you a good day.
 
 EOF
