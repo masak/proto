@@ -122,6 +122,9 @@ EOF
 # The above 'Makefile.in' needs something active to convert it into a
 # Makefile. There is a Configure.pm in proto that is invoked by the
 # following Perl 6 script:
+
+# XXX: This won't do. We can't introduce a dependency on proto in a fresh
+#      project. Need to copy the Configure.pm into the project's lib/ dir.
 cat >Configure.p6 <<EOF
 # Configure.p6 - installer - see documentation in ../Configure.pm
 use v6; BEGIN { @*INC.push( '../..' ); }; use Configure; # proto dir
