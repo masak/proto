@@ -68,7 +68,7 @@ squirt( 'Makefile', $maketext );
 .say for
     '',
     q[Makefile is ready, running 'make' on it.];
-run 'make";
+run('make');
 .say for
     q[Configure and 'make' have finished. ]
     ~ q[Use 'make help' to view other options.],
