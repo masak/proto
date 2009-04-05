@@ -127,7 +127,7 @@ EOF
 #      project. Need to copy the Configure.pm into the project's lib/ dir.
 cat >Configure.p6 <<EOF
 # Configure.p6 - installer - see documentation in ../Configure.pm
-use v6; BEGIN { @*INC.push( '../..' ); }; use Configure; # proto dir
+use v6; BEGIN { @*INC.push( '../../lib' ); }; use Configure; # proto's lib/ dir
 EOF
 
 # Notify proto about dependencies on other modules. The installer will
