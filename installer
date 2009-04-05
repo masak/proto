@@ -196,10 +196,9 @@ sub fetch( Str $project ) {
         my $name       = %info<name> // $project;
         my $command = do given %info<home> {
             when 'github' {
-                sprintf 'git clone git://github.com/%s/%s.git %s',
-                        %info<owner>,
-                        $name,
-                        $target_dir;
+                sprintf '(git clone   git@github.com:%s/%s.git %s ||'
+                      ~ ' git clone git://github.com/%s/%s.git %s)',
+                        (%info<owner>, $name, $target_dir) xx 2;
             }
             when 'googlecode' {
                 "svn co https://$name.googlecode.com/svn/trunk $target_dir";
