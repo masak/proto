@@ -44,7 +44,7 @@ install_perl6( $config_info );
 # Delegate to installer
 my $rakudo_directory = rakudo_directory( $config_info );
 my $perl6 = "$rakudo_directory/perl6";
-exec( "$perl6 installer @ARGV" );
+exec( "env RAKUDO_DIR=$rakudo_directory $perl6 installer @ARGV" );
 
 sub install_perl6 {
     my $config_info = shift;
