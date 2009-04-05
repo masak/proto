@@ -24,7 +24,7 @@ sub install(*@projects) {
             say "Project not found: '$project'";
             $missing_projects = True;
         }
-        elsif "projects/$project" ~~ :d {
+        elsif "{%config-info{'Proto projects directory'}}/$project" ~~ :d {
             say "Won't install $project: already installed.";
         }
         else {
@@ -50,7 +50,7 @@ sub update(*@projects) {
             say "No such project: '$project'";
             $missing_projects = True;
         }
-        elsif "projects/$project" !~~ :d {
+        elsif "{%config-info{'Proto projects directory'}}/$project" !~~ :d {
             say "Cannot update $project: not installed.";
         }
         else {
@@ -96,14 +96,18 @@ sub test(*@projects) {
         my %info = %project_info{$project};
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
-        my $project_dir = %info.exists('main_subdir')
-                          ?? "projects/$project/{%info<main_subdir>}"
-                          !! "projects/$project";
+        my $project_dir
+            = %config-info{'Proto projects directory'}
+                ~ %info.exists('main_subdir')
+                    ?? "/$project/{%info<main_subdir>}"
+                    !! "/$project";
         my $in_dir = "cd $project_dir";
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-        my $p6l = "env PERL6LIB=$PWD/projects/$project_dir/lib";
+        my $p6l = sprintf 'env PERL6LIB=%s/%s/lib',
+                          %config-info{'Proto projects directory'},
+                          $project_dir;
         print "Building $project... ";
         run( "$in_dir; $p6l make test" );
     }
@@ -119,11 +123,15 @@ sub showdeps(*@projects) {
         exit 1;
     }
     for @projects -> $project {
-        if "projects/$project" !~~ :d {
+        if "{%config-info{'Proto projects directory'}}/$project" !~~ :d {
             say "$project is not installed.";
             next;
         }
-        my @deps = get_deps( "projects/$project/deps.proto" );
+        my @deps
+            = get_deps( sprintf '%s/%s/deps.proto',
+                                %config-info{'Proto projects directory'},
+                                $project
+                      );
         if !@deps {
             say "$project has no dependencies.";
             next;
@@ -152,7 +160,8 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
             my $project = @fetch-queue.shift;
 
             fetch($project);
-            my $target_dir = "projects/$project";
+            my $target_dir
+                = %config-info{'Proto projects directory'} ~ "/$project";
             for get_deps( "$target_dir/deps.proto" ) -> $dep {
                 next if %seen-dep<<$dep>>++;
                 @fetch-queue.push($dep);
@@ -178,7 +187,7 @@ sub fetch( Str $project ) {
         #       because dependencies couldn't be installed).
         exit 1;
     }
-    my $target_dir = "projects/$project";
+    my $target_dir = %config-info{'Proto projects directory'} ~ "/$project";
     my %info       = %project_info{$project};
     my $silently   = '>/dev/null 2>&1';
     if $target_dir ~~ :d {
@@ -214,8 +223,9 @@ sub do_build( Str $projectName ) {
     print "Building $projectName...";
     # RAKUDO: Doesn't support any other way to change the current working
     #         directory. Improvising.
-    my %info       = %project_info{$projectName};
-    my $target_dir  = "projects/$projectName";
+    my %info        = %project_info{$projectName};
+    my $target_dir  = %config-info{'Proto projects directory'}
+                      ~ "/$projectName";
     my $project_dir = $target_dir;
     if defined %info<main_subdir> { $project_dir = %info<main_subdir>; }
     my $in_dir = "cd $project_dir";
@@ -224,7 +234,7 @@ sub do_build( Str $projectName ) {
     #         instead.
     my $p6lib
         = 'env PERL6LIB='
-          ~ join ':', map { "$PWD/projects/$_/lib" },
+          ~ join ':', map { "%config-info{'Proto projects directory'}/$_/lib" },
                           $projectName, get_deps_deeply( $projectName );
     my $perl6 = %config-info{'Rakudo directory'} ~ '/perl6';
     # XXX: Need to have error handling here, and not continue if things go
@@ -265,7 +275,7 @@ sub get_deps($deps-file) {
 #      feels weird with a file name, maybe get_deps should take a project
 #      name too.
 sub get_deps_deeply($project) {
-    my $target_dir = "projects/$project";
+    my $target_dir = %config-info{'Proto projects directory'} ~ "/$project";
     # TODO: Make this one find the deps of the deps, and so on. We're off the
     #       hook for now, since there are no known deps of deps.
     return get_deps( "$target_dir/deps.proto" );
