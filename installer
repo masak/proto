@@ -2,7 +2,7 @@
 use v6;
 
 my %config-info = load-config-file('config.proto');
-my %project_info = load-module-list('modules.list');
+my %project_info = load-module-list('projects.list');
 
 my $PWD = %*ENV<PWD>; # from proto script
 
