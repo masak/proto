@@ -2,7 +2,7 @@
 use v6;
 
 my %config-info = load-config-file('config.proto');
-my %project_info = load-module-list('projects.list');
+my %project-info = load-module-list('projects.list');
 
 my $PWD = %*ENV<PWD>; # from proto script
 
@@ -18,11 +18,11 @@ given @*ARGS.shift {
 
 sub install(*@projects) {
     my @projects-to-install;
-    my $missing_projects = False;
+    my $missing-projects = False;
     for @projects -> $project {
-        if !%project_info.exists($project) {
+        if !%project-info.exists($project) {
             say "Project not found: '$project'";
-            $missing_projects = True;
+            $missing-projects = True;
         }
         elsif $project eq 'all' {
             @projects-to-install.push(uninstalled-projects());
@@ -34,7 +34,7 @@ sub install(*@projects) {
             @projects-to-install.push($project);
         }
     }
-    if $missing_projects {
+    if $missing-projects {
         say 'Try updating proto to get the latest list of projects.';
         exit(1);
     }
@@ -47,11 +47,11 @@ sub install(*@projects) {
 
 sub update(*@projects) {
     my @projects-to-update;
-    my $missing_projects = False;
+    my $missing-projects = False;
     for @projects -> $project {
-        if !%project_info.exists($project) {
+        if !%project-info.exists($project) {
             say "No such project: '$project'";
-            $missing_projects = True;
+            $missing-projects = True;
         }
         elsif $project eq 'all' {
             @projects-to-update.push(installed-projects());
@@ -63,7 +63,7 @@ sub update(*@projects) {
             @projects-to-update.push($project);
         }
     }
-    if $missing_projects {
+    if $missing-projects {
         exit(1);
     }
     if !@projects-to-update {
@@ -74,9 +74,9 @@ sub update(*@projects) {
 }
 
 sub regular-projects() {
-    return %project_info.keys.grep:
-        { !%project_info{$_}.exists('type')
-          || %project_info{$_}<type> ne 'pseudo' };
+    return %project-info.keys.grep:
+        { !%project-info{$_}.exists('type')
+          || %project-info{$_}<type> ne 'pseudo' };
 }
 
 sub installed-projects() {
@@ -90,7 +90,7 @@ sub uninstalled-projects() {
 }
 
 sub uninstall(*@projects) {
-    not_implemented('uninstall');
+    not-implemented('uninstall');
 }
 
 sub test(*@projects) {
@@ -99,36 +99,36 @@ sub test(*@projects) {
         # TODO: Maybe just test everything installed?
         exit 1;
     }
-    my $can_continue = True;
+    my $can-continue = True;
     for @projects -> $project {
-        if !%project_info.exists($project) {
+        if !%project-info.exists($project) {
             say "Project not found: '$project'";
-            $can_continue = False;
+            $can-continue = False;
         }
         # TODO: Also need to check that projects are actually installed.
     }
-    if !$can_continue {
+    if !$can-continue {
         say "Aborting...";
         exit(1);
     }
     for @projects -> $project {
-        my %info = %project_info{$project};
+        my %info = %project-info{$project};
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
-        my $project_dir
+        my $project-dir
             = %config-info{'Proto projects directory'}
                 ~ %info.exists('main_subdir')
                     ?? "/$project/{%info<main_subdir>}"
                     !! "/$project";
-        my $in_dir = "cd $project_dir";
+        my $in-dir = "cd $project-dir";
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
         my $p6l = sprintf 'env PERL6LIB=%s/%s/lib',
                           %config-info{'Proto projects directory'},
-                          $project_dir;
+                          $project-dir;
         print "Building $project... ";
-        run( "$in_dir; $p6l make test" );
+        run( "$in-dir; $p6l make test" );
     }
 
 }
@@ -147,7 +147,7 @@ sub showdeps(*@projects) {
             next;
         }
         my @deps
-            = get_deps( sprintf '%s/%s/deps.proto',
+            = get-deps( sprintf '%s/%s/deps.proto',
                                 %config-info{'Proto projects directory'},
                                 $project
                       );
@@ -179,9 +179,9 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
             my $project = @fetch-queue.shift;
 
             fetch($project);
-            my $target_dir
+            my $target-dir
                 = %config-info{'Proto projects directory'} ~ "/$project";
-            for get_deps( "$target_dir/deps.proto" ) -> $dep {
+            for get-deps( "$target-dir/deps.proto" ) -> $dep {
                 next if %seen-dep<<$dep>>++;
                 @fetch-queue.push($dep);
                 @build-stack.unshift($dep);
@@ -189,13 +189,13 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
         }
 
         for @build-stack -> $project {
-            do_build($project);
+            do-build($project);
         }
     }
 }
 
 sub fetch( Str $project ) {
-    if not defined %project_info{$project} {
+    if not defined %project-info{$project} {
         say "proto installer does not know about project '$project'";
         say 'Try updating proto to get the latest list of projects.';
         # TODO: It seems we can do better than this. A failed download does
@@ -206,12 +206,12 @@ sub fetch( Str $project ) {
         #       because dependencies couldn't be installed).
         exit 1;
     }
-    my $target_dir = %config-info{'Proto projects directory'} ~ "/$project";
-    my %info       = %project_info{$project};
+    my $target-dir = %config-info{'Proto projects directory'} ~ "/$project";
+    my %info       = %project-info{$project};
     my $silently   = '>/dev/null 2>&1';
-    if $target_dir ~~ :d {
+    if $target-dir ~~ :d {
         print "Updating $project...";
-        my $indir = "cd $target_dir";
+        my $indir = "cd $target-dir";
         my $command = do given %info<home> {
             when 'github'     { 'git pull' }
             when 'googlecode' { 'svn up' }
@@ -226,10 +226,10 @@ sub fetch( Str $project ) {
             when 'github' {
                 sprintf '(git clone   git@github.com:%s/%s.git %s ||'
                       ~ ' git clone git://github.com/%s/%s.git %s)',
-                        (%info<owner>, $name, $target_dir) xx 2;
+                        (%info<owner>, $name, $target-dir) xx 2;
             }
             when 'googlecode' {
-                "svn co https://$name.googlecode.com/svn/trunk $target_dir";
+                "svn co https://$name.googlecode.com/svn/trunk $target-dir";
             }
             default { die "Unknown home type {%info<home>}"; }
         };
@@ -238,47 +238,49 @@ sub fetch( Str $project ) {
     }
 }
 
-sub do_build( Str $projectName ) {
+sub do-build( Str $projectName ) {
     print "Building $projectName...";
     # RAKUDO: Doesn't support any other way to change the current working
     #         directory. Improvising.
-    my %info        = %project_info{$projectName};
-    my $target_dir  = %config-info{'Proto projects directory'}
+    my %info        = %project-info{$projectName};
+    my $target-dir  = %config-info{'Proto projects directory'}
                       ~ "/$projectName";
-    my $project_dir = $target_dir;
-    if defined %info<main_subdir> { $project_dir = %info<main_subdir>; }
-    my $in_dir = "cd $project_dir";
+    my $project-dir = $target-dir;
+    if defined %info<main_subdir> {
+        $project-dir = %info<main_subdir>;
+    }
+    my $in-dir = "cd $project-dir";
     # RAKUDO: Can't really figure out how to set environment variables
     #         so they're visible by later commands. Doing like this
     #         instead.
     my $p6lib
         = 'env PERL6LIB='
           ~ join ':', map { "%config-info{'Proto projects directory'}/$_/lib" },
-                          $projectName, get_deps_deeply( $projectName );
+                          $projectName, get-deps-deeply( $projectName );
     my $perl6 = %config-info{'Rakudo directory'} ~ '/perl6';
     # XXX: Need to have error handling here, and not continue if things go
     #      haywire with the build. However, a project may not have a
     #      Makefile.PL or Configure.p6, and this needs to be considered
     #      a successful [sic] outcome.
     for <Makefile.PL Configure.p6 configure> -> $config-file {
-        if "$project_dir/$config-file" ~~ :f {
+        if "$project-dir/$config-file" ~~ :f {
             my $perl = $config-file eq 'Makefile.PL'
                 ?? 'perl'
                 !! "{%*ENV<RAKUDO_DIR>}/perl6";
-            run( "$in_dir; $p6lib $perl $config-file > make.log 2>\&1" );
+            run( "$in-dir; $p6lib $perl $config-file > make.log 2>\&1" );
             last;
         }
     }
-    run( "$in_dir; $p6lib make >> make.log 2>\&1" );
+    run( "$in-dir; $p6lib make >> make.log 2>\&1" );
     say 'built';
-#   unlink( "$project_dir/make.log" );
+#   unlink( "$project-dir/make.log" );
 }
 
-sub not_implemented($subcommand) {
+sub not-implemented($subcommand) {
     warn "The '$subcommand' subcommand is not implemented yet.";
 }
 
-sub get_deps($deps-file) {
+sub get-deps($deps-file) {
     return unless $deps-file ~~ :f;
     my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
     my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
@@ -290,14 +292,14 @@ sub get_deps($deps-file) {
 }
 
 # XXX: Oops, it's inconsistent that this sub takes a project name while
-#      get_deps takes a file name. Should fix one of them; and since this one
-#      feels weird with a file name, maybe get_deps should take a project
+#      get-deps takes a file name. Should fix one of them; and since this one
+#      feels weird with a file name, maybe get-deps should take a project
 #      name too.
-sub get_deps_deeply($project) {
-    my $target_dir = %config-info{'Proto projects directory'} ~ "/$project";
+sub get-deps-deeply($project) {
+    my $target-dir = %config-info{'Proto projects directory'} ~ "/$project";
     # TODO: Make this one find the deps of the deps, and so on. We're off the
     #       hook for now, since there are no known deps of deps.
-    return get_deps( "$target_dir/deps.proto" );
+    return get-deps( "$target-dir/deps.proto" );
 }
 
 sub load-module-list(Str $filename) {
@@ -319,7 +321,9 @@ sub load-module-list(Str $filename) {
         when / ^ \s+ (\S+) ':' \s* (\S+) \s* ['#' | $ ] / {
             %current{~$0} = ~$1;
         }
-        default { warn "don't know how to parse the line «$_», ignoring it" };
+        default {
+            warn "don't know how to parse the line «$_», ignoring it"
+        }
     }
     if %current {
         %overall{$current-name} = %current;
