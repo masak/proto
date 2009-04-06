@@ -24,6 +24,9 @@ sub install(*@projects) {
             say "Project not found: '$project'";
             $missing_projects = True;
         }
+        elsif $project eq 'all' {
+            @projects-to-install.push(uninstalled-projects());
+        }
         elsif "{%config-info{'Proto projects directory'}}/$project" ~~ :d {
             say "Won't install $project: already installed.";
         }
@@ -50,6 +53,9 @@ sub update(*@projects) {
             say "No such project: '$project'";
             $missing_projects = True;
         }
+        elsif $project eq 'all' {
+            @projects-to-update.push(installed-projects());
+        }
         elsif "{%config-info{'Proto projects directory'}}/$project" !~~ :d {
             say "Cannot update $project: not installed.";
         }
@@ -61,13 +67,26 @@ sub update(*@projects) {
         exit(1);
     }
     if !@projects-to-update {
-        # TODO: This should probably mean 'update everything', for some value
-        #       of 'everything'. Either we'll require an 'all' pseudopackage
-        #       or we'll consider no package at all synonymous to 'all'.
         say 'Nothing to update.';
         exit(1);
     }
     fetch-and-build-projects-and-their-deps(@projects-to-update.uniq);
+}
+
+sub regular-projects() {
+    return %project_info.keys.grep:
+        { !%project_info{$_}.exists('type')
+          || %project_info{$_}<type> ne 'pseudo' };
+}
+
+sub installed-projects() {
+    return regular-projects.grep:
+        { "{%config-info{'Proto projects directory'}}/$_" ~~ :d };
+}
+
+sub uninstalled-projects() {
+    return regular-projects.grep:
+        { "{%config-info{'Proto projects directory'}}/$_" !~~ :d };
 }
 
 sub uninstall(*@projects) {
