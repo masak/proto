@@ -1,14 +1,14 @@
 november:
-     home:  github
-     owner: viklund
+    home:  github
+    owner: viklund
 
 html-template:
-     home:  github
-     owner: masak
+    home:  github
+    owner: masak
 
 druid:
-     home:  github
-     owner: masak
+    home:  github
+    owner: masak
 
 perl6-examples:
     home:   github
@@ -33,4 +33,7 @@ maya:
 form:
     home:   github
     owner:  mattw
+
+all:
+    type:  pseudo
 
