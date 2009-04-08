@@ -34,6 +34,10 @@ form:
     home:   github
     owner:  mattw
 
+pun:
+    home:   github
+    owner:  masak
+
 all:
     type:  pseudo
 
