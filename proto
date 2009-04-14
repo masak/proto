@@ -3,6 +3,7 @@ use strict;
 $| = 1; # flush after every print
 
 use File::Path;
+use Cwd         ();
 
 my $config_file = 'config.proto';
 if ( !-e $config_file ) {
@@ -328,8 +329,7 @@ sub create_default_config_file {
     };
     my $parrot_dir = $ENV{'PARROT_DIR'};
     my $rakudo_dir = $ENV{'RAKUDO_DIR'};
-    my $pwd = `pwd`;
-    chomp $pwd;
+    my $pwd = Cwd::cwd();
 
     my $config_info = {
         'config.proto version' => '2009-03-17',
