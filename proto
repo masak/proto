@@ -361,6 +361,9 @@ sub create_default_config_file {
     if ( !defined $parrot_dir ) {
         $parrot_dir = 'rakudo-decides';
     }
+    if ( $parrot_dir and $rakudo_dir ) {
+        $config_info->{'Parrot revision'} = 'rakudo-decides',
+    }
 
     $config_info->{'Parrot directory'} = $parrot_dir;
     $config_info->{'Rakudo directory'} = $rakudo_dir;
