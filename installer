@@ -189,7 +189,7 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
         }
 
         for @build-stack -> $project {
-            do-build($project);
+            build($project);
         }
     }
 }
@@ -238,7 +238,7 @@ sub fetch( Str $project ) {
     }
 }
 
-sub do-build( Str $projectName ) {
+sub build( Str $projectName ) {
     print "Building $projectName...";
     # RAKUDO: Doesn't support any other way to change the current working
     #         directory. Improvising.
