@@ -42,6 +42,10 @@ io-prompt:
     home:   github
     owner:  pnu
 
+wtop:
+    home:   github
+    owner:  masak
+
 all:
     type:  pseudo
 
