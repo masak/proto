@@ -38,6 +38,10 @@ pun:
     home:   github
     owner:  masak
 
+io-prompt:
+    home:   github
+    owner:  pnu
+
 all:
     type:  pseudo
 
