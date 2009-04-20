@@ -46,6 +46,10 @@ wtop:
     home:   github
     owner:  masak
 
+xml:
+    home:   github
+    owner:  krunen
+
 all:
     type:  pseudo
 
