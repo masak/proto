@@ -50,6 +50,10 @@ xml:
     home:   github
     owner:  krunen
 
+statistics-lite:
+    home:   github
+    owner:  aff
+
 all:
     type:  pseudo
 
