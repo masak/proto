@@ -3,11 +3,13 @@ use strict;
 $| = 1; # flush after every print
 
 use File::Path;
-use Cwd         ();
+use File::Spec;
+use Cwd ();
 
 my $config_file = 'config.proto';
 if ( !-e $config_file ) {
     create_default_config_file($config_file);
+    my $config_info = load_config_file($config_file);
     die <<"EOMESSAGE";
 
 *** CONFIG FILE CREATED ***
@@ -17,7 +19,9 @@ Next time you run '$0', these settings will be used to bootstrap your
 system into a working Perl 6 installation.
 
 If you're new to this, or if configure settings scare you, you probably want
-the default settings anyway.
+the default settings anyway. The most important ones are:
+Rakudo   -> $config_info->{'Rakudo directory'}
+Projects -> $config_info->{'Proto projects directory'}
 
 EOMESSAGE
 }
@@ -26,8 +30,9 @@ if ( !-r $config_file ) {
 }
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
-if ( ! -d 'projects' ) {
-    mkdir 'projects' or die "Couldn't create projects dir";
+if ( ! -d $config_info->{'Proto projects directory'} ) {
+    mkdir $config_info->{'Proto projects directory'}
+        or die "Couldn't create projects dir";
 }
 
 # 1. perl git and subversion installed
@@ -328,13 +333,14 @@ sub create_default_config_file {
                  'carried out. If such a download fails, proto falls back to',
                  'downloading the project the usual way.' ],
     };
-    my $parrot_dir = $ENV{'PARROT_DIR'};
-    my $rakudo_dir = $ENV{'RAKUDO_DIR'};
-    my $pwd = Cwd::cwd();
+    my $parrot_dir = $ENV{'PARROT_DIR'}; # often undef
+    my $rakudo_dir = $ENV{'RAKUDO_DIR'}; # often undef
+    my $pwd = Cwd::abs_path( Cwd::getcwd() ); # Cwd::cwd();
+    my $projects_dir = Cwd::abs_path( File::Spec->updir() );
 
     my $config_info = {
         'config.proto version' => '2009-03-17',
-        'Proto projects directory' => "$pwd/projects",
+        'Proto projects directory' => $projects_dir,
         'Test when building' => 'no',
         'Test failure policy' => 'die',
         'Perl 6 project developer' => 'no',
@@ -357,7 +363,7 @@ sub create_default_config_file {
         #$config_info->{'Rakudo setup'} = 'Rakudo outermost';
         $config_info->{'Rakudo revision'} = 'release',
         $config_info->{'Parrot revision'} = 'rakudo-decides',
-        $rakudo_dir = "$pwd/projects/rakudo";
+        $rakudo_dir = "$projects_dir/rakudo"; # "$pwd/projects/rakudo";
     }
     if ( !defined $parrot_dir ) {
         $parrot_dir = 'rakudo-decides';

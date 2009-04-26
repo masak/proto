@@ -309,7 +309,7 @@ sub load-module-list(Str $filename) {
     my %overall;
     my $current-name;
     my %current;
-    for =$fh {
+    for $fh.get {   # for =$fh {
         when / ^ \s* ['#' | $ ] /   { next };
         when / ^ (\S+) \: \s* ['#' | $ ] / {
             if $current-name.defined {
