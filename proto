@@ -215,13 +215,14 @@ sub build_rakudo {
             = "(cd $rakudo_directory && perl Configure.pl $flags && make)"
               . '>make.log 2>&1';
         if ( system( $command ) != 0 ) {
+            print "failed\n";
             if ( system("grep memory make.log $silently") == 0 ) {
                 die "Not enough memory to build Perl 6.\n";
             }
-            die "\nCouldn't build Perl 6: $?";
+            die "Couldn't build Perl 6: $?";
         }
         -f "$rakudo_directory/perl6"
-            or die "\nCouldn't build Perl 6.\n";
+            or die "failed\nCouldn't build Perl 6.\n";
         unlink('make.log');
         print "built\n";
     }
