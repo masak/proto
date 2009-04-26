@@ -149,7 +149,7 @@ sub download_rakudo {
 
     print 'Downloading Perl 6...';
     if ( $config_info->{'Rakudo revision'} eq 'release' ) {
-        my $rakudo_release = '2009-03';
+        my $rakudo_release = '2009-04';
         my $tarfile = "rakudo-$rakudo_release.tar.gz";
         my $rakudo_url = "http://www.pmichaud.com/perl6/$tarfile";
         my $command = "wget $rakudo_url $silently";
