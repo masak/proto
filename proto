@@ -206,25 +206,24 @@ sub build_rakudo {
     my $config_info = shift;
     my $rakudo_directory = rakudo_directory( $config_info );
     if ( !-f "$rakudo_directory/perl6" ) {
-        print 'Building Perl 6...';
         # XXX Is this the correct behaviour?
         my $flags = parrot_is_built( $config_info )
                         ? ''
                         : '--gen-parrot';
         my $command
             = "(cd $rakudo_directory && perl Configure.pl $flags && make)"
-              . '>make.log 2>&1';
+              . ' 2>&1 | ./dotty-progress "Building Perl 6" 3579';
         if ( system( $command ) != 0 ) {
-            print "failed\n";
+            print "[ FAIL ]\n";
             if ( system("grep memory make.log $silently") == 0 ) {
                 die "Not enough memory to build Perl 6.\n";
             }
             die "Couldn't build Perl 6: $?";
         }
         -f "$rakudo_directory/perl6"
-            or die "failed\nCouldn't build Perl 6.\n";
+            or die "[ FAIL ]\nCouldn't build Perl 6.\n";
         unlink('make.log');
-        print "built\n";
+        print "[  ok  ]\n";
     }
 }
 
@@ -342,7 +341,6 @@ sub create_default_config_file {
     };
     my $parrot_dir = $ENV{'PARROT_DIR'}; # often undef
     my $rakudo_dir = $ENV{'RAKUDO_DIR'}; # often undef
-    my $pwd = Cwd::abs_path( Cwd::getcwd() ); # Cwd::cwd();
     my $projects_dir = Cwd::abs_path( File::Spec->updir() );
 
     my $config_info = {
@@ -370,7 +368,7 @@ sub create_default_config_file {
         #$config_info->{'Rakudo setup'} = 'Rakudo outermost';
         $config_info->{'Rakudo revision'} = 'release',
         $config_info->{'Parrot revision'} = 'rakudo-decides',
-        $rakudo_dir = "$projects_dir/rakudo"; # "$pwd/projects/rakudo";
+        $rakudo_dir = "$projects_dir/rakudo";
     }
     if ( !defined $parrot_dir ) {
         $parrot_dir = 'rakudo-decides';

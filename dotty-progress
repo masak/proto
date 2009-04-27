@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+use strict;
+$| = 1; # autoflush on
+
+my $action = shift;
+my $number_of_lines = shift;
+
+my $TOTAL_LINE_LENGTH = 78;
+my $dots_length = $TOTAL_LINE_LENGTH - length($action) - 8;
+
+print $action;
+
+my $dots_so_far = 0;
+for my $current_line (1..$number_of_lines) {
+    my $line = <>;
+    while ( $dots_so_far < int($current_line/$number_of_lines*$dots_length) ) {
+        print '.';
+        $dots_so_far++;
+    }
+}
+print '.' x ($dots_length - $dots_so_far);
