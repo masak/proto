@@ -54,6 +54,10 @@ statistics-lite:
     home:   github
     owner:  aff
 
+json:
+    home:   github
+    owner:  moritz
+
 all:
     type:  pseudo
 
