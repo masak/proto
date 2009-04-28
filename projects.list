@@ -12,7 +12,7 @@ druid:
 
 perl6-examples:
     home:   github
-    owner:  eric256 
+    owner:  perl6 
 
 uri:
     home:   github
