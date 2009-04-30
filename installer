@@ -149,11 +149,7 @@ sub showdeps(*@projects) {
             say "$project is not installed.";
             next;
         }
-        my @deps
-            = get-deps( sprintf '%s/%s/deps.proto',
-                                %config-info{'Proto projects directory'},
-                                $project
-                      );
+        my @deps = get-deps($project);
         if !@deps {
             say "$project has no dependencies.";
             next;
@@ -182,9 +178,7 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
             my $project = @fetch-queue.shift;
 
             fetch($project);
-            my $target-dir
-                = %config-info{'Proto projects directory'} ~ "/$project";
-            for get-deps( "$target-dir/deps.proto" ) -> $dep {
+            for get-deps($project) -> $dep {
                 next if %seen-dep<<$dep>>++;
                 @fetch-queue.push($dep);
                 @build-stack.unshift($dep);
@@ -299,7 +293,9 @@ sub not-implemented($subcommand) {
     warn "The '$subcommand' subcommand is not implemented yet.";
 }
 
-sub get-deps($deps-file) {
+sub get-deps($project) {
+    my $deps-file = %config-info{'Proto projects directory'}
+                    ~ "/$project/deps.proto";
     return unless $deps-file ~~ :f;
     my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
     my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
@@ -309,15 +305,10 @@ sub get-deps($deps-file) {
              .grep({$^keep-all-nonempty-lines});
 }
 
-# XXX: Oops, it's inconsistent that this sub takes a project name while
-#      get-deps takes a file name. Should fix one of them; and since this one
-#      feels weird with a file name, maybe get-deps should take a project
-#      name too.
 sub get-deps-deeply($project) {
-    my $target-dir = %config-info{'Proto projects directory'} ~ "/$project";
     # TODO: Make this one find the deps of the deps, and so on. We're off the
     #       hook for now, since there are no known deps of deps.
-    return get-deps( "$target-dir/deps.proto" );
+    return get-deps( $project );
 }
 
 sub load-module-list(Str $filename) {
