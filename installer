@@ -20,6 +20,7 @@ sub install(*@projects) {
     my @projects-to-install;
     my $missing-projects = False;
     for @projects -> $project {
+        # RAKUDO: :exists [perl #59794]
         if !%project-info.exists($project) {
             say "Project not found: '$project'";
             $missing-projects = True;
@@ -49,6 +50,7 @@ sub update(*@projects) {
     my @projects-to-update;
     my $missing-projects = False;
     for @projects -> $project {
+        # RAKUDO: :exists [perl #59794]
         if !%project-info.exists($project) {
             say "No such project: '$project'";
             $missing-projects = True;
@@ -196,7 +198,8 @@ sub fetch-and-build-projects-and-their-deps(@projects) {
 }
 
 sub fetch( Str $project ) {
-    if not defined %project-info{$project} {
+    # RAKUDO: :exists [perl #59794]
+    if !%project-info.exists($project) {
         say "proto installer does not know about project '$project'";
         say 'Try updating proto to get the latest list of projects.';
         # TODO: It seems we can do better than this. A failed download does
