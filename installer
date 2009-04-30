@@ -76,7 +76,8 @@ sub update(*@projects) {
 sub regular-projects() {
     return %project-info.keys.grep:
         { !%project-info{$_}.exists('type')
-          || %project-info{$_}<type> ne 'pseudo' };
+          || %project-info{$_}<type> ne 'pseudo'
+          || %project-info{$_}<type> ne 'bootstrap' };
 }
 
 sub installed-projects() {
@@ -208,6 +209,14 @@ sub fetch( Str $project ) {
     }
     my $target-dir = %config-info{'Proto projects directory'} ~ "/$project";
     my %info       = %project-info{$project};
+    if %info<type> eq 'bootstrap' {
+        if $project eq 'proto' {
+            $target-dir = '.';
+        }
+        else {
+            die "Unknown bootstrapping project '$project'.";
+        }
+    }
     my $silently   = '>/dev/null 2>&1';
     if $target-dir ~~ :d {
         print "Updating $project...";
@@ -238,13 +247,20 @@ sub fetch( Str $project ) {
     }
 }
 
-sub build( Str $projectName ) {
-    print "Building $projectName...";
+sub build( Str $project ) {
+    print "Building $project...";
     # RAKUDO: Doesn't support any other way to change the current working
     #         directory. Improvising.
-    my %info        = %project-info{$projectName};
-    my $target-dir  = %config-info{'Proto projects directory'}
-                      ~ "/$projectName";
+    my %info        = %project-info{$project};
+    my $target-dir  = %config-info{'Proto projects directory'} ~ "/$project";
+    if %info<type> eq 'bootstrap' {
+        if $project eq 'proto' {
+            $target-dir = '.';
+        }
+        else {
+            die "Unknown bootstrapping project '$project'.";
+        }
+    }
     my $project-dir = $target-dir;
     if defined %info<main_subdir> {
         $project-dir = %info<main_subdir>;
@@ -256,7 +272,7 @@ sub build( Str $projectName ) {
     my $p6lib
         = 'env PERL6LIB='
           ~ join ':', map { "%config-info{'Proto projects directory'}/$_/lib" },
-                          $projectName, get-deps-deeply( $projectName );
+                          $project, get-deps-deeply( $project );
     my $perl6 = %config-info{'Rakudo directory'} ~ '/perl6';
     # XXX: Need to have error handling here, and not continue if things go
     #      haywire with the build. However, a project may not have a

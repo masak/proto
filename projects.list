@@ -1,6 +1,7 @@
 proto:
     home:  github
     owner: masak
+    type:  bootstrap
 
 november:
     home:  github
@@ -64,4 +65,3 @@ json:
 
 all:
     type:  pseudo
-
