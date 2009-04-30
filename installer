@@ -303,8 +303,7 @@ sub get-deps($deps-file) {
     return unless $deps-file ~~ :f;
     my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
     my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
-    return slurp($deps-file)\
-             .split("\n")\
+    return lines($deps-file)\
              .map({remove-line-ending-comment($^line)})\
              .map({trim-spaces($^line)})\
              .grep({$^keep-all-nonempty-lines});
@@ -357,8 +356,7 @@ sub load-module-list(Str $filename) {
 #      we'll need to add the comment-handling code back.
 sub load-config-file(Str $filename) {
     my %settings;
-    # RAKUDO: Oslo doesn't have lines; have to wait till next month...
-    for slurp($filename).split("\n") {
+    for lines($filename) {
         when /^ '---'/ {
             # do nothing
         }
