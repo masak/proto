@@ -289,10 +289,9 @@ class Installer {
                         ~ "/$project/deps.proto";
         return unless $deps-file ~~ :f;
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
-        my &trim-spaces = { .subst(/ ^ \h+ /, '').subst(/ \h+ $ /, '') };
         return lines($deps-file)\
                  .map({remove-line-ending-comment($^line)})\
-                 .map({trim-spaces($^line)})\
+                 .map(*.trim)})\
                  .grep({$^keep-all-nonempty-lines});
     }
 
