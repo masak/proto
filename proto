@@ -47,9 +47,14 @@ my $silently = ' > /dev/null 2>&1';
 
 install_perl6( $config_info );
 
-# Delegate to installer
 my $rakudo_directory = rakudo_directory( $config_info );
 my $perl6 = "$rakudo_directory/perl6";
+# Precompile the installer to PIR
+if ( ! -f 'lib/Installer.pir' || -M 'lib/Installer.pir' > -M 'lib/Installer.pm' ) {
+    print 'precompiling..'; # remove this message when it begins to annoy
+    system( "$perl6 --target=pir --output=lib/Installer.pir lib/Installer.pm" );
+}
+# Delegate to installer
 exec( "env RAKUDO_DIR=$rakudo_directory $perl6 installer @ARGV" );
 
 sub install_perl6 {
