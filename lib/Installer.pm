@@ -301,7 +301,7 @@ class Installer {
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
         return lines($deps-file)\
                  .map({remove-line-ending-comment($^line)})\
-                 .map(*.trim)})\
+                 .map(*.trim))\
                  .grep({$^keep-all-nonempty-lines});
     }
 
