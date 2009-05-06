@@ -21,7 +21,8 @@ class Installer {
             elsif $project eq 'all' {
                 @projects-to-install.push(uninstalled-projects());
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project" ~~ :d {
+            elsif "{%!config-info{'Proto projects directory'}}/$project"
+                    ~~ :d {
                 say "Won't install $project: already installed.";
             }
             else {
@@ -36,7 +37,9 @@ class Installer {
             say 'Nothing to install.';
             exit(1);
         }
-        self.fetch-and-build-projects-and-their-deps(@projects-to-install.uniq);
+        self.fetch-and-build-projects-and-their-deps(
+            @projects-to-install.uniq
+        );
     }
 
     method update(*@projects) {
@@ -51,7 +54,8 @@ class Installer {
             elsif $project eq 'all' {
                 @projects-to-update.push(installed-projects());
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project" !~~ :d {
+            elsif "{%!config-info{'Proto projects directory'}}/$project"
+                    !~~ :d {
                 say "Cannot update $project: not installed.";
             }
             else {
@@ -65,7 +69,9 @@ class Installer {
             say 'Nothing to update.';
             exit(1);
         }
-        self.fetch-and-build-projects-and-their-deps(@projects-to-update.uniq);
+        self.fetch-and-build-projects-and-their-deps(
+            @projects-to-update.uniq
+        );
     }
 
     method regular-projects() {
@@ -109,8 +115,8 @@ class Installer {
         }
         for @projects -> $project {
             my %info = %!project-info{$project};
-            # RAKUDO: Doesn't support any other way to change the current working
-            #         directory. Improvising.
+            # RAKUDO: Doesn't support any other way to change the current
+            #         working directory. Improvising.
             my $project-dir
                 = %!config-info{'Proto projects directory'}
                     ~ %info.exists('main_subdir')
@@ -128,9 +134,9 @@ class Installer {
         }
     }
 
-    # TODO: This sub should probably recursively show dependencies, and in such
-    #       a way that a dependency found twice by different routes is only
-    #       mentioned the second time -- its dependencies are not shown.
+    # TODO: This sub should probably recursively show dependencies, and in
+    #       such a way that a dependency found twice by different routes is
+    #       only mentioned the second time -- its dependencies are not shown.
     method showdeps(*@projects) {
         unless @projects {
             say "You have to specify which projects' dependencies to show.";
@@ -154,13 +160,13 @@ class Installer {
     }
 
     method fetch-and-build-projects-and-their-deps(@projects) {
-        # TODO: Though the below traversal works, it seems much cooler to do builds
-        #       as soon as possible. Right now, in a dep tree looking like this:
-        #       :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D and then build
-        #       D-C-E-B-A. Though this works, one could conceive of a download
-        #       preorder A-B-C-D-E and a build postorder C-D-B-E-A.
-        #       Those could even be interspersed build-soonest, making it
-        #       dA-dB-dC-bC-bD-bB-dE-bE-bA.
+        # TODO: Though the below traversal works, it seems much cooler to do
+        #       builds as soon as possible. Right now, in a dep tree looking
+        #       like this: :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D
+        #       and then build D-C-E-B-A. Though this works, one could
+        #       conceive of a download preorder A-B-C-D-E and a build
+        #       postorder C-D-B-E-A. Those could even be interspersed
+        #       build-soonest, making it dA-dB-dC-bC-bD-bB-dE-bE-bA.
         my %seen-dep;
         for @projects -> $top-project {
             my @fetch-queue = $top-project;
@@ -187,15 +193,16 @@ class Installer {
         if !%!project-info.exists($project) {
             say "proto installer does not know about project '$project'";
             say 'Try updating proto to get the latest list of projects.';
-            # TODO: It seems we can do better than this. A failed download does
-            #       not invalidate a whole installation process, only the
+            # TODO: It seems we can do better than this. A failed download
+            #       does not invalidate a whole installation process, only the
             #       dependency tree in which it is a part. Passing information
-            #           upwards with exceptions would provide excellent error
+            #       upwards with exceptions would provide excellent error
             #       diagnostics (either it failed because it wasn't found, or
             #       because dependencies couldn't be installed).
             exit 1;
         }
-        my $target-dir = %!config-info{'Proto projects directory'} ~ "/$project";
+        my $target-dir = %!config-info{'Proto projects directory'}
+                         ~ "/$project";
         my %info       = %!project-info{$project};
         if %info.exists('type') && %info<type> eq 'bootstrap' {
             if $project eq 'proto' {
@@ -226,7 +233,8 @@ class Installer {
                             (%info<owner>, $name, $target-dir) xx 2;
                 }
                 when 'googlecode' {
-                    "svn co https://$name.googlecode.com/svn/trunk $target-dir";
+                    sprintf 'svn co https://%s.googlecode.com/svn/trunk %s',
+                            $name, $target-dir;
                 }
                 default { die "Unknown home type {%info<home>}"; }
             };
@@ -240,7 +248,8 @@ class Installer {
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my %info        = %!project-info{$project};
-        my $target-dir  = %!config-info{'Proto projects directory'} ~ "/$project";
+        my $target-dir  = %!config-info{'Proto projects directory'}
+                          ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
             if $project eq 'proto' {
                 $target-dir = '.';
@@ -259,13 +268,14 @@ class Installer {
         #         instead.
         my $p6lib
             = 'env PERL6LIB='
-                ~ join ':', map { "%!config-info{'Proto projects directory'}/$_/lib" },
-                                  $project, self.get-deps-deeply( $project );
-            my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
-            # XXX: Need to have error handling here, and not continue if things go
-            #      haywire with the build. However, a project may not have a
-            #      Makefile.PL or Configure.p6, and this needs to be considered
-            #     a successful [sic] outcome.
+                ~ join ':', map {
+                      "%!config-info{'Proto projects directory'}/$_/lib"
+                  }, $project, self.get-deps-deeply( $project );
+        my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
+        # XXX: Need to have error handling here, and not continue if things go
+        #      haywire with the build. However, a project may not have a
+        #      Makefile.PL or Configure.p6, and this needs to be considered
+        #     a successful [sic] outcome.
         for <Makefile.PL Configure.p6 configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
@@ -296,8 +306,8 @@ class Installer {
     }
 
     method get-deps-deeply($project) {
-        # TODO: Make this one find the deps of the deps, and so on. We're off the
-        #       hook for now, since there are no known deps of deps.
+        # TODO: Make this one find the deps of the deps, and so on. We're off
+        #       the hook for now, since there are no known deps of deps.
         return self.get-deps( $project );
     }
 
@@ -333,8 +343,8 @@ class Installer {
 
     # XXX: Removed all comment-handling code from the p6 version of this sub,
     #      on the theory that less code means less maintenance. Should we ever
-    #      want to write back to the config.proto file from within this script,
-    #      we'll need to add the comment-handling code back.
+    #      want to write back to the config.proto file from within this
+    #      script, we'll need to add the comment-handling code back.
     sub load-config-file(Str $filename) {
         my %settings;
         for lines($filename) {
