@@ -63,5 +63,9 @@ json:
     home:   github
     owner:  moritz
 
+faz:
+    home:   github
+    owner:  ruoso
+
 all:
     type:  pseudo
