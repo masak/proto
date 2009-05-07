@@ -29,44 +29,85 @@
 cat <<EOF
 
 Hi, this is 'create-new-project', a project stubber for the 'proto' installer.
+
+Choose the collaboration site you would like to use.
+
+1. Github     (http://github.com)
+2. Gitorious  (http://gitorious.org)
+
+EOF
+
+read -p "Your choice (1 or 2): " SITE
+if [ "$SITE" == "1" ] ; then
+CREATEURL=https://github.com/signup/free
+LOGINURL=https://github.com/login
+NEWREPOURL=http://github.com/repositories/new
+HOMENICK=github
+elif [ "$SITE" == "2" ] ; then
+CREATEURL=http://gitorious.org/users/new
+LOGINURL=http://gitorious.org/login
+NEWREPOURL=http://gitorious.org/projects/new
+HOMENICK=gitorious
+else
+    echo -e "\nYou managed to not select either 1 or 2, so I give up.\n"
+    exit 1;
+fi
+
+cat <<EOF
+
 You first need to have done the following:
 
-1. Create a github account           <https://github.com/signup/free>
-2. Log in                            <https://github.com/login>
-3. Create a new repository           <http://github.com/repositories/new>
+1. Create a collaboration account    <$CREATEURL>
+2. Log in                            <$LOGINURL>
+3. Create a project repository       <$NEWREPOURL>
 4. Enter your Project Name,
-   Description, optional Homepage
+   Description, Homepage etc
    and click Create.
 
-This script will then take care of the 'Next steps:' part.
+This script will then take care of the next steps.
 
-If 'Create' worked, continue with this script, otherwise type Control-C to exit.
+If 'Create' worked, continue here, otherwise type Control-C to exit.
 
 EOF
 
 # Skip these reads if they were already done as in SYNOPSIS above.
 if [ -z "$GITUSER" -a -z "$PROJECT" ]
 then
-    read -p "Git username: " GITUSER
-    read -p "Project name: " PROJECT
+    read -p "Name used in steps 1..4 above: " GITUSER
+    read -p "Project                      : " PROJECT
     export GITUSER PROJECT
 else
     echo "Using '$GITUSER' as username and '$PROJECT' as project."
     read -p "After you've followed the steps above, press Enter..."
 fi
 
+if [ "$SITE" == "1" ] ; then
+REMOTEURL=git@github.com:$GITUSER/$PROJECT.git
+PUBLICURL=http://github.com/$GITUSER/$PROJECT/tree/master
+elif [ "$SITE" == "2" ] ; then
+REMOTEURL=git@gitorious.org:$PROJECT/mainline.git
+PUBLICURL=http://gitorious.org/projects/$PROJECT
+fi
+
 # Begin with some steps from "Create New Repository" at github.com
-cd /tmp
-rm -rf $PROJECT       # ensure a clean start every time
-mkdir $PROJECT
-cd $PROJECT
-mkdir lib t
-git init
+PROJECTBASE=/tmp/$PROJECT
+#cd /tmp
+#rm -rf $PROJECT       # ensure a clean start every time
+rm -rf $PROJECTBASE       # ensure a clean start every time
+#mkdir $PROJECT
+mkdir $PROJECTBASE
+#cd $PROJECT
+#mkdir lib t
+mkdir $PROJECTBASE/lib $PROJECTBASE/t
+#git init
+GIT_DIR=$PROJECTBASE/.git git init
 
 # The project should consist mainly of Perl modules.
 # Module files contain classes, roles, grammars and documentation.
-mkdir lib/Example
-cat >lib/Example/Hello.pm <<EOF
+#mkdir lib/Example
+mkdir $PROJECTBASE/lib/Example
+#cat >lib/Example/Hello.pm <<EOF
+cat >$PROJECTBASE/lib/Example/Hello.pm <<EOF
 class Example::Hello
 {
     method greet { return "hello" }
@@ -76,13 +117,14 @@ class Example::Hello
 =head1 NAME
 Example::Hello - canonical "hello, world!" example for proto
 =head1 AUTHOR
-$GITUSER ($GITUSER at github.com and @example.com)
+$GITUSER ($GITUSER at $HOMENICK and @example.com)
 =end pod
 EOF
 
 # Include a test suite to improve your karma (and your code quality)
 # Beware the \ escapes for bash:
-cat >t/01-simple.t <<EOF
+#cat >t/01-simple.t <<EOF
+cat >$PROJECTBASE/t/01-simple.t <<EOF
 use Example::Hello;
 use Test;
 plan 3;
@@ -94,7 +136,8 @@ EOF
 
 # Create a Makefile.in like this example from mattw's form project.
 # note the \$ escaping to play nicely with bash.
-cat >Makefile.in <<EOF
+#cat >Makefile.in <<EOF
+cat >$PROJECTBASE/Makefile.in <<EOF
 PERL6=<PERL6>
 PERL6LIB=<PERL6LIB>
 RAKUDO_DIR=<RAKUDO_DIR>
@@ -115,8 +158,22 @@ lib/Test.pir: \$(RAKUDO_DIR)/Test.pm \$(PERL6)
 clean:
 	rm -f \$(PIRS)
 
+realclean: clean
+	rm Makefile
+
 test: all
 	PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r --nocolor t/
+
+help:
+	@echo ''
+	@echo 'You can make the following targets:'
+	@echo ''
+	@echo 'all       - default, precompile .pm to .pir for speed'
+	@echo 'clean     - removes .pir and backup~ files'
+	@echo 'realclean - clean and also remove Makefile'
+	@echo 'test      - verify that the code works as specified'
+	@echo 'help      - this text.'
+	@echo ''
 EOF
 
 # The above 'Makefile.in' needs something active to convert it into a
@@ -125,35 +182,50 @@ EOF
 
 # XXX: This won't do. We can't introduce a dependency on proto in a fresh
 #      project. Need to copy the Configure.pm into the project's lib/ dir.
-cat >Configure.p6 <<EOF
-# Configure.p6 - installer - see documentation in ../Configure.pm
-use v6; BEGIN { @*INC.push( '../../lib' ); }; use Configure; # proto's lib/ dir
+cp lib/Configure.pm $PROJECTBASE/lib
+#cat >Configure.pl <<EOF
+cat >$PROJECTBASE/Configure.pl <<EOF
+# Configure.pl - installer - see documentation in lib/Configure.pm
+use v6; BEGIN { @*INC.push( 'lib' ); }; use Configure;
 EOF
 
 # Notify proto about dependencies on other modules. The installer will
 # ensure that PERL6LIB can also find the content of their lib
 # directories so that 'use thatmodule;' Just Works.
-cat >deps.proto <<EOF
+#cat >deps.proto <<EOF
+cat >$PROJECTBASE/deps.proto <<EOF
 # project dependencies
 EOF
 
-# Some more steps from "Create New Repository" at github.com
-git add deps.proto Makefile* Configure.p6 lib/Example/* t/*
-git commit -m "created by proto's create-new-project"
-git remote add origin git@github.com:$GITUSER/$PROJECT.git
-git push origin master
+# Some more steps from "New Project" at github or gitorious.
+(
+    cd $PROJECTBASE
+    git add $PROJECTBASE/deps.proto $PROJECTBASE/Makefile.in $PROJECTBASE/Configure.pl $PROJECTBASE/lib/Configure.pm lib/Example/* $PROJECTBASE/t/*
+    git commit -m "created by proto's create-new-project"
+    git remote add origin $REMOTEURL
+    git push origin master
+)
+if [ "$?" != "0" ]; then echo 'Cannot git push. Start again.'; exit 1; fi
 
 # Add these lines to proto's modules.list
+cat >>modules.list <<EOF
+
+$PROJECT:
+    home:   $HOMENICK
+    owner:  $GITUSER
+EOF
+
 cat <<EOF
 
-5. If there were NO errors above, your repository on github should be ready:
-   in your browser click on "When you're done: Continue" or
-   http://github.com/$GITUSER/$PROJECT/tree/master
+5. If there were NO errors above, your repository on $HOMENICK should be
+   ready. In your browser click on the repository link or
+   $PUBLICURL
 
 6. Ask a proto maintainer to add these lines to 'modules.list', or simply
    edit your local copy:
+
 $PROJECT:
-    home:   github
+    home:   $HOMENICK
     owner:  $GITUSER
 
 7. Then you should be able to install and test your project:
@@ -162,12 +234,15 @@ $PROJECT:
 
 Now create-new-project is finished, and your work really starts :)
 
-8. Replace proto/projects/$PROJECT/lib/Example/Hello.pm with your module file(s)
-   and update SOURCES in proto/projects/$PROJECT/Makefile.in accordingly.
-   Run 'perl Makefile.PL' after each change to Makefile.in.
+8. Replace $PROJECT/lib/Example/Hello.pm with your module file(s)
+   and update SOURCES in $PROJECT/Makefile.in accordingly.
+   Run 'perl6 Configure.pl' after each change to Makefile.in.
+
 9. Add README, LICENCE and other instructions.
-10. Revise and extend proto/projects/$PROJECT/t/01-simple.t as well, and run
+
+10. Revise and extend $PROJECT/t/01-simple.t as well, and run
     'make test' after every change that affects execution of your code.
+
 11. Use 'git push' early and often.
 
 On behalf of the 'proto' developers, this script wishes you a good day.

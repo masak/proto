@@ -217,8 +217,8 @@ class Installer {
             print "Updating $project...";
             my $indir = "cd $target-dir";
             my $command = do given %info<home> {
-                when 'github'     { 'git pull' }
-                when 'googlecode' { 'svn up' }
+                when 'github' | 'gitorious' { 'git pull' }
+                when 'googlecode'           { 'svn up' }
             };
             run( "$indir; $command $silently" );
             say 'updated';
@@ -231,6 +231,12 @@ class Installer {
                     sprintf '(git clone   git@github.com:%s/%s.git %s ||'
                           ~ ' git clone git://github.com/%s/%s.git %s)',
                             (%info<owner>, $name, $target-dir) xx 2;
+                }
+                when 'gitorious' {
+                    sprintf
+                      '(git clone   git@gitorious.org:%s/mainline.git %s ||'
+                    ~ ' git clone git://gitorious.org/%s/mainline.git %s)',
+                      ($name, $target-dir) xx 2;
                 }
                 when 'googlecode' {
                     sprintf 'svn co https://%s.googlecode.com/svn/trunk %s',
