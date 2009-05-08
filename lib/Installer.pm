@@ -77,8 +77,7 @@ class Installer {
     method regular-projects() {
         return %!project-info.keys.grep:
             { !%!project-info{$_}.exists('type')
-              || %!project-info{$_}<type> ne 'pseudo'
-              || %!project-info{$_}<type> ne 'bootstrap' };
+              || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
     }
 
     method installed-projects() {
