@@ -19,7 +19,7 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-install.push(uninstalled-projects());
+                @projects-to-install.push(self.uninstalled-projects());
             }
             elsif "{%!config-info{'Proto projects directory'}}/$project"
                     ~~ :d {
@@ -82,12 +82,12 @@ class Installer {
     }
 
     method installed-projects() {
-        return regular-projects.grep:
+        return self.regular-projects.grep:
             { "{%!config-info{'Proto projects directory'}}/$_" ~~ :d };
     }
 
     method uninstalled-projects() {
-        return regular-projects.grep:
+        return self.regular-projects.grep:
             { "{%!config-info{'Proto projects directory'}}/$_" !~~ :d };
     }
 
