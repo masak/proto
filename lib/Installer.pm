@@ -92,7 +92,7 @@ class Installer {
     }
 
     method uninstall(*@projects) {
-        not-implemented('uninstall');
+        self.not-implemented('uninstall');
     }
 
     method test(*@projects) {
