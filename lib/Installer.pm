@@ -119,14 +119,15 @@ class Installer {
             #         working directory. Improvising.
             my $project-dir
                 = %!config-info{'Proto projects directory'}
-                    ~ %info.exists('main_subdir')
+                    ~ ( %info.exists('main_subdir')
                         ?? "/$project/{%info<main_subdir>}"
-                        !! "/$project";
+                        !! "/$project"
+                      );
             my $in-dir = "cd $project-dir";
             # RAKUDO: Can't really figure out how to set environment variables
             #         so they're visible by later commands. Doing like this
             #         instead.
-            my $p6l = sprintf 'env PERL6LIB=%s/%s/lib',
+            my $p6l = sprintf 'env PERL6LIB=%s:%s/lib',
                               %!config-info{'Proto projects directory'},
                               $project-dir;
             print "Testing $project... ";
@@ -282,7 +283,7 @@ class Installer {
         #      haywire with the build. However, a project may not have a
         #      Makefile.PL or Configure.p6, and this needs to be considered
         #     a successful [sic] outcome.
-        for <Makefile.PL Configure.p6 configure> -> $config-file {
+        for <Makefile.PL Configure.pl Configure.p6 configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'

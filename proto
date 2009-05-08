@@ -51,8 +51,9 @@ my $rakudo_directory = rakudo_directory( $config_info );
 my $perl6 = "$rakudo_directory/perl6";
 # Precompile the installer to PIR
 if ( ! -f 'lib/Installer.pir' || -M 'lib/Installer.pir' > -M 'lib/Installer.pm' ) {
-    print 'precompiling..'; # remove this message when it begins to annoy
+    print "Compiling proto installer...";
     system( "$perl6 --target=pir --output=lib/Installer.pir lib/Installer.pm" );
+    print "done\n";
 }
 # Delegate to installer
 exec( "env RAKUDO_DIR=$rakudo_directory $perl6 installer @ARGV" );

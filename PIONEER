@@ -10,8 +10,8 @@ project, if you only adhere to a few easy-to-fulfill conventions:
 
 == Dependencies
 
-This is what proto was designed for; installing the projects you need and
-building them before builing your project.
+This is what proto was designed for: installing the projects you need,
+and building them before builing your project.
 
 If you have dependencies, declare them in a file deps.proto in the root of
 your repository. The November wiki has a deps.proto that looks like this:

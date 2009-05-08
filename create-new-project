@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # NAME
 # create-new-project - a project stubber for proto
@@ -9,22 +9,24 @@
 #     read -p "Git username: " GITUSER
 #     read -p "Project name: " PROJECT
 #     export GITUSER PROJECT
-#     cd /tmp                              # or your preferred directory
-#     git clone git://github.com/masak/proto.git
+#     cd /tmp                            # (or your preferred directory)
+#     git clone git://github.com/masak/proto.git proto
 #     cd proto
 #     ./proto
-#     bash create-new-project
-#     cat >>modules.list <<EOF
-#     $PROJECT:
-#         home:   github
-#         owner:  $GITUSER
-#
-#     EOF
+#     ./create-new-project
 #     ./proto install $PROJECT
 #     ./proto test $PROJECT
+#     ./proto update $PROJECT
 #
 # DESCRIPTION
 # Implements proto's PIONEER plan in code
+#
+# BUGS
+# 1.  The 'cat >>modules.list <<EOF' causes two problems:
+# 1a. Subsequent 'git pull' in proto cannot merge remote modules.list
+#     changes with the local change, needing manual intervention.
+# 1b. Creating the same project multiple times also appends the project
+#     information to modules.list multiple times, needing manual fixing.
 
 cat <<EOF
 
@@ -73,8 +75,8 @@ EOF
 # Skip these reads if they were already done as in SYNOPSIS above.
 if [ -z "$GITUSER" -a -z "$PROJECT" ]
 then
-    read -p "Name used in steps 1..4 above: " GITUSER
-    read -p "Project                      : " PROJECT
+    read -p "Username used in steps 1..4 above: " GITUSER
+    read -p "Project                          : " PROJECT
     export GITUSER PROJECT
 else
     echo "Using '$GITUSER' as username and '$PROJECT' as project."
@@ -91,21 +93,16 @@ fi
 
 # Begin with some steps from "Create New Repository" at github.com
 PROJECTBASE=/tmp/$PROJECT
-#cd /tmp
-#rm -rf $PROJECT       # ensure a clean start every time
 rm -rf $PROJECTBASE       # ensure a clean start every time
-#mkdir $PROJECT
-mkdir $PROJECTBASE
-#cd $PROJECT
-#mkdir lib t
-mkdir $PROJECTBASE/lib $PROJECTBASE/t
+#mkdir $PROJECTBASE
+mkdir -p $PROJECTBASE/lib/Example $PROJECTBASE/t
 #git init
-GIT_DIR=$PROJECTBASE/.git git init
+#GIT_DIR=$PROJECTBASE/.git git init
 
 # The project should consist mainly of Perl modules.
 # Module files contain classes, roles, grammars and documentation.
 #mkdir lib/Example
-mkdir $PROJECTBASE/lib/Example
+#mkdir $PROJECTBASE/lib/Example
 #cat >lib/Example/Hello.pm <<EOF
 cat >$PROJECTBASE/lib/Example/Hello.pm <<EOF
 class Example::Hello
@@ -123,7 +120,6 @@ EOF
 
 # Include a test suite to improve your karma (and your code quality)
 # Beware the \ escapes for bash:
-#cat >t/01-simple.t <<EOF
 cat >$PROJECTBASE/t/01-simple.t <<EOF
 use Example::Hello;
 use Test;
@@ -136,7 +132,6 @@ EOF
 
 # Create a Makefile.in like this example from mattw's form project.
 # note the \$ escaping to play nicely with bash.
-#cat >Makefile.in <<EOF
 cat >$PROJECTBASE/Makefile.in <<EOF
 PERL6=<PERL6>
 PERL6LIB=<PERL6LIB>
@@ -176,14 +171,10 @@ help:
 	@echo ''
 EOF
 
-# The above 'Makefile.in' needs something active to convert it into a
-# Makefile. There is a Configure.pm in proto that is invoked by the
-# following Perl 6 script:
-
-# XXX: This won't do. We can't introduce a dependency on proto in a fresh
-#      project. Need to copy the Configure.pm into the project's lib/ dir.
+# The above 'Makefile.in' needs something active to transform it into
+# a Makefile. Copy the Configure.pm from proto and invoke it by the
+# following Configure.pl (Perl 6) script:
 cp lib/Configure.pm $PROJECTBASE/lib
-#cat >Configure.pl <<EOF
 cat >$PROJECTBASE/Configure.pl <<EOF
 # Configure.pl - installer - see documentation in lib/Configure.pm
 use v6; BEGIN { @*INC.push( 'lib' ); }; use Configure;
@@ -197,10 +188,12 @@ cat >$PROJECTBASE/deps.proto <<EOF
 # project dependencies
 EOF
 
-# Some more steps from "New Project" at github or gitorious.
+# Some steps from "New Project" guidelines at github or gitorious.
 (
     cd $PROJECTBASE
-    git add $PROJECTBASE/deps.proto $PROJECTBASE/Makefile.in $PROJECTBASE/Configure.pl $PROJECTBASE/lib/Configure.pm lib/Example/* $PROJECTBASE/t/*
+    git init
+    git add deps.proto Makefile.in Configure.pl lib/Configure.pm
+    git add lib/Example/* t/*
     git commit -m "created by proto's create-new-project"
     git remote add origin $REMOTEURL
     git push origin master
@@ -208,7 +201,7 @@ EOF
 if [ "$?" != "0" ]; then echo 'Cannot git push. Start again.'; exit 1; fi
 
 # Add these lines to proto's modules.list
-cat >>modules.list <<EOF
+cat >>projects.list <<EOF
 
 $PROJECT:
     home:   $HOMENICK

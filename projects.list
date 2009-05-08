@@ -67,5 +67,9 @@ faz:
     home:   github
     owner:  ruoso
 
+http-daemon:
+    home:   gitorious
+    owner:  mberends
+
 all:
     type:  pseudo
