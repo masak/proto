@@ -1,3 +1,6 @@
+all:
+    type:  pseudo
+
 proto:
     home:  github
     owner: masak
@@ -71,5 +74,6 @@ http-daemon:
     home:   gitorious
     owner:  mberends
 
-all:
-    type:  pseudo
+yarn:
+    home:   github
+    owner:  masak
