@@ -435,6 +435,7 @@ sub save_config_file {
     }
     print {$YAML_FILE} "--- \n";
     for my $settingname ( sort keys %$settings ) {
+        print {$YAML_FILE} "\n";
         my $setting_comments = $comments->{$settingname};
         if ( defined $setting_comments ) {
             for my $comment ( @$setting_comments ) {
