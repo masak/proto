@@ -69,13 +69,7 @@ squirt( 'Makefile', $maketext );
 # Job done.
 .say for
     '',
-    q[Makefile is ready, running 'make' on it.];
-run('make');
-.say for
-    q[Configure and 'make' have finished. ]
-    ~ q[Use 'make help' to view other options.],
-    '';
-
+    q[Makefile is ready, and you can run 'make'.];
 
 # The opposite of slurp
 sub squirt( Str $filename, Str $text ) {
