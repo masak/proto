@@ -177,7 +177,7 @@ EOF
 cp lib/Configure.pm $PROJECTBASE/lib
 cat >$PROJECTBASE/Configure.pl <<EOF
 # Configure.pl - installer - see documentation in lib/Configure.pm
-use v6; BEGIN { @*INC.push( 'lib' ); }; use Configure;
+use v6; BEGIN { @*INC.unshift( 'lib' ); }; use Configure;
 EOF
 
 # Notify proto about dependencies on other modules. The installer will
