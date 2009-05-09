@@ -44,7 +44,9 @@ else {
 }
 
 say "PERL6       $perl6";
-my $perl6lib = %*ENV<PWD> ~ '/lib';
+my $perl6lib = %*ENV<PERL6LIB>.index(%*ENV<PWD> ~ '/lib').defined
+               ?? %*ENV<PERL6LIB>
+               !! %*ENV<PWD> ~ '/lib';
 say "PERL6LIB    $perl6lib";
 # The perl6-examples/bin directory is a sibling of PERL6LIB
 my $perl6bin = $perl6lib.subst( '/lib', '/bin' );
