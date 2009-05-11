@@ -1,24 +1,8 @@
 #!perl6
 use v6;
-BEGIN { @*INC.push('lib'); }
+BEGIN { @*INC.unshift('lib'); }
 use Installer;
 
-my Installer $proto .= new;
-
-given @*ARGS.shift {
-    when undef       { exit; }
-    when 'install'   { $proto.install(  @*ARGS) }
-    when 'update'    { $proto.update(   @*ARGS) }
-    when 'uninstall' { $proto.uninstall(@*ARGS) }
-    when 'test'      { $proto.test(     @*ARGS) }
-    when 'showdeps'  { $proto.showdeps( @*ARGS) }
-    default {
-        .say for
-            "Unrecognized subcommand '$_'. A typical command is:",
-            "'./proto install <projectname>', also update, test, showdeps,"
-                ~ " uninstall.",
-            "See the README for more details"
-     }
-}
+Installer.new.subcommand-dispatch(@*ARGS.shift).(@*ARGS);
 
 # vim: ft=perl6

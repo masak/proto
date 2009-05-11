@@ -9,6 +9,23 @@ class Installer {
         )
     }
 
+    method subcommand-dispatch($_) {
+        when undef       { exit; }
+        when 'install'   { -> *@projects { self.install(  @projects) } }
+        when 'update'    { -> *@projects { self.update(   @projects) } }
+        when 'uninstall' { -> *@projects { self.uninstall(@projects) } }
+        when 'test'      { -> *@projects { self.test(     @projects) } }
+        when 'showdeps'  { -> *@projects { self.showdeps( @projects) } }
+        default {
+            .say for
+                "Unrecognized subcommand '$_'. A typical command is:",
+                "'./proto install <projectname>', also update, test, showdeps,"
+                    ~ " uninstall.",
+                "See the README for more details";
+            exit;
+        }
+    }
+
     method install(*@projects) {
         my @projects-to-install;
         my $missing-projects = False;
