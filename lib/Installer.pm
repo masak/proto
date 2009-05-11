@@ -52,7 +52,7 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-update.push(installed-projects());
+                @projects-to-update.push(self.installed-projects());
             }
             elsif "{%!config-info{'Proto projects directory'}}/$project"
                     !~~ :d {
@@ -91,7 +91,39 @@ class Installer {
     }
 
     method uninstall(*@projects) {
-        self.not-implemented('uninstall');
+        for @projects -> $project {
+            # RAKUDO: :exists [perl #59794]
+            if !%!project-info.exists($project) {
+                say "Project not found: '$project'";
+                say "Aborting.";
+            }
+            elsif $project eq 'all' {
+                say "'uninstall all' not implemented yet";
+                # TODO: Implement.
+            }
+            elsif "{%!config-info{'Proto projects directory'}}/$project"
+                    !~~ :d {
+                say "Won't uninstall $project: not found.";
+                say "Aborting.";
+            }
+        }
+        for self.installed-projects() -> $project {
+            next if $project eq any(@projects);
+            for self.get-deps($project) -> $dep {
+                if $dep eq any(@projects) {
+                    say "Cannot uninstall $dep, depended on by $project.";
+                    say "Aborting.";
+                    return;
+                }
+            }
+        }
+        for @projects -> $project {
+            print "Removing $project...";
+            my $target-dir = %!config-info{'Proto projects directory'}
+                             ~ "/$project";
+            run("rm -rf $target-dir");
+            say "done";
+        }
     }
 
     method test(*@projects) {

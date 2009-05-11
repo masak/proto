@@ -50,10 +50,6 @@ installed modules will be updated.
 
 See the file PIONEER for how to set your project up with proto.
 
-[Note: from here on, all the described features are currently nothing more
-than wishful thinking. It is hoped that this notice might move downwards
-fairly quickly over the next few time units.]
-
 Removing a module is as simple as
 
   % ./proto uninstall <module>
