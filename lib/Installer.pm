@@ -184,14 +184,22 @@ class Installer {
                 say "$project is not installed.";
                 next;
             }
-            my @deps = self.get-deps($project);
-            if !@deps {
+            if !self.get-deps($project) {
                 say "$project has no dependencies.";
                 next;
             }
-            say $project, ':';
-            for @deps -> $dep {
-                say '  ', $dep;
+            self.showdeps-recursively($project);
+        }
+    }
+
+    submethod showdeps-recursively(Str $project, Int $indent = 0) {
+        say '  ' x $indent, $project, ':';
+        for self.get-deps($project) -> $dep {
+            if self.get-deps($dep) {
+                self.showdeps-recursively($dep, int($indent + 1));
+            }
+            else {
+                say '  ' x ($indent + 1), $dep;
             }
         }
     }
