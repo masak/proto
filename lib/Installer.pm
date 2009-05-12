@@ -192,6 +192,9 @@ class Installer {
         }
     }
 
+    # TODO: Detect circularity by replacing the $indent parameter with a
+    #       list of ancestor projects, and checking against inclusion in
+    #       that list.
     submethod showdeps-recursively(Str $project, Int $indent = 0) {
         say '  ' x $indent, $project, ':';
         for self.get-deps($project) -> $dep {
