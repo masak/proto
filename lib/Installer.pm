@@ -95,22 +95,6 @@ class Installer {
         );
     }
 
-    method regular-projects() {
-        return %!project-info.keys.grep:
-            { !%!project-info{$_}.exists('type')
-              || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
-    }
-
-    method installed-projects() {
-        return self.regular-projects.grep:
-            { "{%!config-info{'Proto projects directory'}}/$_" ~~ :d };
-    }
-
-    method uninstalled-projects() {
-        return self.regular-projects.grep:
-            { "{%!config-info{'Proto projects directory'}}/$_" !~~ :d };
-    }
-
     method uninstall(*@projects) {
         for @projects -> $project {
             # RAKUDO: :exists [perl #59794]
@@ -200,7 +184,7 @@ class Installer {
                 say "$project is not installed.";
                 next;
             }
-            my @deps = get-deps($project);
+            my @deps = self.get-deps($project);
             if !@deps {
                 say "$project has no dependencies.";
                 next;
@@ -212,7 +196,23 @@ class Installer {
         }
     }
 
-    method fetch-and-build-projects-and-their-deps(@projects) {
+    method regular-projects() {
+        return %!project-info.keys.grep:
+            { !%!project-info{$_}.exists('type')
+              || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
+    }
+
+    method installed-projects() {
+        return self.regular-projects.grep:
+            { "{%!config-info{'Proto projects directory'}}/$_" ~~ :d };
+    }
+
+    method uninstalled-projects() {
+        return self.regular-projects.grep:
+            { "{%!config-info{'Proto projects directory'}}/$_" !~~ :d };
+    }
+
+    submethod fetch-and-build-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
         #       like this: :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D
@@ -241,7 +241,7 @@ class Installer {
         }
     }
 
-    method fetch( Str $project ) {
+    submethod fetch( Str $project ) {
         # RAKUDO: :exists [perl #59794]
         if !%!project-info.exists($project) {
             say "proto installer does not know about project '$project'";
@@ -302,7 +302,7 @@ class Installer {
         }
     }
 
-    method build( Str $project ) {
+    submethod build( Str $project ) {
         print "Building $project...";
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
@@ -353,7 +353,7 @@ class Installer {
         warn "The '$subcommand' subcommand is not implemented yet.";
     }
 
-    method get-deps($project) {
+    submethod get-deps($project) {
         my $deps-file = %!config-info{'Proto projects directory'}
                         ~ "/$project/deps.proto";
         return unless $deps-file ~~ :f;
@@ -364,7 +364,7 @@ class Installer {
                  .grep({$^keep-all-nonempty-lines});
     }
 
-    method get-deps-deeply($project) {
+    submethod get-deps-deeply($project) {
         # TODO: Make this one find the deps of the deps, and so on. We're off
         #       the hook for now, since there are no known deps of deps.
         return self.get-deps( $project );
