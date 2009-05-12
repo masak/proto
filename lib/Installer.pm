@@ -375,10 +375,16 @@ class Installer {
                  .grep({$^keep-all-nonempty-lines});
     }
 
+    # TODO: This is a nice, short algorithm and all, but we need to make sure
+    #       we don't get stuck in a cycle. Passing the projects up the call
+    #       stack as an optional param would probably work.
     submethod get-deps-deeply($project) {
-        # TODO: Make this one find the deps of the deps, and so on. We're off
-        #       the hook for now, since there are no known deps of deps.
-        return self.get-deps( $project );
+        my @deps = self.get-deps( $project );
+        for @deps -> $dep {
+            my @deps-of-dep = get-deps-deeply( $dep );
+            @deps.push( @deps-of-dep );
+        }
+        return @deps.uniq;
     }
 
     sub load-project-list(Str $filename) {
