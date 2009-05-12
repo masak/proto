@@ -5,7 +5,7 @@ class Installer {
     method new() {
         self.bless(
             config-info => load-config-file('config.proto'),
-            project-info => load-module-list('projects.list'),
+            project-info => load-project-list('projects.list'),
         )
     }
 
@@ -370,14 +370,14 @@ class Installer {
         return self.get-deps( $project );
     }
 
-    sub load-module-list(Str $filename) {
+    sub load-project-list(Str $filename) {
         my $fh = open($filename)
             or die "Can't open '$filename': $!";
 
         my %overall;
         my $current-name;
         my %current;
-        for $fh.get {   # for =$fh {
+        for $fh.lines {
             when / ^ \s* ['#' | $ ] /   { next };
             when / ^ (\S+) \: \s* ['#' | $ ] / {
                 if $current-name.defined {
