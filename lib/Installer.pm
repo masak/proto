@@ -9,21 +9,25 @@ class Installer {
         )
     }
 
-    method subcommand-dispatch($_) {
-        when undef       { exit; }
-        when 'install'   { -> *@projects { self.install(  @projects) } }
-        when 'update'    { -> *@projects { self.update(   @projects) } }
-        when 'uninstall' { -> *@projects { self.uninstall(@projects) } }
-        when 'test'      { -> *@projects { self.test(     @projects) } }
-        when 'showdeps'  { -> *@projects { self.showdeps( @projects) } }
-        default {
-            .say for
-                "Unrecognized subcommand '$_'. A typical command is:",
-                "'./proto install <projectname>', also update, test, showdeps,"
-                    ~ " uninstall.",
-                "See the README for more details";
-            exit;
-        }
+    # Returns a block which calls the right subcommand with a variable number
+    # of parameters. If the provided subcommand is unknown or undef, this
+    # method exits immediately.
+    method subcommand-dispatch($command) {
+        my @available-commands = <install update uninstall test showdeps>;
+        given $command {
+            when undef                    { exit }
+            when any(@available-commands) {} # fall out, approved
+            default {
+                .say for
+                    "Unrecognized subcommand '$command'. A typical usage is:",
+                    q['./proto install <projectname>'],
+                    'Available commands: ' ~ @available-commands,
+                    'See the README for more details';
+                exit;
+            }
+        };
+        return eval sprintf '{ -> *@projects { self.%s( @projects) } }',
+                            $command;
     }
 
     method install(*@projects) {
