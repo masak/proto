@@ -1,11 +1,14 @@
+use v6;
+use Ecosystem;
+
 class Installer {
     has %!config-info;
-    has %!project-info;
+    has Ecosystem $.ecosystem;
 
     method new() {
         self.bless(
-            config-info => load-config-file('config.proto'),
-            project-info => load-project-list('projects.list'),
+            config-info => (my $c = load-config-file('config.proto')),
+            ecosystem   => Ecosystem.new($c{'Proto projects directory'}),
         )
     }
 
@@ -34,13 +37,12 @@ class Installer {
         my @projects-to-install;
         my $missing-projects = False;
         for @projects -> $project {
-            # RAKUDO: :exists [perl #59794]
-            if !%!project-info.exists($project) {
+            if !$.ecosystem.contains-project($project) {
                 say "Project not found: '$project'";
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-install.push(self.uninstalled-projects());
+                @projects-to-install.push($.ecosystem.uninstalled-projects());
             }
             elsif "{%!config-info{'Proto projects directory'}}/$project"
                     ~~ :d {
@@ -67,13 +69,12 @@ class Installer {
         my @projects-to-update;
         my $missing-projects = False;
         for @projects -> $project {
-            # RAKUDO: :exists [perl #59794]
-            if !%!project-info.exists($project) {
+            if !$.ecosystem.contains-project($project) {
                 say "No such project: '$project'";
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-update.push(self.installed-projects());
+                @projects-to-update.push($.ecosystem.installed-projects());
             }
             elsif "{%!config-info{'Proto projects directory'}}/$project"
                     !~~ :d {
@@ -97,8 +98,7 @@ class Installer {
 
     method uninstall(*@projects) {
         for @projects -> $project {
-            # RAKUDO: :exists [perl #59794]
-            if !%!project-info.exists($project) {
+            if !$.ecosystem.contains-project($project) {
                 say "Project not found: '$project'";
                 say "Aborting.";
             }
@@ -112,7 +112,7 @@ class Installer {
                 say "Aborting.";
             }
         }
-        for self.installed-projects() -> $project {
+        for $.ecosystem.installed-projects() -> $project {
             next if $project eq any(@projects);
             for self.get-deps($project) -> $dep {
                 if $dep eq any(@projects) {
@@ -139,7 +139,7 @@ class Installer {
         }
         my $can-continue = True;
         for @projects -> $project {
-            if !%!project-info.exists($project) {
+            if !$.ecosystem.contains-project($project) {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
@@ -150,7 +150,7 @@ class Installer {
             exit(1);
         }
         for @projects -> $project {
-            my %info = %!project-info{$project};
+            my %info = $.ecosystem.get-info-on{$project};
             # RAKUDO: Doesn't support any other way to change the current
             #         working directory. Improvising.
             my $project-dir
@@ -207,22 +207,6 @@ class Installer {
         }
     }
 
-    method regular-projects() {
-        return %!project-info.keys.grep:
-            { !%!project-info{$_}.exists('type')
-              || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
-    }
-
-    method installed-projects() {
-        return self.regular-projects.grep:
-            { "{%!config-info{'Proto projects directory'}}/$_" ~~ :d };
-    }
-
-    method uninstalled-projects() {
-        return self.regular-projects.grep:
-            { "{%!config-info{'Proto projects directory'}}/$_" !~~ :d };
-    }
-
     submethod fetch-and-build-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
@@ -254,7 +238,7 @@ class Installer {
 
     submethod fetch( Str $project ) {
         # RAKUDO: :exists [perl #59794]
-        if !%!project-info.exists($project) {
+        if !$.ecosystem.contains-project($project) {
             say "proto installer does not know about project '$project'";
             say 'Try updating proto to get the latest list of projects.';
             # TODO: It seems we can do better than this. A failed download
@@ -267,7 +251,7 @@ class Installer {
         }
         my $target-dir = %!config-info{'Proto projects directory'}
                          ~ "/$project";
-        my %info       = %!project-info{$project};
+        my %info       = $.ecosystem.get-info-on{$project};
         if %info.exists('type') && %info<type> eq 'bootstrap' {
             if $project eq 'proto' {
                 $target-dir = '.';
@@ -317,7 +301,7 @@ class Installer {
         print "Building $project...";
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
-        my %info        = %!project-info{$project};
+        my %info        = $.ecosystem.get-info-on{$project};
         my $target-dir  = %!config-info{'Proto projects directory'}
                           ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
@@ -387,40 +371,6 @@ class Installer {
         return @deps.uniq;
     }
 
-    sub load-project-list(Str $filename) {
-        my $fh = open($filename)
-            or die "Can't open '$filename': $!";
-
-        my %overall;
-        my $current-name;
-        my %current;
-        for $fh.lines {
-            when / ^ \s* ['#' | $ ] /   { next };
-            when / ^ (\S+) \: \s* ['#' | $ ] / {
-                if $current-name.defined {
-                    %overall{$current-name} = %current.clone;
-                }
-                %current = ();
-                $current-name = ~$0;
-            }
-            when / ^ \s+ (\S+) ':' \s* (\S+) \s* ['#' | $ ] / {
-                %current{~$0} = ~$1;
-            }
-            default {
-                warn "don't know how to parse the line «$_», ignoring it"
-            }
-        }
-        if %current {
-            %overall{$current-name} = %current;
-        }
-
-        return %overall;
-    }
-
-    # XXX: Removed all comment-handling code from the p6 version of this sub,
-    #      on the theory that less code means less maintenance. Should we ever
-    #      want to write back to the config.proto file from within this
-    #      script, we'll need to add the comment-handling code back.
     sub load-config-file(Str $filename) {
         my %settings;
         for lines($filename) {
@@ -437,4 +387,5 @@ class Installer {
         return %settings;
     }
 }
+
 # vim: ft=perl6
