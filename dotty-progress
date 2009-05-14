@@ -2,6 +2,9 @@
 use strict;
 $| = 1; # autoflush on
 
+die "Usage: $0 <action> <number-of-lines>\n"
+    unless @ARGV == 2;
+
 my $action = shift;
 my $number_of_lines = shift;
 
