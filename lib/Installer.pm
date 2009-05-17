@@ -139,18 +139,22 @@ class Installer {
         }
         my $can-continue = True;
         for @projects -> $project {
-            if !$.ecosystem.contains-project($project) {
+            unless $.ecosystem.contains-project($project) {
                 say "Project not found: '$project'";
+                $can-continue = False;
+            }
+            unless $.ecosystem.is-installed($project) {
+                say "Project '$project' is not installed";
                 $can-continue = False;
             }
             # TODO: Also need to check that projects are actually installed.
         }
-        if !$can-continue {
+        unless $can-continue {
             say "Aborting...";
             exit(1);
         }
         for @projects -> $project {
-            my %info = $.ecosystem.get-info-on{$project};
+            my %info = $.ecosystem.get-info-on($project);
             # RAKUDO: Doesn't support any other way to change the current
             #         working directory. Improvising.
             my $project-dir

@@ -15,8 +15,8 @@ if ( !-e $config_file ) {
 *** CONFIG FILE CREATED ***
 
 Greetings. I have created a file '$config_file' that you may want to review.
-Next time you run '$0', these settings will be used to bootstrap your
-system into a working Perl 6 installation.
+Next time you run '$0', these settings will be used to bootstrap your system
+into a working Perl 6 installation.
 
 If you're new to this, or if configure settings scare you, you probably want
 the default settings anyway. The most important ones are:
@@ -49,13 +49,7 @@ install_perl6( $config_info );
 
 my $rakudo_directory = rakudo_directory( $config_info );
 my $perl6 = "$rakudo_directory/perl6";
-# Precompile the installer to PIR
-if ( ! -f 'lib/Installer.pir' || -M 'lib/Installer.pir' > -M 'lib/Installer.pm'  || ! -f 'lib/Ecosystem.pir' || -M 'lib/Ecosystem.pir' > -M 'lib/Ecosystem.pm' ) {
-    print "Building proto...";
-    system( "$perl6 --target=pir --output=lib/Ecosystem.pir lib/Ecosystem.pm" );
-    system( "env -i PERL6LIB=`pwd`/lib $perl6 --target=pir --output=lib/Installer.pir lib/Installer.pm" );
-    print "done\n";
-}
+make_pir_modules( $perl6 );
 # Delegate to installer
 exec( "env RAKUDO_DIR=$rakudo_directory $perl6 installer @ARGV" );
 
@@ -274,6 +268,23 @@ sub parrot_version {
     return;
 }
 
+sub make_pir_modules {
+    my ($perl6) = @_;
+    my $displayed_building = 0;
+    # Precompile these modules to PIR
+    for my $name ( 'Ecosystem', 'Installer' ) {
+        if ( ! -f "lib/$name.pir" || -M "lib/$name.pir" > -M "lib/$name.pm") {
+            unless ( $displayed_building ) {
+                print "Building proto..."; $displayed_building = 1;
+            }
+            system( "env -i PERL6LIB=`pwd`/lib $perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
+        }
+    }
+    if ( $displayed_building ) {
+        print "done\n";
+    }
+}
+
 sub create_default_config_file {
     my ($file_name) = @_;
 
@@ -464,5 +475,9 @@ Rakudo directory.
 
 If both variables are defined, the directories must be nested as either
 parrot/languages/rakudo or rakudo/parrot.
+
+=head1 TODO
+
+Some possible changes, subject 
 
 =cut

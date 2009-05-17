@@ -1,6 +1,6 @@
 class Ecosystem;
 
-has $projects-dir;
+has $projects-dir; # no twigil because ?
 has %!project-info;
 
 method new(:$projects-dir!) {
@@ -31,6 +31,10 @@ method installed-projects() {
 
 method uninstalled-projects() {
     return self.regular-projects.grep: { "$projects-dir/$_" !~~ :d };
+}
+
+method is-installed( Str $project ) {
+    return "$projects-dir/$project" ~~ :d;
 }
 
 sub load-project-list(Str $filename) {
