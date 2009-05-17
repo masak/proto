@@ -147,7 +147,6 @@ class Installer {
                 say "Project '$project' is not installed";
                 $can-continue = False;
             }
-            # TODO: Also need to check that projects are actually installed.
         }
         unless $can-continue {
             say "Aborting...";
@@ -255,7 +254,7 @@ class Installer {
         }
         my $target-dir = %!config-info{'Proto projects directory'}
                          ~ "/$project";
-        my %info       = $.ecosystem.get-info-on{$project};
+        my %info       = $.ecosystem.get-info-on($project);
         if %info.exists('type') && %info<type> eq 'bootstrap' {
             if $project eq 'proto' {
                 $target-dir = '.';
@@ -305,7 +304,7 @@ class Installer {
         print "Building $project...";
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
-        my %info        = $.ecosystem.get-info-on{$project};
+        my %info        = $.ecosystem.get-info-on($project);
         my $target-dir  = %!config-info{'Proto projects directory'}
                           ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
