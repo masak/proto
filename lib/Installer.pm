@@ -326,7 +326,7 @@ class Installer {
         my $p6lib
             = 'env PERL6LIB='
                 ~ join ':', map {
-                      "%!config-info{'Proto projects directory'}/$_/lib"
+                      "{%!config-info{'Proto projects directory'}}/$_/lib"
                   }, $project, self.get-deps-deeply( $project );
         my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
         # XXX: Need to have error handling here, and not continue if things go
