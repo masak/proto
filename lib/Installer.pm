@@ -371,7 +371,7 @@ class Installer {
     submethod get-deps-deeply($project) {
         my @deps = self.get-deps( $project );
         for @deps -> $dep {
-            my @deps-of-dep = get-deps-deeply( $dep );
+            my @deps-of-dep = self.get-deps-deeply( $dep );
             @deps.push( @deps-of-dep );
         }
         return @deps.uniq;
