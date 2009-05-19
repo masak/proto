@@ -338,11 +338,14 @@ class Installer {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
                     !! "{%*ENV<RAKUDO_DIR>}/perl6";
-                run( "$in-dir; $p6lib $perl $config-file > make.log 2>\&1" );
+                my $conf-cmd
+                    = "$in-dir; $p6lib $perl $config-file > make.log 2>\&1";
+                run( $conf-cmd );
                 last;
             }
         }
-        run( "$in-dir; $p6lib make >> make.log 2>\&1" );
+        my $make-cmd = "$in-dir; $p6lib make >> make.log 2>\&1";
+        run( $make-cmd );
         say 'built';
 #       unlink( "$project-dir/make.log" );
     }
