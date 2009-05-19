@@ -218,22 +218,22 @@ class Installer {
         #       conceive of a download preorder A-B-C-D-E and a build
         #       postorder C-D-B-E-A. Those could even be interspersed
         #       build-soonest, making it dA-dB-dC-bC-bD-bB-dE-bE-bA.
-        my %seen-dep;
+        my %seen;
         for @projects -> $top-project {
-            my @fetch-queue = $top-project;
+            next if %seen{$top-project};
             my @build-stack = $top-project;
+            my @fetch-queue = $top-project;
 
             while @fetch-queue {
                 my $project = @fetch-queue.shift;
+                next if %seen{$project}++;
                 self.fetch($project);
-                for self.get-deps($project) -> $dep {
-                    next if %seen-dep<<$dep>>++;
-                    @fetch-queue.push($dep);
-                    @build-stack.unshift($dep);
-                }
+                my @deps = self.get-deps($project);
+                @fetch-queue.push(@deps);
+                @build-stack.unshift(@deps.reverse);
             }
 
-            for @build-stack -> $project {
+            for @build-stack.uniq -> $project {
                 self.build($project);
             }
         }
