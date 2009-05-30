@@ -7,7 +7,7 @@ class Installer {
 
     method new() {
         self.bless(
-            self.CREATE(),
+            # self.CREATE(), # un-comment for latest Rakudo
             config-info => (my $c = load-config-file('config.proto')),
             ecosystem   => Ecosystem.new($c{'Proto projects directory'}),
         )

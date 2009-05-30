@@ -5,7 +5,7 @@ has %!project-info;
 
 method new(:$projects-dir!) {
     self.bless(
-        self.CREATE(),
+        # self.CREATE(), # un-comment for latest Rakudo
         projects-dir => $projects-dir,
         project-info => load-project-list('projects.list'),
     );
