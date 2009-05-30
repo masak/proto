@@ -334,7 +334,7 @@ class Installer {
         #      haywire with the build. However, a project may not have a
         #      Makefile.PL or Configure.p6, and this needs to be considered
         #     a successful [sic] outcome.
-        for <Makefile.PL Configure.pl Configure.p6 configure> -> $config-file {
+        for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
