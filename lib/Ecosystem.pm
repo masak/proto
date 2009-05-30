@@ -5,6 +5,7 @@ has %!project-info;
 
 method new(:$projects-dir!) {
     self.bless(
+        self.CREATE(),
         projects-dir => $projects-dir,
         project-info => load-project-list('projects.list'),
     );

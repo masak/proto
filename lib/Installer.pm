@@ -7,6 +7,7 @@ class Installer {
 
     method new() {
         self.bless(
+            self.CREATE(),
             config-info => (my $c = load-config-file('config.proto')),
             ecosystem   => Ecosystem.new($c{'Proto projects directory'}),
         )
