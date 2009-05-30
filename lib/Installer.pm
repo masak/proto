@@ -164,14 +164,8 @@ class Installer {
                         !! "/$project"
                       );
             my $in-dir = "cd $project-dir";
-            # RAKUDO: Can't really figure out how to set environment variables
-            #         so they're visible by later commands. Doing like this
-            #         instead.
-            my $p6l = sprintf 'env PERL6LIB=%s:%s/lib',
-                              %!config-info{'Proto projects directory'},
-                              $project-dir;
             print "Testing $project... ";
-            run( "$in-dir; $p6l make test" );
+            self.configured-run( "make test", :project( $project ), dir( $project-dir ) );
         }
     }
 
@@ -272,7 +266,7 @@ class Installer {
                 when 'github' | 'gitorious' { 'git pull' }
                 when 'googlecode'           { 'svn up' }
             };
-            run( "$indir; $command $silently" );
+            self.configured-run( $command, :dir( $target-dir ) );
             say 'updated';
         }
         else {
@@ -296,6 +290,8 @@ class Installer {
                 }
                 default { die "Unknown home type {%info<home>}"; }
             };
+            # This failes since there is parens in $command
+            #self.configured-run( $command );
             run( "$command $silently" );
             say 'downloaded';
         }
@@ -320,15 +316,6 @@ class Installer {
         if defined %info<main_subdir> {
             $project-dir = %info<main_subdir>;
         }
-        my $in-dir = "cd $project-dir";
-        # RAKUDO: Can't really figure out how to set environment variables
-        #         so they're visible by later commands. Doing like this
-        #         instead.
-        my $p6lib
-            = 'env PERL6LIB='
-                ~ join ':', map {
-                      "{%!config-info{'Proto projects directory'}}/$_/lib"
-                  }, $project, self.get-deps-deeply( $project );
         my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
         # XXX: Need to have error handling here, and not continue if things go
         #      haywire with the build. However, a project may not have a
@@ -339,14 +326,13 @@ class Installer {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
                     !! "{%*ENV<RAKUDO_DIR>}/perl6";
-                my $conf-cmd
-                    = "$in-dir; $p6lib $perl $config-file > make.log 2>\&1";
-                run( $conf-cmd );
+                my $conf-cmd = "$perl $config-file";
+                self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
                 last;
             }
         }
-        my $make-cmd = "$in-dir; $p6lib make >> make.log 2>\&1";
-        run( $make-cmd );
+        my $make-cmd = 'make';
+        self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
         say 'built';
 #       unlink( "$project-dir/make.log" );
     }
@@ -397,6 +383,28 @@ class Installer {
                                           ~ 'parrot';
         }
         return %settings;
+    }
+
+    submethod configured-run( Str $command, Str :$project = '', Str :$dir = '.', Str :$output-mode = 'Log' ) {
+        # RAKUDO: Can't really figure out how to set environment variables
+        #         so they're visible by later commands. Doing like this
+        #         instead.
+        my $parrot_dir = "PARROT_DIR={%!config-info{'Parrot directory'}}";
+        my $rakudo_dir = "RAKUDO_DIR={%!config-info{'Rakudo directory'}}";
+        my $p6lib
+            = 'PERL6LIB='
+                ~ join ':', map {
+                      "{%!config-info{'Proto projects directory'}}/$_/lib"
+                  }, $project, self.get-deps-deeply( $project );
+        my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
+        my $redirection = do given $output-mode {
+            when 'Log'     { '>make.log 2>&1'  }
+            when 'Silent'  { '>/dev/null 2>&1' }
+            when 'Verbose' { ''                }
+            default        { die               }
+        };
+        my $cmd = "cd $dir; $env $command $redirection";
+        run( $cmd );
     }
 }
 
