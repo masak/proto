@@ -167,7 +167,7 @@ class Installer {
             print "Testing $project... ";
             my $r = self.configured-run( "make test", :project( $project ), dir( $project-dir ) );
             if $r != 0 {
-                say "Failed";
+                say "failed";
             }
         }
     }
@@ -350,7 +350,7 @@ class Installer {
             my $make-cmd = 'make';
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
-                say "building failed, see $project-dir/make.log";
+                say "build failed, see $project-dir/make.log";
                 return;
             }
         }
