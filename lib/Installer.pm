@@ -165,7 +165,10 @@ class Installer {
                       );
             my $in-dir = "cd $project-dir";
             print "Testing $project... ";
-            self.configured-run( "make test", :project( $project ), dir( $project-dir ) );
+            my $r = self.configured-run( "make test", :project( $project ), dir( $project-dir ) );
+            if $r != 0 {
+                say "Failed";
+            }
         }
     }
 
@@ -266,8 +269,12 @@ class Installer {
                 when 'github' | 'gitorious' { 'git pull' }
                 when 'googlecode'           { 'svn up' }
             };
-            self.configured-run( $command, :dir( $target-dir ) );
-            say 'updated';
+            my $r = self.configured-run( $command, :dir( $target-dir ) );
+            if $r != 0 {
+                say 'failed';
+            } else {
+                say 'updated';
+            }
         }
         else {
             print "Downloading $project...";
@@ -292,8 +299,12 @@ class Installer {
             };
             # This failes since there is parens in $command
             #self.configured-run( $command );
-            run( "$command $silently" );
-            say 'downloaded';
+            my $r = run( "$command $silently" );
+            if $r != 0 {
+                say 'failed';
+            } else {
+                say 'downloaded';
+            }
         }
     }
 
@@ -327,14 +338,24 @@ class Installer {
                     ?? 'perl'
                     !! "{%*ENV<RAKUDO_DIR>}/perl6";
                 my $conf-cmd = "$perl $config-file";
-                self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
+                my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
+                if $r != 0 {
+                    say "configure failed, see $project-dir/make.log";
+                    return;
+                }
                 last;
             }
         }
-        my $make-cmd = 'make';
-        self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
+        if "$project-dir/Makefile" ~~ :f {
+            my $make-cmd = 'make';
+            my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
+            if $r != 0 {
+                say "building failed, see $project-dir/make.log";
+                return;
+            }
+        }
         say 'built';
-#       unlink( "$project-dir/make.log" );
+        unlink( "$project-dir/make.log" );
     }
 
     method not-implemented($subcommand) {
