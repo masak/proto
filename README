@@ -50,7 +50,7 @@ will check the module <module> and all that depend on it for updates, and
 rebuild them in the required order. Omit the name of the module, and all your
 installed modules will be updated.
 
-See the file PIONEER for how to set your project up with proto, or let the
+See the file PIONEER for how to set up your project with proto, or let the
 create-new-project script make one semi-automatically.
 
 Removing a module is as simple as
