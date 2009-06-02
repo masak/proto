@@ -57,7 +57,7 @@ missing, the testing will be considered successful.
 Proto assumes that if your project has a top level lib/ directory, you
 intend other code to 'use' modules therein. Currently subfolders form a
 namespace hierarchy so that lib/A/B.pm satisfies 'use A::B;' but this will
-become more complicated after S11 Versioning is implemented.
+become more complicated after S11-style versioning is implemented.
 
 Proto cannot change your PERL6LIB environment variable, but will warn you
 about needed changes.
