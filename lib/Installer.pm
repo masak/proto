@@ -61,9 +61,9 @@ class Installer {
             say 'Nothing to install.';
             exit(1);
         }
-        self.fetch-and-build-projects-and-their-deps(
-            @projects-to-install.uniq
-        );
+        @projects-to-install .= uniq;
+        self.fetch-and-build-projects-and-their-deps( @projects-to-install );
+        self.check-if-in-perl6lib( @projects-to-install );
     }
 
     method update(*@projects) {
@@ -406,7 +406,8 @@ class Installer {
         return %settings;
     }
 
-    submethod configured-run( Str $command, Str :$project = '', Str :$dir = '.', Str :$output-mode = 'Log' ) {
+    submethod configured-run( Str $command, Str :$project = '',
+                              Str :$dir = '.', Str :$output-mode = 'Log' ) {
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
@@ -426,6 +427,20 @@ class Installer {
         };
         my $cmd = "cd $dir; $env $command $redirection";
         run( $cmd );
+    }
+
+    submethod check-if-in-perl6lib( @projects ) {
+        my @projects-not-in
+            = grep {
+                not "{%!config-info{'Proto projects directory'}}/$_/lib"
+                    eq any(%*ENV<PERL6LIB>.split(':'))
+              }, @projects;
+        if @projects-not-in {
+            say 'The following projects are not in your $PERL6LIB env var: ',
+                ~@projects;
+            say 'Please add them if you want to compile and run them outside '
+                ~ 'of proto.';
+        }
     }
 }
 
