@@ -164,11 +164,31 @@ class Installer {
                         !! "/$project"
                       );
             my $in-dir = "cd $project-dir";
-            print "Testing $project... ";
-            my $r = self.configured-run( "make test", :project( $project ), dir( $project-dir ) );
-            if $r != 0 {
-                say "failed";
+            print "Testing $project...";
+            my $command = '';
+            if "$project-dir/Makefile" ~~ :e {
+                if slurp("$project-dir/Makefile") ~~ /^test:/ {
+                    $command = 'make test';
+                }
             }
+            unless $command {
+                if "$project-dir/t" ~~ :d
+                   && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
+                {
+                    $command = 'prove -e "'
+                        ~ %!config-info{'Parrot directory'} ~ '/parrot '
+                        ~ %!config-info{'Rakudo directory'} ~ '/perl6.pbc"'
+                        ~ ' -r --nocolor t/';
+                }
+            }
+            if $command {
+                my $r = self.configured-run( $command, :project( $project ), :dir( $project-dir ) );
+                if $r != 0 {
+                    say 'failed';
+                    return;
+                }
+            }
+            say 'ok';
         }
     }
 
