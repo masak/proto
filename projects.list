@@ -77,3 +77,7 @@ http-daemon:
 yarn:
     home:   github
     owner:  masak
+
+ppm:
+    home:   github
+    owner:  dcarrera
