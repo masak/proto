@@ -81,3 +81,7 @@ yarn:
 ppm:
     home:   github
     owner:  dcarrera
+
+bioperl6:
+    home:   github
+    owner:  cjfields
