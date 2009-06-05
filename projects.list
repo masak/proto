@@ -85,3 +85,11 @@ ppm:
 bioperl6:
     home:   github
     owner:  cjfields
+
+epoxy:
+    home:   github
+    owner:  s1n
+
+epoxy-resin:
+    home:   github
+    owner:  perl6
