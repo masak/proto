@@ -93,3 +93,7 @@ epoxy:
 epoxy-resin:
     home:   github
     owner:  perl6
+
+SQL-Grammar:
+    home:   github
+    owner:  arnsholt
