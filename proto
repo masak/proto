@@ -387,7 +387,7 @@ sub create_default_config_file {
     }
     if ( !defined $rakudo_dir ) {
         #$config_info->{'Rakudo setup'} = 'Rakudo outermost';
-        $config_info->{'Rakudo revision'} = 'release',
+        $config_info->{'Rakudo revision'} = 'bleeding',
         $config_info->{'Parrot revision'} = 'rakudo-decides',
         $rakudo_dir = "$projects_dir/rakudo";
     }
