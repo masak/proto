@@ -154,7 +154,7 @@ sub download_rakudo {
     return if -d $rakudo_directory;
 
     if ( $config_info->{'Rakudo revision'} eq 'release' ) {
-        my $rakudo_release = '2009-06';
+        my $rakudo_release = '2009-07';
         my $tarfile = "rakudo-$rakudo_release.tar.gz";
         my $rakudo_url
             = "http://cloud.github.com/downloads/rakudo/rakudo/$tarfile";
