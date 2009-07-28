@@ -13,36 +13,33 @@ class Installer {
         )
     }
 
+    my @available-commands = <install update uninstall test showdeps help>;
+
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
     # method exits immediately.
-    my @available-commands = <install update uninstall test showdeps>;
     method subcommand-dispatch($command) {
         given $command {
             when undef                    { exit }
             when any(@available-commands) {} # fall out, approved
-            when 'help' {
-                self.help();
-            }
             default {
-                self.help("Unrecognized subcommand '$command'.");
+                say "Unrecognized subcommand '$command'.";
+                self.help();
+                exit;
             }
         };
         return eval sprintf '{ -> *@projects { self.%s( @projects) } }',
                             $command;
     }
 
-    method help($msg?) {
-        say $msg if $msg;
+    method help(*@projects) {
         .say for
             "A typical usage is:",
             q['./proto install <projectname>'],
             'Available commands: ' ~ @available-commands,
-            './proto help - this help',
             'See the README for more details';
-        exit;
     }
-    
+
     method install(*@projects) {
         my @projects-to-install;
         my $missing-projects = False;
