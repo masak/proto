@@ -38,6 +38,10 @@ svg-plot:
     home:   github
     owner:  moritz
 
+svg-match:
+    home:   github
+    owner:  moritz
+
 maya:
     home:   github
     owner:  ihrd
