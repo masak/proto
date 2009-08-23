@@ -30,6 +30,37 @@ if ( !-r $config_file ) {
 }
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
+if ( $config_info->{'config.proto version'} lt '2009-09-23' ) {
+    my $rakudo_directory = rakudo_directory( $config_info );
+    my $perl6 = "$rakudo_directory/perl6";
+    my $oneliner = 'use Ecosystem; sub load-config-file(Str $filename) { my %settings; for lines($filename) { when / (.*) \: \s+ (.*) / { %settings{$0} = $1 } }; return %settings }; print Ecosystem.new(load-config-file("config.proto"){"Proto projects directory"}).installed-projects().join(", ")';
+    my $installed_projects = `env PERL6LIB=lib $perl6 -e '$oneliner'`;
+
+    die <<"EOMESSAGE";
+
+*** CONFIG FILE TOO OLD ***
+
+Hello, faithful proto user. With its August 2009 release, Rakudo can now
+install globally on the system, which means it's time for proto to install
+Perl 6 modules globally too. Rather than spend a lot of effort trying to
+guess how to upgrade our userbase from local to global modules, we'll just
+deprecate the old ways and let you do a bit of the work. Hope it's OK!
+
+So here's the thing: we're moving to a model where PERL6LIB only needs to
+point to one lib/ dir with all the installed modules bunched together. You
+should probably reinstall the projects you have already, so that they
+end up in that place.
+
+Here are your currently installed projects:
+
+$installed_projects
+
+When you're ready to go with the new ways, please remove your old
+config.proto and reinstall the above projects.
+
+EOMESSAGE
+}
+
 if ( ! -d $config_info->{'Proto projects directory'} ) {
     mkdir $config_info->{'Proto projects directory'}
         or die "Couldn't create projects dir";
