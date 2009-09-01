@@ -129,3 +129,7 @@ gamebase:
 Vector:
     home:  github
     owner: LastOfTheCarelessMen
+
+perl6-literate:
+    home:  github
+    owner: masak
