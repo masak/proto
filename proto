@@ -507,10 +507,10 @@ Rakudo directory.
 If both variables are defined, the directories must be nested as either
 parrot/languages/rakudo or rakudo/parrot.
 
-=head1 TODO (please keep up to date)
+=head1 TODO
 
-The installed-modules branch plans to make proto more cpan-like by doing
-the following:
+The installed-modules branch plans to make proto more PERL6LIB-friendly by
+doing the following:
 
 1.  Place all installed Perl 6 modules (.pm and .pir files) into one
     folder hierarchy, so that PERL6LIB does not grow with installs.
@@ -518,7 +518,7 @@ the following:
     config.proto, with $HOME/.ecosystem as default value.
     (Q: how about names "Perl 6 library" and .perl6lib instead?)
 
-2.  Rename the current "install" proto subcommand to "cache". Add a new
+2.  Rename the current "install" proto subcommand to "fetch". Add a new
     "install" step to the end of the existing "fetch, configure, build,
     test" workflow.
 
