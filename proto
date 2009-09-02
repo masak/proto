@@ -507,8 +507,38 @@ Rakudo directory.
 If both variables are defined, the directories must be nested as either
 parrot/languages/rakudo or rakudo/parrot.
 
-=head1 TODO
+=head1 TODO (please keep up to date)
 
-Some possible changes, subject 
+The installed-modules branch plans to make proto more cpan-like by doing
+the following:
+
+1.  Place all installed Perl 6 modules (.pm and .pir files) into one
+    folder hierarchy, so that PERL6LIB does not grow with installs.
+    To support this, add a new "Ecosystem directory" setting to
+    config.proto, with $HOME/.ecosystem as default value.
+    (Q: how about names "Perl 6 library" and .perl6lib instead?)
+
+2.  Rename the current "install" proto subcommand to "cache". Add a new
+    "install" step to the end of the existing "fetch, configure, build,
+    test" workflow.
+
+3.  Keep a separate cache directory per project for all processing prior
+    to installation. Allow the cache directory to be cleaned or removed
+    without affecting the installed module.
+
+4.  It may not have to be a sudden reinstall of all projects. We could
+    add a "Proto cache directory" alongside the "Proto projects directory"
+    at some stage and favour it for updates and new projects. Each
+    project added to "Proto cache" can be removed from "Proto projects".
+    At a later stage the "Proto projects directory" can be phased out.
+
+5.  Detect and use a 'make install' target if found, otherwise do the
+    right thing based on a lib/ directory and filename extensions.
+    Similarly try to perform update and uninstall operations.
+
+6.  Update create-new-project to support 'make install', update and
+    uninstall. Document it as a guideline for module developers.
+
+7.  ...
 
 =cut
