@@ -517,10 +517,20 @@ doing the following:
     To support this, add a new "Ecosystem directory" setting to
     config.proto, with $HOME/.ecosystem as default value.
     (Q: how about names "Perl 6 library" and .perl6lib instead?)
+    (Q: validate PERL6LIB by dying with an explanation if PERL6LIB does
+    not contain this directory?)
 
-2.  Rename the current "install" proto subcommand to "fetch". Add a new
-    "install" step to the end of the existing "fetch, configure, build,
-    test" workflow.
+1.5  Factor out the code common to the existing "install" and "update"
+    methods, or unify and add a new/existing flag. Either way, stop the
+    repetition.
+
+2.  Rename the existing "fetch" submethod to "download".
+    Rename the current "install" proto subcommand to "fetch".
+    Add a new "install" step to the end of the existing "fetch,
+    configure, build, test" workflow, to copy module files to where
+    PERL6LIB can find them.
+    Rename the current "update" proto subcommand to "refresh".
+    Add a new "update" command that 
 
 3.  Keep a separate cache directory per project for all processing prior
     to installation. Allow the cache directory to be cleaned or removed
@@ -531,6 +541,8 @@ doing the following:
     at some stage and favour it for updates and new projects. Each
     project added to "Proto cache" can be removed from "Proto projects".
     At a later stage the "Proto projects directory" can be phased out.
+    If having the two base directories at the same time causes problems,
+    stop supporting the older one.
 
 5.  Detect and use a 'make install' target if found, otherwise do the
     right thing based on a lib/ directory and filename extensions.
