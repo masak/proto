@@ -18,7 +18,7 @@ Greetings. I have created a file '$config_file' that you may want to review.
 Next time you run '$0', these settings will be used to bootstrap your system
 into a working Perl 6 installation.
 
-If you're new to this, or if configure settings scare you, you probably want
+If you're new to this, or if configuring settings scares you, you probably want
 the default settings anyway. The most important ones are:
 Rakudo   -> $config_info->{'Rakudo directory'}
 Projects -> $config_info->{'Proto projects directory'}
