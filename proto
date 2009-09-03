@@ -517,8 +517,10 @@ doing the following:
     To support this, add a new "Ecosystem directory" setting to
     config.proto, with $HOME/.ecosystem as default value.
     (Q: how about names "Perl 6 library" and .perl6lib instead?)
-    (Q: validate PERL6LIB by dying with an explanation if PERL6LIB does
-    not contain this directory?)
+    Validate PERL6LIB by dying with a friendly explanation if PERL6LIB
+    does not contain this directory. Perhaps even make sure it has
+    been added to ~/.bash_profile, ~/.bash_login, or ~/.profile .
+    Make this behaviour optional with a config setting.
 
 1.5 Factor out the code common in the existing "install" and "update"
     methods, or unify them and add a new/existing flag. Either way, stop
