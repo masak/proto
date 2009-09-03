@@ -520,17 +520,27 @@ doing the following:
     (Q: validate PERL6LIB by dying with an explanation if PERL6LIB does
     not contain this directory?)
 
-1.5  Factor out the code common to the existing "install" and "update"
-    methods, or unify and add a new/existing flag. Either way, stop the
-    repetition.
+1.5 Factor out the code common in the existing "install" and "update"
+    methods, or unify them and add a new/existing flag. Either way, stop
+    the repetition because we need to edit this part significantly.
 
-2.  Rename the existing "fetch" submethod to "download".
+2.  Hrm. Rename the existing "fetch" submethod to "download".
     Rename the current "install" proto subcommand to "fetch".
     Add a new "install" step to the end of the existing "fetch,
     configure, build, test" workflow, to copy module files to where
     PERL6LIB can find them.
     Rename the current "update" proto subcommand to "refresh".
-    Add a new "update" command that 
+    Add a new "update" command that works like the new "install" for the
+    latest version of a project if a previous version was installed.
+
+2.3 Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
+    [Q:add a project.state file for is_built(), is_tested() and
+    is_installed()? Q:is a state database a good thing?]
+
+2.7 Ensure robustness of the workflow, so that an error in fetching,
+    building or testing any dependency, stops the dependent module
+    being installed. Refactor the existing code to do this very
+    concisely in the top level methods.
 
 3.  Keep a separate cache directory per project for all processing prior
     to installation. Allow the cache directory to be cleaned or removed
@@ -551,6 +561,6 @@ doing the following:
 6.  Update create-new-project to support 'make install', update and
     uninstall. Document it as a guideline for module developers.
 
-7.  ...
+7.  ...keep planning...
 
 =cut
