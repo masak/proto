@@ -509,60 +509,71 @@ parrot/languages/rakudo or rakudo/parrot.
 
 =head1 TODO
 
-The installed-modules branch plans to make proto more PERL6LIB-friendly by
-doing the following:
+The installed-modules branch plans to make proto friendlier by doing the
+following:
 
 1.  Place all installed Perl 6 modules (.pm and .pir files) into one
     folder hierarchy, so that PERL6LIB does not grow with installs.
-    To support this, add a new "Ecosystem directory" setting to
-    config.proto, with $HOME/.ecosystem as default value.
-    (Q: how about names "Perl 6 library" and .perl6lib instead?)
+    To support this, add a new "Perl 6 library" setting to config.proto,
+    with $HOME/.perl6lib as default value.
     Validate PERL6LIB by dying with a friendly explanation if PERL6LIB
     does not contain this directory. Perhaps even make sure it has
     been added to ~/.bash_profile, ~/.bash_login, or ~/.profile .
     Make this behaviour optional with a config setting.
 
-1.5 Factor out the code common in the existing "install" and "update"
+2.  Factor out the code common in the existing "install" and "update"
     methods, or unify them and add a new/existing flag. Either way, stop
     the repetition because we need to edit this part significantly.
 
-2.  Hrm. Rename the existing "fetch" submethod to "download".
+3.  Rename the existing "fetch" submethod to "download".
     Rename the current "install" proto subcommand to "fetch".
     Add a new "install" step to the end of the existing "fetch,
-    configure, build, test" workflow, to copy module files to where
-    PERL6LIB can find them.
-    Rename the current "update" proto subcommand to "refresh".
+    configure, build, test" workflow, to copy module files to the
+    "Perl 6 library" tree.
+
+4.  Rename the current "update" proto subcommand to "refresh".
     Add a new "update" command that works like the new "install" for the
     latest version of a project if a previous version was installed.
 
-2.3 Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
-    [Q:add a project.state file for is_built(), is_tested() and
-    is_installed()? Q:is a state database a good thing?]
+5.  Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
 
-2.7 Ensure robustness of the workflow, so that an error in fetching,
+6.  Add a projects.installed file that contains a line per project that
+    is successfully installed, containing only the project name.
+
+7.  Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
     being installed. Refactor the existing code to do this very
     concisely in the top level methods.
 
-3.  Keep a separate cache directory per project for all processing prior
+8.  Keep a separate cache directory per project for all processing prior
     to installation. Allow the cache directory to be cleaned or removed
     without affecting the installed module.
 
-4.  It may not have to be a sudden reinstall of all projects. We could
-    add a "Proto cache directory" alongside the "Proto projects directory"
-    at some stage and favour it for updates and new projects. Each
-    project added to "Proto cache" can be removed from "Proto projects".
+9.  (maybe migration) It may not have to be a sudden reinstall of all
+    projects. We could add a "Proto cache directory" alongside the
+    "Proto projects directory" at some stage and favour it for updates
+    and new projects. Each project added to "Proto cache" can be removed
+    from "Proto projects".
     At a later stage the "Proto projects directory" can be phased out.
-    If having the two base directories at the same time causes problems,
-    stop supporting the older one.
+    If this migration effort causes problems, drop it.
 
-5.  Detect and use a 'make install' target if found, otherwise do the
-    right thing based on a lib/ directory and filename extensions.
-    Similarly try to perform update and uninstall operations.
+10. To install modules into the global library tree, first look for an
+    an 'install' target in the Makefile, run it if found.
+    If there is no 'install', check that all the files in lib/ can be
+    copied without clobbering, then either proceed to copy or abort.
 
-6.  Update create-new-project to support 'make install', update and
-    uninstall. Document it as a guideline for module developers.
+11. Handle 'update' like 'install' but allow files to be overwritten.
+    Use the 'install' target in the Makefile, not 'update'.
 
-7.  ...keep planning...
+12. Handle 'uninstall' by Makefile or by listing all the names in
+    $project/lib and deleting each same named file in "Perl 6 library".
+    Also remove the project name from projects.installed and delete the
+    project cache directory. Think "realclean".
+    We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
+
+13. Update create-new-project to support install, update and uninstall
+    in its Makefile. Document it as a guideline for module developers.
+
+14. ...keep planning...
 
 =cut
