@@ -137,3 +137,7 @@ perl6-literate:
 xSQLite3:
     home:  github
     owner: asciiville
+
+perl6-sqlite:
+    home:  github
+    owner: tene
