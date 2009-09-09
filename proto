@@ -509,17 +509,14 @@ parrot/languages/rakudo or rakudo/parrot.
 
 =head1 TODO
 
-The installed-modules branch plans to make proto friendlier by doing the
-following:
+The installed-modules branch plans to improve proto by doing the following:
 
 1.  Place all installed Perl 6 modules (.pm and .pir files) into one
-    folder hierarchy, so that PERL6LIB does not grow with installs.
-    To support this, add a new "Perl 6 library" setting to config.proto,
-    with $HOME/.perl6lib as default value.
-    Validate PERL6LIB by dying with a friendly explanation if PERL6LIB
-    does not contain this directory. Perhaps even make sure it has
-    been added to ~/.bash_profile, ~/.bash_login, or ~/.profile .
-    Make this behaviour optional with a config setting.
+    folder hierarchy. Rakudo now preloads @*INC with $HOME/.perl6lib,
+    followed by <parrot_install>/lib/<version/languages/perl6/lib, the
+    directories in PERL6LIB, and lastly '.' (the current directory).
+    Add a "Perl 6 library" setting to config.proto, with $HOME/.perl6lib
+    as default value.
 
 2.  Factor out the code common in the existing "install" and "update"
     methods, or unify them and add a new/existing flag. Either way, stop
@@ -537,8 +534,10 @@ following:
 
 5.  Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
 
-6.  Add a projects.installed file that contains a line per project that
-    is successfully installed, containing only the project name.
+6.  Add a projects.state file to register successfully installed
+    projects. Currently this file requires only a line per installed
+    project, containing just the project name (this may change).
+    Route all access to state information via the Ecosystem class.
 
 7.  Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
@@ -548,14 +547,11 @@ following:
 8.  Keep a separate cache directory per project for all processing prior
     to installation. Allow the cache directory to be cleaned or removed
     without affecting the installed module.
+    Add a "Proto cache directory" to config.proto with a default value
+    of <proto_base>/cache.
 
-9.  (maybe migration) It may not have to be a sudden reinstall of all
-    projects. We could add a "Proto cache directory" alongside the
-    "Proto projects directory" at some stage and favour it for updates
-    and new projects. Each project added to "Proto cache" can be removed
-    from "Proto projects".
-    At a later stage the "Proto projects directory" can be phased out.
-    If this migration effort causes problems, drop it.
+9.  Drop the migration plan for existing installations: laziness++ ;)
+    Just make a warning list of apparently non updated projects.
 
 10. To install modules into the global library tree, first look for an
     an 'install' target in the Makefile, run it if found.
@@ -571,9 +567,16 @@ following:
     project cache directory. Think "realclean".
     We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
 
-13. Update create-new-project to support install, update and uninstall
+13. Validate @*INC by exiting with a friendly explanation if @*INC does
+    not contain the 'Perl 6 library' directory. List the possible fixes:
+    edit config.proto (set Perl 6 library), or any one of
+    ~/.bash_profile, ~/.bash_login, or ~/.profile (set PERL6LIB).
+    Make this behaviour optional with a 'Validate Perl 6 library' option
+    in config.proto.
+
+14. Update create-new-project to support install, update and uninstall
     in its Makefile. Document it as a guideline for module developers.
 
-14. ...keep planning...
+15. ...keep planning and doing...
 
 =cut
