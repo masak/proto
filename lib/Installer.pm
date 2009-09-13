@@ -9,11 +9,11 @@ class Installer {
         self.bless(
             self.CREATE(),
             config-info => (my $c = load-config-file('config.proto')),
-            ecosystem   => Ecosystem.new($c{'Proto projects directory'}),
+            ecosystem   => Ecosystem.new($c{'Perl 6 library'}),
         )
     }
 
-    my @available-commands = <install update uninstall test showdeps help>;
+    my @available-commands = <fetch refresh clean test showdeps help>;#TODO: install update uninstall
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -40,7 +40,7 @@ class Installer {
             'See the README for more details';
     }
 
-    method install(*@projects) {
+    method fetch-or-refresh( $subcommand, *@projects) {
         my @projects-to-install;
         my $missing-projects = False;
         for @projects -> $project {
@@ -49,11 +49,11 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-install.push($.ecosystem.uninstalled-projects());
+                @projects-to-install.push($.ecosystem.unfetched-projects());
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
+            elsif "{%!config-info{'Proto projects cache'}}/$project"
                     ~~ :d {
-                say "Won't install $project: already installed.";
+                say "Won't fetch $project: already fetched.";
             }
             else {
                 @projects-to-install.push($project);
@@ -68,11 +68,17 @@ class Installer {
             exit(1);
         }
         @projects-to-install .= uniq;
-        self.fetch-and-build-projects-and-their-deps( @projects-to-install );
-        self.check-if-in-perl6lib( @projects-to-install );
+        self.download-and-build-projects-and-their-deps( @projects-to-install );
+        if $subcommand eq 'fetch' {
+            self.check-if-in-perl6lib( @projects-to-install );
+        }
     }
 
-    method update(*@projects) {
+    method fetch(*@projects) {
+        self.fetch-or-refresh( 'fetch', @projects );
+    }
+
+    method refresh(*@projects) {
         my @projects-to-update;
         my $missing-projects = False;
         for @projects -> $project {
@@ -81,11 +87,11 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-update.push($.ecosystem.installed-projects());
+                @projects-to-update.push($.ecosystem.fetched-projects());
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
+            elsif "{%!config-info{'Proto projects cache'}}/$project"
                     !~~ :d {
-                say "Cannot update $project: not installed.";
+                say "Cannot refresh $project: not fetched.";
             }
             else {
                 @projects-to-update.push($project);
@@ -98,12 +104,12 @@ class Installer {
             say 'Nothing to update.';
             exit(1);
         }
-        self.fetch-and-build-projects-and-their-deps(
+        self.download-and-build-projects-and-their-deps(
             @projects-to-update.uniq
         );
     }
 
-    method uninstall(*@projects) {
+    method clean(*@projects) {
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
                 say "Project not found: '$project'";
@@ -113,17 +119,17 @@ class Installer {
                 say "'uninstall all' not implemented yet";
                 # TODO: Implement.
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
+            elsif "{%!config-info{'Proto projects cache'}}/$project"
                     !~~ :d {
                 say "Won't uninstall $project: not found.";
                 say "Aborting.";
             }
         }
-        for $.ecosystem.installed-projects() -> $project {
+        for $.ecosystem.fetched-projects() -> $project {
             next if $project eq any(@projects);
             for self.get-deps($project) -> $dep {
                 if $dep eq any(@projects) {
-                    say "Cannot uninstall $dep, depended on by $project.";
+                    say "Cannot clean $dep, depended on by $project.";
                     say "Aborting.";
                     return;
                 }
@@ -131,7 +137,7 @@ class Installer {
         }
         for @projects -> $project {
             print "Removing $project...";
-            my $target-dir = %!config-info{'Proto projects directory'}
+            my $target-dir = %!config-info{'Proto projects cache'}
                              ~ "/$project";
             run("rm -rf $target-dir");
             say "done";
@@ -141,7 +147,8 @@ class Installer {
     method test(*@projects) {
         unless @projects {
             say 'You have to specify what you want to test.';
-            # TODO: Maybe just test everything installed?
+            # TODO: Maybe just test everything fetched?
+            #       YES: cheese speleology!
             exit 1;
         }
         my $can-continue = True;
@@ -150,8 +157,8 @@ class Installer {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
-            unless $.ecosystem.is-installed($project) {
-                say "Project '$project' is not installed";
+            unless $.ecosystem.is-fetched($project) {
+                say "Project '$project' is not downloaded";
                 $can-continue = False;
             }
         }
@@ -169,7 +176,8 @@ class Installer {
                         ?? "/$project/{%info<main_subdir>}"
                         !! "/$project"
                       );
-            my $in-dir = "cd $project-dir";
+#           my $in-dir = "cd $project-dir";
+#           chdir $project-dir;
             print "Testing $project...";
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
@@ -207,8 +215,8 @@ class Installer {
             exit 1;
         }
         for @projects -> $project {
-            if "{%!config-info{'Proto projects directory'}}/$project" !~~ :d {
-                say "$project is not installed.";
+            if "{%!config-info{'Proto projects cache'}}/$project" !~~ :d {
+                say "$project is not fetched.";
                 next;
             }
             if !self.get-deps($project) {
@@ -234,7 +242,7 @@ class Installer {
         }
     }
 
-    submethod fetch-and-build-projects-and-their-deps(@projects) {
+    submethod download-and-build-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
         #       like this: :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D
@@ -246,14 +254,14 @@ class Installer {
         for @projects -> $top-project {
             next if %seen{$top-project};
             my @build-stack = $top-project;
-            my @fetch-queue = $top-project;
+            my @download-queue = $top-project;
 
-            while @fetch-queue {
-                my $project = @fetch-queue.shift;
+            while @download-queue {
+                my $project = @download-queue.shift;
                 next if %seen{$project}++;
-                self.fetch($project);
+                self.download($project);
                 my @deps = self.get-deps($project);
-                @fetch-queue.push(@deps);
+                @download-queue.push(@deps);
                 @build-stack.unshift(@deps.reverse);
             }
 
@@ -263,7 +271,7 @@ class Installer {
         }
     }
 
-    submethod fetch( Str $project ) {
+    submethod download( Str $project ) {
         # RAKUDO: :exists [perl #59794]
         if !$.ecosystem.contains-project($project) {
             say "proto installer does not know about project '$project'";
@@ -273,10 +281,10 @@ class Installer {
             #       dependency tree in which it is a part. Passing information
             #       upwards with exceptions would provide excellent error
             #       diagnostics (either it failed because it wasn't found, or
-            #       because dependencies couldn't be installed).
+            #       because dependencies couldn't be fetched).
             exit 1;
         }
-        my $target-dir = %!config-info{'Proto projects directory'}
+        my $target-dir = %!config-info{'Proto projects cache'}
                          ~ "/$project";
         my %info       = $.ecosystem.get-info-on($project);
         if %info.exists('type') && %info<type> eq 'bootstrap' {
@@ -323,7 +331,7 @@ class Installer {
                 }
                 default { die "Unknown home type {%info<home>}"; }
             };
-            # This failes since there is parens in $command
+            # This fails since there is parens in $command
             #self.configured-run( $command );
             my $r = run( "$command $silently" );
             if $r != 0 {
@@ -339,7 +347,7 @@ class Installer {
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my %info        = $.ecosystem.get-info-on($project);
-        my $target-dir  = %!config-info{'Proto projects directory'}
+        my $target-dir  = %!config-info{'Proto projects cache'}
                           ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
             if $project eq 'proto' {
@@ -389,7 +397,7 @@ class Installer {
     }
 
     submethod get-deps($project) {
-        my $deps-file = %!config-info{'Proto projects directory'}
+        my $deps-file = %!config-info{'Proto projects cache'}
                         ~ "/$project/deps.proto";
         return unless $deps-file ~~ :f;
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
@@ -411,27 +419,6 @@ class Installer {
         return @deps.uniq;
     }
 
-    sub load-config-file(Str $filename) {
-        my %settings;
-        for lines($filename) {
-            when /^ '---'/ {
-                # do nothing
-            }
-            when / '#' (.*) $/ {
-                # do nothing
-            }
-            when / (.*) ':' \s+ (.*) / {
-                %settings{$0} = $1;
-            }
-        }
-        if %settings{'Parrot directory'} eq 'rakudo-decides' {
-            %settings{'Parrot directory'} = %settings{'Rakudo directory'}
-                                          ~ '/'
-                                          ~ 'parrot';
-        }
-        return %settings;
-    }
-
     submethod configured-run( Str $command, Str :$project = '',
                               Str :$dir = '.', Str :$output-mode = 'Log' ) {
         # RAKUDO: Can't really figure out how to set environment variables
@@ -442,7 +429,7 @@ class Installer {
         my $p6lib
             = 'PERL6LIB='
                 ~ join ':', map {
-                      "{%!config-info{'Proto projects directory'}}/$_/lib"
+                      "{%!config-info{'Proto projects cache'}}/$_/lib"
                   }, $project, self.get-deps-deeply( $project );
         my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
         my $redirection = do given $output-mode {
@@ -455,10 +442,27 @@ class Installer {
         run( $cmd );
     }
 
+    sub load-config-file(Str $filename) {
+        my %settings;
+        for lines($filename) {
+            when /^ '---'/               { #`[ do nothing ] }
+            when / '#' (.*) $/           { #`[ do nothing ] }
+            when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
+#           when / (.*) ':' \s+ (.*) /   { %settings{$0} = $1; }
+        }
+        if %settings{'Parrot directory'} eq 'rakudo-decides' {
+            %settings{'Parrot directory'} = %settings{'Rakudo directory'}
+                                            ~ '/'
+                                            ~ 'parrot';
+        }
+        return %settings;
+    }
+
+# TODO: replace with a central ~/.perl6lib check
     submethod check-if-in-perl6lib( @projects ) {
         my @projects-not-in
             = grep {
-                not "{%!config-info{'Proto projects directory'}}/$_/lib"
+                not "{%!config-info{'Proto projects cache'}}/$_/lib"
                     eq any(%*ENV<PERL6LIB>.split(':'))
               }, @projects;
         if @projects-not-in {

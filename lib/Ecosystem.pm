@@ -1,13 +1,15 @@
 class Ecosystem;
 
-has $projects-dir; # no twigil because ?
+has $cache-dir;
 has %!project-info;
+has %!project-state;
 
-method new(:$projects-dir!) {
+method new(:$cache-dir!) {
     self.bless(
         self.CREATE(),
-        projects-dir => $projects-dir,
-        project-info => load-project-list('projects.list'),
+        cache-dir  => $cache-dir,
+        project-info  => load-project-list('projects.list'),
+        project-state => load-project-list('projects.state'),
     );
 }
 
@@ -26,16 +28,20 @@ method regular-projects() {
           || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
 }
 
-method installed-projects() {
-    return self.regular-projects.grep: { "$projects-dir/$_" ~~ :d };
+method fetched-projects() {
+    return self.regular-projects.grep: { "$cache-dir/$_" ~~ :d };
 }
 
-method uninstalled-projects() {
-    return self.regular-projects.grep: { "$projects-dir/$_" !~~ :d };
+method unfetched-projects() {
+    return self.regular-projects.grep: { "$cache-dir/$_" !~~ :d };
+}
+
+method is-fetched( Str $project ) {
+    return "$cache-dir/$project" ~~ :d;
 }
 
 method is-installed( Str $project ) {
-    return "$projects-dir/$project" ~~ :d;
+    return %!project-state{$project}<state> eq 'installed';
 }
 
 sub load-project-list(Str $filename) {
@@ -46,15 +52,18 @@ sub load-project-list(Str $filename) {
     my $current-name;
     my %current;
     for $fh.lines {
-        when / ^ \s* ['#' | $ ] /   { next };
-        when / ^ (\S+) \: \s* ['#' | $ ] / {
+        when / ^ <.ws> ['#' | $ ] /   { next };
+#       when / ^ \s* ['#' | $ ] /   { next };
+        when / ^ (\S+) \: <.ws> ['#' | $ ] / {
+#       when / ^ (\S+) \: \s* ['#' | $ ] / {
             if $current-name.defined {
                 %overall{$current-name} = %current.clone;
             }
             %current = ();
             $current-name = ~$0;
         }
-        when / ^ \s+ (\S+) ':' \s* (\S+) \s* ['#' | $ ] / {
+        when / ^ <.ws> (\S+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
+#       when / ^ \s+ (\S+) ':' \s* (\S+) \s* ['#' | $ ] / {
             %current{~$0} = ~$1;
         }
         default {
@@ -66,6 +75,20 @@ sub load-project-list(Str $filename) {
     }
 
     return %overall;
+}
+
+sub save-project-list(Str $filename, %overall) {
+    my $fh = open( $filename, :w );
+    for %overall.keys -> $projectname {
+say "SAVE $projectname";
+        $fh.say("$projectname:");
+        for %overall{$projectname}.keys -> $key {
+say "  KEY $key: {%overall{$projectname}{$key}}";
+            $fh.say("    $key: {%overall{$projectname}{$key}}");
+        }
+        $fh.say("");
+    }
+    close $fh;
 }
 
 # vim: ft=perl6

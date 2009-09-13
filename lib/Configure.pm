@@ -8,7 +8,7 @@
 # Determine how this Configure.p6 was invoked, to write the same paths
 # and executables into the Makefile variables. The variables are:
 # PERL6       how to execute a Perl 6 script
-# PERL6LIB    initial value of @*INC, where 'use <module>;' searches
+# PERL6LIB    part of @*INC, where 'use <module>;' searches
 # PERL6BIN    directory where executables such as 'prove' reside
 # RAKUDO_DIR  (deprecated) currently the location of Rakudo's Test.pm
 
