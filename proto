@@ -573,12 +573,12 @@ The installed-modules branch plans to improve proto by doing the following:
 
 5.  Replace the parrot_in_rakudo() and rakudo_in_parrot() choices with the new
     --gen-parrot or --parrot-config=</my/parrot_install/bin/parrot_config>
-    options to Rakudo's Configure.pl.
+    options for Rakudo's Configure.pl.
 
 6.  Change install_perl6() to use Rakudo's 'make install' target, revise
     these config.proto settings:
     'Rakudo directory' -> <parrot_install>/lib/<version>/languages/perl6
-    'Parrot directory' -> <parrot_install>/bin or 'rakudo_decides'
+    'Parrot directory' -> 'rakudo_decides' or <parrot_install>/bin
 
 7.  Factor out the code common in the existing "install" and "update"
     methods, or unify them and add a new/existing flag. Either way, stop

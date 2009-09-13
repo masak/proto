@@ -41,7 +41,7 @@ class Installer {
     }
 
     method fetch-or-refresh( $subcommand, *@projects) {
-        my @projects-to-install;
+        my @projects-to-download;
         my $missing-projects = False;
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
@@ -49,28 +49,32 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-install.push($.ecosystem.unfetched-projects());
+                @projects-to-download.push($.ecosystem.unfetched-projects());
             }
-            elsif "{%!config-info{'Proto projects cache'}}/$project"
+            elsif $subcommand eq "fetch" && "{%!config-info{'Proto projects cache'}}/$project"
                     ~~ :d {
                 say "Won't fetch $project: already fetched.";
             }
+            elsif $subcommand eq "refresh" && "{%!config-info{'Proto projects cache'}}/$project"
+                    !~~ :d {
+                say "Cannot refresh $project: not fetched.";
+            }
             else {
-                @projects-to-install.push($project);
+                @projects-to-download.push($project);
             }
         }
         if $missing-projects {
             say 'Try updating proto to get the latest list of projects.';
             exit(1);
         }
-        if !@projects-to-install {
+        if !@projects-to-download {
             say 'Nothing to install.';
             exit(1);
         }
-        @projects-to-install .= uniq;
-        self.download-and-build-projects-and-their-deps( @projects-to-install );
+        @projects-to-download .= uniq;
+        self.download-and-build-projects-and-their-deps( @projects-to-download );
         if $subcommand eq 'fetch' {
-            self.check-if-in-perl6lib( @projects-to-install );
+            self.check-if-in-perl6lib( @projects-to-download );
         }
     }
 
@@ -79,34 +83,7 @@ class Installer {
     }
 
     method refresh(*@projects) {
-        my @projects-to-update;
-        my $missing-projects = False;
-        for @projects -> $project {
-            if !$.ecosystem.contains-project($project) {
-                say "No such project: '$project'";
-                $missing-projects = True;
-            }
-            elsif $project eq 'all' {
-                @projects-to-update.push($.ecosystem.fetched-projects());
-            }
-            elsif "{%!config-info{'Proto projects cache'}}/$project"
-                    !~~ :d {
-                say "Cannot refresh $project: not fetched.";
-            }
-            else {
-                @projects-to-update.push($project);
-            }
-        }
-        if $missing-projects {
-            exit(1);
-        }
-        if !@projects-to-update {
-            say 'Nothing to update.';
-            exit(1);
-        }
-        self.download-and-build-projects-and-their-deps(
-            @projects-to-update.uniq
-        );
+        self.fetch-or-refresh( 'refresh', @projects );
     }
 
     method clean(*@projects) {
