@@ -34,13 +34,7 @@ if ( ! -r $config_file ) {
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
 if ( $config_info->{'config.proto version'} lt '2009-09-23' ) {
-    create_default_state_file($state_file); # empty dummy file
-    my $rakudo_directory = $config_info->{'Rakudo directory'};
-    my $perl6 = "$rakudo_directory/perl6";
-    my $oneliner = 'use Ecosystem; sub load-config-file(Str $filename) { my %settings; for lines($filename) { when / (.*) \: \s+ (.*) / { %settings{$0} = $1 } }; return %settings }; print Ecosystem.new(load-config-file("config.proto"){"Proto projects directory"}).fetched-projects().join(", ")';
-    my $installed_projects = `env PERL6LIB=lib $perl6 -e '$oneliner'`;
-    my @installed_projects = split ", ", $installed_projects;
-    create_default_state_file($state_file, @installed_projects);
+    my @legacy_projects = legacy_projects( $config_info );
     die <<"EOMESSAGE";
 
 *** CONFIG FILE TOO OLD ***
@@ -57,7 +51,7 @@ reinstall the projects you have already, so that they end up in that place.
 
 Here are your currently installed projects ('legacy' in projects.state):
 
-@installed_projects
+@legacy_projects
 
 When you're ready to go with the new ways, please remove your old
 config.proto and reinstall the above projects.
@@ -188,6 +182,23 @@ sub make_pir_modules {
     if ( $displayed_building ) {
         print "done\n";
     }
+}
+
+sub legacy_projects {
+    my ( $config_info ) = @_;
+    my @legacy_projects;
+    my $project_dir = $config_info->{'Proto projects directory'};
+    open PROJECTS_LIST, '<', 'projects.list' or die "cannot open projects list";
+    while ( defined( my $line = <PROJECTS_LIST> ) ) {
+        if ( $line =~ m/ ^ (\S+) : $ /x ) {
+            my $project = $1;
+            if ( -d "$project_dir/$project" and $project ne 'proto' ) {
+                push @legacy_projects, $project;
+            }
+        }
+    }
+    close PROJECTS_LIST;
+    return @legacy_projects;
 }
 
 sub create_default_config_file {

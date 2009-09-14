@@ -80,10 +80,10 @@ sub load-project-list(Str $filename) {
 sub save-project-list(Str $filename, %overall) {
     my $fh = open( $filename, :w );
     for %overall.keys -> $projectname {
-say "SAVE $projectname";
+#say "SAVE $projectname";
         $fh.say("$projectname:");
         for %overall{$projectname}.keys -> $key {
-say "  KEY $key: {%overall{$projectname}{$key}}";
+#say "  KEY $key: {%overall{$projectname}{$key}}";
             $fh.say("    $key: {%overall{$projectname}{$key}}");
         }
         $fh.say("");
