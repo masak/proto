@@ -22,12 +22,12 @@ these settings will be used to bootstrap your Perl 6 software ecosystem.
 
 If you're new to this, or reluctant to do configuration, you probably want
 the default settings anyway. The most important ones are:
-Rakudo         -> $config_info->{'Rakudo directory'}
-Perl 6 library -> $config_info->{'Perl 6 library'}
+Perl 6 executable -> $config_info->{'Perl 6 executable'}
+Perl 6 library    -> $config_info->{'Perl 6 library'}
 
 EOMESSAGE
 }
-if ( !-r $config_file ) {
+if ( ! -r $config_file ) {
     die "The file $config_file exists but is not readable. Cannot continue.\n";
 }
 
@@ -35,7 +35,7 @@ my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
 if ( $config_info->{'config.proto version'} lt '2009-09-23' ) {
     create_default_state_file($state_file); # empty dummy file
-    my $rakudo_directory = rakudo_directory( $config_info );
+    my $rakudo_directory = $config_info->{'Rakudo directory'};
     my $perl6 = "$rakudo_directory/perl6";
     my $oneliner = 'use Ecosystem; sub load-config-file(Str $filename) { my %settings; for lines($filename) { when / (.*) \: \s+ (.*) / { %settings{$0} = $1 } }; return %settings }; print Ecosystem.new(load-config-file("config.proto"){"Proto projects directory"}).fetched-projects().join(", ")';
     my $installed_projects = `env PERL6LIB=lib $perl6 -e '$oneliner'`;
@@ -84,117 +84,38 @@ $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
 
 my $silently = ' > /dev/null 2>&1';
 
-install_perl6( $config_info );
-
-my $rakudo_directory = rakudo_directory( $config_info );
-my $perl6 = "$rakudo_directory/perl6";
+my $perl6 = $config_info->{'Perl 6 executable'};
+#if ( system("$perl6 -v $silently") != 0 ) {
+    install_perl6( $config_info );
+#}
 make_pir_modules( $perl6 );
-# Delegate to installer
-$ENV{'RAKUDO_DIR'} = $rakudo_directory;
-exec( "$perl6 installer @ARGV" );
+exec( "$perl6 installer @ARGV" ); # Delegate to installer
+
 
 sub install_perl6 {
     my $config_info = shift;
-
-    if (parrot_in_rakudo( $config_info ) ) {
-        build_parrot_in_rakudo( $config_info );
+    my $perl6 = $config_info->{'Perl 6 executable'};
+    my $rakudo_directory;
+    if ( $perl6 =~ m{ (.*) /parrot_install/bin/perl6 }x ) {
+        $rakudo_directory = $1;
     }
-    # This call also checks that the directories are sane
-    elsif (rakudo_in_parrot( $config_info )) {
-        build_rakudo_in_parrot( $config_info );
+    elsif ( $perl6 =~ m{ (.*) /perl6 }x ) {
+        $rakudo_directory = $1;
     }
-}
-
-sub parrot_in_rakudo {
-    my $config_info = shift;
-
-    my $rakudo_directory = rakudo_directory($config_info);
-    my $parrot_directory = parrot_directory($config_info);
-
-    # Decide on strategy
-    if ( length( $rakudo_directory ) < length( $parrot_directory ) ) {
-        my $test_parrot_directory = "$rakudo_directory/parrot";
-        if ( $test_parrot_directory ne $parrot_directory ) {
-            die 'If you want parrot in rakudo it has to be in <RAKUDO_DIR>/parrot'
-        }
-        return 1;
+    else {
+        die "cannot figure Rakudo directory from $perl6";
     }
-    return '';
-}
-
-sub rakudo_in_parrot {
-    my $config_info = shift;
-
-    my $rakudo_directory = rakudo_directory($config_info);
-    my $parrot_directory = parrot_directory($config_info);
-
-    if ( length( $rakudo_directory ) > length( $parrot_directory ) ) {
-        my $test_rakudo_directory = "$parrot_directory/languages/rakudo";
-        if ( $test_rakudo_directory ne $rakudo_directory ) {
-            die 'If you want rakudo in parrot it has to be in <PARROT_DIR>/languages/rakudo';
-        }
-        return 1;
-    }
-    return '';
-}
-
-sub rakudo_directory {
-    my $config_info = shift;
-    my $rakudo_directory = $config_info->{'Rakudo directory'};
-    my $parrot_directory = $config_info->{'Parrot directory'};
-
-    if (   $rakudo_directory eq 'parrot-decides' 
-        && $parrot_directory eq 'rakudo-decides' ) {
-        die 'Either set Rakudo directory or Parrot directory in config.proto';
-    }
-    elsif ( $rakudo_directory eq 'parrot-decides' ) {
-        $rakudo_directory = "$parrot_directory/languages/rakudo";
-    }
-    return $rakudo_directory;
-}
-
-sub parrot_directory {
-    my $config_info = shift;
-    my $rakudo_directory = $config_info->{'Rakudo directory'};
-    my $parrot_directory = $config_info->{'Parrot directory'};
-
-    if (   $rakudo_directory eq 'parrot-decides' 
-        && $parrot_directory eq 'rakudo-decides' ) {
-        die 'Either set Rakudo directory or Parrot directory in config.proto';
-    }
-    elsif ( $parrot_directory eq 'rakudo-decides' ) {
-        $parrot_directory = "$rakudo_directory/parrot";
-    }
-    return $parrot_directory;
-}
-
-sub build_parrot_in_rakudo {
-    my $config_info = shift;
-    download_rakudo( $config_info );
-    if ( $config_info->{'Parrot revision'} ne 'rakudo-decides' ) {
-        download_parrot( $config_info );
-        build_parrot( $config_info );
-    }
-    build_rakudo( $config_info );
-}
-
-sub build_rakudo_in_parrot {
-    my $config_info = shift;
-    download_parrot( $config_info );
-    download_rakudo( $config_info );
-    build_parrot( $config_info );
-    build_rakudo( $config_info );
+    download_rakudo( $config_info, $rakudo_directory );
+    build_rakudo( $config_info, $rakudo_directory );
 }
 
 sub download_rakudo {
-    my $config_info = shift;
-    my $rakudo_directory = rakudo_directory( $config_info );
-
+    my ( $config_info, $rakudo_directory ) = @_;
     # XXX Maybe check if rakudo dir has contents instead?
     return if -d $rakudo_directory;
 
     if ( $config_info->{'Rakudo revision'} eq 'release' ) {
-        my $rakudo_release = '2009-07';
+        my $rakudo_release = '2009-08';
         my $tarfile = "rakudo-$rakudo_release.tar.gz";
         my $rakudo_url
             = "http://cloud.github.com/downloads/rakudo/rakudo/$tarfile";
@@ -231,34 +152,14 @@ sub download_rakudo {
     print "[  ok  ]\n";
 }
 
-sub download_parrot {
-    my $config_info = shift;
-    my $parrot_directory = parrot_directory( $config_info );
-
-    return if parrot_version( $parrot_directory );
-
-    print 'Downloading Parrot...';
-    my $command = 'svn checkout https://svn.parrot.org/parrot/trunk '
-                  . $parrot_directory
-                  . $silently;
-    system( $command ) == 0 or die "\nCouldn't check out Parrot: $?";
-    print "downloaded\n";
-    mkpath( "$parrot_directory/languages" ) unless -d "$parrot_directory/languages";
-}
-
 sub build_rakudo {
-    my $config_info = shift;
-    my $rakudo_directory = rakudo_directory( $config_info );
-    my $parrot_directory = parrot_directory( $config_info );
+    my ( $config_info, $rakudo_directory ) = @_;
     if ( ! -f "$rakudo_directory/perl6" ) {
-        # XXX Is this the correct behaviour?
-        my $flags = parrot_is_built( $config_info )
-                        ? ''
-                        : '--gen-parrot';
+        my $flags = '--gen-parrot';
         my $command
             = "(cd $rakudo_directory && perl Configure.pl $flags && make install)"
-              . ' 2>&1 | ./dotty-progress "Building Perl 6" 3579'; # TODO: recalibrate
-        if ( system( $command ) != 0 ) {
+              . ' 2>&1 | ./dotty-progress "Building Perl 6" 4258'; # TODO: recalibrate
+        if ( system($command) != 0 ) {
             print "[ FAIL ]\n";
             if ( system("grep memory make.log $silently") == 0 ) {
                 die "Not enough memory to build Perl 6.\n";
@@ -270,43 +171,6 @@ sub build_rakudo {
         unlink('make.log');
         print "[  ok  ]\n";
     }
-}
-
-sub build_parrot {
-    my $config_info = shift;
-    my $parrot_directory = parrot_directory( $config_info );
-
-    return if parrot_is_built( $config_info );
-
-    print 'Building parrot...';
-    my $command = "(cd $parrot_directory && perl Configure.pl && make) $silently";
-    system( $command ) == 0 or die "\nCouldn't build Parrot: $?";
-    if ( !-x "$parrot_directory/parrot" ) {
-        die "\nCouldn't build Parrot.";
-    }
-    print "built\n";
-}
-
-sub parrot_is_built {
-    my $config_info = shift;
-    my $parrot_directory = parrot_directory( $config_info );
-    return 1 if -x "$parrot_directory/parrot";
-    return '';
-}
-
-sub parrot_version {
-    my ($parrot_dir) = @_;
-
-    my $parrot_readme = "$parrot_dir/README";
-    if ( -f $parrot_readme ) {
-        open my $handle, '<', $parrot_readme or return;
-        if ( defined( my $line = <$handle> ) ) {
-            if ( $line =~ /^This is Parrot, version ([0-9.]+)/ ) {
-                return $1;
-            }
-        }
-    }
-    return;
 }
 
 sub make_pir_modules {
@@ -343,41 +207,20 @@ sub create_default_config_file {
         'Proto projects cache'
             => [ 'Proto projects cache -- the base directory in which each project',
                  'gets its own download directory' ],
+        'Perl 6 executable'
+            => [ 'Perl 6 executable -- how to run perl6. ' ],
         'Perl 6 library'
             => [ 'Perl 6 library -- the path to a directory, which will be created',
                  'if it does not exist, which will contain the projects installed',
                  'by proto. If you set this to a different path after projects',
                  'have already been installed, be aware that the old projects',
                  'will have to be moved along if proto is to find them' ],
-        'Parrot directory'
-            => [ 'Parrot directory -- the path to the directory, which may',
-                 'or may not exist, where Parrot lives or will be installed.',
-                 'When the value of "Rakudo setup" is set to "Rakudo',
-                 'outermost", the value of this setting won\'t matter',
-                 'because Rakudo will decide which Parrot version to',
-                 'download.' ],
-        # TODO: Implement downloading of specific releases.
-        'Parrot revision'
-            => [ 'Parrot revision -- the revision of Parrot to download, if',
-                 'no Parrot was found in $PARROT_DIR at startup. Allowed',
-                 'values are "release", "bleeding", and an integer (optionally',
-                 'preceded by the letter "r"). The value "bleeding" means to',
-                 'download the latest Parrot revision from SVN, whereas',
-                 '"release" means to download the latest release as a',
-                 'tarball. When the value of "Rakudo setup" is set to',
-                 '"Rakudo outermost", the value of this setting won\'t matter',
-                 'because Rakudo will decide which Parrot version to',
-                 'download.' ],
-        'Rakudo directory'
-            => [ 'Rakudo directory -- the path to the directory, which may',
-                 'or may not exist, where Rakudo lives or will be installed.'
-               ],
         # TODO: Implement downloading of specific releases.
         'Rakudo revision'
             => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
                  'download, if no such revision was found in $RAKUDO_DIR or',
                  'other likely locations at startup. Allowed values are',
-                 '"release", "bleeding", and a hexadecimal integer of length',
+                 '"bleeding", "release", and a hexadecimal integer of length',
                  'up to 40. The value "bleeding" means to download the latest',
                  'Rakudo Perl 6 revision from github, whereas "release" means',
                  'to download the latest release as a tarball.' ],
@@ -403,51 +246,38 @@ sub create_default_config_file {
                  'carried out. If such a download fails, proto falls back to',
                  'downloading the project the usual way.' ],
     };
-    my $parrot_dir = $ENV{'PARROT_DIR'}; # often undef
-    my $rakudo_dir = $ENV{'RAKUDO_DIR'}; # often undef
     my $cache_dir  = File::Spec->rel2abs('.') . '/cache';
-    my $perl6lib   = $ENV{'HOME'} . '/.perl6lib';
+    my $perl6lib = $ENV{'HOME'} . '/.perl6lib';
+    my $perl6exe;
+    if ( exists( $ENV{PERL6EXE} ) ) { # if you know what you're doing
+        $perl6exe = $ENV{PERL6EXE};
+    }
+    else { # default: install rakudo in the same directory as proto
+        my $path = File::Spec->rel2abs($0);
+        my ($volume,$directories,$file) = File::Spec->splitpath( $path );
+        my @dirs = File::Spec->splitdir( $directories );
+        pop @dirs if ( $dirs[$#dirs] eq '' ); # remove silly empty value
+#       print "DIR: $directories\n";
+#       for ( my $i=0; $i <= $#dirs; $i++ ) {
+#           print "DIR[$i]: $dirs[$i]\n";
+#       }
+        $dirs[$#dirs] = 'rakudo';
+        push @dirs, 'parrot_install', 'bin';
+        $directories = File::Spec->catdir( @dirs );
+        $perl6exe = File::Spec->catpath( $volume, $directories, 'perl6' );
+#        $perl6exe = $ENV{'HOME'} . '/rakudo/parrot_install/bin/perl6';
+    }
 
     my $config_info = {
         'config.proto version' => '2009-09-23',
         'Proto projects cache' => $cache_dir,
+        'Perl 6 executable' => $perl6exe,
         'Perl 6 library' => $perl6lib,
+        'Rakudo revision' => 'bleeding',
         'Test when building' => 'no',
         'Test failure policy' => 'die',
         'Perl 6 project developer' => 'no',
     };
-
-    if ( !defined $parrot_dir && defined $rakudo_dir ) {
-        # derive the parrot_dir from rakudo_dir: there are only 2 possibilities
-        if ( $rakudo_dir =~ m{(.*)/languages/rakudo$} ) {
-            # Parrot contains Rakudo
-            $parrot_dir = $1;
-            #$config_info->{'Rakudo setup'} = 'Parrot outermost';
-        }
-        else {
-            # rakudo contains parrot
-            $parrot_dir = $rakudo_dir . '/parrot';
-            #$config_info->{'Rakudo setup'} = 'Rakudo outermost';
-        }
-    }
-    if ( !defined $rakudo_dir ) {
-        #$config_info->{'Rakudo setup'} = 'Rakudo outermost';
-        $config_info->{'Rakudo revision'} = 'bleeding';
-        $config_info->{'Parrot revision'} = 'rakudo-decides';
-        my @dirparts = File::Spec->splitdir( File::Spec->rel2abs( File::Spec->curdir() ) );
-        $dirparts[$#dirparts] = 'rakudo';
-        $rakudo_dir = File::Spec->catdir( @dirparts );
-    }
-    if ( !defined $parrot_dir ) {
-        $parrot_dir = 'rakudo-decides';
-    }
-    if ( $parrot_dir and $rakudo_dir ) {
-        $config_info->{'Parrot revision'} = 'rakudo-decides',
-    }
-
-    $config_info->{'Parrot directory'} = $parrot_dir;
-    $config_info->{'Rakudo directory'} = $rakudo_dir;
-
     save_config_file($file_name, $config_info, $commentinfo )
         or die "Couldn't create $file_name: $!\n";
 }
@@ -456,7 +286,7 @@ sub create_default_state_file {
     my ($file_name, @projectnames ) = @_;
     open PROJECTS_STATE, ">", $file_name or die "cannot create $file_name: $!";
     for my $projectname (@projectnames) {
-        print PROJECTS_STATE "$projectname:\n    state: old\n\n";
+        print PROJECTS_STATE "$projectname:\n    state: legacy\n\n";
     }
     close PROJECTS_STATE;
 }
@@ -534,11 +364,15 @@ The C<Installer> script
 
 =head1 ENVIRONMENT
 
-PARROT_DIR - if exported by the shell, specifies where to look for an installed
-Parrot directory.
+PERL6EXE - if exported by the shell, specifies where to look for an installed
+Perl 6 executable. Not required if your shell executes 'perl6' anyway.
+The setting is saved as 'Perl 6 executable' in config.proto.
+It is configured automatically if you let proto install Rakudo (and Parrot).
+For example, to use perl6.pbc instead of the fakecutable use something like:
 
-RAKUDO_DIR - if exported by the shell, specifies where to look for an installed
-Rakudo directory.
+    PERL6EXE=/my/parrot_install/bin/parrot \
+        /my/parrot_install/lib/<version>/languages/perl6/perl6.pbc \
+        ./proto
 
 =head1 TODO
 
@@ -571,18 +405,18 @@ The installed-modules branch plans to improve proto by doing the following:
     Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
     [DONE]
 
-5.  Replace the parrot_in_rakudo() and rakudo_in_parrot() choices with the new
-    --gen-parrot or --parrot-config=</my/parrot_install/bin/parrot_config>
-    options for Rakudo's Configure.pl.
-
-6.  Change install_perl6() to use Rakudo's 'make install' target, revise
-    these config.proto settings:
-    'Rakudo directory' -> <parrot_install>/lib/<version>/languages/perl6
-    'Parrot directory' -> 'rakudo_decides' or <parrot_install>/bin
-
-7.  Factor out the code common in the existing "install" and "update"
+5.  Factor out the code common in the existing "install" and "update"
     methods, or unify them and add a new/existing flag. Either way, stop
     the repetition because we need to edit this part significantly.
+    [DONE]
+
+6.  Replace the 'Parrot directory' and 'Rakudo directory' settings with
+    'Perl 6 executable' in config.proto.
+    [DONE]
+
+7.  Make install_perl6 implement L<http://www.rakudo.org/how-to-get-rakudo>,
+    including the new 'make install' step.
+    [DONE]
 
 8.  Add a new "install" step to the end of the existing "fetch,
     configure, build, test" workflow, to copy module files to the

@@ -1,5 +1,5 @@
-projects
 projects.state
 config.proto
 *.pir
 cache/*
+*~

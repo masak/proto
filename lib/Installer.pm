@@ -427,11 +427,6 @@ class Installer {
             when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
 #           when / (.*) ':' \s+ (.*) /   { %settings{$0} = $1; }
         }
-        if %settings{'Parrot directory'} eq 'rakudo-decides' {
-            %settings{'Parrot directory'} = %settings{'Rakudo directory'}
-                                            ~ '/'
-                                            ~ 'parrot';
-        }
         return %settings;
     }
 
