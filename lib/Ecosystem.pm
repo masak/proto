@@ -22,6 +22,16 @@ method get-info-on($project) {
     return %!project-info{$project};
 }
 
+method get-state($project) {
+    return %!project-state{$project}<state>;
+}
+
+method set-state($project,$state) {
+    %!project-state{$project} = {} unless %!project-state.exists($project);
+    %!project-state{$project}<state> = $state;
+    save-project-list('projects.state', %!project-state);
+}
+
 method regular-projects() {
     return %!project-info.keys.grep:
         { !%!project-info{$_}.exists('type')
@@ -79,11 +89,9 @@ sub load-project-list(Str $filename) {
 
 sub save-project-list(Str $filename, %overall) {
     my $fh = open( $filename, :w );
-    for %overall.keys -> $projectname {
-#say "SAVE $projectname";
+    for %overall.keys.sort -> $projectname {
         $fh.say("$projectname:");
-        for %overall{$projectname}.keys -> $key {
-#say "  KEY $key: {%overall{$projectname}{$key}}";
+        for %overall{$projectname}.keys.sort -> $key {
             $fh.say("    $key: {%overall{$projectname}{$key}}");
         }
         $fh.say("");

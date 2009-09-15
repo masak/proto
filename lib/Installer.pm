@@ -13,7 +13,7 @@ class Installer {
         )
     }
 
-    my @available-commands = <fetch refresh clean test showdeps help>;#TODO: install update uninstall
+    my @available-commands = <fetch refresh clean test install showdeps help>; #TODO: update uninstall
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -68,7 +68,7 @@ class Installer {
             exit(1);
         }
         if !@projects-to-download {
-            say 'Nothing to install.';
+            say 'Nothing to fetch.';
             exit(1);
         }
         @projects-to-download .= uniq;
@@ -93,12 +93,12 @@ class Installer {
                 say "Aborting.";
             }
             elsif $project eq 'all' {
-                say "'uninstall all' not implemented yet";
+                say "'clean all' not implemented yet";
                 # TODO: Implement.
             }
             elsif "{%!config-info{'Proto projects cache'}}/$project"
                     !~~ :d {
-                say "Won't uninstall $project: not found.";
+                say "Won't clean $project: not found.";
                 say "Aborting.";
             }
         }
@@ -154,7 +154,6 @@ class Installer {
                         !! "/$project"
                       );
 #           my $in-dir = "cd $project-dir";
-#           chdir $project-dir;
             print "Testing $project...";
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
@@ -273,7 +272,7 @@ class Installer {
         }
         my $silently   = '>/dev/null 2>&1';
         if $target-dir ~~ :d {
-            print "Updating $project...";
+            print "Refreshing $project...";
             my $indir = "cd $target-dir";
             my $command = do given %info<home> {
                 when 'github' | 'gitorious' { 'git pull' }
@@ -340,7 +339,9 @@ class Installer {
         # XXX: Need to have error handling here, and not continue if things go
         #      haywire with the build. However, a project may not have a
         #      Makefile.PL or Configure.p6, and this needs to be considered
-        #     a successful [sic] outcome.
+        #      a successful [sic] outcome.
+        # TODO: deprecate PARROT_DIR and RAKUDO_DIR now that we have an
+        #       installed Perl 6 executable.
         %*ENV<PARROT_DIR> = %*VM<config><bindir>;
         my $perl6 = %!config-info{'Perl 6 executable'};
         if $perl6 ~~ / (.*) \/ perl6 / { %*ENV<RAKUDO_DIR> = $0; }
@@ -348,7 +349,6 @@ class Installer {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
-#                   !! "{%*ENV<RAKUDO_DIR>}/perl6";
                     !! $perl6;
                 my $conf-cmd = "$perl $config-file";
                 my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
@@ -363,12 +363,42 @@ class Installer {
             my $make-cmd = 'make';
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
+                $.ecosystem.set-state($project,'broken');
                 say "build failed, see $project-dir/make.log";
                 return;
             }
         }
         say 'built';
+        $.ecosystem.set-state($project,'built');
         unlink( "$project-dir/make.log" );
+    }
+
+    method install(*@projects) {
+        # ensure all requested projects have been fetched, built and tested.
+        # abort if any project is faulty.
+        for @projects -> $project {
+            # TODO
+        }
+        # install each project either via a custom copy by 'make install' if
+        # available, or otherwise a default copy from lib/
+        for @projects -> $project { # Makefile exists
+            my $project-dir = "{%!config-info{'Proto projects cache'}}/$project";
+            if "$project-dir/Makefile" ~~ :f && lines("$project-dir/Makefile").grep(/^install\:/).elems > 0 {
+                my $make-cmd = 'make install';
+                my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
+                if $r != 0 {
+                    $.ecosystem.set-state($project,'notinstalled');
+                    say "install failed, see $project-dir/make.log";
+                    return;
+                }
+            }
+            else {
+                # no Makefile, recursively install lib/*
+                my $perl6lib = %!config-info{'Perl 6 library'};
+                run("cp -r $project-dir/lib/* $perl6lib");
+                # TODO: a non clobbering alternative to cp
+            }
+        }
     }
 
     method not-implemented($subcommand) {
@@ -400,21 +430,9 @@ class Installer {
 
     submethod configured-run( Str $command, Str :$project = '',
                               Str :$dir = '.', Str :$output-mode = 'Log' ) {
-        # RAKUDO: Can't really figure out how to set environment variables
-        #         so they're visible by later commands. Doing like this
-        #         instead.
-#       my $parrot_dir = "PARROT_DIR={%!config-info{'Parrot directory'}}";
-#       my $rakudo_dir = "RAKUDO_DIR={%!config-info{'Rakudo directory'}}";
-#       my $p6lib
-#           = 'PERL6LIB='
-#               ~ join ':', map {
-#                     "{%!config-info{'Proto projects cache'}}/$_/lib"
-#                 }, $project, self.get-deps-deeply( $project );
-#       my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
         %*ENV<PERL6LIB> = join ':', map {
                               "{%!config-info{'Proto projects cache'}}/$_/lib"
                           }, $project, self.get-deps-deeply( $project );
-#       my $env = ('env', $p6lib).join(' ');
         my $redirection = do given $output-mode {
             when 'Log'     { '>make.log 2>&1'  }
             when 'Silent'  { '>/dev/null 2>&1' }
@@ -422,7 +440,6 @@ class Installer {
             default        { die               }
         };
         my $cmd = "cd $dir; $command $redirection";
-#       my $cmd = "cd $dir; $env $command $redirection";
         run( $cmd );
     }
 
@@ -432,7 +449,6 @@ class Installer {
             when /^ '---'/               { #`[ do nothing ] }
             when / '#' (.*) $/           { #`[ do nothing ] }
             when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
-#           when / (.*) ':' \s+ (.*) /   { %settings{$0} = $1; }
         }
         return %settings;
     }

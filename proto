@@ -433,7 +433,11 @@ The installed-modules branch plans to improve proto by doing the following:
     including the new 'make install' step.
     [DONE]
 
-8.  Add a new "install" step to the end of the existing "fetch,
+8.  Use the shiny new %*ENV for passing environment variables to child
+    processes.
+    [DONE]
+
+9.  Add a new "install" step to the end of the existing "fetch,
     configure, build, test" workflow, to copy module files to the
     "Perl 6 library" tree.
     To install modules into the global library tree, first look for an
@@ -441,37 +445,34 @@ The installed-modules branch plans to improve proto by doing the following:
     If there is no 'install', check that all the files in lib/ can be
     copied without clobbering, then either proceed to copy or abort.
 
-9.  Add a new "update" command that works like the new "install" for the
+10. Add a new "update" command that works like the new "install" for the
     latest version of a project if a previous version was installed.
     Handle 'update' like 'install' but allow files to be overwritten.
     Use the 'install' target in the Makefile, not 'update'.
 
-10. Handle 'uninstall' by Makefile or by listing all the names in
+11. Handle 'uninstall' by Makefile or by listing all the names in
     $project/lib and deleting each same named file in "Perl 6 library".
     Also remove the project name from projects.installed and delete the
     project cache directory. Think "realclean".
     We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
 
-11. Ensure robustness of the workflow, so that an error in fetching,
+12. Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
     being installed. Refactor the existing code to do this very
     concisely in the top level methods.
 
-12. Drop the migration plan for existing installations: laziness++ ;)
+13. Drop the migration plan for existing installations: laziness++ ;)
     Just make a warning list of apparently non updated projects.
 
-13. Validate @*INC by exiting with a friendly explanation if @*INC does
+14. Validate @*INC by exiting with a friendly explanation if @*INC does
     not contain the 'Perl 6 library' directory. List the possible fixes:
     edit config.proto (set Perl 6 library), or any one of
     ~/.bash_profile, ~/.bash_login, or ~/.profile (set PERL6LIB).
     Make this behaviour optional with a 'Validate Perl 6 library' option
     in config.proto.
 
-14. Update create-new-project to support install, update and uninstall
+15. Update create-new-project to support install, update and uninstall
     in its Makefile. Document it as a guideline for module developers.
-
-15. Use the shiny new %*ENV for passing environment variables to child
-    processes.
 
 16. ...keep planning and doing...
 
