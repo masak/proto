@@ -148,7 +148,7 @@ class Installer {
             # RAKUDO: Doesn't support any other way to change the current
             #         working directory. Improvising.
             my $project-dir
-                = %!config-info{'Proto projects directory'}
+                = %!config-info{'Proto projects cache'}
                     ~ ( %info.exists('main_subdir')
                         ?? "/$project/{%info<main_subdir>}"
                         !! "/$project"
@@ -167,9 +167,8 @@ class Installer {
                    && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
                 {
                     $command = 'prove -e "'
-                        ~ %!config-info{'Parrot directory'} ~ '/parrot '
-                        ~ %!config-info{'Rakudo directory'} ~ '/perl6.pbc"'
-                        ~ ' -r --nocolor t/';
+                        ~ %!config-info{'Perl 6 executable'}
+                        ~ '" -r --nocolor t/';
                 }
             }
             if $command {
@@ -338,16 +337,19 @@ class Installer {
         if defined %info<main_subdir> {
             $project-dir = %info<main_subdir>;
         }
-        my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
         # XXX: Need to have error handling here, and not continue if things go
         #      haywire with the build. However, a project may not have a
         #      Makefile.PL or Configure.p6, and this needs to be considered
         #     a successful [sic] outcome.
+        %*ENV<PARROT_DIR> = %*VM<config><bindir>;
+        my $perl6 = %!config-info{'Perl 6 executable'};
+        if $perl6 ~~ / (.*) \/ perl6 / { %*ENV<RAKUDO_DIR> = $0; }
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
-                    !! "{%*ENV<RAKUDO_DIR>}/perl6";
+#                   !! "{%*ENV<RAKUDO_DIR>}/perl6";
+                    !! $perl6;
                 my $conf-cmd = "$perl $config-file";
                 my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
                 if $r != 0 {
@@ -401,21 +403,26 @@ class Installer {
         # RAKUDO: Can't really figure out how to set environment variables
         #         so they're visible by later commands. Doing like this
         #         instead.
-        my $parrot_dir = "PARROT_DIR={%!config-info{'Parrot directory'}}";
-        my $rakudo_dir = "RAKUDO_DIR={%!config-info{'Rakudo directory'}}";
-        my $p6lib
-            = 'PERL6LIB='
-                ~ join ':', map {
-                      "{%!config-info{'Proto projects cache'}}/$_/lib"
-                  }, $project, self.get-deps-deeply( $project );
-        my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
+#       my $parrot_dir = "PARROT_DIR={%!config-info{'Parrot directory'}}";
+#       my $rakudo_dir = "RAKUDO_DIR={%!config-info{'Rakudo directory'}}";
+#       my $p6lib
+#           = 'PERL6LIB='
+#               ~ join ':', map {
+#                     "{%!config-info{'Proto projects cache'}}/$_/lib"
+#                 }, $project, self.get-deps-deeply( $project );
+#       my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
+        %*ENV<PERL6LIB> = join ':', map {
+                              "{%!config-info{'Proto projects cache'}}/$_/lib"
+                          }, $project, self.get-deps-deeply( $project );
+#       my $env = ('env', $p6lib).join(' ');
         my $redirection = do given $output-mode {
             when 'Log'     { '>make.log 2>&1'  }
             when 'Silent'  { '>/dev/null 2>&1' }
             when 'Verbose' { ''                }
             default        { die               }
         };
-        my $cmd = "cd $dir; $env $command $redirection";
+        my $cmd = "cd $dir; $command $redirection";
+#       my $cmd = "cd $dir; $env $command $redirection";
         run( $cmd );
     }
 
@@ -432,16 +439,18 @@ class Installer {
 
 # TODO: replace with a central ~/.perl6lib check
     submethod check-if-in-perl6lib( @projects ) {
-        my @projects-not-in
-            = grep {
-                not "{%!config-info{'Proto projects cache'}}/$_/lib"
-                    eq any(%*ENV<PERL6LIB>.split(':'))
-              }, @projects;
-        if @projects-not-in {
-            say 'The following projects are not in your $PERL6LIB env var: ',
-                ~@projects;
-            say 'Please add them if you want to compile and run them outside '
-                ~ 'of proto.';
+        if %*ENV.exists('PERL6LIB') {
+            my @projects-not-in
+                = grep {
+                    not "{%!config-info{'Proto projects cache'}}/$_/lib"
+                        eq any(%*ENV<PERL6LIB>.split(':'))
+                  }, @projects;
+            if @projects-not-in {
+                say 'The following projects are not in your $PERL6LIB env var: ',
+                    ~@projects;
+                say 'Please add them if you want to compile and run them outside '
+                    ~ 'of proto.';
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ my ( $config_info, $commentinfo ) = load_config_file($config_file);
 
 if ( $config_info->{'config.proto version'} lt '2009-09-23' ) {
     my @legacy_projects = legacy_projects( $config_info );
+    create_default_state_file( $state_file, @legacy_projects );
     die <<"EOMESSAGE";
 
 *** CONFIG FILE TOO OLD ***
@@ -66,6 +67,9 @@ if ( ! -d $config_info->{'Perl 6 library'} ) {
 if ( ! -d $config_info->{'Proto projects cache'} ) {
     mkpath $config_info->{'Proto projects cache'}
         or die "Couldn't create Proto projects cache dir";
+}
+if ( ! -f $state_file ) {
+    create_default_state_file( $state_file );
 }
 
 # 1. perl git and subversion installed
