@@ -113,7 +113,7 @@ class Installer {
             }
         }
         for @projects -> $project {
-            print "Removing $project...";
+            print "Cleaning $project...";
             my $target-dir = %!config-info{'Proto projects cache'}
                              ~ "/$project";
             run("rm -rf $target-dir");
@@ -145,15 +145,12 @@ class Installer {
         }
         for @projects -> $project {
             my %info = $.ecosystem.get-info-on($project);
-            # RAKUDO: Doesn't support any other way to change the current
-            #         working directory. Improvising.
             my $project-dir
                 = %!config-info{'Proto projects cache'}
                     ~ ( %info.exists('main_subdir')
                         ?? "/$project/{%info<main_subdir>}"
                         !! "/$project"
                       );
-#           my $in-dir = "cd $project-dir";
             print "Testing $project...";
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
@@ -174,10 +171,12 @@ class Installer {
                 my $r = self.configured-run( $command, :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
                     say 'failed';
+                    $.ecosystem.set-state($project,'failed');
                     return;
                 }
             }
             say 'ok';
+            $.ecosystem.set-state($project,'tested');
         }
     }
 
@@ -273,17 +272,18 @@ class Installer {
         my $silently   = '>/dev/null 2>&1';
         if $target-dir ~~ :d {
             print "Refreshing $project...";
-            my $indir = "cd $target-dir";
+#           my $indir = "cd $target-dir";
             my $command = do given %info<home> {
                 when 'github' | 'gitorious' { 'git pull' }
                 when 'googlecode'           { 'svn up' }
             };
-            my $r = self.configured-run( $command, :dir( $target-dir ) );
-            if $r != 0 {
+#           my $r = self.configured-run( $command, :dir( $target-dir ) );
+#           if $r != 0 {
+            if ? self.configured-run( $command, :dir( $target-dir ) ) {
                 say 'failed';
             } else {
                 say 'updated';
-            }
+            } # TODO: ternary ?? !! instead
         }
         else {
             print "Downloading $project...";
@@ -306,14 +306,14 @@ class Installer {
                 }
                 default { die "Unknown home type {%info<home>}"; }
             };
-            # This fails since there is parens in $command
+            # This fails since there are parens in $command
             #self.configured-run( $command );
             my $r = run( "$command $silently" );
             if $r != 0 {
                 say 'failed';
             } else {
                 say 'downloaded';
-            }
+            } # TODO: ternary ?? !! instead
         }
     }
 
@@ -383,9 +383,8 @@ class Installer {
         # available, or otherwise a default copy from lib/
         for @projects -> $project { # Makefile exists
             my $project-dir = "{%!config-info{'Proto projects cache'}}/$project";
-            if "$project-dir/Makefile" ~~ :f && lines("$project-dir/Makefile").grep(/^install\:/).elems > 0 {
-                my $make-cmd = 'make install';
-                my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
+            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
+                my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
                     $.ecosystem.set-state($project,'notinstalled');
                     say "install failed, see $project-dir/make.log";
@@ -439,6 +438,8 @@ class Installer {
             when 'Verbose' { ''                }
             default        { die               }
         };
+        # Switch directory like this only in the child process,
+        # so that the proto current directory does not have to change.
         my $cmd = "cd $dir; $command $redirection";
         run( $cmd );
     }
@@ -446,8 +447,8 @@ class Installer {
     sub load-config-file(Str $filename) {
         my %settings;
         for lines($filename) {
-            when /^ '---'/               { #`[ do nothing ] }
-            when / '#' (.*) $/           { #`[ do nothing ] }
+            when /^ '---'/               { }
+            when / '#' (.*) $/           { }
             when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
         }
         return %settings;

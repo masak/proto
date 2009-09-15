@@ -444,6 +444,7 @@ The installed-modules branch plans to improve proto by doing the following:
     an 'install' target in the Makefile, run it if found.
     If there is no 'install', check that all the files in lib/ can be
     copied without clobbering, then either proceed to copy or abort.
+    [PART DONE]
 
 10. Add a new "update" command that works like the new "install" for the
     latest version of a project if a previous version was installed.
