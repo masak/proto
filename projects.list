@@ -141,3 +141,7 @@ xSQLite3:
 perl6-sqlite:
     home:  github
     owner: tene
+
+Tree:
+    home:  github
+    owner: wayland
