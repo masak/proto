@@ -262,7 +262,7 @@ sub create_default_config_file {
                  'downloading the project the usual way.' ],
     };
     my $cache_dir  = File::Spec->rel2abs('.') . '/cache';
-    my $perl6lib = $ENV{'HOME'} . '/.perl6lib';
+    my $perl6lib = $ENV{'HOME'} . '/.perl6/lib';
     my $perl6exe;
     if ( exists( $ENV{PERL6EXE} ) ) { # if you know what you're doing
         $perl6exe = $ENV{PERL6EXE};
@@ -397,8 +397,8 @@ The installed-modules branch plans to improve proto by doing the following:
     folder hierarchy. Rakudo now preloads @*INC with $HOME/.perl6lib,
     followed by <parrot_install>/lib/<version/languages/perl6/lib, the
     directories in PERL6LIB, and lastly '.' (the current directory).
-    Add a "Perl 6 library" setting to config.proto, with $HOME/.perl6lib
-    as default value. (This may become $HOME/.perl6/lib).
+    Add a "Perl 6 library" setting to config.proto, with $HOME/.perl6/lib
+    as default value.
     [DONE]
 
 2.  Keep a separate cache directory per project for all processing prior
