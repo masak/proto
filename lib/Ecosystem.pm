@@ -23,7 +23,13 @@ method get-info-on($project) {
 }
 
 method get-state($project) {
-    return %!project-state{$project}<state>;
+    if %!project-state.exists($project) {
+        return %!project-state{$project}<state>;
+    }
+    if self.is-fetched($project) {
+        return 'fetched'
+    }
+    return 'not-here';
 }
 
 method set-state($project,$state) {
@@ -48,10 +54,6 @@ method unfetched-projects() {
 
 method is-fetched( Str $project ) {
     return "$cache-dir/$project" ~~ :d;
-}
-
-method is-installed( Str $project ) {
-    return %!project-state{$project}<state> eq 'installed';
 }
 
 sub load-project-list(Str $filename) {

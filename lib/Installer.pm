@@ -376,12 +376,26 @@ class Installer {
     method install(*@projects) {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
+        my @projects-to-download;
         for @projects -> $project {
-            # TODO
+            my $state = $.ecosystem.get-state($project);
+            if $state eq any(<failed broken>) {
+                say "Can't install, $project $state";
+                return;
+            }
+            next if $state eq any('tested', 'installed');
+            @projects-to-download.push: $project;
         }
+        self.download-and-build-projects-and-their-deps( @projects-to-download );
         # install each project either via a custom copy by 'make install' if
         # available, or otherwise a default copy from lib/
         for @projects -> $project { # Makefile exists
+            print "Installing $project...";
+            if $.ecosystem.get-state($project) eq 'installed' {
+                say 'already installed';
+                next;
+            }
+
             my $project-dir = "{%!config-info{'Proto projects cache'}}/$project";
             if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
                 my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
@@ -397,6 +411,8 @@ class Installer {
                 run("cp -r $project-dir/lib/* $perl6lib");
                 # TODO: a non clobbering alternative to cp
             }
+            $.ecosystem.set-state($project, 'installed');
+            say 'installed';
         }
     }
 
