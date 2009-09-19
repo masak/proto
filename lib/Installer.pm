@@ -408,6 +408,17 @@ class Installer {
             else {
                 # no Makefile, recursively install lib/*
                 my $perl6lib = %!config-info{'Perl 6 library'};
+
+                # Making sure we don't clobber anything
+                my @files = qqx{find $project-dir/lib/ -type f}.split(/\n+/);
+                for @files -> $file {
+                    my $relative-file = $file.subst("$project-dir/lib/",'');
+                    my $destination = $perl6lib ~ '/' ~ $relative-file;
+                    if $destination ~~ :f {
+                        say "won't install since the file '$destination' already exists";
+                        return False;
+                    }
+                }
                 run("cp -r $project-dir/lib/* $perl6lib");
                 # TODO: a non clobbering alternative to cp
             }
