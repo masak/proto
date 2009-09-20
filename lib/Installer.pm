@@ -134,7 +134,7 @@ class Installer {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
-            unless $.ecosystem.is-fetched($project) {
+            unless $.ecosystem.get-state($project) {
                 say "Project '$project' is not downloaded";
                 $can-continue = False;
             }

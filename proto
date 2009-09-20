@@ -272,15 +272,10 @@ sub create_default_config_file {
         my ($volume,$directories,$file) = File::Spec->splitpath( $path );
         my @dirs = File::Spec->splitdir( $directories );
         pop @dirs if ( $dirs[$#dirs] eq '' ); # remove silly empty value
-#       print "DIR: $directories\n";
-#       for ( my $i=0; $i <= $#dirs; $i++ ) {
-#           print "DIR[$i]: $dirs[$i]\n";
-#       }
         $dirs[$#dirs] = 'rakudo';
         push @dirs, 'parrot_install', 'bin';
         $directories = File::Spec->catdir( @dirs );
         $perl6exe = File::Spec->catpath( $volume, $directories, 'perl6' );
-#        $perl6exe = $ENV{'HOME'} . '/rakudo/parrot_install/bin/perl6';
     }
 
     my $config_info = {
@@ -298,10 +293,12 @@ sub create_default_config_file {
 }
 
 sub create_default_state_file {
-    my ($file_name, @projectnames ) = @_;
+    my ($file_name, @project_names ) = @_;
+    my $project_dir = $config_info->{'Proto projects directory'};
     open PROJECTS_STATE, ">", $file_name or die "cannot create $file_name: $!";
-    for my $projectname (@projectnames) {
-        print PROJECTS_STATE "$projectname:\n    state: legacy\n\n";
+    for my $project_name (@project_names) {
+        my $path = "$project_dir/$project_name";
+        print PROJECTS_STATE "$project_name:\n    state: legacy: $path\n\n";
     }
     close PROJECTS_STATE;
 }
@@ -444,26 +441,34 @@ The installed-modules branch plans to improve proto by doing the following:
     an 'install' target in the Makefile, run it if found.
     If there is no 'install', check that all the files in lib/ can be
     copied without clobbering, then either proceed to copy or abort.
-    [PART DONE]
+    [DONE]
 
-10. Add a new "update" command that works like the new "install" for the
-    latest version of a project if a previous version was installed.
-    Handle 'update' like 'install' but allow files to be overwritten.
-    Use the 'install' target in the Makefile, not 'update'.
+10. Drop the migration plan for existing installations: laziness++ ;)
+    Just warn the user as long as the old config.proto has not been
+    upgraded, and record as "state: legacy: /path" in projects.state.
+    This must be overwritten if the user later re-installs the project.
+    [DONE]
 
-11. Handle 'uninstall' by Makefile or by listing all the names in
+11. Handle "uninstall" by Makefile or by listing all the names in
     $project/lib and deleting each same named file in "Perl 6 library".
     Also remove the project name from projects.installed and delete the
     project cache directory. Think "realclean".
     We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
 
-12. Ensure robustness of the workflow, so that an error in fetching,
+12. Add a new "update" command. To be fail-safe, cache the project's
+    downloaded cache (yes, cache the cache) by copying everything into
+    another directory called cache/$project.temp. Refresh the normal
+    cache. Determine whether there are any differences and back out
+    politely if nothing changed. Build and test the updated project in
+    the refreshed cache directory. If it passes, rename the cache
+    directory to cache/$project.new and rename the cache/$project.temp
+    to just cache/$project, and uninstall the old version of the project.
+    Discard the old project cache and rename the .new back. Install.
+
+13. Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
     being installed. Refactor the existing code to do this very
     concisely in the top level methods.
-
-13. Drop the migration plan for existing installations: laziness++ ;)
-    Just make a warning list of apparently non updated projects.
 
 14. Validate @*INC by exiting with a friendly explanation if @*INC does
     not contain the 'Perl 6 library' directory. List the possible fixes:
@@ -474,7 +479,28 @@ The installed-modules branch plans to improve proto by doing the following:
 
 15. Update create-new-project to support install, update and uninstall
     in its Makefile. Document it as a guideline for module developers.
+    This facility is new to proto, so it is also new to all projects.
+    The 'make' utility will need to know where to find 'Perl 6 library',
+    so do this: %*ENV<PERL6LIB> = %!config-info{'Perl 6 library'}.
 
 16. ...keep planning and doing...
+
+17. Add a list command to report on the state of all fetched/installed
+    projects.
+    [OPTIONAL]
+
+18. Refactor into MVC form. Details to be determined. Some ideas:
+    Model is currently only Ecosystem (metadata). It should also include
+    handling files and directories in the proto/cache/ and the
+    'Perl 6 library' tree, perhaps within a separate module.
+    View is the part of Installer.pm that deals with lists of projects,
+    commands and other user I/O.
+    Controller is the part of Installer.pm that er, controls flow, but
+    it should leave the actual updating of projects, files and state to
+    Model.
+    [OPTIONAL]
+
+19. Create tests and a harness to verify proto's stability.
+    [OPTIONAL]
 
 =cut

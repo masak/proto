@@ -26,7 +26,7 @@ method get-state($project) {
     if %!project-state.exists($project) {
         return %!project-state{$project}<state>;
     }
-    if self.is-fetched($project) {
+    if "$cache-dir/$project" ~~ :d {
         return 'fetched'
     }
     return 'not-here';
@@ -50,10 +50,6 @@ method fetched-projects() {
 
 method unfetched-projects() {
     return self.regular-projects.grep: { "$cache-dir/$_" !~~ :d };
-}
-
-method is-fetched( Str $project ) {
-    return "$cache-dir/$project" ~~ :d;
 }
 
 sub load-project-list(Str $filename) {

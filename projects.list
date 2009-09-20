@@ -133,3 +133,15 @@ Vector:
 perl6-literate:
     home:  github
     owner: masak
+
+xSQLite3:
+    home:  github
+    owner: asciiville
+
+perl6-sqlite:
+    home:  github
+    owner: tene
+
+Tree:
+    home:  github
+    owner: wayland
