@@ -454,6 +454,7 @@ The installed-modules branch plans to improve proto by doing the following:
     Also remove the project name from projects.installed and delete the
     project cache directory. Think "realclean".
     We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
+    [PARTDONE]
 
 12. Add a new "update" command. To be fail-safe, cache the project's
     downloaded cache (yes, cache the cache) by copying everything into

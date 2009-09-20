@@ -9,11 +9,11 @@ class Installer {
         self.bless(
             self.CREATE(),
             config-info => (my $c = load-config-file('config.proto')),
-            ecosystem   => Ecosystem.new($c{'Perl 6 library'}),
+            ecosystem   => Ecosystem.new(cache-dir => $c{'Proto projects cache'}),
         )
     }
 
-    my @available-commands = <fetch refresh clean test install showdeps help>; #TODO: update uninstall
+    my @available-commands = <fetch refresh clean test install showdeps help uninstall>; #TODO: update
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -121,6 +121,42 @@ class Installer {
         }
     }
 
+    method uninstall(*@projects) {
+        # Check that all projects are installed
+        for @projects -> $project {
+            if $.ecosystem.get-state($project) ne 'installed' {
+                say "Can't uninstall $project - not installed";
+                return False;
+            }
+        }
+
+        my $perl6lib = %!config-info{'Perl 6 library'};
+        for @projects -> $project {
+            print "Uninstalling $project...";
+            my $project-dir = $.ecosystem.project-dir($project);
+            if makefile-has-uninstall($project-dir ~ '/Makefile') {
+                # TODO
+            }
+            else {
+                my @files = $.ecosystem.files-in-cache-lib($project)\
+                          .map({ "$perl6lib/$_" })\
+                          .grep({ $_ ~~ :f });
+
+                for @files -> $file {
+                    run("rm $file");
+                }
+            }
+            $.ecosystem.set-state($project, 'uninstalled');# strange state
+            say 'done';
+        }
+    }
+
+    sub makefile-has-uninstall( $makefile ) {
+        if $makefile !~~ :e { return False }
+        # TODO: open Makefile and check for / ^uninstall: /
+        return False
+    }
+
     method test(*@projects) {
         unless @projects {
             say 'You have to specify what you want to test.';
@@ -134,7 +170,7 @@ class Installer {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
-            unless $.ecosystem.get-state($project) {
+            unless $.ecosystem.get-state($project) eq 'built' {
                 say "Project '$project' is not downloaded";
                 $can-continue = False;
             }
@@ -144,13 +180,7 @@ class Installer {
             exit(1);
         }
         for @projects -> $project {
-            my %info = $.ecosystem.get-info-on($project);
-            my $project-dir
-                = %!config-info{'Proto projects cache'}
-                    ~ ( %info.exists('main_subdir')
-                        ?? "/$project/{%info<main_subdir>}"
-                        !! "/$project"
-                      );
+            my $project-dir = $.ecosystem.project-dir($project);
             print "Testing $project...";
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
@@ -396,7 +426,7 @@ class Installer {
                 next;
             }
 
-            my $project-dir = "{%!config-info{'Proto projects cache'}}/$project";
+            my $project-dir = $.ecosystem.project-dir($project);
             if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
                 my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
@@ -410,10 +440,9 @@ class Installer {
                 my $perl6lib = %!config-info{'Perl 6 library'};
 
                 # Making sure we don't clobber anything
-                my @files = qqx{find $project-dir/lib/ -type f}.split(/\n+/);
+                my @files = $.ecosystem.files-in-cache-lib($project);
                 for @files -> $file {
-                    my $relative-file = $file.subst("$project-dir/lib/",'');
-                    my $destination = $perl6lib ~ '/' ~ $relative-file;
+                    my $destination = $perl6lib ~ '/' ~ $file;
                     if $destination ~~ :f {
                         say "won't install since the file '$destination' already exists";
                         return False;

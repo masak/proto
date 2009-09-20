@@ -44,6 +44,22 @@ method regular-projects() {
           || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
 }
 
+method project-dir($project) {
+    return $cache-dir ~ ( %!project-info{$project}.exists('main_subdir')
+                          ?? "/$project/{%!project-info{$project}<main_subdir>}"
+                          !! "/$project"
+                        );
+}
+
+method files-in-cache-lib($project) {
+    my $project-dir = self.project-dir($project);
+    my @cache_files = qqx{find $project-dir/lib/ -type f}\
+                      .split(/\n+/)\
+                      .grep({ $_ ne "" })\
+                      .map: { $_.subst("$project-dir/lib/",'') };
+    return @cache_files;
+}
+
 method fetched-projects() {
     return self.regular-projects.grep: { "$cache-dir/$_" ~~ :d };
 }
