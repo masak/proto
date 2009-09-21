@@ -334,7 +334,9 @@ class Installer {
                     sprintf 'svn co https://%s.googlecode.com/svn/trunk %s',
                             $name, $target-dir;
                 }
-                default { die "Unknown home type {%info<home>}"; }
+                default {
+                    die "Unknown home type '{%info<home>}' for project '$project'";
+                }
             };
             # This fails since there are parens in $command
             #self.configured-run( $command );
