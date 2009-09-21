@@ -417,6 +417,12 @@ class Installer {
             @projects-to-download.push: $project;
         }
         self.download-and-build-projects-and-their-deps( @projects-to-download );
+
+        # Add the built deps. TODO make sure that the project actually is
+        # installable.
+        @projects.unshift( @projects.map({ self.get-deps-deeply( $_ )})\
+                                    .grep({ $.ecosystem.get-state($_) ne 'installed' })
+                         );
         # install each project either via a custom copy by 'make install' if
         # available, or otherwise a default copy from lib/
         for @projects -> $project { # Makefile exists
