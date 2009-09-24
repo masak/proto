@@ -484,13 +484,20 @@ The installed-modules branch plans to improve proto by doing the following:
     The 'make' utility will need to know where to find 'Perl 6 library',
     so do this: %*ENV<PERL6LIB> = %!config-info{'Perl 6 library'}.
 
-16. ...keep planning and doing...
+16. When loading projects.list also load a projects.local if it exists.
+    The projects.local file allows individual projects to be handled by
+    proto without causing git conflicts on projects.list.
 
-17. Add a list command to report on the state of all fetched/installed
+17. ...keep planning and doing...
+
+18. Make 'test' to show details of failures. Also do 'test all'.
+    [OPTIONAL]
+
+19. Add a list command to report on the state of all fetched/installed
     projects.
     [OPTIONAL]
 
-18. Refactor into MVC form. Details to be determined. Some ideas:
+20. Refactor into MVC form. Details to be determined. Some ideas:
     Model is currently only Ecosystem (metadata). It should also include
     handling files and directories in the proto/cache/ and the
     'Perl 6 library' tree, perhaps within a separate module.
@@ -501,7 +508,13 @@ The installed-modules branch plans to improve proto by doing the following:
     Model.
     [OPTIONAL]
 
-19. Create tests and a harness to verify proto's stability.
+21. Write a test suite for proto itself, with the possibility of partial
+    testing offline. With acceptable test coverage, proto could be taken
+    a bit more seriously as an infrastructure tool.
+    [OPTIONAL]
+
+22. Emulate Debian's 'popularity-contest' for package usage statistics,
+    based on anonymous submission via smtp or http.
     [OPTIONAL]
 
 =cut
