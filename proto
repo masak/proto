@@ -490,14 +490,25 @@ The installed-modules branch plans to improve proto by doing the following:
 
 17. ...keep planning and doing...
 
-18. Make 'test' to show details of failures. Also do 'test all'.
+18. Build a test suite for proto itself, with the possibility of partial
+    testing offline. With acceptable test coverage, proto will be safer
+    to develop and use until other infrastructure tools usurp it.
+    Use a test version of config.proto that points to test directories,
+    so that the main installation is not affected.
+    For even better testing, consider testing proto inside a chroot jail
+    to prevent bugs from damaging things. Building the jail may be a bit
+    complicated though, think it through first.
     [OPTIONAL]
 
-19. Add a list command to report on the state of all fetched/installed
+19. Make 'test' (of a project) show details of failures. Also add a
+    'test all' suitable for "Cheese speleology".
+    [OPTIONAL]
+
+20. Add a list command to report on the state of all fetched/installed
     projects.
     [OPTIONAL]
 
-20. Refactor into MVC form. Details to be determined. Some ideas:
+21. Refactor into MVC form. Details to be determined. Some ideas:
     Model is currently only Ecosystem (metadata). It should also include
     handling files and directories in the proto/cache/ and the
     'Perl 6 library' tree, perhaps within a separate module.
@@ -506,11 +517,6 @@ The installed-modules branch plans to improve proto by doing the following:
     Controller is the part of Installer.pm that er, controls flow, but
     it should leave the actual updating of projects, files and state to
     Model.
-    [OPTIONAL]
-
-21. Write a test suite for proto itself, with the possibility of partial
-    testing offline. With acceptable test coverage, proto could be taken
-    a bit more seriously as an infrastructure tool.
     [OPTIONAL]
 
 22. Emulate Debian's 'popularity-contest' for package usage statistics,

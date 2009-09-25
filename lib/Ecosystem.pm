@@ -22,11 +22,18 @@ method get-info-on($project) {
     return %!project-info{$project};
 }
 
+# The definition and implementation of project state is still in flux,
+# particularly where one state overlaps with or implies another.
+# For example, a failed build implies a failed test, and an installed
+# project may be removed from cache.
+# Route all access to project state via the following methods
+# (get-state, set-state and is-state) to shield the rest of the code
+# as much as possible from changes.
 method get-state($project) {
-    if %!project-state.exists($project) {
-        return %!project-state{$project}<state>;
+    if %!project-state.exists($project) and %!project-state{$project}.exists('state') {
+        return ~ %!project-state{$project}{'state'};
     }
-    if "$cache-dir/$project" ~~ :d {
+    if self.is-state($project,'fetched') {
         return 'fetched'
     }
     return 'not-here';
@@ -36,6 +43,18 @@ method set-state($project,$state) {
     %!project-state{$project} = {} unless %!project-state.exists($project);
     %!project-state{$project}<state> = $state;
     save-project-list('projects.state', %!project-state);
+}
+
+method is-state($project,$state) {
+    if %!project-state.exists($project)
+        and %!project-state{$project}.exists('state')
+        and $state eq %!project-state{$project}<state> {
+        return Bool::True;
+    }
+    if $state eq 'fetched' and "$cache-dir/$project" ~~ :d {
+        return Bool::True
+    }
+    return Bool::False;
 }
 
 method regular-projects() {

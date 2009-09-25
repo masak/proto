@@ -13,7 +13,7 @@ class Installer {
         )
     }
 
-    my @available-commands = <fetch refresh clean test install showdeps help uninstall>; #TODO: update
+    my @available-commands = <fetch refresh clean test install showdeps showstate help uninstall>; #TODO: update
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -246,6 +246,17 @@ class Installer {
         }
     }
 
+    method showstate(*@projects1) { # 'is copy' would be elegant, but segfaults
+        my @projects = @projects1;
+        if @projects.grep('all') { @projects=$.ecosystem.regular-projects.sort; }
+        unless @projects { say "No projects requested"; return; }
+        for @projects -> $project {
+            print "$project: ";
+            my $state = $.ecosystem.get-state($project);
+            say "$state";
+        }
+    }
+
     submethod download-and-build-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
@@ -302,18 +313,13 @@ class Installer {
         my $silently   = '>/dev/null 2>&1';
         if $target-dir ~~ :d {
             print "Refreshing $project...";
-#           my $indir = "cd $target-dir";
             my $command = do given %info<home> {
                 when 'github' | 'gitorious' { 'git pull' }
                 when 'googlecode'           { 'svn up' }
             };
-#           my $r = self.configured-run( $command, :dir( $target-dir ) );
-#           if $r != 0 {
-            if ? self.configured-run( $command, :dir( $target-dir ) ) {
-                say 'failed';
-            } else {
-                say 'updated';
-            } # TODO: ternary ?? !! instead
+            my $state = self.configured-run( $command, :dir( $target-dir ) )
+                ?? 'failed' !! 'updated';
+            say $state;
         }
         else {
             print "Downloading $project...";
@@ -340,12 +346,9 @@ class Installer {
             };
             # This fails since there are parens in $command
             #self.configured-run( $command );
-            my $r = run( "$command $silently" );
-            if $r != 0 {
-                say 'failed';
-            } else {
-                say 'downloaded';
-            } # TODO: ternary ?? !! instead
+            my $state = run( "$command $silently" )
+                ?? 'failed' !! 'downloaded';
+            say $state;
         }
     }
 
@@ -357,12 +360,9 @@ class Installer {
         my $target-dir  = %!config-info{'Proto projects cache'}
                           ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
-            if $project eq 'proto' {
-                $target-dir = '.';
-            }
-            else {
-                die "Unknown bootstrapping project '$project'.";
-            }
+            die "Unknown bootstrapping project '$project'."
+                unless $project eq 'proto';
+            $target-dir = '.';
         }
         my $project-dir = $target-dir;
         if defined %info<main_subdir> {
@@ -420,12 +420,12 @@ class Installer {
         }
         self.download-and-build-projects-and-their-deps( @projects-to-download );
 
-        # Add the built deps. TODO make sure that the project actually is
-        # installable.
+        # Add the built deps.
+        # TODO: make sure that the project actually is installable.
         @projects.unshift( @projects.map({ self.get-deps-deeply( $_ )})\
                                     .grep({ $.ecosystem.get-state($_) ne 'installed' })
                          );
-        # install each project either via a custom copy by 'make install' if
+        # Install each project either via a custom copy by 'make install' if
         # available, or otherwise a default copy from lib/
         for @projects -> $project { # Makefile exists
             print "Installing $project...";
@@ -449,6 +449,10 @@ class Installer {
 
                 # Making sure we don't clobber anything
                 my @files = $.ecosystem.files-in-cache-lib($project);
+                # the Test and Configure modules from any project are
+                # not welcome in the shared Perl 6 library
+                # TODO: skip $file if eq any('Test.pm','Test.pir');
+                # TODO: skip $file if eq any('Configure.pm','Configure.pir');
                 for @files -> $file {
                     my $destination = $perl6lib ~ '/' ~ $file;
                     if $destination ~~ :f {
@@ -457,7 +461,24 @@ class Installer {
                     }
                 }
                 run("cp -r $project-dir/lib/* $perl6lib");
-                # TODO: a non clobbering alternative to cp
+                # TODO: a non clobbering, OS neutral alternative to cp
+                # If the previous loop ran to completion, copy all files
+                # one by one. NOTE: under construction
+                for @files -> $file {
+                    my @names = split /\/|\\/, $file; # find dirs by / or \
+                    my $filepart = @names.pop;
+                    if @names.elems {
+                        my $dir = $perl6lib ~ '/' ~ join('/',@names);
+                        if $dir !~~ :d {
+                            # TODO: implement IO::Path::create(), or what it
+                            # becomes since p{/dir} is unimplemented and wrong
+                            run("mkdir $dir");
+                        }
+                    }
+                    # TODO: replace cp with slurp() and squirt()
+                    my $command = "cp $project-dir/lib/$file $perl6lib/$file";
+                    my $status = run($command);
+                }
             }
             $.ecosystem.set-state($project, 'installed');
             say 'installed';
