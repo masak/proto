@@ -449,14 +449,18 @@ The installed-modules branch plans to improve proto by doing the following:
     This must be overwritten if the user later re-installs the project.
     [DONE]
 
-11. Handle "uninstall" by Makefile or by listing all the names in
+11. Add a showstate command to report on the state of all fetched or
+    installed projects.
+    [DONE]
+
+12. Handle "uninstall" by Makefile or by listing all the names in
     $project/lib and deleting each same named file in "Perl 6 library".
     Also remove the project name from projects.installed and delete the
     project cache directory. Think "realclean".
     We could keep the cache, but a "rm -rf" and a new fetch is cleaner.
     [PARTDONE]
 
-12. Add a new "update" command. To be fail-safe, cache the project's
+13. Add a new "update" command. To be fail-safe, cache the project's
     downloaded cache (yes, cache the cache) by copying everything into
     another directory called cache/$project.temp. Refresh the normal
     cache. Determine whether there are any differences and back out
@@ -466,31 +470,31 @@ The installed-modules branch plans to improve proto by doing the following:
     to just cache/$project, and uninstall the old version of the project.
     Discard the old project cache and rename the .new back. Install.
 
-13. Ensure robustness of the workflow, so that an error in fetching,
+14. Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
     being installed. Refactor the existing code to do this very
     concisely in the top level methods.
 
-14. Validate @*INC by exiting with a friendly explanation if @*INC does
+15. Validate @*INC by exiting with a friendly explanation if @*INC does
     not contain the 'Perl 6 library' directory. List the possible fixes:
     edit config.proto (set Perl 6 library), or any one of
     ~/.bash_profile, ~/.bash_login, or ~/.profile (set PERL6LIB).
     Make this behaviour optional with a 'Validate Perl 6 library' option
     in config.proto.
 
-15. Update create-new-project to support install, update and uninstall
+16. Update create-new-project to support install, update and uninstall
     in its Makefile. Document it as a guideline for module developers.
     This facility is new to proto, so it is also new to all projects.
     The 'make' utility will need to know where to find 'Perl 6 library',
     so do this: %*ENV<PERL6LIB> = %!config-info{'Perl 6 library'}.
 
-16. When loading projects.list also load a projects.local if it exists.
+17. When loading projects.list also load a projects.local if it exists.
     The projects.local file allows individual projects to be handled by
     proto without causing git conflicts on projects.list.
 
-17. ...keep planning and doing...
+18. ...keep planning and doing...
 
-18. Build a test suite for proto itself, with the possibility of partial
+19. Build a test suite for proto itself, with the possibility of partial
     testing offline. With acceptable test coverage, proto will be safer
     to develop and use until other infrastructure tools usurp it.
     Use a test version of config.proto that points to test directories,
@@ -500,15 +504,13 @@ The installed-modules branch plans to improve proto by doing the following:
     complicated though, think it through first.
     [OPTIONAL]
 
-19. Make 'test' (of a project) show details of failures. Also add a
+20. Improve the usage message and provide help per command.
+
+21. Make 'test' (of a project) show details of failures. Also add a
     'test all' suitable for "Cheese speleology".
     [OPTIONAL]
 
-20. Add a list command to report on the state of all fetched/installed
-    projects.
-    [OPTIONAL]
-
-21. Refactor into MVC form. Details to be determined. Some ideas:
+22. Refactor into MVC form. Details to be determined. Some ideas:
     Model is currently only Ecosystem (metadata). It should also include
     handling files and directories in the proto/cache/ and the
     'Perl 6 library' tree, perhaps within a separate module.
@@ -519,7 +521,7 @@ The installed-modules branch plans to improve proto by doing the following:
     Model.
     [OPTIONAL]
 
-22. Emulate Debian's 'popularity-contest' for package usage statistics,
+23. Emulate Debian's 'popularity-contest' for package usage statistics,
     based on anonymous submission via smtp or http.
     [OPTIONAL]
 

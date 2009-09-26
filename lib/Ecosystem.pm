@@ -24,11 +24,26 @@ method get-info-on($project) {
 
 # The definition and implementation of project state is still in flux,
 # particularly where one state overlaps with or implies another.
-# For example, a failed build implies a failed test, and an installed
-# project may be removed from cache.
+# For example, a test implies a successful build, but an installed
+# project might have been cleaned from cache.
 # Route all access to project state via the following methods
 # (get-state, set-state and is-state) to shield the rest of the code
-# as much as possible from changes.
+# as much as possible from changes to state definitions.
+# The following states are currently in use (and may well change):
+#   fetched    or  fetch-failed
+#   built      or  build-failed
+#   tested     or  test-failed
+#   installed  or  install-failed
+method is-state($project,$state) {
+    if $state eq 'fetched' { return ?( "$cache-dir/$project" ~~ :d ); }
+    if %!project-state.exists($project)
+        and %!project-state{$project}.exists('state')
+        and $state eq %!project-state{$project}<state> {
+        return True;
+    }
+    return False;
+}
+
 method get-state($project) {
     if %!project-state.exists($project) and %!project-state{$project}.exists('state') {
         return ~ %!project-state{$project}{'state'};
@@ -41,20 +56,13 @@ method get-state($project) {
 
 method set-state($project,$state) {
     %!project-state{$project} = {} unless %!project-state.exists($project);
-    %!project-state{$project}<state> = $state;
+    if $state {
+        %!project-state{$project}<state> = $state;
+    }
+    else {
+        %!project-state.delete($project); # because there was only <state>
+    }
     save-project-list('projects.state', %!project-state);
-}
-
-method is-state($project,$state) {
-    if %!project-state.exists($project)
-        and %!project-state{$project}.exists('state')
-        and $state eq %!project-state{$project}<state> {
-        return Bool::True;
-    }
-    if $state eq 'fetched' and "$cache-dir/$project" ~~ :d {
-        return Bool::True
-    }
-    return Bool::False;
 }
 
 method regular-projects() {

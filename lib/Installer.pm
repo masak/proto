@@ -13,7 +13,7 @@ class Installer {
         )
     }
 
-    my @available-commands = <fetch refresh clean test install showdeps showstate help uninstall>; #TODO: update
+    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help>; #TODO: add update
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -32,7 +32,7 @@ class Installer {
                             $command;
     }
 
-    method help(*@projects) {
+    method help(@projects) {
         .say for
             "A typical usage is:",
             q['./proto install <projectname>'],
@@ -40,8 +40,8 @@ class Installer {
             'See the README for more details';
     }
 
-    method fetch-or-refresh( $subcommand, *@projects) {
-        my @projects-to-download;
+    method fetch-or-refresh($subcommand, @projects) {
+        my @projects-to-fetch;
         my $missing-projects = False;
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
@@ -49,115 +49,65 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-download.push($.ecosystem.unfetched-projects());
+                @projects-to-fetch.push($.ecosystem.unfetched-projects());
             }
-            elsif $subcommand eq "fetch" && "{%!config-info{'Proto projects cache'}}/$project"
-                    ~~ :d {
+            elsif $subcommand eq "fetch" && $.ecosystem.is-state($project,'fetched') {
                 say "Won't fetch $project: already fetched.";
             }
-            elsif $subcommand eq "refresh" && "{%!config-info{'Proto projects cache'}}/$project"
-                    !~~ :d {
+            elsif $subcommand eq "refresh" && !$.ecosystem.is-state($project,'fetched') {
                 say "Cannot refresh $project: not fetched.";
             }
             else {
-                @projects-to-download.push($project);
+                @projects-to-fetch.push($project);
             }
         }
         if $missing-projects {
             say 'Try updating proto to get the latest list of projects.';
             exit(1);
         }
-        if !@projects-to-download {
+        if !@projects-to-fetch {
             say 'Nothing to fetch.';
             exit(1);
         }
-        @projects-to-download .= uniq;
-        self.download-and-build-projects-and-their-deps( @projects-to-download );
+        @projects-to-fetch .= uniq;
+        my @projects-to-build = self.download-projects-and-their-deps( @projects-to-fetch );
+        for @projects-to-build -> $project { self.build($project) }
         if $subcommand eq 'fetch' {
-            self.check-if-in-perl6lib( @projects-to-download );
+            self.check-if-in-perl6lib( @projects-to-fetch );
         }
     }
 
-    method fetch(*@projects) {
+    method fetch(@projects) {
         self.fetch-or-refresh( 'fetch', @projects );
     }
 
-    method refresh(*@projects) {
+    method refresh(@projects) {
         self.fetch-or-refresh( 'refresh', @projects );
     }
 
-    method clean(*@projects) {
+    method clean(@projects is copy) {
+        if @projects.grep('all') {
+            @projects=$.ecosystem.regular-projects.sort;
+        }
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
-                say "Project not found: '$project'";
-                say "Aborting.";
+                say "proto does not know about $project: skipping";
             }
-            elsif $project eq 'all' {
-                say "'clean all' not implemented yet";
-                # TODO: Implement.
-            }
-            elsif "{%!config-info{'Proto projects cache'}}/$project"
-                    !~~ :d {
-                say "Won't clean $project: not found.";
-                say "Aborting.";
-            }
-        }
-        for $.ecosystem.fetched-projects() -> $project {
-            next if $project eq any(@projects);
-            for self.get-deps($project) -> $dep {
-                if $dep eq any(@projects) {
-                    say "Cannot clean $dep, depended on by $project.";
-                    say "Aborting.";
-                    return;
-                }
-            }
-        }
-        for @projects -> $project {
-            print "Cleaning $project...";
-            my $target-dir = %!config-info{'Proto projects cache'}
-                             ~ "/$project";
-            run("rm -rf $target-dir");
-            say "done";
-        }
-    }
-
-    method uninstall(*@projects) {
-        # Check that all projects are installed
-        for @projects -> $project {
-            if $.ecosystem.get-state($project) ne 'installed' {
-                say "Can't uninstall $project - not installed";
-                return False;
-            }
-        }
-
-        my $perl6lib = %!config-info{'Perl 6 library'};
-        for @projects -> $project {
-            print "Uninstalling $project...";
-            my $project-dir = $.ecosystem.project-dir($project);
-            if makefile-has-uninstall($project-dir ~ '/Makefile') {
-                # TODO
+            elsif $.ecosystem.is-state($project,'fetched') {
+                print "Cleaning $project...";
+                my $target-dir = %!config-info{'Proto projects cache'}
+                                 ~ "/$project";
+                run("rm -rf $target-dir");
+                $.ecosystem.set-state($project,'');
+                say "done";
             }
             else {
-                my @files = $.ecosystem.files-in-cache-lib($project)\
-                          .map({ "$perl6lib/$_" })\
-                          .grep({ $_ ~~ :f });
-
-                for @files -> $file {
-                    run("rm $file");
-                }
+                say "$project was already cleaned";
             }
-            $.ecosystem.set-state($project, 'uninstalled');# strange state
-            say 'done';
         }
     }
 
-    sub makefile-has-uninstall( $makefile ) {
-        if $makefile !~~ :e { return False }
-        # TODO: open Makefile and check for / ^uninstall: /
-        return False
-    }
-
-    method test(*@projects) {
+    method test(@projects) {
         unless @projects {
             say 'You have to specify what you want to test.';
             # TODO: Maybe just test everything fetched?
@@ -190,7 +140,7 @@ class Installer {
             }
             unless $command {
                 if "$project-dir/t" ~~ :d
-                   && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
+                    && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
                 {
                     $command = 'prove -e "'
                         ~ %!config-info{'Perl 6 executable'}
@@ -201,7 +151,7 @@ class Installer {
                 my $r = self.configured-run( $command, :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
                     say 'failed';
-                    $.ecosystem.set-state($project,'failed');
+                    $.ecosystem.set-state($project,'test-failed');
                     return;
                 }
             }
@@ -213,21 +163,21 @@ class Installer {
     # TODO: This sub should probably recursively show dependencies, and in
     #       such a way that a dependency found twice by different routes is
     #       only mentioned the second time -- its dependencies are not shown.
-    method showdeps(*@projects) {
+    method showdeps(@projects) {
         unless @projects {
             say "You have to specify which projects' dependencies to show.";
             exit 1;
         }
         for @projects -> $project {
-            if "{%!config-info{'Proto projects cache'}}/$project" !~~ :d {
-                say "$project is not fetched.";
-                next;
+            if !$.ecosystem.is-state($project,'fetched') {
+                say "$project is not here.";
             }
-            if !self.get-deps($project) {
+            elsif !self.get-deps($project) {
                 say "$project has no dependencies.";
-                next;
             }
-            self.showdeps-recursively($project);
+            else {
+                self.showdeps-recursively($project);
+            }
         }
     }
 
@@ -246,18 +196,13 @@ class Installer {
         }
     }
 
-    method showstate(*@projects1) { # 'is copy' would be elegant, but segfaults
-        my @projects = @projects1;
+    method showstate(@projects is copy) {
         if @projects.grep('all') { @projects=$.ecosystem.regular-projects.sort; }
         unless @projects { say "No projects requested"; return; }
-        for @projects -> $project {
-            print "$project: ";
-            my $state = $.ecosystem.get-state($project);
-            say "$state";
-        }
+        for @projects -> $p { say "$p: {$.ecosystem.get-state($p)}"; }
     }
 
-    submethod download-and-build-projects-and-their-deps(@projects) {
+    submethod download-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
         #       like this: :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D
@@ -266,9 +211,10 @@ class Installer {
         #       postorder C-D-B-E-A. Those could even be interspersed
         #       build-soonest, making it dA-dB-dC-bC-bD-bB-dE-bE-bA.
         my %seen;
+        my @build-stack;
         for @projects -> $top-project {
             next if %seen{$top-project};
-            my @build-stack = $top-project;
+            @build-stack.push($top-project);
             my @download-queue = $top-project;
 
             while @download-queue {
@@ -280,10 +226,11 @@ class Installer {
                 @build-stack.unshift(@deps.reverse);
             }
 
-            for @build-stack.uniq -> $project {
-                self.build($project);
-            }
+#           for @build-stack.uniq -> $project {
+#               self.build($project);
+#           }
         }
+        return @build-stack.uniq;
     }
 
     submethod download( Str $project ) {
@@ -311,7 +258,7 @@ class Installer {
             }
         }
         my $silently   = '>/dev/null 2>&1';
-        if $target-dir ~~ :d {
+        if $.ecosystem.is-state($project,'fetched') {
             print "Refreshing $project...";
             my $command = do given %info<home> {
                 when 'github' | 'gitorious' { 'git pull' }
@@ -375,8 +322,9 @@ class Installer {
         # TODO: deprecate PARROT_DIR and RAKUDO_DIR now that we have an
         #       installed Perl 6 executable.
         %*ENV<PARROT_DIR> = %*VM<config><bindir>;
+        %*ENV<RAKUDO_DIR> = %*VM<config><bindir>; # same, in parrot_install
         my $perl6 = %!config-info{'Perl 6 executable'};
-        if $perl6 ~~ / (.*) \/ perl6 / { %*ENV<RAKUDO_DIR> = $0; }
+#       if $perl6 ~~ / (.*) \/ perl6 / { %*ENV<RAKUDO_DIR> = $0; }
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
@@ -395,7 +343,7 @@ class Installer {
             my $make-cmd = 'make';
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
-                $.ecosystem.set-state($project,'broken');
+                $.ecosystem.set-state($project,'build-failed');
                 say "build failed, see $project-dir/make.log";
                 return;
             }
@@ -405,20 +353,21 @@ class Installer {
         unlink( "$project-dir/make.log" );
     }
 
-    method install(*@projects) {
+    method install(@projects) {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
         my @projects-to-download;
         for @projects -> $project {
             my $state = $.ecosystem.get-state($project);
-            if $state eq any(<failed broken>) {
+            if $state eq any(<failed broken build-failed>) {
                 say "Can't install, $project $state";
                 return;
             }
             next if $state eq any('tested', 'installed');
             @projects-to-download.push: $project;
         }
-        self.download-and-build-projects-and-their-deps( @projects-to-download );
+        my @projects-to-build = self.download-projects-and-their-deps( @projects-to-download );
+        for @projects-to-build -> $project { self.build($project) }
 
         # Add the built deps.
         # TODO: make sure that the project actually is installable.
@@ -438,7 +387,7 @@ class Installer {
             if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
                 my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
-                    $.ecosystem.set-state($project,'notinstalled');
+                    $.ecosystem.set-state($project,'install-failed');
                     say "install failed, see $project-dir/make.log";
                     return;
                 }
@@ -460,28 +409,70 @@ class Installer {
                         return False;
                     }
                 }
-                run("cp -r $project-dir/lib/* $perl6lib");
-                # TODO: a non clobbering, OS neutral alternative to cp
                 # If the previous loop ran to completion, copy all files
-                # one by one. NOTE: under construction
+                # except Test.pm etc one by one.
                 for @files -> $file {
                     my @names = split /\/|\\/, $file; # find dirs by / or \
                     my $filepart = @names.pop;
+                    next if $filepart eq any(<Test.pm Configure.pm>);
                     if @names.elems {
                         my $dir = $perl6lib ~ '/' ~ join('/',@names);
                         if $dir !~~ :d {
-                            # TODO: implement IO::Path::create(), or what it
-                            # becomes since p{/dir} is unimplemented and wrong
-                            run("mkdir $dir");
+                            run("mkdir $dir"); # TODO: change to IO::Path::create()
                         }
                     }
-                    # TODO: replace cp with slurp() and squirt()
+                    # TODO: a non clobbering, OS neutral alternative to
+                    #       cp, replace with slurp() and squirt()
                     my $command = "cp $project-dir/lib/$file $perl6lib/$file";
-                    my $status = run($command);
+                    my $status = run($command); # TODO: check status
                 }
+                # the old version that also copied Test.pm etc:
+                # run("cp -r $project-dir/lib/* $perl6lib");
             }
             $.ecosystem.set-state($project, 'installed');
             say 'installed';
+        }
+    }
+
+    method uninstall(@projects) {
+        # Check that all projects are installed
+        for @projects -> $project {
+            if !$.ecosystem.is-state($project,'installed') {
+                say "Can't uninstall $project - not installed";
+                return False;
+            }
+        }
+# TODO: Ensure the proposed uninstall does not break any dependencies.
+#       This following was moved out of clean() and needs to be revised.
+#       for $.ecosystem.fetched-projects() -> $project {
+#           next if $project eq any(@projects);
+#           for self.get-deps($project) -> $dep {
+#               if $dep eq any(@projects) {
+#                   say "Cannot clean $dep, depended on by $project.";
+#                   say "Aborting.";
+#                   return;
+#               }
+#           }
+#       }
+
+        my $perl6lib = %!config-info{'Perl 6 library'};
+        for @projects -> $project {
+            print "Uninstalling $project...";
+            my $project-dir = $.ecosystem.project-dir($project);
+            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^uninstall\:/ {
+                self.configured-run( 'make uninstall', :project( $project ), :dir( $project-dir ) );
+            }
+            else {
+                for $.ecosystem.files-in-cache-lib($project).map({"$perl6lib/$_"}).grep({ $_ ~~ :f }) -> $file
+                {
+                    run("rm $file")
+                }
+            }
+            # assume 'tested' preceded 'installed'
+            $.ecosystem.set-state($project,
+                $.ecosystem.is-state($project,'fetched')
+                ?? 'tested' !! 'not-here' ); # TODO: erase state
+            say 'done';
         }
     }
 
@@ -539,7 +530,7 @@ class Installer {
         return %settings;
     }
 
-# TODO: replace with a central ~/.perl6lib check
+# TODO: replace with a central ~/.perl6/lib check
     submethod check-if-in-perl6lib( @projects ) {
         if %*ENV.exists('PERL6LIB') {
             my @projects-not-in
