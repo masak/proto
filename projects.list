@@ -145,3 +145,7 @@ perl6-sqlite:
 Tree:
     home:  github
     owner: wayland
+
+mwbot:
+    home:  github
+    owner: carlins
