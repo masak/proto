@@ -149,3 +149,7 @@ Tree:
 mwbot:
     home:  github
     owner: carlins
+
+link-c:
+    home:  github
+    owner: quietfanatic
