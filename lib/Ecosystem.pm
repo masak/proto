@@ -80,6 +80,12 @@ method project-dir($project) {
 
 method files-in-cache-lib($project) {
     my $project-dir = self.project-dir($project);
+    
+    if "$project-dir/lib" !~~ :d {
+        warn "\nWarning: lib directory does not exist in target project";
+        return [];
+    }
+
     my @cache_files = qqx{find $project-dir/lib/ -type f}\
                       .split(/\n+/)\
                       .grep({ $_ ne "" })\

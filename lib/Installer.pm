@@ -423,8 +423,10 @@ class Installer {
                     }
                     # TODO: a non clobbering, OS neutral alternative to
                     #       cp, replace with slurp() and squirt()
-                    my $command = "cp $project-dir/lib/$file $perl6lib/$file";
-                    my $status = run($command); # TODO: check status
+                    if "$project-dir/lib/$file" ~~ :f && "$perl6lib/$file" ~~ :f {
+                        my $command = "cp $project-dir/lib/$file $perl6lib/$file";
+                        my $status = run($command); # TODO: check status
+                    }
                 }
                 # the old version that also copied Test.pm etc:
                 # run("cp -r $project-dir/lib/* $perl6lib");
