@@ -3,6 +3,7 @@ class Ecosystem;
 has $cache-dir;
 has %!project-info;
 has %!project-state;
+has @!protected-files;
 
 method new(:$cache-dir!) {
     self.bless(
@@ -10,6 +11,7 @@ method new(:$cache-dir!) {
         cache-dir  => $cache-dir,
         project-info  => load-project-list('projects.list'),
         project-state => load-project-list('projects.state'),
+        protected-files => <Test.pm Test.pir Configure.pm Configure.pir>,
     );
 }
 

@@ -32,7 +32,7 @@ class Installer {
                             $command;
     }
 
-    method help(@projects) {
+    method help(*@projects) {
         .say for
             "A typical usage is:",
             q['./proto install <projectname>'],
@@ -40,7 +40,7 @@ class Installer {
             'See the README for more details';
     }
 
-    method fetch-or-refresh($subcommand, @projects) {
+    method fetch-or-refresh($subcommand,@projects) {
         my @projects-to-fetch;
         my $missing-projects = False;
         for @projects -> $project {
@@ -265,7 +265,7 @@ class Installer {
                 when 'googlecode'           { 'svn up' }
             };
             my $state = self.configured-run( $command, :dir( $target-dir ) )
-                ?? 'failed' !! 'updated';
+                ?? 'failed' !! 'refreshed';
             say $state;
         }
         else {
@@ -322,9 +322,9 @@ class Installer {
         # TODO: deprecate PARROT_DIR and RAKUDO_DIR now that we have an
         #       installed Perl 6 executable.
         %*ENV<PARROT_DIR> = %*VM<config><bindir>;
-        %*ENV<RAKUDO_DIR> = %*VM<config><bindir>; # same, in parrot_install
         my $perl6 = %!config-info{'Perl 6 executable'};
-#       if $perl6 ~~ / (.*) \/ perl6 / { %*ENV<RAKUDO_DIR> = $0; }
+        %*ENV<RAKUDO_DIR> = %*VM<config><libdir> ~ %*VM<config><versiondir>
+            ~ '/languages/perl6/lib'; # point to Test.pm
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
@@ -400,8 +400,6 @@ class Installer {
                 my @files = $.ecosystem.files-in-cache-lib($project);
                 # the Test and Configure modules from any project are
                 # not welcome in the shared Perl 6 library
-                # TODO: skip $file if eq any('Test.pm','Test.pir');
-                # TODO: skip $file if eq any('Configure.pm','Configure.pir');
                 for @files -> $file {
                     my $destination = $perl6lib ~ '/' ~ $file;
                     if $destination ~~ :f {
@@ -414,7 +412,7 @@ class Installer {
                 for @files -> $file {
                     my @names = split /\/|\\/, $file; # find dirs by / or \
                     my $filepart = @names.pop;
-                    next if $filepart eq any(<Test.pm Configure.pm>);
+                    next if $filepart eq any(@.ecosystem.protected-files);
                     if @names.elems {
                         my $dir = $perl6lib ~ '/' ~ join('/',@names);
                         if $dir !~~ :d {
