@@ -124,7 +124,7 @@ csv:
 
 gamebase:
     home:  github
-    owner: mikecanz
+    owner: quietfanatic
 
 Vector:
     home:  github
@@ -145,3 +145,11 @@ perl6-sqlite:
 Tree:
     home:  github
     owner: wayland
+
+mwbot:
+    home:  github
+    owner: carlins
+
+link-c:
+    home:  github
+    owner: quietfanatic
