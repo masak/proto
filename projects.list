@@ -153,3 +153,11 @@ mwbot:
 link-c:
     home:  github
     owner: quietfanatic
+
+rssbot:
+    home:  github
+    owner: carlins
+
+lolsql:
+    home:  github
+    owner: jnthn
