@@ -165,3 +165,11 @@ lolsql:
 mubot:
     home:  github
     owner: carlins
+
+irc-client:
+    home:  github
+    owner: carlins
+
+http-client:
+    home:  github
+    owner: carlins
