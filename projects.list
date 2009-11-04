@@ -161,3 +161,7 @@ rssbot:
 lolsql:
     home:  github
     owner: jnthn
+
+mubot:
+    home:  github
+    owner: carlins
