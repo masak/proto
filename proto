@@ -48,7 +48,7 @@ my $silently = ' > /dev/null 2>&1';
 install_perl6( $config_info );
 
 my $rakudo_directory = rakudo_directory( $config_info );
-my $perl6 = "$rakudo_directory/perl6";
+my $perl6 = "$rakudo_directory/parrot_install/bin/perl6";
 make_pir_modules( $perl6 );
 # Delegate to installer
 exec( "env RAKUDO_DIR=$rakudo_directory $perl6 installer @ARGV" );
@@ -215,7 +215,8 @@ sub build_rakudo {
                         ? ''
                         : '--gen-parrot';
         my $command
-            = "(cd $rakudo_directory && perl Configure.pl $flags && make)"
+            = "(cd $rakudo_directory && perl Configure.pl $flags "
+              . '&& make && make install)'
               . ' 2>&1 | ./dotty-progress "Building Perl 6" 3579';
         if ( system( $command ) != 0 ) {
             print "[ FAIL ]\n";
