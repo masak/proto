@@ -298,7 +298,12 @@ sub create_default_state_file {
     open PROJECTS_STATE, ">", $file_name or die "cannot create $file_name: $!";
     for my $project_name (@project_names) {
         my $path = "$project_dir/$project_name";
-        print PROJECTS_STATE "$project_name:\n    state: legacy: $path\n\n";
+        print PROJECTS_STATE join "\n",
+            "$project_name:",
+            '    state: legacy',
+            "    old-location: $path",
+            '',
+            '';
     }
     close PROJECTS_STATE;
 }
