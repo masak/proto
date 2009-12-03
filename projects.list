@@ -173,3 +173,8 @@ irc-client:
 http-client:
     home:  github
     owner: carlins
+
+Perl6-Term--ANSIColor:
+    home:  github
+    owner: illvilja
+
