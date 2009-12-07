@@ -107,12 +107,10 @@ class Installer {
         }
     }
 
-    method test(@projects) {
-        unless @projects {
-            say 'You have to specify what you want to test.';
-            # TODO: Maybe just test everything fetched?
-            #       YES: cheese speleology!
-            exit 1;
+    method test(@projects is copy) {
+        if !@projects | @projects.grep('all') {
+            say 'Beginning to test all available projects...';
+            @projects = $.ecosystem.fetched-projects;
         }
         my $can-continue = True;
         for @projects -> $project {
