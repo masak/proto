@@ -416,7 +416,7 @@ class Installer {
                     if @names.elems {
                         my $dir = $perl6lib ~ '/' ~ join('/',@names);
                         if $dir !~~ :d {
-                            run("mkdir $dir"); # TODO: change to IO::Path::create()
+                            mkdir $dir;
                         }
                     }
                     # TODO: a non clobbering, OS neutral alternative to
