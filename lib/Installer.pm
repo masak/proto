@@ -120,7 +120,8 @@ class Installer {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
-            unless $.ecosystem.get-state($project) eq 'built' {
+            my @testable-states = <built installed test-failed tested>;
+            unless $.ecosystem.get-state($project) eq any(@testable-states) {
                 say "Project '$project' is not downloaded";
                 $can-continue = False;
             }
