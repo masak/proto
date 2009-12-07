@@ -352,9 +352,12 @@ class Installer {
         unlink( "$project-dir/make.log" );
     }
 
-    method install(@projects) {
+    method install(@projects is copy) {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
+        if @projects.grep('all') {
+                @projects = $.ecosystem.unfetched-projects;
+        }
         my @projects-to-download;
         for @projects -> $project {
             my $state = $.ecosystem.get-state($project);
