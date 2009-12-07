@@ -3,7 +3,7 @@ class Ecosystem;
 has $cache-dir;
 has %!project-info;
 has %!project-state;
-has @!protected-files;
+has @.protected-files;
 
 method new(:$cache-dir!) {
     self.bless(
