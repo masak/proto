@@ -90,8 +90,8 @@ method files-in-cache-lib($project) {
 
     my @cache_files = qqx{find $project-dir/lib/}\
                       .split(/\n+/)\
-                      .grep({ $_ ne "" })\
-                      .map: { $_.subst("$project-dir/lib/",'') };
+                      .map({$_.subst("$project-dir/lib/",'')})\
+                      .grep({ $_ ne "" });
     return @cache_files;
 }
 
