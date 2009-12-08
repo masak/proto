@@ -265,6 +265,16 @@ class Installer {
             };
             my $state = self.configured-run( $command, :dir( $target-dir ) )
                 ?? 'failed' !! 'refreshed';
+            if $state eq 'refreshed' {
+                my @directories;
+                my $perl6lib = %!config-info{'Perl 6 library'};
+                # Can't unlink non-empty directories, delete the files first
+                for $.ecosystem.files-in-cache-lib($project) {
+                    if $_ ~~ :f { unlink $perl6lib ~ '/' ~ $_ }
+                    else { @directories.push: $perl6lib ~ '/' ~ $_ }
+                }
+                for @directories { unlink $_ }
+            }
             say $state;
         }
         else {
