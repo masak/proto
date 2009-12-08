@@ -153,3 +153,28 @@ mwbot:
 link-c:
     home:  github
     owner: quietfanatic
+
+rssbot:
+    home:  github
+    owner: carlins
+
+lolsql:
+    home:  github
+    owner: jnthn
+
+mubot:
+    home:  github
+    owner: carlins
+
+irc-client:
+    home:  github
+    owner: carlins
+
+http-client:
+    home:  github
+    owner: carlins
+
+Perl6-Term--ANSIColor:
+    home:  github
+    owner: illvilja
+
