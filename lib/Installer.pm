@@ -369,11 +369,11 @@ class Installer {
                 @projects = $.ecosystem.unfetched-projects;
         }
         my @projects-to-download;
-        for @projects -> $project {
+        for @projects.kv -> $key, $project {
             my $state = $.ecosystem.get-state($project);
             if $state eq any(<failed broken build-failed>) {
                 say "Can't install, $project $state";
-                return;
+                @projects.splice($key, 1);
             }
             next if $state eq any('tested', 'installed');
             @projects-to-download.push: $project;
