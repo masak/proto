@@ -269,6 +269,7 @@ class Installer {
                 my @directories;
                 # Can't unlink non-empty directories, delete the files first
                 for $.ecosystem.files-in-cache-lib($project) {
+                    next unless $_;
                     my $location = %!config-info{'Perl 6 library'} ~ '/' ~ $_;
                     if $location ~~ :f { unlink $location }
                     else { @directories.push: $location }
@@ -366,7 +367,7 @@ class Installer {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
         if @projects.grep('all') {
-                @projects = $.ecosystem.unfetched-projects;
+                @projects = $.ecosystem.regular-projects.sort;
         }
         my @projects-to-download;
         for @projects.kv -> $key, $project {
