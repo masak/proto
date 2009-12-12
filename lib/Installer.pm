@@ -13,7 +13,7 @@ class Installer {
         )
     }
 
-    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help>; #TODO: add update
+    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help update>; #TODO: add update
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -83,6 +83,26 @@ class Installer {
 
     method refresh(@projects) {
         self.fetch-or-refresh( 'refresh', @projects );
+    }
+
+    method update(@projects is copy) {
+        if @projects.grep('all') {
+            @projects = $.ecosystem.fetched-projects.sort;
+        }
+        for @projects {
+            print "updating $_...";
+            my $location = %!config-info{'Proto projects cache'} ~ '/' ~ $_;
+            run "cp -r $location $location.temp"; # XXX Not portable
+            my $proto-dir = $*CWD;
+            chdir $location;
+            my $where = $.ecosystem.get-info-on($_)<home>;
+            my $status = $where eq 'googlecode' ?? qqx{svn up} !! qqx{git pull};
+            chdir $proto-dir;
+            if $status ~~ /'At revision'/ | /'Already up-to-date'/ {
+                run "rm -rf $location.temp";
+                say 'already up-to-date';
+            }
+        }
     }
 
     method clean(@projects is copy) {
