@@ -367,7 +367,12 @@ class Installer {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
         if @projects.grep('all') {
-                @projects = $.ecosystem.regular-projects.sort;
+            @projects = $.ecosystem.regular-projects.sort;
+            for @projects.kv -> $key, $project {
+                if $.ecosystem.get-state($project) eq 'installed' {
+                    @projects.splice($key, 1);
+                }
+            }
         }
         my @projects-to-download;
         for @projects.kv -> $key, $project {
