@@ -6,6 +6,16 @@ use File::Path;
 use File::Spec;
 use Cwd qw(abs_path);
 
+# every first arguments beginning with - are single letter flags
+# exemple:  ./proto -v  -h
+# exemple:  ./proto -vz -h
+
+my %proto_flags; 
+while ( ( $ARGV[0] ||='' )  =~ /^-(.*)/ ) {
+    shift @ARGV;
+    $proto_flags{$_}=1 for split //,$1;
+};
+
 my ($volume,$proto_dir,$file) = File::Spec->splitpath(abs_path($0));
 my $config_file = File::Spec->catpath( $volume, $proto_dir,'config.proto');
 my $state_file = File::Spec->catpath( $volume, $proto_dir,'projects.state');
@@ -117,20 +127,23 @@ sub download_rakudo {
         my $tarfile = "rakudo-$rakudo_release.tar.gz";
         my $rakudo_url
             = "http://cloud.github.com/downloads/rakudo/rakudo/$tarfile";
-        my $command = "wget $rakudo_url 2>&1 | "
-                      . ' ./dotty-progress "Downloading Perl 6" 23';
-        system( $command ) == 0 or die "\nCouldn't download Perl 6: $?";
-        print "[  ok  ]\n";
-        $command = "tar xzvf $tarfile 2>&1 |"
-                   . ' ./dotty-progress "Unpacking Perl 6" 771';
-        system( $command ) == 0 or die "\nCouldn't unpack Perl 6: $?";
-        $command = "rm -f $tarfile";
-        system( $command ); # Don't mind failure here
-        $command = "mv rakudo-$rakudo_release $rakudo_directory $silently";
-        system( $command ) == 0 or die "\nCouldn't move Perl 6: $?";
+	shell_must( "wget $rakudo_url"
+	    , 'download Perl 6'
+	    , dotty => 23 
+	);
+
+        shell_must ( "tar xzvf $tarfile"
+	    , 'unpack Perl 6'
+	    , dotty => 771 
+	); 
+
+        system( "rm -f $tarfile" ); # Don't mind failure here
+        shell_must( "mv rakudo-$rakudo_release $rakudo_directory" 
+	    , "move Perl6 to $rakudo_directory"
+	    , silently => 'Yeah!' 
+	);
     }
     elsif ( $rakudo_directory =~ m{ (.*) / \w+ $}x ) {
-        print 'Downloading Perl 6...';
         my $parent_dir = $1;
         if ( ! -d $parent_dir ) {
             mkpath($parent_dir) or die "Couldn't create $parent_dir";
@@ -138,10 +151,10 @@ sub download_rakudo {
         if ( -d $rakudo_directory ) {
             rmtree($rakudo_directory) or die "Couldn't remove $rakudo_directory";
         }
-        my $command = 'git clone git://github.com/rakudo/rakudo.git'
-                      . " $rakudo_directory"
-                      . $silently;
-        system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
+	shell_must( "git clone git://github.com/rakudo/rakudo.git $rakudo_directory"
+	    , 'checkout rakudo'
+	    , silently => 'please ...' 
+	);
     }
     else {
         die "Something went wrong while downloading rakudo";
@@ -154,10 +167,11 @@ sub build_rakudo {
     my ( $config_info, $rakudo_directory ) = @_;
     if ( ! -f "$rakudo_directory/perl6" ) {
         my $flags = '--gen-parrot';
-        my $command
-            = "(cd $rakudo_directory && perl Configure.pl $flags && make install)"
-              . ' 2>&1 | ./dotty-progress "Building Perl 6" 4258'; # TODO: recalibrate
-        if ( system($command) != 0 ) {
+	my $ret = shell_does( "(cd $rakudo_directory && perl Configure.pl $flags && make install)"
+	    , "Building Perl 6"
+	    , dotty => 4258 # TODO: recalibrate
+	);
+        if ( $ret != 0 ) {
             print "[ FAIL ]\n";
             if ( system("grep memory make.log $silently") == 0 ) {
                 die "Not enough memory to build Perl 6.\n";
@@ -171,6 +185,22 @@ sub build_rakudo {
     }
 }
 
+sub shell_does {
+    my ( $cmd, $desc, %option ) = @_;
+    unless ( $proto_flags{v} ) {
+	if ( $option{dotty} )       { $cmd .= qq( 2>\&1 | ./dotty-progress "$desc" $option{dotty} ) }
+	elsif ( $option{silently} ) { $cmd .= ' > /dev/null 2>&1'; }
+    }
+    system($cmd);
+}
+
+sub shell_must {
+    my ( $cmd, $desc, %option ) = @_;
+    my $ret = shell_does(@_);
+    if ( $ret != 0 ) { die "[ FAIL ] Couldn't $desc: $!"; }
+    else { print "[ OK ]\n" }
+}
+ 
 sub make_pir_modules {
     my ($perl6) = @_;
     my $displayed_building = 0;
