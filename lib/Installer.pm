@@ -9,13 +9,11 @@ class Installer {
         self.bless(
             self.CREATE(),
             config-info => (my $c = load-config-file('config.proto')),
-            ecosystem   => Ecosystem.new(
-                               :projects-dir($c{'Proto projects directory'})
-                           ),
+            ecosystem   => Ecosystem.new(cache-dir => $c{'Proto projects cache'}),
         )
     }
 
-    my @available-commands = <install update uninstall test showdeps help>;
+    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help update>; #TODO: add update
 
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
@@ -42,8 +40,8 @@ class Installer {
             'See the README for more details';
     }
 
-    method install(*@projects) {
-        my @projects-to-install;
+    method fetch-or-refresh($subcommand,@projects) {
+        my @projects-to-fetch;
         my $missing-projects = False;
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
@@ -51,100 +49,88 @@ class Installer {
                 $missing-projects = True;
             }
             elsif $project eq 'all' {
-                @projects-to-install.push($.ecosystem.uninstalled-projects());
+                @projects-to-fetch.push($.ecosystem.unfetched-projects());
             }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
-                    ~~ :d {
-                say "Won't install $project: already installed.";
+            elsif $subcommand eq "fetch" && $.ecosystem.is-state($project,'fetched') {
+                say "Won't fetch $project: already fetched.";
+            }
+            elsif $subcommand eq "refresh" && !$.ecosystem.is-state($project,'fetched') {
+                say "Cannot refresh $project: not fetched.";
             }
             else {
-                @projects-to-install.push($project);
+                @projects-to-fetch.push($project);
             }
         }
         if $missing-projects {
             say 'Try updating proto to get the latest list of projects.';
             exit(1);
         }
-        if !@projects-to-install {
-            say 'Nothing to install.';
+        if !@projects-to-fetch {
+            say 'Nothing to fetch.';
             exit(1);
         }
-        @projects-to-install .= uniq;
-        self.fetch-and-build-projects-and-their-deps( @projects-to-install );
-        self.check-if-in-perl6lib( @projects-to-install );
+        @projects-to-fetch .= uniq;
+        my @projects-to-build = self.download-projects-and-their-deps( @projects-to-fetch );
+        for @projects-to-build -> $project { self.build($project) }
+        if $subcommand eq 'fetch' {
+            self.check-if-in-perl6lib( @projects-to-fetch );
+        }
     }
 
-    method update(*@projects) {
-        my @projects-to-update;
-        my $missing-projects = False;
+    method fetch(@projects) {
+        self.fetch-or-refresh( 'fetch', @projects );
+    }
+
+    method refresh(@projects) {
+        self.fetch-or-refresh( 'refresh', @projects );
+    }
+
+    method update(@projects is copy) {
+        if @projects.grep('all') {
+            @projects = $.ecosystem.fetched-projects.sort;
+        }
+        for @projects {
+            print "updating $_...";
+            my $location = %!config-info{'Proto projects cache'} ~ '/' ~ $_;
+            run "cp -r $location $location.temp"; # XXX Not portable
+            my $proto-dir = $*CWD;
+            chdir $location;
+            my $where = $.ecosystem.get-info-on($_)<home>;
+            my $status = $where eq 'googlecode' ?? qqx{svn up} !! qqx{git pull};
+            chdir $proto-dir;
+            if $status ~~ /'At revision'/ | /'Already up-to-date'/ {
+                run "rm -rf $location.temp";
+                say 'already up-to-date';
+            }
+        }
+    }
+
+    method clean(@projects is copy) {
+        if @projects.grep('all') {
+            @projects=$.ecosystem.regular-projects.sort;
+        }
         for @projects -> $project {
             if !$.ecosystem.contains-project($project) {
-                say "No such project: '$project'";
-                $missing-projects = True;
+                say "proto does not know about $project: skipping";
             }
-            elsif $project eq 'all' {
-                @projects-to-update.push($.ecosystem.installed-projects());
-            }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
-                    !~~ :d {
-                say "Cannot update $project: not installed.";
+            elsif $.ecosystem.is-state($project,'fetched') {
+                print "Cleaning $project...";
+                my $target-dir = %!config-info{'Proto projects cache'}
+                                 ~ "/$project";
+                run("rm -rf $target-dir");
+                $.ecosystem.set-state($project,'');
+                say "done";
             }
             else {
-                @projects-to-update.push($project);
+                say "$project was already cleaned";
             }
-        }
-        if $missing-projects {
-            exit(1);
-        }
-        if !@projects-to-update {
-            say 'Nothing to update.';
-            exit(1);
-        }
-        self.fetch-and-build-projects-and-their-deps(
-            @projects-to-update.uniq
-        );
-    }
-
-    method uninstall(*@projects) {
-        for @projects -> $project {
-            if !$.ecosystem.contains-project($project) {
-                say "Project not found: '$project'";
-                say "Aborting.";
-            }
-            elsif $project eq 'all' {
-                say "'uninstall all' not implemented yet";
-                # TODO: Implement.
-            }
-            elsif "{%!config-info{'Proto projects directory'}}/$project"
-                    !~~ :d {
-                say "Won't uninstall $project: not found.";
-                say "Aborting.";
-            }
-        }
-        for $.ecosystem.installed-projects() -> $project {
-            next if $project eq any(@projects);
-            for self.get-deps($project) -> $dep {
-                if $dep eq any(@projects) {
-                    say "Cannot uninstall $dep, depended on by $project.";
-                    say "Aborting.";
-                    return;
-                }
-            }
-        }
-        for @projects -> $project {
-            print "Removing $project...";
-            my $target-dir = %!config-info{'Proto projects directory'}
-                             ~ "/$project";
-            run("rm -rf $target-dir");
-            say "done";
         }
     }
 
-    method test(*@projects) {
-        unless @projects {
-            say 'You have to specify what you want to test.';
-            # TODO: Maybe just test everything installed?
-            exit 1;
+    method test(@projects is copy) {
+        if !@projects | @projects.grep('all') {
+            say 'Beginning to test all available projects...';
+            @projects = $.ecosystem.fetched-projects;
         }
         my $can-continue = True;
         for @projects -> $project {
@@ -152,8 +138,9 @@ class Installer {
                 say "Project not found: '$project'";
                 $can-continue = False;
             }
-            unless $.ecosystem.is-installed($project) {
-                say "Project '$project' is not installed";
+            my @testable-states = <built installed test-failed tested>;
+            unless $.ecosystem.get-state($project) eq any(@testable-states) {
+                say "Project '$project' is not downloaded";
                 $can-continue = False;
             }
         }
@@ -162,16 +149,7 @@ class Installer {
             exit(1);
         }
         for @projects -> $project {
-            my %info = $.ecosystem.get-info-on($project);
-            # RAKUDO: Doesn't support any other way to change the current
-            #         working directory. Improvising.
-            my $project-dir
-                = %!config-info{'Proto projects directory'}
-                    ~ ( %info.exists('main_subdir')
-                        ?? "/$project/{%info<main_subdir>}"
-                        !! "/$project"
-                      );
-            my $in-dir = "cd $project-dir";
+            my $project-dir = $.ecosystem.project-dir($project);
             print "Testing $project...";
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
@@ -181,43 +159,44 @@ class Installer {
             }
             unless $command {
                 if "$project-dir/t" ~~ :d
-                   && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
+                    && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
                 {
                     $command = 'prove -e "'
-                        ~ %!config-info{'Parrot directory'} ~ '/parrot '
-                        ~ %!config-info{'Rakudo directory'} ~ '/perl6.pbc"'
-                        ~ ' -r --nocolor t/';
+                        ~ %!config-info{'Perl 6 executable'}
+                        ~ '" -r --nocolor t/';
                 }
             }
             if $command {
                 my $r = self.configured-run( $command, :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
                     say 'failed';
+                    $.ecosystem.set-state($project,'test-failed');
                     return;
                 }
             }
             say 'ok';
+            $.ecosystem.set-state($project,'tested');
         }
     }
 
     # TODO: This sub should probably recursively show dependencies, and in
     #       such a way that a dependency found twice by different routes is
     #       only mentioned the second time -- its dependencies are not shown.
-    method showdeps(*@projects) {
+    method showdeps(@projects) {
         unless @projects {
             say "You have to specify which projects' dependencies to show.";
             exit 1;
         }
         for @projects -> $project {
-            if "{%!config-info{'Proto projects directory'}}/$project" !~~ :d {
-                say "$project is not installed.";
-                next;
+            if !$.ecosystem.is-state($project,'fetched') {
+                say "$project is not here.";
             }
-            if !self.get-deps($project) {
+            elsif !self.get-deps($project) {
                 say "$project has no dependencies.";
-                next;
             }
-            self.showdeps-recursively($project);
+            else {
+                self.showdeps-recursively($project);
+            }
         }
     }
 
@@ -236,7 +215,13 @@ class Installer {
         }
     }
 
-    submethod fetch-and-build-projects-and-their-deps(@projects) {
+    method showstate(@projects is copy) {
+        if @projects.grep('all') { @projects=$.ecosystem.regular-projects.sort; }
+        unless @projects { say "No projects requested"; return; }
+        for @projects -> $p { say "$p: {$.ecosystem.get-state($p)}"; }
+    }
+
+    submethod download-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
         #       like this: :A[ :B[ 'C', 'D' ], 'E' ], we download A-B-E-C-D
@@ -245,27 +230,29 @@ class Installer {
         #       postorder C-D-B-E-A. Those could even be interspersed
         #       build-soonest, making it dA-dB-dC-bC-bD-bB-dE-bE-bA.
         my %seen;
+        my @build-stack;
         for @projects -> $top-project {
             next if %seen{$top-project};
-            my @build-stack = $top-project;
-            my @fetch-queue = $top-project;
+            @build-stack.push($top-project);
+            my @download-queue = $top-project;
 
-            while @fetch-queue {
-                my $project = @fetch-queue.shift;
+            while @download-queue {
+                my $project = @download-queue.shift;
                 next if %seen{$project}++;
-                self.fetch($project);
+                self.download($project);
                 my @deps = self.get-deps($project);
-                @fetch-queue.push(@deps);
+                @download-queue.push(@deps);
                 @build-stack.unshift(@deps.reverse);
             }
 
-            for @build-stack.uniq -> $project {
-                self.build($project);
-            }
+#           for @build-stack.uniq -> $project {
+#               self.build($project);
+#           }
         }
+        return @build-stack.uniq;
     }
 
-    submethod fetch( Str $project ) {
+    submethod download( Str $project ) {
         # RAKUDO: :exists [perl #59794]
         if !$.ecosystem.contains-project($project) {
             say "proto installer does not know about project '$project'";
@@ -275,10 +262,10 @@ class Installer {
             #       dependency tree in which it is a part. Passing information
             #       upwards with exceptions would provide excellent error
             #       diagnostics (either it failed because it wasn't found, or
-            #       because dependencies couldn't be installed).
+            #       because dependencies couldn't be fetched).
             exit 1;
         }
-        my $target-dir = %!config-info{'Proto projects directory'}
+        my $target-dir = %!config-info{'Proto projects cache'}
                          ~ "/$project";
         my %info       = $.ecosystem.get-info-on($project);
         if %info.exists('type') && %info<type> eq 'bootstrap' {
@@ -290,19 +277,26 @@ class Installer {
             }
         }
         my $silently   = '>/dev/null 2>&1';
-        if $target-dir ~~ :d {
-            print "Updating $project...";
-            my $indir = "cd $target-dir";
+        if $.ecosystem.is-state($project,'fetched') {
+            print "Refreshing $project...";
             my $command = do given %info<home> {
                 when 'github' | 'gitorious' { 'git pull' }
                 when 'googlecode'           { 'svn up' }
             };
-            my $r = self.configured-run( $command, :dir( $target-dir ) );
-            if $r != 0 {
-                say 'failed';
-            } else {
-                say 'updated';
+            my $state = self.configured-run( $command, :dir( $target-dir ) )
+                ?? 'failed' !! 'refreshed';
+            if $state eq 'refreshed' {
+                my @directories;
+                # Can't unlink non-empty directories, delete the files first
+                for $.ecosystem.files-in-cache-lib($project) {
+                    next unless $_;
+                    my $location = %!config-info{'Perl 6 library'} ~ '/' ~ $_;
+                    if $location ~~ :f { unlink $location }
+                    else { @directories.push: $location }
+                }
+                for @directories { unlink $_ }
             }
+            say $state;
         }
         else {
             print "Downloading $project...";
@@ -323,16 +317,15 @@ class Installer {
                     sprintf 'svn co https://%s.googlecode.com/svn/trunk %s',
                             $name, $target-dir;
                 }
-                default { die "Unknown home type {%info<home>}"; }
+                default {
+                    die "Unknown home type '{%info<home>}' for project '$project'";
+                }
             };
-            # This failes since there is parens in $command
+            # This fails since there are parens in $command
             #self.configured-run( $command );
-            my $r = run( "$command $silently" );
-            if $r != 0 {
-                say 'failed';
-            } else {
-                say 'downloaded';
-            }
+            my $state = run( "$command $silently" )
+                ?? 'failed' !! 'downloaded';
+            say $state;
         }
     }
 
@@ -341,30 +334,32 @@ class Installer {
         # RAKUDO: Doesn't support any other way to change the current working
         #         directory. Improvising.
         my %info        = $.ecosystem.get-info-on($project);
-        my $target-dir  = %!config-info{'Proto projects directory'}
+        my $target-dir  = %!config-info{'Proto projects cache'}
                           ~ "/$project";
         if %info.exists('type') && %info<type> eq 'bootstrap' {
-            if $project eq 'proto' {
-                $target-dir = '.';
-            }
-            else {
-                die "Unknown bootstrapping project '$project'.";
-            }
+            die "Unknown bootstrapping project '$project'."
+                unless $project eq 'proto';
+            $target-dir = '.';
         }
         my $project-dir = $target-dir;
         if defined %info<main_subdir> {
             $project-dir = %info<main_subdir>;
         }
-        my $perl6 = %!config-info{'Rakudo directory'} ~ '/perl6';
         # XXX: Need to have error handling here, and not continue if things go
         #      haywire with the build. However, a project may not have a
         #      Makefile.PL or Configure.p6, and this needs to be considered
-        #     a successful [sic] outcome.
+        #      a successful [sic] outcome.
+        # TODO: deprecate PARROT_DIR and RAKUDO_DIR now that we have an
+        #       installed Perl 6 executable.
+        %*ENV<PARROT_DIR> = %*VM<config><bindir>;
+        my $perl6 = %!config-info{'Perl 6 executable'};
+        %*ENV<RAKUDO_DIR> = %*VM<config><libdir> ~ %*VM<config><versiondir>
+            ~ '/languages/perl6/lib'; # point to Test.pm
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
-                    !! "{%*ENV<RAKUDO_DIR>}/perl6";
+                    !! $perl6;
                 my $conf-cmd = "$perl $config-file";
                 my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
                 if $r != 0 {
@@ -378,12 +373,145 @@ class Installer {
             my $make-cmd = 'make';
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
+                $.ecosystem.set-state($project,'build-failed');
                 say "build failed, see $project-dir/make.log";
                 return;
             }
         }
         say 'built';
+        $.ecosystem.set-state($project,'built');
         unlink( "$project-dir/make.log" );
+    }
+
+    method install(@projects is copy) {
+        # ensure all requested projects have been fetched, built and tested.
+        # abort if any project is faulty.
+        if @projects.grep('all') {
+            @projects = $.ecosystem.regular-projects.sort;
+            for @projects.kv -> $key, $project {
+                if $.ecosystem.get-state($project) eq 'installed' {
+                    @projects.splice($key, 1);
+                }
+            }
+        }
+        my @projects-to-download;
+        for @projects.kv -> $key, $project {
+            my $state = $.ecosystem.get-state($project);
+            if $state eq any(<failed broken build-failed>) {
+                say "Can't install, $project $state";
+                @projects.splice($key, 1);
+            }
+            next if $state eq any('tested', 'installed');
+            @projects-to-download.push: $project;
+        }
+        my @projects-to-build = self.download-projects-and-their-deps( @projects-to-download );
+        for @projects-to-build -> $project { self.build($project) }
+
+        # Add the built deps.
+        # TODO: make sure that the project actually is installable.
+        @projects.unshift( @projects.map({ self.get-deps-deeply( $_ )})\
+                                    .grep({ $.ecosystem.get-state($_) ne 'installed' })
+                         );
+        # Install each project either via a custom copy by 'make install' if
+        # available, or otherwise a default copy from lib/
+        for @projects -> $project { # Makefile exists
+            print "Installing $project...";
+            if $.ecosystem.get-state($project) eq 'installed' {
+                say 'already installed';
+                next;
+            }
+
+            my $project-dir = $.ecosystem.project-dir($project);
+            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
+                my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
+                if $r != 0 {
+                    $.ecosystem.set-state($project,'install-failed');
+                    say "install failed, see $project-dir/make.log";
+                    return;
+                }
+            }
+            else {
+                # no Makefile, recursively install lib/*
+                my $perl6lib = %!config-info{'Perl 6 library'};
+
+                # Making sure we don't clobber anything
+                my @files = $.ecosystem.files-in-cache-lib($project);
+                # the Test and Configure modules from any project are
+                # not welcome in the shared Perl 6 library
+                for @files -> $file {
+                    my $destination = $perl6lib ~ '/' ~ $file;
+                    if $destination ~~ :f {
+                        say "won't install since the file '$destination' already exists";
+                        return False;
+                    }
+                }
+                # If the previous loop ran to completion, copy all files
+                # except Test.pm etc one by one.
+                for @files -> $file {
+                    my @names = split /\/|\\/, $file; # find dirs by / or \
+                    my $filepart = @names.pop;
+                    next if $filepart eq any(@.ecosystem.protected-files);
+                    if @names.elems {
+                        my $dir = $perl6lib ~ '/' ~ join('/',@names);
+                        if $dir !~~ :d {
+                            mkdir $dir;
+                        }
+                    }
+                    # TODO: a non clobbering, OS neutral alternative to
+                    #       cp, replace with slurp() and squirt()
+                    if "$project-dir/lib/$file" ~~ :f {
+                        my $command = "cp $project-dir/lib/$file $perl6lib/$file";
+                        my $status = run($command); # TODO: check status
+                    }
+                }
+                # the old version that also copied Test.pm etc:
+                # run("cp -r $project-dir/lib/* $perl6lib");
+            }
+            $.ecosystem.set-state($project, 'installed');
+            say 'installed';
+        }
+    }
+
+    method uninstall(@projects) {
+        # Check that all projects are installed
+        for @projects -> $project {
+            if !$.ecosystem.is-state($project,'installed') {
+                say "Can't uninstall $project - not installed";
+                return False;
+            }
+        }
+# TODO: Ensure the proposed uninstall does not break any dependencies.
+#       This following was moved out of clean() and needs to be revised.
+#       for $.ecosystem.fetched-projects() -> $project {
+#           next if $project eq any(@projects);
+#           for self.get-deps($project) -> $dep {
+#               if $dep eq any(@projects) {
+#                   say "Cannot clean $dep, depended on by $project.";
+#                   say "Aborting.";
+#                   return;
+#               }
+#           }
+#       }
+
+        my $perl6lib = %!config-info{'Perl 6 library'};
+        for @projects -> $project {
+            print "Uninstalling $project...";
+            my $project-dir = $.ecosystem.project-dir($project);
+            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^uninstall\:/ {
+                self.configured-run( 'make uninstall', :project( $project ), :dir( $project-dir ) );
+            }
+            else {
+                for $.ecosystem.files-in-cache-lib($project).map({"$perl6lib/$_"}).grep({ $_ ~~ :f }) -> $file
+                {
+                    run("rm $file")
+                }
+            }
+            # assume 'tested' preceded 'installed'
+            $.ecosystem.set-state($project,
+                $.ecosystem.is-state($project,'fetched')
+                ?? 'tested' !! 'not-here' ); # TODO: erase state
+            say 'done';
+        }
     }
 
     method not-implemented($subcommand) {
@@ -391,7 +519,7 @@ class Installer {
     }
 
     submethod get-deps($project) {
-        my $deps-file = %!config-info{'Proto projects directory'}
+        my $deps-file = %!config-info{'Proto projects cache'}
                         ~ "/$project/deps.proto";
         return unless $deps-file ~~ :f;
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
@@ -413,61 +541,47 @@ class Installer {
         return @deps.uniq;
     }
 
-    sub load-config-file(Str $filename) {
-        my %settings;
-        for lines($filename) {
-            when /^ '---'/ {
-                # do nothing
-            }
-            when / '#' (.*) $/ {
-                # do nothing
-            }
-            when / (.*) ':' \s+ (.*) / {
-                %settings{$0} = $1;
-            }
-        }
-        if %settings{'Parrot directory'} eq 'rakudo-decides' {
-            %settings{'Parrot directory'} = %settings{'Rakudo directory'}
-                                          ~ '/'
-                                          ~ 'parrot';
-        }
-        return %settings;
-    }
-
     submethod configured-run( Str $command, Str :$project = '',
                               Str :$dir = '.', Str :$output-mode = 'Log' ) {
-        # RAKUDO: Can't really figure out how to set environment variables
-        #         so they're visible by later commands. Doing like this
-        #         instead.
-        my $parrot_dir = "PARROT_DIR={%!config-info{'Parrot directory'}}";
-        my $rakudo_dir = "RAKUDO_DIR={%!config-info{'Rakudo directory'}}";
-        my $p6lib
-            = 'PERL6LIB='
-                ~ join ':', map {
-                      "{%!config-info{'Proto projects directory'}}/$_/lib"
-                  }, $project, self.get-deps-deeply( $project );
-        my $env = ('env', $parrot_dir, $rakudo_dir, $p6lib).join(' ');
+        %*ENV<PERL6LIB> = join ':', map {
+                              "{%!config-info{'Proto projects cache'}}/$_/lib"
+                          }, $project, self.get-deps-deeply( $project );
         my $redirection = do given $output-mode {
             when 'Log'     { '>make.log 2>&1'  }
             when 'Silent'  { '>/dev/null 2>&1' }
             when 'Verbose' { ''                }
             default        { die               }
         };
-        my $cmd = "cd $dir; $env $command $redirection";
+        # Switch directory like this only in the child process,
+        # so that the proto current directory does not have to change.
+        my $cmd = "cd $dir; $command $redirection";
         run( $cmd );
     }
 
+    sub load-config-file(Str $filename) {
+        my %settings;
+        for lines($filename) {
+            when /^ '---'/               { }
+            when / '#' (.*) $/           { }
+            when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
+        }
+        return %settings;
+    }
+
+# TODO: replace with a central ~/.perl6/lib check
     submethod check-if-in-perl6lib( @projects ) {
-        my @projects-not-in
-            = grep {
-                not "{%!config-info{'Proto projects directory'}}/$_/lib"
-                    eq any(%*ENV<PERL6LIB>.split(':'))
-              }, @projects;
-        if @projects-not-in {
-            say 'The following projects are not in your $PERL6LIB env var: ',
-                ~@projects;
-            say 'Please add them if you want to compile and run them outside '
-                ~ 'of proto.';
+        if %*ENV.exists('PERL6LIB') {
+            my @projects-not-in
+                = grep {
+                    not "{%!config-info{'Proto projects cache'}}/$_/lib"
+                        eq any(%*ENV<PERL6LIB>.split(':'))
+                  }, @projects;
+            if @projects-not-in {
+                say 'The following projects are not in your $PERL6LIB env var: ',
+                    ~@projects;
+                say 'Please add them if you want to compile and run them outside '
+                    ~ 'of proto.';
+            }
         }
     }
 }

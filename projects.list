@@ -38,10 +38,6 @@ svg-plot:
     home:   github
     owner:  moritz
 
-svg-match:
-    home:   github
-    owner:  moritz
-
 maya:
     home:   github
     owner:  ihrd
@@ -93,14 +89,6 @@ ppm:
 bioperl6:
     home:   github
     owner:  cjfields
-
-epoxy:
-    home:   github
-    owner:  s1n
-
-epoxy-resin:
-    home:   github
-    owner:  perl6
 
 SQL-Grammar:
     home:   github

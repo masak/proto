@@ -1,13 +1,17 @@
 class Ecosystem;
 
-has $projects-dir; # no twigil because ?
+has $cache-dir;
 has %!project-info;
+has %!project-state;
+has @.protected-files;
 
-method new(:$projects-dir!) {
+method new(:$cache-dir!) {
     self.bless(
         self.CREATE(),
-        projects-dir => $projects-dir,
-        project-info => load-project-list('projects.list'),
+        cache-dir  => $cache-dir,
+        project-info  => load-project-list('projects.list'),
+        project-state => load-project-list('projects.state'),
+        protected-files => <Test.pm Test.pir Configure.pm Configure.pir>,
     );
 }
 
@@ -20,22 +24,82 @@ method get-info-on($project) {
     return %!project-info{$project};
 }
 
+# The definition and implementation of project state is still in flux,
+# particularly where one state overlaps with or implies another.
+# For example, a test implies a successful build, but an installed
+# project might have been cleaned from cache.
+# Route all access to project state via the following methods
+# (get-state, set-state and is-state) to shield the rest of the code
+# as much as possible from changes to state definitions.
+# The following states are currently in use (and may well change):
+#   fetched    or  fetch-failed
+#   built      or  build-failed
+#   tested     or  test-failed
+#   installed  or  install-failed
+method is-state($project,$state) {
+    if $state eq 'fetched' { return ?( "$cache-dir/$project" ~~ :d ); }
+    if %!project-state.exists($project)
+        and %!project-state{$project}.exists('state')
+        and $state eq %!project-state{$project}<state> {
+        return True;
+    }
+    return False;
+}
+
+method get-state($project) {
+    if %!project-state.exists($project) and %!project-state{$project}.exists('state') {
+        return ~ %!project-state{$project}{'state'};
+    }
+    if self.is-state($project,'fetched') {
+        return 'fetched'
+    }
+    return 'not-here';
+}
+
+method set-state($project,$state) {
+    %!project-state{$project} = {} unless %!project-state.exists($project);
+    if $state {
+        %!project-state{$project}<state> = $state;
+    }
+    else {
+        %!project-state.delete($project); # because there was only <state>
+    }
+    save-project-list('projects.state', %!project-state);
+}
+
 method regular-projects() {
     return %!project-info.keys.grep:
         { !%!project-info{$_}.exists('type')
           || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
 }
 
-method installed-projects() {
-    return self.regular-projects.grep: { "$projects-dir/$_" ~~ :d };
+method project-dir($project) {
+    return $cache-dir ~ ( %!project-info{$project}.exists('main_subdir')
+                          ?? "/$project/{%!project-info{$project}<main_subdir>}"
+                          !! "/$project"
+                        );
 }
 
-method uninstalled-projects() {
-    return self.regular-projects.grep: { "$projects-dir/$_" !~~ :d };
+method files-in-cache-lib($project) {
+    my $project-dir = self.project-dir($project);
+    
+    if "$project-dir/lib" !~~ :d {
+        return ();
+    }
+
+    my @cache_files = qqx{find $project-dir/lib/}\
+                      .split(/\n+/)\
+                      .map({$_.subst("$project-dir/lib/",'')})\
+                      .grep({ $_ ne "" });
+    return @cache_files;
 }
 
-method is-installed( Str $project ) {
-    return "$projects-dir/$project" ~~ :d;
+method fetched-projects() {
+    return self.regular-projects.grep: { "$cache-dir/$_" ~~ :d };
+}
+
+method unfetched-projects() {
+    return self.regular-projects.grep: { "$cache-dir/$_" !~~ :d };
 }
 
 sub load-project-list(Str $filename) {
@@ -46,15 +110,15 @@ sub load-project-list(Str $filename) {
     my $current-name;
     my %current;
     for $fh.lines {
-        when / ^ \s* ['#' | $ ] /   { next };
-        when / ^ (\S+) \: \s* ['#' | $ ] / {
+        when / ^ <.ws> ['#' | $ ] /   { next };
+        when / ^ (\S+) \: <.ws> ['#' | $ ] / {
             if $current-name.defined {
                 %overall{$current-name} = %current.clone;
             }
             %current = ();
             $current-name = ~$0;
         }
-        when / ^ \s+ (\S+) ':' \s* (\S+) \s* ['#' | $ ] / {
+        when / ^ <.ws> (\S+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
             %current{~$0} = ~$1;
         }
         default {
@@ -66,6 +130,18 @@ sub load-project-list(Str $filename) {
     }
 
     return %overall;
+}
+
+sub save-project-list(Str $filename, %overall) {
+    my $fh = open( $filename, :w );
+    for %overall.keys.sort -> $projectname {
+        $fh.say("$projectname:");
+        for %overall{$projectname}.keys.sort -> $key {
+            $fh.say("    $key: {%overall{$projectname}{$key}}");
+        }
+        $fh.say("");
+    }
+    close $fh;
 }
 
 # vim: ft=perl6
