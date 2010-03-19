@@ -111,7 +111,7 @@ sub load-project-list(Str $filename) {
     my %current;
     for $fh.lines {
         when / ^ <.ws> ['#' | $ ] /   { next };
-        when / ^ (\S+) \: <.ws> ['#' | $ ] / {
+        when / ^ (\S+) ':' <.ws> ['#' | $ ] / {
             if $current-name.defined {
                 %overall{$current-name} = %current.clone;
             }

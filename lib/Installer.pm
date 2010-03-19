@@ -20,7 +20,7 @@ class Installer {
     # method exits immediately.
     method subcommand-dispatch($command) {
         given $command {
-            when undef                    { exit }
+            when Mu                       { exit }
             when any(@available-commands) {} # fall out, approved
             default {
                 say "Unrecognized subcommand '$command'.";

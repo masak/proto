@@ -6,6 +6,7 @@ use File::Path;
 use File::Spec;
 use Cwd qw(abs_path);
 
+#---------------------------- main program -----------------------------
 my ($volume,$proto_dir,$file) = File::Spec->splitpath(abs_path($0));
 my $config_file = File::Spec->catpath( $volume, $proto_dir,'config.proto');
 my $state_file = File::Spec->catpath( $volume, $proto_dir,'projects.state');
@@ -89,7 +90,7 @@ my $perl6 = $config_info->{'Perl 6 executable'};
 make_pir_modules( $perl6 );
 exec( "$perl6 installer @ARGV" ); # Delegate to installer
 
-
+#---------------------------- install_perl6 ----------------------------
 sub install_perl6 {
     my $config_info = shift;
     my $perl6 = $config_info->{'Perl 6 executable'};
@@ -107,6 +108,7 @@ sub install_perl6 {
     build_rakudo( $config_info, $rakudo_directory );
 }
 
+#--------------------------- download_rakudo ---------------------------
 sub download_rakudo {
     my ( $config_info, $rakudo_directory ) = @_;
     # XXX Maybe check if rakudo dir has contents instead?
@@ -150,6 +152,7 @@ sub download_rakudo {
     print "[  ok  ]\n";
 }
 
+#---------------------------- build_rakudo -----------------------------
 sub build_rakudo {
     my ( $config_info, $rakudo_directory ) = @_;
     if ( ! -f "$rakudo_directory/perl6" ) {
@@ -172,6 +175,7 @@ sub build_rakudo {
     }
 }
 
+#-------------------------- make_pir_modules ---------------------------
 sub make_pir_modules {
     my ($perl6) = @_;
     my $displayed_building = 0;
@@ -181,7 +185,13 @@ sub make_pir_modules {
             unless ( $displayed_building ) {
                 print "Building proto..."; $displayed_building = 1;
             }
-            system( "env -i PERL6LIB=`pwd`/lib $perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
+            # WORKAROUND: because BEGIN { @*INC.unshift('lib'); } does
+            # not work, proto should make use of of ~/.perl6/lib even
+            # for its own module files.  Actually, that isn't even just
+            # a workaround, maybe it can stay that way.  Ask masak?
+            system( "cp lib/$name.pm $/$name.pir" );
+            system( "$perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
+            # system( "env -i PERL6LIB=`pwd`/lib $perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
         }
     }
     if ( $displayed_building ) {
@@ -189,6 +199,7 @@ sub make_pir_modules {
     }
 }
 
+#--------------------------- legacy_projects ---------------------------
 sub legacy_projects {
     my ( $config_info ) = @_;
     my @legacy_projects;
@@ -206,6 +217,7 @@ sub legacy_projects {
     return @legacy_projects;
 }
 
+#--------------------- create_default_config_file ----------------------
 sub create_default_config_file {
     my ($file_name) = @_;
 
@@ -293,6 +305,7 @@ sub create_default_config_file {
         or die "Couldn't create $file_name: $!\n";
 }
 
+#---------------------- create_default_state_file ----------------------
 sub create_default_state_file {
     my ($file_name, @project_names ) = @_;
     my $project_dir = $config_info->{'Proto projects directory'};
@@ -309,6 +322,7 @@ sub create_default_state_file {
     close PROJECTS_STATE;
 }
 
+#-------------------------- load_config_file ---------------------------
 sub load_config_file {
     my ( $filename ) = @_;
     my $settings = {};
@@ -338,6 +352,7 @@ sub load_config_file {
     return wantarray ? ( $settings, $comments ) : $settings;
 }
 
+#-------------------------- save_config_file ---------------------------
 sub save_config_file {
     my ( $filename, $settings, $comments ) = @_;
     if ( not defined $comments ) { $comments = { }; }
@@ -392,7 +407,33 @@ For example, to use perl6.pbc instead of the fakecutable use something like:
         /my/parrot_install/lib/<version>/languages/perl6/perl6.pbc \
         ./proto
 
+=head1 ROADMAP
+
+1.  Get proto working ASAP with the latest master Rakudo, formerly known
+    as the 'ng' branch.  There were quite a few regressions switching
+    over.  Problems are being dealt with quickly by working around them
+    in these files and commenting them as WORKAROUND, and reporting them
+    in #perl6.  This approach leaves a TODO item here, to search for
+    WORKAROUND comments, try to eliminate their causes, or otherwise
+    send reports to rakudobug@perl.org.
+
+2.  The ~/.perl6 directory presents an opportunity for proto to phase
+    itself out in the long term.  Not only will the ~/.perl6/lib tree
+    store all module files, the ~/.perl6 parent directory can also store
+    proto configuration and project state files.  The direct benefit is
+    independence of the directory in which proto was initially
+    downloaded.
+
+3.  Versioning.  Proto must support the versioning implementation of S11
+    decided at the 2010 Copenhagen Perl 6 Hackathon and documented in
+    rakudo/docs/S11-Modules-proposal.pod.  Details to be worked out.
+
+
 =head1 TODO
+
+1.  ?
+
+=head1 Rakudo/alpha old TODO list (partly deprecated)
 
 The installed-modules branch plans to improve proto by doing the following:
 
