@@ -1,3 +1,4 @@
+# BEGIN { @*INC.unshift 'lib'; }
 use v6;
 use Ecosystem;
 
@@ -18,18 +19,16 @@ class Installer {
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
     # method exits immediately.
-    method subcommand-dispatch($command) {
-        given $command {
-            when Mu                       { exit }
-            when any(@available-commands) {} # fall out, approved
-            default {
-                say "Unrecognized subcommand '$command'.";
-                self.help();
-                exit;
-            }
-        };
-        return eval sprintf '{ -> *@projects { self.%s( @projects) } }',
-                            $command;
+    method subcommand-dispatch($command is copy) {
+        $command //= 'help';
+        if $command ~~ any(@available-commands) {
+            my $fullcommand = sprintf
+                '{ -> *@projects { self.%s( @projects) } }', $command;
+            return eval $fullcommand;
+        }
+        else {
+            self.help();
+        }
     }
 
     method help(*@projects) {

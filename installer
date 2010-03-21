@@ -1,6 +1,6 @@
 #!perl6
 use v6;
-# BEGIN { @*INC.unshift('lib'); }  # 2010-03-18 not yet reimplemented
+BEGIN { @*INC.unshift('lib'); }  # 2010-03-18 not yet reimplemented
 # WORKAROUND: make the proto file compile to ./perl6/lib.
 
 use Installer;

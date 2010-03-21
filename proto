@@ -87,7 +87,7 @@ my $perl6 = $config_info->{'Perl 6 executable'};
 #if ( system("$perl6 -v $silently") != 0 ) {
     install_perl6( $config_info );
 #}
-make_pir_modules( $perl6 );
+make_pir_modules( $perl6, $config_info->{'Perl 6 library'} );
 exec( "$perl6 installer @ARGV" ); # Delegate to installer
 
 #---------------------------- install_perl6 ----------------------------
@@ -177,7 +177,7 @@ sub build_rakudo {
 
 #-------------------------- make_pir_modules ---------------------------
 sub make_pir_modules {
-    my ($perl6) = @_;
+    my ($perl6exe, $perl6libdir) = @_;
     my $displayed_building = 0;
     # Precompile these modules to PIR
     for my $name ( 'Ecosystem', 'Installer' ) {
@@ -189,7 +189,7 @@ sub make_pir_modules {
             # not work, proto should make use of of ~/.perl6/lib even
             # for its own module files.  Actually, that isn't even just
             # a workaround, maybe it can stay that way.  Ask masak?
-            system( "cp lib/$name.pm $/$name.pir" );
+            system( "cp lib/$name.pm $perl6libdir/$name.pir" );
             system( "$perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
             # system( "env -i PERL6LIB=`pwd`/lib $perl6 --target=pir --output=lib/$name.pir lib/$name.pm" );
         }
@@ -421,17 +421,32 @@ For example, to use perl6.pbc instead of the fakecutable use something like:
     itself out in the long term.  Not only will the ~/.perl6/lib tree
     store all module files, the ~/.perl6 parent directory can also store
     proto configuration and project state files.  The direct benefit is
-    independence of the directory in which proto was initially
-    downloaded.
+    independence of the directory in which proto was initially used.
+    Software installed by proto should continue to work even if proto is
+    completely removed.
 
 3.  Versioning.  Proto must support the versioning implementation of S11
     decided at the 2010 Copenhagen Perl 6 Hackathon and documented in
     rakudo/docs/S11-Modules-proposal.pod.  Details to be worked out.
 
+4.  Cheese speleology: remember http://use.perl.org/~masak/journal/39583
+    and implement it.  Easier said than done, but now is the very best
+    time to do it.  Details to be worked out.
+
+5.  If Rakudo must be installed, default to downloading binary-only
+    Parrot and Rakudo distributions compatible with the hardware and
+    OS if possible.  Otherwise check that tools are installed to fetch
+    source code and compile.  Allow the user to override the default
+    directories used, and to choose either last stable release (archive
+    download) or bleading edge source (via subversion and git).
+    Default to placing the installed Parrot in ~/.perl6/parrot_install/
+    and Rakudo (perl6[.exe]) in ~/.perl6/parrot_install/bin/.
 
 =head1 TODO
 
-1.  ?
+1.  For Windows compatibility, change all hard coded mkdir and cp
+    commands to use the Perl 5's L<ExtUtils::Command> with C<-e mkpath>
+    and C<-e cp> instead.
 
 =head1 Rakudo/alpha old TODO list (partly deprecated)
 

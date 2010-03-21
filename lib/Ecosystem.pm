@@ -110,19 +110,38 @@ sub load-project-list(Str $filename) {
     my $current-name;
     my %current;
     for $fh.lines {
+
+        # ignore blank lines and comments
+        # WORKAROUND: Rakudo does not see '#' as a literal # char in a
+        # regex.  STD.pm does not accept \#, but Rakudo does
         when / ^ <.ws> ['#' | $ ] /   { next };
-        when / ^ (\S+) ':' <.ws> ['#' | $ ] / {
+        # the [ '#' | $ ] may be a slighly evil, because the one option
+        # is a literal character, and the other is an anchor. 
+
+        # section name
+        # WORKAROUND: Rakudo has a backtracking bug reported in
+        # http://nopaste.snit.ch/20018
+#       when / ^ (\S+)     ':' <.ws> ['#' | $ ] / {
+        when / ^ (<-[:]>+) ':' <.ws> ['#' | $ ] / {
             if $current-name.defined {
                 %overall{$current-name} = %current.clone;
             }
             %current = ();
             $current-name = ~$0;
         }
-        when / ^ <.ws> (\S+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
+
+        # key and value within section
+        # WORKAROUND: Rakudo has a backtracking bug reported in
+        # http://nopaste.snit.ch/20018
+#       when / ^ <.ws> (\S+)     ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
+        when / ^ <.ws> (<-[:]>+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
             %current{~$0} = ~$1;
         }
+
+        # oops - did not match any of the above
         default {
-            warn "don't know how to parse the line «$_», ignoring it"
+            warn "warning: cannot parse «$_», ignored by Ecosystem.pm" ~
+                 " load-project-list('$filename')";
         }
     }
     if %current {
