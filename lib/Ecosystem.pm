@@ -1,4 +1,7 @@
-class Ecosystem;
+class Ecosystem:auth<masak>:ver<0.2.0>;
+# The first proto series would have been version 0.0.x
+# The installed-modules series would have been version 0.1.x
+# Changed the :auth name-part when using git branch to fork the project.
 
 has $cache-dir;
 has %!project-info;
@@ -120,6 +123,7 @@ sub load-project-list(Str $filename) {
 
         # section name
         # WORKAROUND: Rakudo has a backtracking bug reported in
+        # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608 and
         # http://nopaste.snit.ch/20018
 #       when / ^ (\S+)     ':' <.ws> ['#' | $ ] / {
         when / ^ (<-[:]>+) ':' <.ws> ['#' | $ ] / {
@@ -132,6 +136,7 @@ sub load-project-list(Str $filename) {
 
         # key and value within section
         # WORKAROUND: Rakudo has a backtracking bug reported in
+        # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608 and
         # http://nopaste.snit.ch/20018
 #       when / ^ <.ws> (\S+)     ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
         when / ^ <.ws> (<-[:]>+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
