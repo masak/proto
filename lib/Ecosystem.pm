@@ -8,6 +8,7 @@ has %!project-info;
 has %!project-state;
 has @.protected-files;
 
+#--------------------------------- new ---------------------------------
 method new(:$cache-dir!) {
     self.bless(
         self.CREATE(),
@@ -18,15 +19,18 @@ method new(:$cache-dir!) {
     );
 }
 
+#-------------------------- contains-project ---------------------------
 method contains-project($project) {
     # RAKUDO: :exists [perl #59794]
     return %!project-info.exists($project);
 }
 
+#----------------------------- get-info-on -----------------------------
 method get-info-on($project) {
     return %!project-info{$project};
 }
 
+#------------------------------ is-state -------------------------------
 # The definition and implementation of project state is still in flux,
 # particularly where one state overlaps with or implies another.
 # For example, a test implies a successful build, but an installed
@@ -49,6 +53,7 @@ method is-state($project,$state) {
     return False;
 }
 
+#------------------------------ get-state ------------------------------
 method get-state($project) {
     if %!project-state.exists($project) and %!project-state{$project}.exists('state') {
         return ~ %!project-state{$project}{'state'};
@@ -59,6 +64,7 @@ method get-state($project) {
     return 'not-here';
 }
 
+#------------------------------ set-state ------------------------------
 method set-state($project,$state) {
     %!project-state{$project} = {} unless %!project-state.exists($project);
     if $state {
@@ -70,12 +76,14 @@ method set-state($project,$state) {
     save-project-list('projects.state', %!project-state);
 }
 
+#-------------------------- regular-projects ---------------------------
 method regular-projects() {
     return %!project-info.keys.grep:
         { !%!project-info{$_}.exists('type')
           || !(%!project-info{$_}<type> eq 'pseudo'|'bootstrap') };
 }
 
+#----------------------------- project-dir -----------------------------
 method project-dir($project) {
     return $cache-dir ~ ( %!project-info{$project}.exists('main_subdir')
                           ?? "/$project/{%!project-info{$project}<main_subdir>}"
@@ -83,6 +91,7 @@ method project-dir($project) {
                         );
 }
 
+#------------------------- files-in-cache-lib --------------------------
 method files-in-cache-lib($project) {
     my $project-dir = self.project-dir($project);
     
@@ -97,14 +106,17 @@ method files-in-cache-lib($project) {
     return @cache_files;
 }
 
+#-------------------------- fetched-projects ---------------------------
 method fetched-projects() {
     return self.regular-projects.grep: { "$cache-dir/$_" ~~ :d };
 }
 
+#------------------------- unfetched-projects --------------------------
 method unfetched-projects() {
     return self.regular-projects.grep: { "$cache-dir/$_" !~~ :d };
 }
 
+#-------------------------- load-project-list --------------------------
 sub load-project-list(Str $filename) {
     my $fh = open($filename)
         or die "Can't open '$filename': $!";
@@ -115,8 +127,6 @@ sub load-project-list(Str $filename) {
     for $fh.lines {
 
         # ignore blank lines and comments
-        # WORKAROUND: Rakudo does not see '#' as a literal # char in a
-        # regex.  STD.pm does not accept \#, but Rakudo does
         when / ^ <.ws> ['#' | $ ] /   { next };
         # the [ '#' | $ ] may be a slighly evil, because the one option
         # is a literal character, and the other is an anchor. 
@@ -156,6 +166,7 @@ sub load-project-list(Str $filename) {
     return %overall;
 }
 
+#-------------------------- save-project-list --------------------------
 sub save-project-list(Str $filename, %overall) {
     my $fh = open( $filename, :w );
     for %overall.keys.sort -> $projectname {
@@ -167,5 +178,3 @@ sub save-project-list(Str $filename, %overall) {
     }
     close $fh;
 }
-
-# vim: ft=perl6

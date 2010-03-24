@@ -428,51 +428,64 @@ something like:
 =head1 ROADMAP
 
 The current proto roadmap responds to the Rakudo * initiative, its
-RQP-RX refactor and the related S11 Modules proposal
+nql-rx refactor and the related S11 Modules proposal
 (github.com/rakudo/rakudo/blob/master/docs/S11-Modules-proposal.pod).
+
+Rakudo * release needs only a subset of these proto roadmap goals.
+The rest are desirable enhancements.
 
 The previous proto roadmap was called 'installed-modules', and is still
 included below for planning reference, but not necessarily to guide
 implementation.
 
-1.  Get proto working ASAP with the latest master Rakudo, formerly known
-    as the 'ng' branch.  There were quite a few regressions switching
-    over.  Problems are being dealt with quickly by working around them
-    in these files and commenting them as WORKAROUND, and reporting them
-    in #perl6.  This approach leaves a TODO item here, to search for
-    WORKAROUND comments, try to eliminate their causes, or otherwise
-    send reports to rakudobug@perl.org.
+1.  Fixing.  Make proto work with the latest master Rakudo, formerly
+    known as the 'ng' branch.  There were a few regressions switching
+    over.  Problems are being handled by working around in proto,
+    commenting the fixes as WORKAROUND, and reporting them in #perl6.
+    This approach leaves a TODO item here, to find WORKAROUND comments,
+    handle them better, or notify http://rt.perl.org/rt3 by mailing
+    rakudobug@perl.org.
 
-2.  The ~/.perl6 directory presents an opportunity for proto to phase
-    itself out in the long term.  Not only will the ~/.perl6/lib tree
-    store all module files, the ~/.perl6 parent directory can also store
-    proto configuration and project state files.  The direct benefit is
-    independence of the directory in which proto was initially used.
-    Software installed by proto should continue to work even if proto is
-    completely removed.
+2.  Modules.  Install Perl 6 modules in the ~/.perl6/lib tree.  Put
+    project.state and config.proto in the ~/.perl6 directory.  Modules
+    installed by proto keep working even if proto is removed.  Thus
+    proto can be replaced and phased out.
 
-3.  Versioning.  Proto must support the versioning implementation of S11
-    decided at the 2010 Copenhagen Perl 6 Hackathon and documented in
-    rakudo/docs/S11-Modules-proposal.pod.  Details to be worked out.
+3.  Runtime.  Build in ~/.perl6/parrot and ~/.perl6/rakudo, install the
+    binaries in ~/.perl6/parrot_install and then remove the build dirs.
+    Let the user edit config.proto to override the directory paths and
+    turn off source tree removal.
 
-4.  Cheese speleology: remember http://use.perl.org/~masak/journal/39583
+4.  Updating.  Re-install proto, Rakudo and Parrot from newer release
+    downloads if the user chooses, and if the date suggests they should
+    be available.
+
+5.  Versioning.  Implement the librarian functions of the S11 Modules
+    proposal.  Details to be worked out.
+
+6.  Cheese speleology: remember http://use.perl.org/~masak/journal/39583
     and implement it.  Easier said than done, but now is the very best
-    time to do it.  Details to be worked out.
-
-5.  If Rakudo must be installed, default to downloading binary-only
-    Parrot and Rakudo distributions compatible with the hardware and
-    OS if possible.  Otherwise check that tools are installed to fetch
-    source code and compile.  Allow the user to override the default
-    directories used, and to choose either last stable release (archive
-    download) or bleading edge source (via subversion and git).
-    Default to placing the installed Parrot in ~/.perl6/parrot_install/
-    and Rakudo (perl6[.exe]) in ~/.perl6/parrot_install/bin/.
+    time to start.  Details to be worked out.
 
 =head1 TODO
 
 1.  For Windows compatibility, change all hard coded mkdir and cp
     commands to use the Perl 5's L<ExtUtils::Command> with C<-e mkpath>
     and C<-e cp> instead.
+
+2.  The install command will need to be able specify :auth<> and :ver<>
+    and look them up in projects.list.
+
+3.  Advise the user to either 1) point the system path to
+    installed_modules/bin, or 2) add a symbolic link in a system path
+    directory to the perl6 fakecutable.
+
+4.  Also put the proto executable
+    in the bin directory and enable it to be run independent of the
+    current working directory.
+
+99. Reduce all WORKAROUND comments to simple cases in rakudobug reports
+    and replace the comments with TODO items linked to RT numbers.
 
 =head1 Rakudo/alpha old TODO list (partly deprecated)
 

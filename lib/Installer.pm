@@ -1,6 +1,8 @@
-# BEGIN { @*INC.unshift 'lib'; }
 use v6;
-use Ecosystem;
+use Ecosystem:auth<masak>:ver<0.2.0>;
+# The first proto series would have been version 0.0.x
+# The installed-modules series would have been version 0.1.x
+# Changed the :auth name-part when using git branch to fork the project.
 
 class Installer {
     has %!config-info;
@@ -16,11 +18,12 @@ class Installer {
 
     my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help update>; #TODO: add update
 
+    #----------------------- subcommand-dispatch -----------------------
     # Returns a block which calls the right subcommand with a variable number
     # of parameters. If the provided subcommand is unknown or undef, this
     # method exits immediately.
     method subcommand-dispatch($command is copy) {
-        $command //= 'help';
+        $command //= 'help'; # oops, // confuses syntax highlighters
         if $command ~~ any(@available-commands) {
             my $fullcommand = sprintf
                 '{ -> *@projects { self.%s( @projects) } }', $command;
@@ -31,6 +34,7 @@ class Installer {
         }
     }
 
+    #------------------------------ help -------------------------------
     method help(*@projects) {
         .say for
             "A typical usage is:",
@@ -39,6 +43,7 @@ class Installer {
             'See the README for more details';
     }
 
+    #------------------------ fetch-or-refresh -------------------------
     method fetch-or-refresh($subcommand,@projects) {
         my @projects-to-fetch;
         my $missing-projects = False;
@@ -76,14 +81,17 @@ class Installer {
         }
     }
 
+    #------------------------------ fetch ------------------------------
     method fetch(@projects) {
         self.fetch-or-refresh( 'fetch', @projects );
     }
 
+    #----------------------------- refresh -----------------------------
     method refresh(@projects) {
         self.fetch-or-refresh( 'refresh', @projects );
     }
 
+    #----------------------------- update ------------------------------
     method update(@projects is copy) {
         if @projects.grep('all') {
             @projects = $.ecosystem.fetched-projects.sort;
@@ -92,6 +100,7 @@ class Installer {
             print "updating $_...";
             my $location = %!config-info{'Proto projects cache'} ~ '/' ~ $_;
             run "cp -r $location $location.temp"; # XXX Not portable
+            # run( "perl -MExtUtils::Command -e cp ??" );
             my $proto-dir = $*CWD;
             chdir $location;
             my $where = $.ecosystem.get-info-on($_)<home>;
@@ -104,6 +113,7 @@ class Installer {
         }
     }
 
+    #------------------------------ clean ------------------------------
     method clean(@projects is copy) {
         if @projects.grep('all') {
             @projects=$.ecosystem.regular-projects.sort;
@@ -126,6 +136,7 @@ class Installer {
         }
     }
 
+    #------------------------------ test -------------------------------
     method test(@projects is copy) {
         if !@projects | @projects.grep('all') {
             say 'Beginning to test all available projects...';
@@ -178,6 +189,7 @@ class Installer {
         }
     }
 
+    #---------------------------- showdeps -----------------------------
     # TODO: This sub should probably recursively show dependencies, and in
     #       such a way that a dependency found twice by different routes is
     #       only mentioned the second time -- its dependencies are not shown.
@@ -199,6 +211,7 @@ class Installer {
         }
     }
 
+    #---------------------- showdeps-recursively -----------------------
     # TODO: Detect circularity by replacing the $indent parameter with a
     #       list of ancestor projects, and checking against inclusion in
     #       that list.
@@ -214,12 +227,14 @@ class Installer {
         }
     }
 
+    #---------------------------- showstate ----------------------------
     method showstate(@projects is copy) {
         if @projects.grep('all') { @projects=$.ecosystem.regular-projects.sort; }
         unless @projects { say "No projects requested"; return; }
         for @projects -> $p { say "$p: {$.ecosystem.get-state($p)}"; }
     }
 
+    #----------------- download-projects-and-their-deps ----------------
     submethod download-projects-and-their-deps(@projects) {
         # TODO: Though the below traversal works, it seems much cooler to do
         #       builds as soon as possible. Right now, in a dep tree looking
@@ -251,6 +266,7 @@ class Installer {
         return @build-stack.uniq;
     }
 
+    #---------------------------- download -----------------------------
     submethod download( Str $project ) {
         # RAKUDO: :exists [perl #59794]
         if !$.ecosystem.contains-project($project) {
@@ -328,6 +344,7 @@ class Installer {
         }
     }
 
+    #------------------------------ build ------------------------------
     submethod build( Str $project ) {
         print "Building $project...";
         # RAKUDO: Doesn't support any other way to change the current working
@@ -382,6 +399,7 @@ class Installer {
         unlink( "$project-dir/make.log" );
     }
 
+    #----------------------------- install -----------------------------
     method install(@projects is copy) {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
@@ -453,12 +471,13 @@ class Installer {
                     if @names.elems {
                         my $dir = $perl6lib ~ '/' ~ join('/',@names);
                         if $dir !~~ :d {
-                            mkdir $dir;
+                            run( "perl -MExtUtils::Command -e mkpath $dir" );
                         }
                     }
                     # TODO: a non clobbering, OS neutral alternative to
                     #       cp, replace with slurp() and squirt()
                     if "$project-dir/lib/$file" ~~ :f {
+                        # my $command = "";
                         my $command = "cp $project-dir/lib/$file $perl6lib/$file";
                         my $status = run($command); # TODO: check status
                     }
@@ -471,6 +490,7 @@ class Installer {
         }
     }
 
+    #---------------------------- uninstall ----------------------------
     method uninstall(@projects) {
         # Check that all projects are installed
         for @projects -> $project {
@@ -513,10 +533,12 @@ class Installer {
         }
     }
 
+    #------------------------- not-implemented -------------------------
     method not-implemented($subcommand) {
         warn "The '$subcommand' subcommand is not implemented yet.";
     }
 
+    #---------------------------- get-deps -----------------------------
     submethod get-deps($project) {
         my $deps-file = %!config-info{'Proto projects cache'}
                         ~ "/$project/deps.proto";
@@ -528,6 +550,7 @@ class Installer {
                  .grep({$^keep-all-nonempty-lines});
     }
 
+    #------------------------- get-deps-deeply -------------------------
     # TODO: This is a nice, short algorithm and all, but we need to make sure
     #       we don't get stuck in a cycle. Passing the projects up the call
     #       stack as an optional param would probably work.
@@ -540,6 +563,7 @@ class Installer {
         return @deps.uniq;
     }
 
+    #------------------------- configured-run --------------------------
     submethod configured-run( Str $command, Str :$project = '',
                               Str :$dir = '.', Str :$output-mode = 'Log' ) {
         %*ENV<PERL6LIB> = join ':', map {
@@ -557,6 +581,7 @@ class Installer {
         run( $cmd );
     }
 
+    #------------------------ load-config-file -------------------------
     sub load-config-file(Str $filename) {
         my %settings;
         for lines($filename) {
@@ -567,6 +592,7 @@ class Installer {
         return %settings;
     }
 
+    #---------------------- check-if-in-perl6lib -----------------------
 # TODO: replace with a central ~/.perl6/lib check
     submethod check-if-in-perl6lib( @projects ) {
         if %*ENV.exists('PERL6LIB') {
@@ -584,5 +610,3 @@ class Installer {
         }
     }
 }
-
-# vim: ft=perl6
