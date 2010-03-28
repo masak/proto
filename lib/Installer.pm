@@ -9,10 +9,14 @@ class Installer {
     has Ecosystem $.ecosystem;
 
     method new() {
+        my $perl6lib = @*INC.grep(/\.perl6.lib$/)[0];
+        my $proto_dir = $perl6lib.subst(/lib$/,"proto");
+        my $dir_separator = '/';
+        my $proto_config_file = $proto_dir ~ $dir_separator ~ 'proto.conf';
         self.bless(
             self.CREATE(),
-            config-info => (my $c = load-config-file('config.proto')),
-            ecosystem   => Ecosystem.new(cache-dir => $c{'Proto projects cache'}),
+            config-info => (my $c = load-config-file($proto_config_file)),
+            ecosystem   => Ecosystem.new(cache-dir => $c{'Proto projects cache'})
         )
     }
 
