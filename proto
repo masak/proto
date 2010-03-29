@@ -4,7 +4,8 @@ $| = 1; # flush after every print
 
 use Archive::Tar;
 use Archive::Extract;
-use Cwd qw(abs_path);
+#use Cwd qw(abs_path);
+use Cwd;
 use File::HomeDir;
 use File::Path;
 use File::Spec;
@@ -51,7 +52,9 @@ for my $path (
     $config_info->{'Proto projects cache'}
 ) {
     unless ( -d $path ) {
-        File::Path->make_path( $path )
+        # it would be nice to use File::Path->make_path here,
+        # but on Windows the directory .perl6 makes it say "invalid path"
+        mkdir $path
             or die "Cannot create directory $path";
     }
 }
@@ -382,7 +385,12 @@ sub create_default_config_file {
     my $proto_cache_path = File::Spec->catpath( $home_vol, $proto_cache_dir, 'cache' );
     # create directories if they do not yet exist
     for my $path ( $perl6_lib_path, $proto_cache_path ) {
-        File::Path->make_path($path) unless ( -d $path );
+        print "making $path\n";
+        unless ( -d $path ) {
+        # it would be nice to use File::Path->make_path here,
+        # but on Windows the directory .perl6 makes it say "invalid path"
+            mkdir $path;
+        }
     }
     my $rakudo_build_dir = File::Spec->catpath( $home_vol, $perl6_dir, 'rakudo' );
     my $parrot_build_dir = File::Spec->catpath( $home_vol, $perl6_dir, 'parrot' );
@@ -605,14 +613,16 @@ implementation.
 2.  Directories.  The user may override anything, but default to all
     subdirectories of ~/.perl6, as follows:
 
-        lib             root of the Perl 6 module hierarchy
-        parrot          main Parrot download/build directory
+        git               for fetching Rakudo if needed
+        lib               root of the Perl 6 module hierarchy
+        parrot            main Parrot download/build directory
             parrot-x.y.z  source directory of a specific Parrot version
-        parrot_install  parrot virtual machine runtime base
-            bin         for parrot executables, eg perl6.pbc
-        proto           keep proto.conf and projects.state here
-            cache       where projects are downloaded and tested
-        rakudo          Rakudo download/build directory
+        parrot_install    parrot virtual machine runtime base
+            bin           for parrot executables, eg perl6.pbc
+        proto             keep proto.conf and projects.state here
+            cache         where projects are downloaded and tested
+        rakudo            Rakudo download/build directory
+        svn               for fetching parrot if needed
 
     By making the parrot, parrot_install and rakudo directories not nest
     in each other, there is more flexibility for customization.  If a
