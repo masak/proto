@@ -18,22 +18,8 @@ make_directories( $config_info->{'Perl 6 library'},
     $config_info->{'Proto projects cache'}
 );
 create_default_state_file( $state_file ) unless ( -f $state_file );
-
-# 1. perl git and subversion installed
-my $git_version = qx{git --version};
-my $svn_version = qx{svn --version};
-
-# TODO: detect if either of these is missing, and install them.
-$git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
-$svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
-
-my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
-
 my $perl6 = $config_info->{'Perl 6 executable'};
-#if ( system("$perl6 -v $silently") != 0 ) {
-unless ( -x $perl6 ) {
-    install_perl6( $config_info );
-}
+install_perl6( $config_info ) unless -x $perl6;
 make_pir_modules( $perl6, $config_info->{'Perl 6 library'} );
 exec( "$perl6 installer @ARGV" ); # Delegate to installer
 
@@ -41,18 +27,20 @@ exec( "$perl6 installer @ARGV" ); # Delegate to installer
 sub make_directories {
     # Create all the directories that do not yet exist
     for my $path ( @_ ) {
+        # skip all the inner work if $path already exists
         unless ( -d $path ) {
-            # it would be nice to use File::Path->make_path here,
-            # but on Windows the directory .perl6 makes it say "invalid path"
+            # it would be nice to use File::Path->make_path here, but in
+            # Windows the directory .perl6 makes it say "invalid path"
             my ( $volume, $directories, $file ) = File::Spec->splitpath( $path, 1 );
             my @dirs = File::Spec->splitdir( $directories );
+            # Because this uses mkdir, it must verify or create the
+            # directories one by one.
             for my $depth ( 0 .. $#dirs ) {
                 my $subpath = File::Spec->catdir( @dirs[0..$depth] );
                 my $subdir = File::Spec->catpath( $volume, $subpath, '' );
                 unless ( -d $subdir ) {
                     print "Making $subdir\n";
                     if ( ( mkdir $subdir ) == 0 ) {
-                    #if ( system( "$^X -MExtUtils::Command -e mkpath \"$path\"" ) != 0 ) {
                         die "Cannot create directory $path";
                     }
                 }
@@ -64,41 +52,73 @@ sub make_directories {
 #---------------------------- install_perl6 ----------------------------
 sub install_perl6 {
     my ($config_info) = @_;
+    my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
+    print "proto is installing Rakudo Perl 6.\n";
     download_parrot( $config_info );
     build_parrot(    $config_info );
     download_rakudo( $config_info );
     build_rakudo(    $config_info );
+    # Perform a minimal check that the installation succeeded
+    my $perl6 = $config_info->{'Perl 6 executable'};
+    unless ( -x $perl6 ) {
+        die "proto was unable to install Rakudo Perl 6 :-(\n";
+    }
+    my $rakudo_version = qx( "$perl6 -v" );
+    unless ( $rakudo_version =~ m/ ^ Rakudo /x ) {
+        die "rakudo error: $rakudo_version";
+    }
+    print "Rakudo Perl 6 has been installed.\n";
 }
 
 #--------------------------- download_parrot ---------------------------
 sub download_parrot {
     my ($config_info) = @_;
     my $parrot_build_dir = $config_info->{'Parrot build directory'};
-    if ( $config_info->{'Parrot version'} =~ m/\d+\.\d+\.\d+/x ) {
-        print "proto is downloading a Parrot tarball...";
+    my $parrot_version = $config_info->{'Parrot version'};
+    if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         # a tested release
-        my $parrot_version = $config_info->{'Parrot version'};
         my $parrot_tarfile = "parrot-$parrot_version.tar.gz";
-        my $ua = LWP::UserAgent -> new;
-        $ua->show_progress( 1 );
-        my $url = "http://ftp.parrot.org/releases/devel/$parrot_version/$parrot_tarfile";
         my $filename = File::Spec->catfile(
             $config_info->{'Parrot build directory'},
             $parrot_tarfile
         );
-        print "filename = $filename\n";
-        $ua->mirror( $url, $filename );
-        # Archive::Tar
-        my $ae = Archive::Extract->new( archive => $filename );
-        $ae->extract( to => $config_info->{'Parrot build directory'} )
-            or die "cannot extract from archive";
+        # check whether a download has already been done, skip if ok
+        if ( -f $filename ) {
+            my $filesize = -s $filename;
+            print "$parrot_tarfile is already downloaded ($filesize bytes)\n";
+        }
+        else {
+            print "proto is downloading a $parrot_tarfile...";
+            my $ua = LWP::UserAgent -> new;
+            $ua->show_progress( 1 );
+            my $url = "http://ftp.parrot.org/releases/devel/$parrot_version/$parrot_tarfile";
+            print "filename = $filename\n";
+            my $response = $ua->mirror( $url, $filename );
+            $response->is_success or die "cannot download $url";
+            print "downloaded.\n";
+        }
+        # check whether an extract has already been done, skip if ok
+        my $parrot_build_dir = $config_info->{'Parrot build directory'};
+        my $parrot_version_file = File::Spec->catfile( $parrot_build_dir,
+            "parrot-$parrot_version", "VERSION" );
+        if ( -f $parrot_version_file ) {
+            print "Parrot source code was already extracted\n";
+        }
+        else {
+            print "proto is extracting Parrot source code from $filename\n";
+            my $ae = Archive::Extract->new( archive => $filename );
+            $ae->extract( to => $parrot_build_dir )
+                or die "cannot extract from archive";
+        }
     }
-    elsif ( $config_info->{'Parrot version'} =~ m/ ^ \d{5,6} $ /x ) {
+    elsif ( $parrot_version =~ m/ ^ \d{5,6} $ /x or $parrot_version eq 'trunk' ) {
         # use Subversion to checkout a Parrot revision such as 41208
-        print "proto is checking out a Parrot revision...";
-    }
-    elsif ( $config_info->{'Parrot version'} eq 'trunk' ) {
-        print "proto is checking out Parrot trunk...";
+        print "proto is checking out Parrot $parrot_version...";
+        # TODO: detect if Subversion missing, and install.
+        my $svn_version = qx{svn --version};
+        $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
+        # or install from http://subversion.apache.org/packages.html#windows
+        print "proto is checking out Parrot $parrot_version...";
         my $command = "svn checkout https://svn.parrot.org/parrot/trunk $parrot_build_dir";
         print "command = $command";
         system( $command );
@@ -182,15 +202,22 @@ sub download_rakudo {
     if ( $config_info->{'Rakudo version'} =~ m/ \d{4}\.\d{2} /x ) {
         my $rakudo_version = $config_info->{'Rakudo version'};
         my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
-        my $ua = LWP::UserAgent -> new;
-        $ua->show_progress( 1 );
-        my $url = "http://cloud.github.com/downloads/rakudo/rakudo/$rakudo_release_tarfile";
         my $filename = File::Spec->catfile(
             $config_info->{'Rakudo build directory'},
             $rakudo_release_tarfile
         );
-        print "filename = $filename\n";
-        $ua->mirror( $url, $filename );
+        if ( -f $filename ) {
+            my $filesize = -s $rakudo_release_tarfile;
+            print "$rakudo_release_tarfile already downloaded ($filesize bytes)\n";
+        }
+        else {
+            print "proto is downloading a $rakudo_release_tarfile...";
+            my $ua = LWP::UserAgent -> new;
+            $ua->show_progress( 1 );
+            my $url = "http://cloud.github.com/downloads/rakudo/rakudo/$rakudo_release_tarfile";
+            print "filename = $filename\n";
+            $ua->mirror( $url, $filename );
+        }
         my $ae = Archive::Extract->new( archive => $filename );
         $ae->extract( to => $config_info->{'Rakudo build directory'} )
             or die "cannot extract from archive";
@@ -266,6 +293,11 @@ sub build_rakudo {
         );
     }
     elsif ($config_info->{'Rakudo version'} eq 'bleeding') {
+        # 1. perl git and subversion installed
+        my $git_version = qx{git --version};
+
+        # TODO: detect if git is missing, and install if needed
+        $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
         $rakudo_build_dir = $config_info->{'Rakudo build directory'};
     }
     else {
@@ -287,7 +319,7 @@ sub build_rakudo {
         print "command = $command\n";
         system( $command );
         my $make = make_utility(); # find out whether 'make' or 'mingw32-make' is installed
-        my $command = "$make install";
+        $command = "$make install";
         system( $command );
         print "\nBuilding Rakudo done\n";
         chdir $cwd;
