@@ -49,6 +49,46 @@ sub make_directories {
     }
 }
 
+#--------------------------- make_short_path ---------------------------
+# BUG: the Parrot "$make install" target used below, runs
+# 'perl tools/dev/install_files.pl' and passes a series of parameters
+# that are separated by spaces.  The parameters should be quoted in case
+# they contain spaces, but they are not.
+# The result is that Windows XP users, whose home directories are
+# typically "C:\Documents and Settings\Username", end up with the
+# non existent directory name "C:\Documents" being passed, followed by
+# the bare words "and" and "Settings".  The result is a failure to
+# install Parrot.
+# Parrot has these tickets to work on the problem:
+#     http://trac.parrot.org/parrot/ticket/930
+#     http://trac.parrot.org/parrot/ticket/888
+# NOTE: attempting to bypass Parrot's Makefile, and run install_files.pl
+# directly, also results in the same or similar problems.  Therefore the
+# unquoted arguments are being passed lower down the Parrot toolchain.
+# WORKAROUND: use the MSDOS short name instead, eg C:\DOCUME~1
+sub make_short_path {
+    my ($path) = @_;
+    if ( $^O eq 'MSWin32' and index($path, ' ') >= 0 ) {
+        # Warning: possibly unreliable code, depending on your Windows setup
+        my ($volume, $directories, $file) = File::Spec->splitpath( $path, 1 );
+        my @dirs = File::Spec->splitdir( $directories );
+        for ( my $i=0; $i<$#dirs; $i++ ) {
+            if ( index($dirs[$i], ' ') >= 0 ) {
+                # this oversimplification is definitely wrong on a
+                # small minority of Windows systems, but mberends--
+                # cannot be bothered to do it properly.
+                my $shortname = uc(substr($dirs[$i],0,6)) . '~1';
+                # for example, it's not always ~1 :/
+                $dirs[$i] = $shortname;
+            }
+        }
+        $directories = File::Spec->catdir( @dirs );
+        $path = File::Spec->catpath($volume, $directories, '' );
+        print "shortened $path to eliminate spaces\n";
+    }
+    return $path;
+}
+
 #---------------------------- install_perl6 ----------------------------
 sub install_perl6 {
     my ($config_info) = @_;
@@ -74,12 +114,13 @@ sub install_perl6 {
 sub download_parrot {
     my ($config_info) = @_;
     my $parrot_build_dir = $config_info->{'Parrot build directory'};
+    $parrot_build_dir = make_short_path( $parrot_build_dir );
     my $parrot_version = $config_info->{'Parrot version'};
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         # a tested release
         my $parrot_tarfile = "parrot-$parrot_version.tar.gz";
         my $filename = File::Spec->catfile(
-            $config_info->{'Parrot build directory'},
+            $parrot_build_dir,
             $parrot_tarfile
         );
         # check whether a download has already been done, skip if ok
@@ -98,7 +139,7 @@ sub download_parrot {
             print "downloaded.\n";
         }
         # check whether an extract has already been done, skip if ok
-        my $parrot_build_dir = $config_info->{'Parrot build directory'};
+        #my $parrot_build_dir = $config_info->{'Parrot build directory'};
         my $parrot_version_file = File::Spec->catfile( $parrot_build_dir,
             "parrot-$parrot_version", "VERSION" );
         if ( -f $parrot_version_file ) {
@@ -134,19 +175,20 @@ sub download_parrot {
 sub build_parrot {
     my ($config_info) = @_;
     my $cwd = Cwd->getcwd();
-    my $parrot_build_dir;
+    my $parrot_build_dir   = $config_info->{'Parrot build directory'};
+    my $parrot_install_dir = $config_info->{'Parrot install directory'};
     print "proto is building Parrot...";
     if ( $config_info->{'Parrot version'} =~ m/\d+\.\d+\.\d+/x ) {
         $parrot_build_dir = File::Spec->catdir( 
-            $config_info->{'Parrot build directory'},
+            $parrot_build_dir,
             'parrot-' . $config_info->{'Parrot version'}
         );
     }
     elsif ( $config_info->{'Parrot version'} =~ m/ ^ \d{5,6} $ /x ) {
-        $parrot_build_dir = $config_info->{'Parrot build directory'};
+        ;
     }
     elsif ( $config_info->{'Parrot version'} eq 'trunk' ) {
-        $parrot_build_dir = $config_info->{'Parrot build directory'};
+        ;
     }
     else {
         die "The Parrot version is $config_info->{'Rakudo revision'}" .
@@ -156,38 +198,22 @@ sub build_parrot {
     unless ( -f 'Makefile' ) {
         my $version = $config_info->{'Parrot version'};
         my $prefix  = $config_info->{'Parrot install directory'};
-        my @parrot_options = (
-            "--prefix=\"$prefix\"",
-            "--optimize"              # does this work on Windows?
-        );
+        $prefix = make_short_path( $prefix );
+        my @parrot_options = ( "--prefix=\"$prefix\"" );
+        if ( $^O ne "MSWin32" ) {
+            push @parrot_options, "--optimize";  # or does this also work on Windows now?
+        }
         my $command = "$^X Configure.pl @parrot_options";
         # run Parrot's Configure.pl
-        print "command = $command\n";
+        print "build_parrot Configure command = $command\n";
         system( $command );
     }
     # run Parrot's make
     my $make = make_utility(); # find out whether 'make' or 'mingw32-make' is installed
     my $command = "$make install";
     system( $command );
-
-=pod
-
-install-bin: installable
-	$(PERL) tools/dev/install_files.pl \
-    --buildprefix=$(BUILDPREFIX) \
-    --prefix=$(PREFIX) \
-    --exec-prefix=$(EXEC_PREFIX) \
-    --bindir=$(BIN_DIR) \
-    --libdir=$(LIB_DIR) \
-    --includedir=$(INCLUDE_DIR) \
-    --destdir=$(DESTDIR) \
-    --docdir=$(DOC_DIR) \
-    --versiondir=$(VERSION_DIR) \
-    MANIFEST MANIFEST.generated
-
-=cut
-
     chdir $cwd;
+    # TODO: run a 'parrot --version' and verify the correct output, die noisily if wrong
     print "building Parrot done\n";
 }
 
@@ -203,11 +229,11 @@ sub download_rakudo {
         my $rakudo_version = $config_info->{'Rakudo version'};
         my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
         my $filename = File::Spec->catfile(
-            $config_info->{'Rakudo build directory'},
+            $rakudo_build_dir,
             $rakudo_release_tarfile
         );
         if ( -f $filename ) {
-            my $filesize = -s $rakudo_release_tarfile;
+            my $filesize = -s $filename;
             print "$rakudo_release_tarfile already downloaded ($filesize bytes)\n";
         }
         else {
@@ -219,7 +245,7 @@ sub download_rakudo {
             $ua->mirror( $url, $filename );
         }
         my $ae = Archive::Extract->new( archive => $filename );
-        $ae->extract( to => $config_info->{'Rakudo build directory'} )
+        $ae->extract( to => $rakudo_build_dir )
             or die "cannot extract from archive";
 
 =pod
@@ -285,20 +311,19 @@ sub download_rakudo {
 #---------------------------- build_rakudo -----------------------------
 sub build_rakudo {
     my ($config_info) = @_;
-    my $rakudo_build_dir;
+    my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
     if ( $config_info->{'Rakudo version'} =~ m/ \d{4}\.\d{2} /x ) {
+        # versions like '2010.02' are release tarballs
         $rakudo_build_dir = File::Spec->catdir(
-            $config_info->{'Rakudo build directory'},
+            $rakudo_build_dir,
             "rakudo-$config_info->{'Rakudo version'}"
         );
     }
     elsif ($config_info->{'Rakudo version'} eq 'bleeding') {
-        # 1. perl git and subversion installed
+        # use git to clone the latest source
         my $git_version = qx{git --version};
-
         # TODO: detect if git is missing, and install if needed
         $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
-        $rakudo_build_dir = $config_info->{'Rakudo build directory'};
     }
     else {
         die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
@@ -312,11 +337,12 @@ sub build_rakudo {
             'bin',
             'parrot_config'
         );
+        $parrot_config = make_short_path( $parrot_config );
         my @rakudo_options = (
             "--parrot-config=\"$parrot_config\""
         );
         my $command = "$^X Configure.pl @rakudo_options";
-        print "command = $command\n";
+        print "Rakudo Configure command = $command\n";
         system( $command );
         my $make = make_utility(); # find out whether 'make' or 'mingw32-make' is installed
         $command = "$make install";
@@ -662,6 +688,24 @@ Perl 6 C<Installer> script to download, test and install your choice of
 Perl 6 projects.
 
 The C<Installer> script
+
+=head1 TOOLCHAIN
+
+Perl 5, a make utility and a C compiler are all you really need.  Proto
+starts in Perl 5 and uses some of its modules to download and extract
+Parrot and Rakudo source code archive files.  Unix-ish systems generally
+have these already installed, if not there is usually a package manager
+that can provide them.
+
+On Windows the most popular options are Strawberry Perl (which includes
+everything you need, and can download CPAN modules too) and ActiveState
+Perl (which recently added a Gnu C compiler as an option, and has its
+own package manager).  Some Windows based developers prefer the
+Microsoft C++ compiler, from http://www.microsoft.com/express/downloads/.
+
+The proto developers are striving to install and run Rakudo Perl 6 with
+whatever operating system, Perl 5 distribution and compiler toolchain
+you use.  Please visit #perl6 to discuss you experiences.
 
 =head1 ENVIRONMENT
 
