@@ -2,22 +2,23 @@
 use strict;
 $| = 1; # flush after every print
 
-use Archive::Extract;
-use Cwd;             # to return to the original directory after a chdir
-use File::Path;
-use File::Spec;
-use LWP::UserAgent;
+use Archive::Extract;  # because releases are in .tar.gz format
+use Cwd;               # to return to original directory after a chdir
+# use File::Path;      # for make_path, but it does not like '.perl6'
+use File::Spec;        # OS independent volume, directory and file names
+use LWP::UserAgent;    # mirror() downloads tarballs and files
 
 #---------------------------- main program -----------------------------
 # The old proto used to keep its data local, the new one is global.
-my ($config_file, $state_file) = get_config_file();
+my ($config_file, $state_file) = get_config_file_names();
+create_default_config_file( $config_file ) unless ( -f $config_file );
+create_default_state_file(  $state_file  ) unless ( -f $state_file );
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
 make_directories( $config_info->{'Perl 6 library'},
     $config_info->{'Parrot build directory'},
     $config_info->{'Rakudo build directory'},
     $config_info->{'Proto projects cache'}
 );
-create_default_state_file( $state_file ) unless ( -f $state_file );
 my $perl6 = $config_info->{'Perl 6 executable'};
 install_perl6( $config_info ) unless -x $perl6;
 make_pir_modules( $perl6, $config_info->{'Perl 6 library'} );
@@ -28,9 +29,9 @@ sub install_perl6 {
     my ($config_info) = @_;
     my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
     print "proto is installing Rakudo Perl 6.\n";
-    download_parrot( $config_info );
-    build_parrot(    $config_info );
-    download_rakudo( $config_info );
+    download_parrot( $config_info ) and
+    build_parrot(    $config_info ) and
+    download_rakudo( $config_info ) and
     build_rakudo(    $config_info );
     # Perform a minimal check that the installation succeeded
     my $perl6 = $config_info->{'Perl 6 executable'};
@@ -38,7 +39,9 @@ sub install_perl6 {
         die "proto was unable to install Rakudo Perl 6 :-(\n";
     }
     my $rakudo_version = qx{$perl6 -v};
-    unless ( $rakudo_version =~ m/^This compiler is built with the Parrot Compiler Toolkit, parrot revision \d{5}$/ ) {
+    # It's a little bit strange that the -v output does not include the
+    # word Rakudo at all...
+    unless ( $rakudo_version =~ m/^This compiler is built with the Parrot Compiler Toolkit, parrot revision \d{5}\.$/ ) {
         die "rakudo error: $rakudo_version";
     }
     print "Rakudo Perl 6 has been installed.\n";
@@ -94,7 +97,7 @@ sub download_parrot {
         # or install from http://subversion.apache.org/packages.html#windows
         my $revision_option = " --revision $parrot_version";
         print "proto is checking out Parrot $parrot_version...";
-        my $command = "svn checkout$revision_option https://svn.parrot.org/parrot/trunk $parrot_build_dir";
+        my $command = qq{svn checkout$revision_option https://svn.parrot.org/parrot/trunk "$parrot_build_dir"};
         print "\ncommand = $command\n";
         if ( system( $command ) != 0 ) {
             die "subversion checkout of Parrot failed";
@@ -106,6 +109,7 @@ sub download_parrot {
     }
     # TODO: verify the download and die noisily if it seems wrong
     print "parrot download done\n";
+    return 1;
 }
 
 #---------------------------- build_parrot -----------------------------
@@ -125,12 +129,12 @@ sub build_parrot {
     elsif ( $parrot_version =~ m/ ^ \d{5,6} $ /x ) {
         ;
     }
-    elsif ( $parrot_version eq 'trunk' ) {
+    elsif ( $parrot_version eq 'HEAD' ) {
         ;
     }
     else {
-        die "The Parrot version is $parrot_version" .
-            " but should be 'trunk' or a number such as '2.2.0'";
+        die "The Parrot version is '$parrot_version' but should be 'HEAD',\n" .
+            "a revision such as 45370 or a release such as '2.2.0'";
     }
     chdir $parrot_build_dir or die "cannot chdir";
     unless ( -f 'Makefile' ) {
@@ -147,12 +151,13 @@ sub build_parrot {
         system( $command );
     }
     # run Parrot's make
-    my $make = make_utility(); # find out whether 'make' or 'mingw32-make' is installed
+    my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
     my $command = "$make install";
     system( $command );
     chdir $cwd;
     # TODO: run a 'parrot --version' and verify the correct output, die noisily if wrong
     print "building Parrot done\n";
+    return 1;
 }
 
 #--------------------------- download_rakudo ---------------------------
@@ -191,107 +196,63 @@ sub download_rakudo {
                 die "Couldn't remove $rakudo_build_dir";
             }
         }
-        my $command = 'git clone git://github.com/rakudo/rakudo.git '.
-            $rakudo_build_dir;
+        my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir"};
         print "\ncommand = $command\n";
         if ( system( $command ) != 0 ) {
             die "Downloading Rakudo using git clone failed";
         }
-
-=pod
-
-        if ( $rakudo_build_dir =~ m{ (.*) / \w+ $}x ) {
-            print 'Downloading Rakudo Perl 6...';
-            my $parent_dir = $1;
-            if ( ! -d $parent_dir ) {
-                mkpath($parent_dir) or die "Couldn't create $parent_dir";
-            }
-            if ( -d $rakudo_build_dir ) {
-                rmtree($rakudo_build_dir) or die "Couldn't remove $rakudo_build_dir";
-            }
-            my $command = 'git clone git://github.com/rakudo/rakudo.git'
-                      . " $rakudo_build_dir"
-                      . $silently;
-            system( $command ) == 0 or die "\nCouldn't check out Rakudo: $?";
-        }
-        else {
-            die "Something went wrong while downloading rakudo";
-        }
-
-=cut
-
     }
     else {
         die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
     }
 
     print "[ Rakudo download ok  ]\n";
+    return 1;
 }
 
 #---------------------------- build_rakudo -----------------------------
 sub build_rakudo {
     my ($config_info) = @_;
     my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
-    if ( $config_info->{'Rakudo version'} =~ m/ \d{4}\.\d{2} /x ) {
+    my $rakudo_version = $config_info->{'Rakudo version'};
+    my $parrot_install_dir = $config_info->{'Parrot install directory'};
+    if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
         # versions like '2010.02' are release tarballs
         $rakudo_build_dir = File::Spec->catdir(
             $rakudo_build_dir,
-            "rakudo-$config_info->{'Rakudo version'}"
+            "rakudo-$rakudo_version"
         );
     }
-    elsif ($config_info->{'Rakudo version'} eq 'bleeding') {
-        # use git to clone the latest source
-        my $git_version = qx{git --version};
-        # TODO: detect if git is missing, and install if needed
-        $git_version =~ s/(git )version ([0-9.]+)\n/$1$2/;    # little re-format
+    elsif ($rakudo_version eq 'bleeding') {
+        # do not change $rakudo_build_dir
     }
     else {
-        die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
+        die "Rakudo version was neither 'bleeding' nor a number like '2010.03'";
     }
+    my $rakudo_build_log = File::Spec->catfile(
+        $rakudo_build_dir, '', 'rakudo-build.log'
+    );
     if ( ! -f "$rakudo_build_dir/perl6" ) {
         print "Building Rakudo in $rakudo_build_dir...";
         my $cwd = Cwd->getcwd();
         chdir $rakudo_build_dir or die "cannot chdir";
         my $parrot_config = File::Spec->catfile(
-            $config_info->{'Parrot install directory'},
-            'bin',
-            'parrot_config'
+            $parrot_install_dir, 'bin', 'parrot_config'
         );
         $parrot_config = make_short_path( $parrot_config );
-        my @rakudo_options = (
-            "--parrot-config=\"$parrot_config\""
-        );
+        my @rakudo_options = ( qq{--parrot-config="$parrot_config"} );
         my $command = "$^X Configure.pl @rakudo_options";
         print "Rakudo Configure command = $command\n";
         system( $command );
-        my $make = make_utility(); # find out whether 'make' or 'mingw32-make' is installed
+        my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
         $command = "$make install";
-        system( $command );
+        if ( system( $command ) != 0 ) {
+            die "error building/installing Rakudo";
+        }
         print "\nBuilding Rakudo done\n";
         chdir $cwd;
-
-=pod
-
-        my $flags = '--gen-parrot';
-        my $command
-            = "(cd $rakudo_build_dir && perl Configure.pl $flags "
-              . '&& make install)'
-              . ' 2>&1 | ./dotty-progress "Building Perl 6" 3579';
-        if ( system($command) != 0 ) {
-            print "[ FAIL ]\n";
-            if ( system("grep memory make.log $silently") == 0 ) {
-                die "Not enough memory to build Perl 6.\n";
-            }
-            die "Couldn't build Perl 6: $?";
-        }
-        -f "$rakudo_build_dir/perl6"
-            or die "[ FAIL ]\nCouldn't build Perl 6.\n";
-        unlink('make.log');
-        print "[  ok  ]\n";
-
-=cut
-
     }
+    return 1;
 }
 
 #-------------------------- make_pir_modules ---------------------------
@@ -301,33 +262,45 @@ sub make_pir_modules {
     # TODO: multiple versions of the Ecosystem and Installer modules
     my ($perl6exe, $perl6libdir) = @_;
     my $displayed_building = 0;
-    # Be sure the destination directory exists
-    unless ( -d $perl6libdir ) {
-        warn "making $perl6libdir";
-        system( "perl -MExtUtils::Command -e mkdir $perl6libdir" );
-    }
     # Precompile these modules to PIR
     for my $name ( 'Ecosystem', 'Installer' ) {
+        my $module_install_path = File::Spec->catfile(
+            $perl6libdir, "$name.pm"
+        );
+        my $module_local_path = File::Spec->catfile(
+            'lib', "$name.pm"
+        );
         # If it is newer or has not been copied, copy "$name.pm" from
         # "lib/" to "$perl6libdir/".
         # -M is script start time minus file modification time, in days.
-        if ( ! -f "$perl6libdir/$name.pm" || -M "lib/$name.pm" < -M "$perl6libdir/$name.pm" ) {
+        if ( ! -f $module_install_path || -M $module_local_path < -M $module_install_path ) {
             unless ( $displayed_building ) {
                 print "Building proto..."; $displayed_building = 1;
             }
             # warn "copying $name to $perl6libdir\n";
-            system( "perl -MExtUtils::Command -e cp lib/$name.pm $perl6libdir" );
-            # Maybe the main proto script (written in Perl 5) would have
-            # been able to load the ExtUtils::Command module anyway, and
-            # could have done the mkdir and cp commands internally...
-            # Such usage is not documented.
+            if ( -f $module_local_path ) {
+                system( qq{perl -MExtUtils::Command -e cp "$module_local_path" "$module_install_path"} );
+                # Maybe the main proto script (written in Perl 5) would have
+                # been able to load the ExtUtils::Command module anyway, and
+                # could have done the mkdir and cp commands internally...
+                # Such usage is not documented.
+            }
+            else {
+                # download the module file from github.
+                print "downloading $name.pm...\n";
+                my $ua = LWP::UserAgent -> new;
+                $ua->show_progress( 1 );
+                my $url = "http://github.com/masak/proto/master/raw/lib/$name.pm";
+                print "module_install_path = $module_install_path\n";
+                $ua->mirror( $url, $module_install_path );
+            }
         }
         if ( ! -f "$perl6libdir/$name.pir" || -M "$perl6libdir/$name.pm" < -M "$perl6libdir/$name.pir" || -M $perl6 < -M "$perl6libdir/$name.pir" ) {
             unless ( $displayed_building ) {
                 print "Building proto..."; $displayed_building = 1;
             }
             # warn "compiling $perl6libdir/$name.pir\n";
-            system( "$perl6 --target=pir --output=$perl6libdir/$name.pir $perl6libdir/$name.pm" );
+            system( qq{$perl6 --target=pir --output=$perl6libdir/$name.pir $perl6libdir/$name.pm} );
         }
     }
     if ( $displayed_building ) {
@@ -335,17 +308,17 @@ sub make_pir_modules {
     }
 }
 
-#---------------------------- make_utility -----------------------------
-sub make_utility {
+#---------------------------- make_command -----------------------------
+sub make_command {
     my @commands = qw< make mingw32-make >;
-    my $make_utility;
+    my $make_command;
     for ( @commands ) {
         if ( system( "$_ --version" ) == 0 ) {
-            $make_utility = $_;
+            $make_command = $_;
             last;
         }
     }
-    return $make_utility;
+    return $make_command;
 }
 
 #--------------------------- make_directories --------------------------
@@ -415,62 +388,17 @@ sub make_short_path {
     return $path;
 }
 
-=pod
-
-#--------------------------- legacy_projects ---------------------------
-sub legacy_projects {
-    my ( $config_info ) = @_;
-    my @legacy_projects;
-    my $project_dir = $config_info->{'Proto projects directory'};
-    open PROJECTS_LIST, '<', 'projects.list' or die "cannot open projects list";
-    while ( defined( my $line = <PROJECTS_LIST> ) ) {
-        if ( $line =~ m/ ^ (\S+) : $ /x ) {
-            my $project = $1;
-            if ( -d "$project_dir/$project" and $project ne 'proto' ) {
-                push @legacy_projects, $project;
-            }
-        }
-    }
-    close PROJECTS_LIST;
-    return @legacy_projects;
-}
-
-=cut
-
-#--------------------- create_default_config_file ----------------------
-sub get_config_file {
-    # removed File::HomeDir dependency because it is not a core module
+#------------------------ get_config_file_names ------------------------
+sub get_config_file_names {
+    # Removed File::HomeDir dependency because it is not a core module.
+    # The following is the only functionality proto needed from it.
     my $home_path = $^O eq 'MSWin32'
         ? $ENV{'HOMEDRIVE'} . $ENV{'HOMEPATH'}
         : $ENV{'HOME'};
     my ( $home_vol, $home_dir ) = File::Spec->splitpath( $home_path, 1 );
     my $perl6basedir = File::Spec->catpath( $home_vol, $home_dir, '.perl6' );
-    my $config_file = File::Spec->catfile( $perl6basedir, 'proto', 'proto.conf' );
-    my $state_file =  File::Spec->catfile( $perl6basedir, 'proto', 'projects.state' );
-    if ( ! -e $config_file ) {
-        create_default_config_file($config_file);
-        my $config_info = load_config_file($config_file);
-        die <<"PROTO_CONFIG_MESSAGE";
-
-*** CONFIG FILE CREATED ***
-
-Greetings!  I have made a configuration file that you may want to review
-called '$config_file'.
-Next time you run $0
-these settings will be used to bootstrap your Perl 6 software ecosystem.
-
-If you're new to this, or reluctant to do configuration, you probably want
-the default settings anyway. The most important ones are:
-Perl 6 library         -> $config_info->{'Perl 6 library'}
-Perl 6 executable      -> $config_info->{'Perl 6 executable'}
-
-PROTO_CONFIG_MESSAGE
-    }
-
-    # So, continue here if there was an existing config.proto file
-    if ( ! -r $config_file ) {
-        die "The file $config_file exists but is not readable. Cannot continue.\n";
-    }
+    my $config_file  = File::Spec->catfile( $perl6basedir, 'proto', 'proto.conf' );
+    my $state_file   = File::Spec->catfile( $perl6basedir, 'proto', 'projects.state' );
     return ($config_file, $state_file);
 }
 
@@ -505,9 +433,9 @@ sub create_default_config_file {
     }
 
     my $config_info = {
-        'proto.conf version'       => '2010-04-01',
+        'proto.conf version'       => '2010-04-02',
         'Rakudo version'           => 'bleeding',
-        'Parrot version'           => '45370',
+        'Parrot version'           => 'HEAD',
         'Proto projects cache'     => $projects_cache_dir,
         'Rakudo build directory'   => $rakudo_build_dir,
         'Parrot build directory'   => $parrot_build_dir,
@@ -519,11 +447,9 @@ sub create_default_config_file {
         'Perl 6 project developer' => 'no',
     };
     my  $commentinfo = {
-        '/' => [ 'proto.conf -- created by proto',
-                 'The file consists of a number of settings written as',
-                 'key/value pairs. You are welcome -- encouraged, even -- to',
-                 'edit the file manually, but please stick to a list of',
-                 'key/value pairs.' ],
+        '/' => [ "$proto_config_file -- created by proto",
+                 'This file contains settings as "key: value" pairs, and comments.',
+                 'You are welcome -- encouraged, even -- to edit the file manually.' ],
         'config.proto version'
             => [ 'config.proto version -- the version number of this file.',
                  'proto uses it to determine whether the file needs to be',
@@ -533,13 +459,13 @@ sub create_default_config_file {
             => [ 'Proto projects cache -- the base directory in which each project',
                  'gets its own download directory' ],
         'Rakudo build directory'
-            => [ 'Rakudo build directory -- Rakudo source is compiled here. ' ],
+            => [ 'Rakudo build directory -- Rakudo source is compiled here.' ],
         'Rakudo version'
-            => [ "Rakudo version -- either 'bleeding' or a number such as '2010.02'" ],
+            => [ "Rakudo version -- either 'bleeding' (requires git) or a number such as '2010.02'" ],
         'Parrot build directory'
-            => [ 'Parrot build directory -- Parrot source is compiled here. ' ],
+            => [ 'Parrot build directory -- Parrot source is compiled here.' ],
         'Parrot version'
-            => [ "Parrot version -- either 'HEAD' or a number such as '2.2.0'" ],
+            => [ "Parrot version -- either 'HEAD' (requires subversion) or a revision number such as 45370 (also requires subversion) or a release number such as '2.2.0'" ],
         'Perl 6 executable'
             => [ 'Perl 6 executable -- how to run perl6. ' ],
         'Perl 6 library'
@@ -573,7 +499,7 @@ sub create_default_config_file {
                  'option means that the build process halts whenever a test',
                  'suite fails. Other values are treated as "keep going".' ],
         'Perl 6 project developer'
-            => [ 'Perl 6 project developer -- when set, this option makes',
+            => [ 'Perl 6 project developer -- yes or no.  When set, this option makes',
                  'proto try to download read-write versions of project',
                  'repositories, from which project development can be',
                  'carried out. If such a download fails, proto falls back to',
@@ -581,6 +507,21 @@ sub create_default_config_file {
     };
     save_config_file($proto_config_file, $config_info, $commentinfo )
         or die "Couldn't create $proto_config_file: $!\n";
+    die <<"PROTO_CONFIG_MESSAGE";
+
+*** CONFIG FILE CREATED ***
+
+Greetings!  I have made a configuration file that you may want to review
+called '$config_file'.
+Next time you run $0
+these settings will be used to bootstrap your Perl 6 software ecosystem.
+
+If you're new to this, or reluctant to do configuration, you probably want
+the default settings anyway. The most important ones are:
+Perl 6 library         -> $config_info->{'Perl 6 library'}
+Perl 6 executable      -> $config_info->{'Perl 6 executable'}
+
+PROTO_CONFIG_MESSAGE
 }
 
 #---------------------- create_default_state_file ----------------------
