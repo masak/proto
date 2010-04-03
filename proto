@@ -56,10 +56,7 @@ sub download_parrot {
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         # a tested release
         my $parrot_tarfile = "parrot-$parrot_version.tar.gz";
-        my $filename = File::Spec->catfile(
-            $parrot_build_dir,
-            $parrot_tarfile
-        );
+        my $filename = File::Spec->catfile( $parrot_build_dir, $parrot_tarfile );
         # check whether a download has already been done, skip if ok
         if ( -f $filename ) {
             my $filesize = -s ( $filename );
@@ -141,6 +138,7 @@ sub build_parrot {
 #        my $version = $config_info->{'Parrot version'};
         my $prefix  = $config_info->{'Parrot install directory'};
         $prefix = make_short_path( $prefix );
+        $prefix =~ s/\\/\//g; # ugh. change backslashes to forward slashes.
         my @parrot_options = ( "--prefix=\"$prefix\"" );
         if ( $^O ne "MSWin32" ) {
             push @parrot_options, "--optimize";  # or does this also work on Windows now?
@@ -547,12 +545,12 @@ sub load_config_file {
     my $settings = {};
     my $comments = {};
     my @collected_comments = ();
-    open my $YAML_FILE, '<', $filename
+    open my $CONFIG_FILE, '<', $filename
         or die "cannot open $filename for read: $!";
     my $doc_sep_line = qr/^---/;
     my $comment_line = qr/\#(.*)$/;
     my $setting_line = qr/(.*):\s+(.*)/;
-    while ( my $line = <$YAML_FILE> ) {
+    while ( my $line = <$CONFIG_FILE> ) {
         chomp $line;
         if ( $line =~ $doc_sep_line ) {
             $comments->{'/'} = [ @collected_comments ];
@@ -567,7 +565,7 @@ sub load_config_file {
             @collected_comments = ();
         }
     }
-    close $YAML_FILE;
+    close $CONFIG_FILE;
     return wantarray ? ( $settings, $comments ) : $settings;
 }
 
@@ -575,62 +573,89 @@ sub load_config_file {
 sub save_config_file {
     my ( $filename, $settings, $comments ) = @_;
     if ( not defined $comments ) { $comments = { }; }
-    open my $YAML_FILE, '>', $filename
+    open my $CONFIG_FILE, '>', $filename
         or die "cannot open $filename for write: $!";
     my $main_comments = $comments->{'/'};
     if ( defined $main_comments ) {
         for my $comment ( @$main_comments ) {
-            print {$YAML_FILE} "# $comment\n";
+            print {$CONFIG_FILE} "# $comment\n";
         }
     }
-    print {$YAML_FILE} "--- \n";
+    print {$CONFIG_FILE} "--- \n";
     for my $settingname ( sort keys %$settings ) {
-        print {$YAML_FILE} "\n";
+        print {$CONFIG_FILE} "\n";
         my $setting_comments = $comments->{$settingname};
         if ( defined $setting_comments ) {
             for my $comment ( @$setting_comments ) {
-                print {$YAML_FILE} "# $comment\n";
+                print {$CONFIG_FILE} "# $comment\n";
             }
         }
-        print {$YAML_FILE} "$settingname: ", ${$settings}{$settingname}, "\n";
+        print {$CONFIG_FILE} "$settingname: ", ${$settings}{$settingname}, "\n";
     }
-    close $YAML_FILE;
+    close $CONFIG_FILE;
 }
 
-__DATA__
+__END__
 
 =pod
 
 =head1 NAME
 
-proto - download and install Parrot, Rakudo, and Perl 6 projects
+proto - download and install Parrot, Rakudo Perl 6, and modules
+
+=head1 SYNOPSIS
+
+    # Perl 5 must already be installed - see that it's >= v5.8
+    perl -v
+    # Fetch the proto bootstrap file this way, or with a browser:
+    # (all on one line without the \ if not in a Unix compatible shell)
+    perl -MLWP::UserAgent -e"my $ua=LWP::UserAgent->new; $ua->mirror( \
+        'http://github.com/masak/proto/raw/master/proto', 'proto')"
+    # The first proto run creates your default ~/.perl6/proto/proto.conf
+    perl proto
+    # After optionally editing proto.conf, do the bootstrap installation
+    perl proto
+    # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
+    sudo proto symlink # on Unix for example, TODO
+    # If the installation appears successful, verify that it works
+    proto selftest # TODO
+    # Read the fine manual
+    proto help
+    perldoc proto
+    # Use proto to install modules
+    proto install SVG HTTP::Daemon:auth<mberends> # TODO
 
 =head1 OVERVIEW
 
-The C<proto> command is a Perl 5 script that installs Rakudo Perl 6 and
-Parrot if they are not already installed. It then hands over to the
-Perl 6 C<Installer> script to download, test and install your choice of
-Perl 6 projects.
+The C<proto> utility is a Perl 5 script that installs Parrot and Rakudo
+Perl 6 if they are not already installed, or works with your existing
+Perl 6 installation.  Proto uses its Perl 6 C<Installer> script to
+download, test and install your choice of Perl 6 modules.
 
-The C<Installer> script
+The Installer script loads Proto's F<Installer.pm> and F<Ecosystem.pm>
+modules, and executes commands such as C<install> or C<test>.
 
-=head1 TOOLCHAIN
+=head1 DEPENDENCIES
 
-Perl 5, a make utility and a C compiler are all you really need.  Proto
-starts in Perl 5 and uses some of its modules to download and extract
-Parrot and Rakudo source code archive files.  Unix-ish systems generally
-have these already installed, if not there is usually a package manager
-that can provide them.
+Perl 5.8, a C compiler and a make utility are the minimum requirements.
+Unix compatible systems generally have these already installed, or have
+a package manager that can provide them.
 
 On Windows the most popular options are Strawberry Perl (which includes
 everything you need, and can download CPAN modules too) and ActiveState
-Perl (which recently added a Gnu C compiler as an option, and has its
-own package manager).  Some Windows based developers prefer the
-Microsoft C++ compiler, from http://www.microsoft.com/express/downloads/.
+Perl (which recently added the MinGW C compiler as an option, and has
+its own package manager called ppm instead of cpan).  See
+L<http://strawberryperl.com> or L<http://activestate.com/activeperl>.
+Some Windows based developers prefer the Microsoft C++ compiler, from
+L<http://www.microsoft.com/express/downloads>.
+
+Git and Subversion are optional.  Users interested in the latest source
+code of Parrot and Rakudo should install these utilities.  See
+L<http://git-scm.com> and L<http://subversion.apache.org>.
 
 The proto developers are striving to install and run Rakudo Perl 6 with
 whatever operating system, Perl 5 distribution and compiler toolchain
-you use.  Please visit #perl6 to discuss you experiences.
+you use.  Please join #perl6 to discuss you experiences.
 
 =head1 ENVIRONMENT
 
@@ -647,87 +672,147 @@ something like:
 
 =head1 ROADMAP
 
-The current proto roadmap responds to the Rakudo * initiative, its
-nql-rx refactor and the related S11 Modules proposal
-(github.com/rakudo/rakudo/blob/master/docs/S11-Modules-proposal.pod).
+The current proto roadmap is linked to the Rakudo * initiative and the
+Synopsis 11 Modules proposal in
+L<//github.com/rakudo/rakudo/blob/master/docs/S11-Modules-proposal.pod>.
+TODO: rename the doc to S11-Modules-plan.pod, so that its URL does not
+overflow perldoc's 72 character line preference.
 
-Rakudo * release needs only a subset of these proto roadmap goals.
+The Rakudo * release needs only a subset of these proto roadmap goals.
 The rest are desirable enhancements.
 
-The previous proto roadmap was called 'installed-modules', and is still
-included below for planning reference, but not necessarily to guide
-implementation.
+The previous proto roadmap was called C<installed-modules>, and is
+included below for reference, but not necessarily to be implemented.
 
-1.  Fixing.  Make proto work with the latest master Rakudo, formerly
-    known as the 'ng' branch.  There were a few regressions switching
-    over.  Problems are being handled by working around in proto,
-    commenting the fixes as WORKAROUND, and reporting them in #perl6.
-    This approach leaves a TODO item here, to find WORKAROUND comments,
-    handle them better, or notify http://rt.perl.org/rt3 by mailing
-    rakudobug@perl.org.
+=head2 Bootstrap
 
-2.  Releases.  The default for a novice user will be to download the
-    most recent stable tarballs for Rakudo and Parrot.  Proto can do
-    that using only core modules, and without requiring installation
-    of subversion or git software.  It does mean that proto needs to be
-    updated with new default version numbers as soon as possible after
-    each Rakudo release.  Rakudo developers can change to downloading
-    the latest Rakudo and Parrot versions by editing proto.conf.
+Simplify the initial download to only the F<proto> file, which can run
+in any temporary directory.  Use the Perl 5 L<LWP::UserAgent> and
+L<Archive::Extract> to download and process the Parrot and Rakudo
+release archive files.
 
-3.  Directories.  The user may override anything, but default to all
-    subdirectories of ~/.perl6, as follows:
+Use a setting in proto.conf to control whether to remove the source code
+trees after a successful installation (the default is to remove).
 
-        git               for fetching Rakudo if needed
-        lib               root of the Perl 6 module hierarchy
-        parrot            main Parrot download/build directory
-            parrot-x.y.z  source directory of a specific Parrot version
-        parrot_install    parrot virtual machine runtime base
-            bin           for parrot executables, eg perl6.pbc
-        proto             keep proto.conf and projects.state here
-            cache         where projects are downloaded and tested
-        rakudo            Rakudo download/build directory
-        svn               for fetching parrot if needed
+=head2 Platforms
 
-    By making the parrot, parrot_install and rakudo directories not nest
-    in each other, there is more flexibility for customization.  If a
-    user prefers the directory nesting done by Rakudo's --gen-parrot
-    option, proto can work with that too.
+Run in more than just Unix compatible environments.  So far, proto has
+conque^Wbeen used in Linux and OS X.  In particilar, it should embrace
+Microsoft Windows.  To be Windows compatible, proto uses Perl 5 modules
+such as File::Spec to handle all directory and file names.
 
-    To be Windows compatible, proto will use Perl 5 modules such as
-    File::Spec and File::Path to handle all directory and file names,
-    and LWP::UserAgent and Archive::Extract to process the archive files.
+=head2 Directories
 
-4.  Modules.  Also put project.state and config.proto in the
-    ~/.perl6/proto directory.  Modules installed by proto keep working
-    even if proto is removed.  Thus proto can be replaced and phased out.
+The user may override all directories.  The default base is .perl6 in
+the user's home directory, which proto.conf will call 'Perl 6 base'.
+That is ~/.perl6 or $HOME/.perl6 in Unix compatible systems, or
+%HOMEDRIVE%%HOMEPATH%\.perl6 in Windows. Subdirectories in .perl6 are:
 
-5.  Runtime.  Build in ~/.perl6/parrot and ~/.perl6/rakudo, install the
-    binaries in ~/.perl6/parrot_install and then remove the build dirs.
-    Let the user edit config.proto to override the directory paths and
-    turn off source tree removal.  Make it easy to install multiple
-    implementations side by side, for example Rakudo on Parrot, Rakudo
-    on Common Language Infrastructure, Pugs, Mildew etc.  Treat them as
-    special projects that can be installed, updated or removed.
+    git                 for fetching Rakudo if needed
+    lib                 start of the Perl 6 module hierarchy
+    parrot              main Parrot download/build directory
+        parrot-x.y.z    source directory of a specific Parrot version
+    parrot_install      parrot virtual machine runtime base
+        bin             for parrot executables, eg perl6.pbc
+    proto               keep proto.conf and projects.state here
+        cache           where projects are downloaded and tested
+    rakudo              Rakudo download/build directory
+        rakudo-yyyy.mm  source directory of a specific Rakudo version
+    svn                 for fetching Parrot if needed
 
-6.  Updating.  Re-install proto, Rakudo and Parrot from newer release
-    downloads if the user chooses, and if the date suggests they should
-    be available.
+By making the parrot, parrot_install and rakudo directories not nest in
+each other, there is more flexibility for customization.  If a user
+wants the directory nesting done by Rakudo's --gen-parrot option, she
+can edit proto.conf to use that, or any other layout.
 
-7.  Versioning.  Implement the librarian functions of the S11 Modules
-    proposal.  Details to be worked out.
+=head2 Runtimes
 
-8.  Cheese speleology: remember http://use.perl.org/~masak/journal/39583
-    and implement it.  Easier said than done, but now is the very best
-    time to start.  Details to be worked out.
+The F<.perl6> base directory makes it easier to install multiple Perl 6
+implementations side by side.  Eventually there may be Rakudo on Parrot,
+Rakudo on Common Language Infrastructure, Pugs, Mildew and others.
+
+Proto has special project references for proto and each runtime, so that
+they can also be installed, updated or uninstalled.  The command
+C<perl6> could mean any one of C<rakudo>, C<pugs> and so on.
+
+=head2 Modules
+
+lichtkind: flash drives do not dissolve, they just vanish in a flash ;)
+
+The Rakudo * plan to implement module versioning is a subset of the S11
+modules spec.  Proto must download and install a specific version of a
+module to satisfy dependencies.  The proto granularity of downloading
+must change from 'project' to 'module'.  Installing a project that
+contains multiple modules will need more redesign, and probably changes
+to F<projects.list>.  Authors will continue to manage their repositories
+as projects.  Proto will download individual files using the Perl 5
+L<LWP::UserAgent>, or a Rakudo based replacement when this becomes
+available.
+
+What is the simplest thing that could possibly work?
+
+All published modules must declare a "full name" (with :auth and :ver).
+Add a 'modules.list' with these possible layouts:
+
+    Module:auth<name>:ver<number>:                                or
+    Namespace::and::Module:auth<name>:ver<number>:
+        url: http://www.zzz.com/path/to/a/versioned/module.pm     or
+        project: http://www.zzz.com/path/to/a/versioned/module.pm
+
+=head2 Testing
+
+Easier said than done, but there needs to be a start.  The command
+C<proto selftest> should provide some mock drivers and files, using
+these to cover and test as much of proto's functionality as possible.
+
+Remember L<http://use.perl.org/~masak/journal/39583> and implement it.
+
+=head2 Releases
+
+The default for a novice user will be to download the
+most recent stable tarballs for Rakudo and Parrot.  Proto can do
+that using only core modules, and without requiring installation
+of subversion or git software.  It does mean that proto needs to be
+updated with new default version numbers as soon as possible after
+each Rakudo release.  Rakudo developers can change to downloading
+the latest Rakudo and Parrot versions by editing proto.conf.
+
+=head2 Authoring
+
+Convert the 'create-new-project' script into a C<proto newmodule>
+command that helps the developer follow Well Though Out Practices.
+Consider "Modules: Creation, Use, and Abuse" in the Perl 5 L<perlmodlib>
+when doing the design.  Implement it as a separate Proto module.
+
+=head2 Refactoring
+
+Whilst proto was being revised to work with the current NQP-RX based
+Rakudo, problems were handled by working around them, commenting the
+fixes as WORKAROUND, and reporting them in #perl6.
+This approach leaves a TODO item here, to find WORKAROUND comments,
+handle them better, or notify http://rt.perl.org/rt3 by mailing
+rakudobug@perl.org.
+
+=head2 Rename
+
+Renaming the proto project is a good subject for a bikeshed discussion.
+Proto has achieved its goal of helping to install stuff.  It has also
+contributed in part to a successor in the form of Plumage, see
+L<http://gitorious.org/parrot-plumage>.  A name change would imply new
+ambitions, which the proto contributors currently do not have.
+
+If the Rakudo * distrubution opts to bundle a subset of the proto files,
+as now seems likely, it might be fitting to rename just the C<proto>
+command.  For example, C<rakudo-install>.  Let the discussions begin...
 
 =head1 TODO
 
 1.  The new Rakudo master is not backwards compatible with the alpha
-    branch, so rip out the old legacy project support.
+    branch, so rip out the old legacy project support.  [done, easy]
 
 2.  For Windows compatibility, change all hard coded mkdir and cp
     commands to use the Perl 5's L<ExtUtils::Command> with C<-e mkpath>
-    and C<-e cp> instead.
+    and C<-e cp> instead.  [done]
 
 3.  The install command will need to be able specify :auth<> and :ver<>
     and look them up in projects.list.
@@ -736,56 +821,53 @@ implementation.
     installed_modules/bin, or 2) add a symbolic link in a system path
     directory to the perl6 fakecutable.
 
-5.  Also put the proto executable
-    in the bin directory and enable it to be run independent of the
-    current working directory.
+5.  Also put the proto executable in the bin directory and enable it to
+    run independent of the current working directory.
 
 99. Reduce all WORKAROUND comments to simple cases in rakudobug reports
     and replace the comments with TODO items linked to RT numbers.
 
 =head1 Rakudo/alpha old TODO list (partly deprecated)
 
-The installed-modules branch plans to improve proto by doing the following:
+The installed-modules branch plans to improve proto by doing the
+following:
 
 1.  Place all installed Perl 6 modules (.pm and .pir files) into one
     folder hierarchy. Rakudo now preloads @*INC with $HOME/.perl6lib,
     followed by <parrot_install>/lib/<version/languages/perl6/lib, the
     directories in PERL6LIB, and lastly '.' (the current directory).
-    Add a "Perl 6 library" setting to config.proto, with $HOME/.perl6/lib
-    as default value.
+    Add a "Perl 6 library" setting to config.proto, with
+    $HOME/.perl6/lib as default value.
     [DONE]
 
-2.  Keep a separate cache directory per project for all processing prior
-    to installation. Allow the cache directory to be cleaned or removed
-    without affecting the installed module.
+2.  Keep a separate cache directory per project for all processing
+    prior to installation. Allow the cache directory to be cleaned or
+    removed without affecting the installed module.
     Add a "Proto cache directory" to config.proto with a default value
-    of <proto_base>/cache.
-    [DONE]
+    of <proto_base>/cache.  [DONE]
 
 3.  Add a projects.state file to register installed projects.
     The format of projects.state is similar to projects.list, currently
     with a C<state> field whose value may be 'legacy', 'built', 'tested'
     (meaning passed *all* tests in the cache directory) or 'installed'.
-    Route all access to projects.state information via the Ecosystem class.
-    [DONE]
+    Route all access to projects.state information via the Ecosystem
+    class.  [DONE]
 
 4.  Rename the existing "fetch" submethod to "download", "install" ->
     "fetch", "update" -> "refresh" and "uninstall" -> "clean".
-    Rename Ecosystem::is-installed() to Ecosystem::is_fetched().
-    [DONE]
+    Rename Ecosystem::is-installed() to Ecosystem::is_fetched(). [DONE]
 
 5.  Factor out the code common in the existing "install" and "update"
-    methods, or unify them and add a new/existing flag. Either way, stop
-    the repetition because we need to edit this part significantly.
-    [DONE]
+    methods, or unify them and add a new/existing flag. Either way,
+    stop the repetition because we need to edit this part
+    significantly.  [DONE]
 
 6.  Replace the 'Parrot directory' and 'Rakudo directory' settings with
-    'Perl 6 executable' in config.proto.
-    [DONE]
+    'Perl 6 executable' in config.proto.  [DONE]
 
-7.  Make install_perl6 implement L<http://www.rakudo.org/how-to-get-rakudo>,
-    including the new 'make install' step.
-    [DONE]
+7.  Make install_perl6 implement
+    L<http://www.rakudo.org/how-to-get-rakudo>, including the new
+    'make install' step.  [DONE]
 
 8.  Use the shiny new %*ENV for passing environment variables to child
     processes.
@@ -824,8 +906,9 @@ The installed-modules branch plans to improve proto by doing the following:
     politely if nothing changed. Build and test the updated project in
     the refreshed cache directory. If it passes, rename the cache
     directory to cache/$project.new and rename the cache/$project.temp
-    to just cache/$project, and uninstall the old version of the project.
-    Discard the old project cache and rename the .new back. Install.
+    to just cache/$project, and uninstall the old version of the
+    project.  Discard the old project cache and rename the .new back.
+    Install.
 
 14. Ensure robustness of the workflow, so that an error in fetching,
     building or testing any dependency, stops the dependent module
@@ -833,17 +916,18 @@ The installed-modules branch plans to improve proto by doing the following:
     concisely in the top level methods.
 
 15. Validate @*INC by exiting with a friendly explanation if @*INC does
-    not contain the 'Perl 6 library' directory. List the possible fixes:
-    edit config.proto (set Perl 6 library), or any one of
+    not contain the 'Perl 6 library' directory. List the possible
+    fixes: edit config.proto (set Perl 6 library), or any one of
     ~/.bash_profile, ~/.bash_login, or ~/.profile (set PERL6LIB).
-    Make this behaviour optional with a 'Validate Perl 6 library' option
-    in config.proto.
+    Make this behaviour optional with a 'Validate Perl 6 library'
+    option in config.proto.
 
 16. Update create-new-project to support install, update and uninstall
     in its Makefile. Document it as a guideline for module developers.
     This facility is new to proto, so it is also new to all projects.
-    The 'make' utility will need to know where to find 'Perl 6 library',
-    so do this: %*ENV<PERL6LIB> = %!config-info{'Perl 6 library'}.
+    The 'make' utility will need to know where to find
+    'Perl 6 library', so do this: %*ENV<PERL6LIB> =
+    %!config-info{'Perl 6 library'}.
 
 17. When loading projects.list also load a projects.local if it exists.
     The projects.local file allows individual projects to be handled by
@@ -851,14 +935,14 @@ The installed-modules branch plans to improve proto by doing the following:
 
 18. ...keep planning and doing...
 
-19. Build a test suite for proto itself, with the possibility of partial
-    testing offline. With acceptable test coverage, proto will be safer
-    to develop and use until other infrastructure tools usurp it.
-    Use a test version of config.proto that points to test directories,
-    so that the main installation is not affected.
-    For even better testing, consider testing proto inside a chroot jail
-    to prevent bugs from damaging things. Building the jail may be a bit
-    complicated though, think it through first.
+19. Build a test suite for proto itself, with the possibility of
+    partial testing offline. With acceptable test coverage, proto will
+    be safer to develop and use until other infrastructure tools usurp
+    it.  Use a test version of config.proto that points to test
+    directories, so that the main installation is not affected.
+    For even better testing, consider testing proto inside a chroot
+    jail to prevent bugs from damaging things. Building the jail may be
+    a bit complicated though, think it through first.
     [OPTIONAL]
 
 20. Improve the usage message and provide help per command.
@@ -868,8 +952,8 @@ The installed-modules branch plans to improve proto by doing the following:
     [OPTIONAL]
 
 22. Refactor into MVC form. Details to be determined. Some ideas:
-    Model is currently only Ecosystem (metadata). It should also include
-    handling files and directories in the proto/cache/ and the
+    Model is currently only Ecosystem (metadata). It should also
+    include handling files and directories in the proto/cache/ and the
     'Perl 6 library' tree, perhaps within a separate module.
     View is the part of Installer.pm that deals with lists of projects,
     commands and other user I/O.
