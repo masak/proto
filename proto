@@ -4,7 +4,6 @@ $| = 1; # flush after every print
 
 use Archive::Extract;  # because releases are in .tar.gz format
 use Cwd;               # to return to original directory after a chdir
-# use File::Path;      # for make_path, but it does not like '.perl6'
 use File::Spec;        # OS independent volume, directory and file names
 use LWP::UserAgent;    # mirror() downloads tarballs and files
 
@@ -41,7 +40,7 @@ sub install_perl6 {
     my $rakudo_version = qx{$perl6 -v};
     # It's a little bit strange that the -v output does not include the
     # word Rakudo at all...
-    unless ( $rakudo_version =~ m/^This compiler is built with the Parrot Compiler Toolkit, parrot revision \d{5}\.$/ ) {
+    unless ( $rakudo_version =~ m/^This compiler is built with the Parrot Compiler Toolkit, parrot revision \d+\.$/ ) {
         die "rakudo error: $rakudo_version";
     }
     print "Rakudo Perl 6 has been installed.\n";
@@ -135,7 +134,6 @@ sub build_parrot {
     }
     chdir $parrot_build_dir or die "cannot chdir";
     unless ( -f 'Makefile' ) {
-#        my $version = $config_info->{'Parrot version'};
         my $prefix  = $config_info->{'Parrot install directory'};
         $prefix = make_short_path( $prefix );
         $prefix =~ s/\\/\//g; # ugh. change backslashes to forward slashes.
@@ -163,9 +161,6 @@ sub download_rakudo {
     my ( $config_info ) = @_;
     my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
     my $rakudo_version = $config_info->{'Rakudo version'};
-#   print "proto is downloading Rakudo $rakudo_version...\n";
-    # XXX Maybe check if rakudo dir has contents instead?
-#    return if -d $rakudo_build_dir;
     if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
         my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
         my $filename = File::Spec->catfile(
@@ -308,11 +303,16 @@ sub make_pir_modules {
 
 #---------------------------- make_command -----------------------------
 sub make_command {
-    my @commands = qw< make mingw32-make >;
+    my @make_utilities = (
+        [ 'make',         '--version' ],
+        [ 'nmake',        '/HELP'     ],
+        [ 'mingw32-make', '--version' ]
+    );
     my $make_command;
-    for ( @commands ) {
-        if ( system( "$_ --version" ) == 0 ) {
-            $make_command = $_;
+    for my $make ( @make_utilities ) {
+        my ( $command, $arguments ) = @{$make};
+        if ( system( "$command $arguments" ) == 0 ) {
+            $make_command = $command;
             last;
         }
     }
@@ -431,9 +431,9 @@ sub create_default_config_file {
     }
 
     my $config_info = {
-        'proto.conf version'       => '2010-04-02',
-        'Rakudo version'           => 'bleeding',
-        'Parrot version'           => 'HEAD',
+        'proto.conf version'       => '2010-04-03',
+        'Rakudo version'           => '2010.03',
+        'Parrot version'           => '2.2.0',
         'Proto projects cache'     => $projects_cache_dir,
         'Rakudo build directory'   => $rakudo_build_dir,
         'Parrot build directory'   => $parrot_build_dir,
@@ -448,8 +448,8 @@ sub create_default_config_file {
         '/' => [ "$proto_config_file -- created by proto",
                  'This file contains settings as "key: value" pairs, and comments.',
                  'You are welcome -- encouraged, even -- to edit the file manually.' ],
-        'config.proto version'
-            => [ 'config.proto version -- the version number of this file.',
+        'proto.conf version'
+            => [ 'proto.conf version -- the version number of this file.',
                  'proto uses it to determine whether the file needs to be',
                  'upgraded to a newer version. The value should never need',
                  'to be edited manually.' ],
@@ -460,6 +460,14 @@ sub create_default_config_file {
             => [ 'Rakudo build directory -- Rakudo source is compiled here.' ],
         'Rakudo version'
             => [ "Rakudo version -- either 'bleeding' (requires git) or a number such as '2010.02'" ],
+        'Rakudo revision'
+            => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
+                 'download, if no such revision was found in $RAKUDO_DIR or',
+                 'other likely locations at startup. Allowed values are',
+                 '"bleeding", "release", and a hexadecimal integer of length',
+                 'up to 40. The value "bleeding" means to download the latest',
+                 'Rakudo Perl 6 revision from github, whereas "release" means',
+                 'to download the latest release as a tarball.' ],
         'Parrot build directory'
             => [ 'Parrot build directory -- Parrot source is compiled here.' ],
         'Parrot version'
@@ -472,15 +480,6 @@ sub create_default_config_file {
                  'by proto. If you set this to a different path after projects',
                  'have already been installed, be aware that the old projects',
                  'will have to be moved along if proto is to find them' ],
-        # TODO: Implement downloading of specific releases.
-        'Rakudo revision'
-            => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
-                 'download, if no such revision was found in $RAKUDO_DIR or',
-                 'other likely locations at startup. Allowed values are',
-                 '"bleeding", "release", and a hexadecimal integer of length',
-                 'up to 40. The value "bleeding" means to download the latest',
-                 'Rakudo Perl 6 revision from github, whereas "release" means',
-                 'to download the latest release as a tarball.' ],
         'Test when building'
             => [ 'Test when building -- when building projects that were just',
                  'downloaded or updated, whether to also run the test suites',

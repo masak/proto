@@ -284,6 +284,7 @@ class Installer {
             #       because dependencies couldn't be fetched).
             exit 1;
         }
+        warn "CONFIG_INFO" ~ %!config-info;
         my $target-dir = %!config-info{'Proto projects cache'}
                          ~ "/$project";
         my %info       = $.ecosystem.get-info-on($project);
@@ -296,6 +297,8 @@ class Installer {
             }
         }
         my $silently   = '>/dev/null 2>&1';
+        # WORKAROUND let's see the errors
+        $silently = '';
         if $.ecosystem.is-state($project,'fetched') {
             print "Refreshing $project...";
             my $command = do given %info<home> {
@@ -407,7 +410,10 @@ class Installer {
     method install(@projects is copy) {
         # ensure all requested projects have been fetched, built and tested.
         # abort if any project is faulty.
-        if @projects.grep('all') {
+        # RAKUDOBUG: rakudo -e'my @a=<aa bb cc>; say @a.grep("dd").perl'
+        # says: ()
+        # WORKAROUND: test .elems > 0
+        if @projects.grep('all').elems > 0 {
             @projects = $.ecosystem.regular-projects.sort;
             for @projects.kv -> $key, $project {
                 if $.ecosystem.get-state($project) eq 'installed' {
@@ -546,7 +552,9 @@ class Installer {
     submethod get-deps($project) {
         my $deps-file = %!config-info{'Proto projects cache'}
                         ~ "/$project/deps.proto";
-        return unless $deps-file ~~ :f;
+        # WORKAROUND
+        # return unless $deps-file ~~ :f;
+        if $deps-file !~~ :f { return; }
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
         return lines($deps-file)\
                  .map({remove-line-ending-comment($^line)})\
@@ -591,7 +599,9 @@ class Installer {
         for lines($filename) {
             when /^ '---'/               { }
             when / '#' (.*) $/           { }
-            when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
+            # WORKAROUND: Rakudo backtracking bug
+#           when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
+            when / (<-[:]>+) ':' <.ws> (.*) / { %settings{$0} = $1; }
         }
         return %settings;
     }
