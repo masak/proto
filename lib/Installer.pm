@@ -284,7 +284,6 @@ class Installer {
             #       because dependencies couldn't be fetched).
             exit 1;
         }
-        warn "CONFIG_INFO" ~ %!config-info;
         my $target-dir = %!config-info{'Proto projects cache'}
                          ~ "/$project";
         my %info       = $.ecosystem.get-info-on($project);
@@ -297,7 +296,7 @@ class Installer {
             }
         }
         my $silently   = '>/dev/null 2>&1';
-        # WORKAROUND let's see the errors
+        # WORKAROUND: let's see the errors
         $silently = '';
         if $.ecosystem.is-state($project,'fetched') {
             print "Refreshing $project...";
@@ -374,10 +373,11 @@ class Installer {
         #      a successful [sic] outcome.
         # TODO: deprecate PARROT_DIR and RAKUDO_DIR now that we have an
         #       installed Perl 6 executable.
-        %*ENV<PARROT_DIR> = %*VM<config><bindir>;
+        # WORKAROUND: %*ENV is readonly, and %*VM nonexistent
+        # %*ENV<PARROT_DIR> = %*VM<config><bindir>;
+        # %*ENV<RAKUDO_DIR> = %*VM<config><libdir> ~ %*VM<config><versiondir>
+        #     ~ '/languages/perl6/lib'; # point to Test.pm
         my $perl6 = %!config-info{'Perl 6 executable'};
-        %*ENV<RAKUDO_DIR> = %*VM<config><libdir> ~ %*VM<config><versiondir>
-            ~ '/languages/perl6/lib'; # point to Test.pm
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
             if "$project-dir/$config-file" ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
@@ -578,9 +578,14 @@ class Installer {
     #------------------------- configured-run --------------------------
     submethod configured-run( Str $command, Str :$project = '',
                               Str :$dir = '.', Str :$output-mode = 'Log' ) {
-        %*ENV<PERL6LIB> = join ':', map {
+        # WORKAROUND:
+        # map {...}, list; is different, and %*ENV is readonly
+        # %*ENV<PERL6LIB> = join ':', map {
+        #                       "{%!config-info{'Proto projects cache'}}/$_/lib"
+        #                   }, $project, self.get-deps-deeply( $project );
+        my $perl6lib = join ':', map {
                               "{%!config-info{'Proto projects cache'}}/$_/lib"
-                          }, $project, self.get-deps-deeply( $project );
+                          }, ( $project, self.get-deps-deeply( $project ) );
         my $redirection = do given $output-mode {
             when 'Log'     { '>make.log 2>&1'  }
             when 'Silent'  { '>/dev/null 2>&1' }
@@ -589,7 +594,9 @@ class Installer {
         };
         # Switch directory like this only in the child process,
         # so that the proto current directory does not have to change.
-        my $cmd = "cd $dir; $command $redirection";
+        # WORKAROUND: %*ENV is readonly
+        # my $cmd = "cd $dir; $command $redirection";
+        my $cmd = "cd $dir; export PERL6LIB=$perl6lib; $command $redirection";
         run( $cmd );
     }
 
@@ -599,7 +606,8 @@ class Installer {
         for lines($filename) {
             when /^ '---'/               { }
             when / '#' (.*) $/           { }
-            # WORKAROUND: Rakudo backtracking bug
+            # WORKAROUND: Rakudo has a backtracking bug reported in
+            # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608
 #           when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
             when / (<-[:]>+) ':' <.ws> (.*) / { %settings{$0} = $1; }
         }

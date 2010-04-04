@@ -68,12 +68,19 @@ method get-state($project) {
 method set-state($project,$state) {
     %!project-state{$project} = {} unless %!project-state.exists($project);
     if $state {
+        warn "SET-STATE 71 project=$project state=$state";
+        warn %!project-state{$project}<state>;
         %!project-state{$project}<state> = $state;
+        warn "SET-STATE 73 project=$project state=$state";
     }
     else {
+        warn "SET-STATE 76 project=$project state=$state";
         %!project-state.delete($project); # because there was only <state>
+        warn "SET-STATE 78 project=$project state=$state";
     }
+    warn "SET-STATE 80 project=$project state=$state";
     save-project-list('projects.state', %!project-state);
+    warn "SET-STATE 82 project=$project state=$state";
 }
 
 #-------------------------- regular-projects ---------------------------
@@ -146,8 +153,7 @@ sub load-project-list(Str $filename) {
 
         # key and value within section
         # WORKAROUND: Rakudo has a backtracking bug reported in
-        # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608 and
-        # http://nopaste.snit.ch/20018
+        # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608
 #       when / ^ <.ws> (\S+)     ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
         when / ^ <.ws> (<-[:]>+) ':' <.ws> (\S+) <.ws> ['#' | $ ] / {
             %current{~$0} = ~$1;
