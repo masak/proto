@@ -111,11 +111,11 @@ sub download_parrot {
 #---------------------------- build_parrot -----------------------------
 sub build_parrot {
     my ($config_info) = @_;
+    print "proto is building Parrot...";
     my $cwd = Cwd->getcwd();
     my $parrot_build_dir   = $config_info->{'Parrot build directory'};
     my $parrot_install_dir = $config_info->{'Parrot install directory'};
     my $parrot_version     = $config_info->{'Parrot version'};
-    print "proto is building Parrot...";
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         $parrot_build_dir = File::Spec->catdir( 
             $parrot_build_dir,
@@ -147,8 +147,9 @@ sub build_parrot {
         system( $command );
     }
     # run Parrot's make
+    my $log_directive = '> proto-make.log';
     my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
-    my $command = "$make install";
+    my $command = "$make install $log_directive";
     system( $command );
     chdir $cwd;
     # TODO: run a 'parrot --version' and verify the correct output, die noisily if wrong
@@ -234,13 +235,17 @@ sub build_rakudo {
         );
         $parrot_config = make_short_path( $parrot_config );
         my @rakudo_options = ( qq{--parrot-config="$parrot_config"} );
-        my $command = "$^X Configure.pl @rakudo_options";
+        my $log_directive = '> proto-configure.log';
+        my $command = "$^X Configure.pl @rakudo_options $log_directive";
         print "Rakudo Configure command = $command\n";
-        system( $command );
-        my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
-        $command = "$make install";
         if ( system( $command ) != 0 ) {
-            die "error building/installing Rakudo";
+            die "error configuring Rakudo: $!";
+        }
+        $log_directive = '> proto-make.log';
+        my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
+        $command = "$make install $log_directive";
+        if ( system( $command ) != 0 ) {
+            die "error building/installing Rakudo: $!";
         }
         print "\nBuilding Rakudo done\n";
         chdir $cwd;
@@ -283,7 +288,7 @@ sub make_pir_modules {
                 print "downloading $name.pm...\n";
                 my $ua = LWP::UserAgent -> new;
                 $ua->show_progress( 1 );
-                my $url = "http://github.com/masak/proto/master/raw/lib/$name.pm";
+                my $url = "http://github.com/masak/proto/raw/master/lib/$name.pm";
                 print "module_install_path = $module_install_path\n";
                 $ua->mirror( $url, $module_install_path );
             }
@@ -608,12 +613,12 @@ proto - download and install Parrot, Rakudo Perl 6, and modules
     perl -v
     # Fetch the proto bootstrap file this way, or with a browser:
     # (all on one line without the \ if not in a Unix compatible shell)
-    perl -MLWP::UserAgent -e"my $ua=LWP::UserAgent->new; $ua->mirror( \
+    perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
         'http://github.com/masak/proto/raw/master/proto', 'proto')"
     # The first proto run creates your default ~/.perl6/proto/proto.conf
-    perl proto
+    perl proto configure
     # After optionally editing proto.conf, do the bootstrap installation
-    perl proto
+    perl proto installrakudo
     # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
     sudo proto symlink # on Unix for example, TODO
     # If the installation appears successful, verify that it works
@@ -734,9 +739,24 @@ Proto has special project references for proto and each runtime, so that
 they can also be installed, updated or uninstalled.  The command
 C<perl6> could mean any one of C<rakudo>, C<pugs> and so on.
 
-=head2 Modules
+=head2 Commands
 
-lichtkind: flash drives do not dissolve, they just vanish in a flash ;)
+The C<proto> file, a Perl 5 program, has so far kept a very low profile.
+In future, C<proto> will intercept and run these commands.  Proto will
+pass everything else through to F<Installer.pm>:
+
+    configure       # create proto.conf if it does not exist
+    install rakudo  # according to proto.conf (only if not installed)
+    link            # put 'proto', 'rakudo' and 'perl6' in your path
+    reconfigure     # interactively change the existing proto.conf
+    update rakudo   # update Rakudo according to settings in proto.conf
+    help            # display commands and their arguments
+
+These first two of these actions used to be automagically carried out.
+To avoid surprises in future, the user will have to give each command
+explicitly.  If there is no command, proto will display the help.
+
+=head2 Modules
 
 The Rakudo * plan to implement module versioning is a subset of the S11
 modules spec.  Proto must download and install a specific version of a
@@ -803,6 +823,9 @@ ambitions, which the proto contributors currently do not have.
 If the Rakudo * distrubution opts to bundle a subset of the proto files,
 as now seems likely, it might be fitting to rename just the C<proto>
 command.  For example, C<rakudo-install>.  Let the discussions begin...
+
+Another avenue being explored is to publish proto as a Perl 5 module to
+be called something like p6::protoinstaller.
 
 =head1 TODO
 
