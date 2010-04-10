@@ -168,7 +168,8 @@ class Installer {
             my $command = '';
             if "$project-dir/Makefile" ~~ :e {
                 if slurp("$project-dir/Makefile") ~~ /^test:/ {
-                    $command = 'make test';
+                    my $make = %!config-info{'Make utility'};
+                    $command = "$make test";
                 }
             }
             unless $command {
@@ -393,7 +394,7 @@ class Installer {
             }
         }
         if "$project-dir/Makefile" ~~ :f {
-            my $make-cmd = 'make';
+            my $make-cmd = %!config-info{'Make utility'};
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
                 $.ecosystem.set-state($project,'build-failed');
@@ -450,7 +451,8 @@ class Installer {
 
             my $project-dir = $.ecosystem.project-dir($project);
             if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
-                my $r = self.configured-run( 'make install', :project( $project ), :dir( $project-dir ) );
+                my $make = %!config-info{'Make utility'};
+                my $r = self.configured-run( "$make install", :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
                     $.ecosystem.set-state($project,'install-failed');
                     say "install failed, see $project-dir/make.log";
@@ -527,7 +529,8 @@ class Installer {
             print "Uninstalling $project...";
             my $project-dir = $.ecosystem.project-dir($project);
             if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^uninstall\:/ {
-                self.configured-run( 'make uninstall', :project( $project ), :dir( $project-dir ) );
+                my $make = %!config-info{'Make utility'};
+                self.configured-run( "$make uninstall", :project( $project ), :dir( $project-dir ) );
             }
             else {
                 for $.ecosystem.files-in-cache-lib($project).map({"$perl6lib/$_"}).grep({ $_ ~~ :f }) -> $file

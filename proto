@@ -8,25 +8,62 @@ use File::Spec;        # OS independent volume, directory and file names
 use LWP::UserAgent;    # mirror() downloads tarballs and files
 
 #---------------------------- main program -----------------------------
-# The old proto used to keep its data local, the new one is global.
+if ( @ARGV == 0 or $ARGV[0] eq 'help' ) {
+    print <<END_OF_HELP;
+Usage: proto <command> [arguments]
+# commands about proto:
+configure         # create proto.conf if it does not exist
+fetch
+# commands about rakudo:
+install rakudo    # according to proto.conf (only if not installed)
+# commands for modules:
+install <modules> # eg mod1 mod2:auth<name> mod3:ver<1.2.3>
+make commands     # add 'proto', 'rakudo' and 'perl6' into your path
+reconfigure       # interactively change an existing proto.conf
+refresh
+update proto      # download proto's files if newer ones are available
+test proto        # check the proto installation using mock drivers
+update rakudo     # change installed Rakudo version
+test rakudo       # uses the spectest suite to thoroughly check Rakudo
+help              # display commands and their arguments
+
+END_OF_HELP
+  clean test install uninstall showdeps showstate help update>; #TODO: add update
+    exit;
+}
 my ($config_file, $state_file) = get_config_file_names();
-create_default_config_file( $config_file ) unless ( -f $config_file );
+if ( $ARGV[0] eq 'configure' ) {
+    if ( -f $config_file ) {
+        die "cannot configure: file '$config_file' already exists\n";
+    }
+    create_default_config_file($config_file);
+}
+unless ( -f $config_file ) {
+    die "first use $0 configure to create $config_file";
+}
 create_default_state_file(  $state_file  ) unless ( -f $state_file );
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
-make_directories( $config_info->{'Perl 6 library'},
-    $config_info->{'Parrot build directory'},
-    $config_info->{'Rakudo build directory'},
+create_directories(
+    $config_info->{'Perl 6 library'},
     $config_info->{'Proto projects cache'}
 );
 my $perl6 = $config_info->{'Perl 6 executable'};
-install_perl6( $config_info ) unless -x $perl6;
+if ( $ARGV[0] eq 'install' and $ARGV[1] eq 'rakudo' ) {
+    die "rakudo is already installed" if -x $perl6;
+    install_rakudo( $config_info );
+    exit; # do nothing else after installing Rakudo
+}
+if ( $ARGV[0] eq 'update' and $ARGV[1] eq 'rakudo' ) {
+    die "cannot update, you should first install rakudo" unless -x $perl6;
+    update_rakudo( $config_info );
+}
 make_pir_modules( $perl6, $config_info->{'Perl 6 library'} );
 exec( "$perl6 installer @ARGV" ); # Delegate to installer
 
-#---------------------------- install_perl6 ----------------------------
-sub install_perl6 {
+#--------------------------- install_rakudo ----------------------------
+sub install_rakudo {
     my ($config_info) = @_;
-    my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
+#   my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
     print "proto is installing Rakudo Perl 6.\n";
     download_parrot( $config_info ) and
     build_parrot(    $config_info ) and
@@ -37,11 +74,9 @@ sub install_perl6 {
     unless ( -x $perl6 ) {
         die "proto was unable to install Rakudo Perl 6 :-(\n";
     }
-    my $rakudo_version = qx{$perl6 -v};
-    # It's a little bit strange that the -v output does not include the
-    # word Rakudo at all...
-    unless ( $rakudo_version =~ m/^This compiler is built with the Parrot Compiler Toolkit, parrot revision \d+\.$/ ) {
-        die "rakudo error: $rakudo_version";
+    my $output = qx{$perl6 -e"say 'Perl 6 rocks!'"};
+    unless ( $output eq "Perl 6 rocks!\n" ) {
+        die "perl 6 install error: $!";
     }
     print "Rakudo Perl 6 has been installed.\n";
 }
@@ -51,6 +86,7 @@ sub download_parrot {
     my ($config_info) = @_;
     my $parrot_build_dir = $config_info->{'Parrot build directory'};
     $parrot_build_dir = make_short_path( $parrot_build_dir );
+    create_directories( $parrot_build_dir );
     my $parrot_version = $config_info->{'Parrot version'};
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         # a tested release
@@ -147,8 +183,8 @@ sub build_parrot {
         system( $command );
     }
     # run Parrot's make
-    my $log_directive = '> proto-make.log';
-    my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
+    my $log_directive = '> proto-make.log 2> proto-make-error.log';
+    my $make = $config_info->{'Make utility'};
     my $command = "$make install $log_directive";
     system( $command );
     chdir $cwd;
@@ -161,6 +197,7 @@ sub build_parrot {
 sub download_rakudo {
     my ( $config_info ) = @_;
     my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
+    create_directories( $rakudo_build_dir );
     my $rakudo_version = $config_info->{'Rakudo version'};
     if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
         my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
@@ -241,8 +278,8 @@ sub build_rakudo {
         if ( system( $command ) != 0 ) {
             die "error configuring Rakudo: $!";
         }
-        $log_directive = '> proto-make.log';
-        my $make = make_command(); # find out whether 'make' or 'mingw32-make' is installed
+        $log_directive = '> proto-make.log 2> proto-make-error.log';
+        my $make = $config_info->{'Make utility'};
         $command = "$make install $log_directive";
         if ( system( $command ) != 0 ) {
             die "error building/installing Rakudo: $!";
@@ -263,12 +300,12 @@ sub make_pir_modules {
     # Precompile these modules to PIR
     for my $name ( 'Ecosystem', 'Installer' ) {
         my $module_install_path = File::Spec->catfile(
-            $perl6libdir, "$name.pm"
+            $perl6libdir, "$name.pm6"
         );
         my $module_local_path = File::Spec->catfile(
-            'lib', "$name.pm"
+            'lib', "$name.pm6"
         );
-        # If it is newer or has not been copied, copy "$name.pm" from
+        # If it is newer or has not been copied, copy "$name.pm6" from
         # "lib/" to "$perl6libdir/".
         # -M is script start time minus file modification time, in days.
         if ( ! -f $module_install_path || -M $module_local_path < -M $module_install_path ) {
@@ -285,20 +322,20 @@ sub make_pir_modules {
             }
             else {
                 # download the module file from github.
-                print "downloading $name.pm...\n";
+                print "downloading $name.pm6...\n";
                 my $ua = LWP::UserAgent -> new;
                 $ua->show_progress( 1 );
-                my $url = "http://github.com/masak/proto/raw/master/lib/$name.pm";
+                my $url = "http://github.com/masak/proto/raw/master/lib/$name.pm6";
                 print "module_install_path = $module_install_path\n";
                 $ua->mirror( $url, $module_install_path );
             }
         }
-        if ( ! -f "$perl6libdir/$name.pir" || -M "$perl6libdir/$name.pm" < -M "$perl6libdir/$name.pir" || -M $perl6 < -M "$perl6libdir/$name.pir" ) {
+        if ( ! -f "$perl6libdir/$name.pir" || -M "$perl6libdir/$name.pm6" < -M "$perl6libdir/$name.pir" || -M $perl6 < -M "$perl6libdir/$name.pir" ) {
             unless ( $displayed_building ) {
                 print "Building proto..."; $displayed_building = 1;
             }
             # warn "compiling $perl6libdir/$name.pir\n";
-            system( qq{$perl6 --target=pir --output=$perl6libdir/$name.pir $perl6libdir/$name.pm} );
+            system( qq{$perl6 --target=pir --output=$perl6libdir/$name.pir $perl6libdir/$name.pm6} );
         }
     }
     if ( $displayed_building ) {
@@ -306,32 +343,32 @@ sub make_pir_modules {
     }
 }
 
-#---------------------------- make_command -----------------------------
-sub make_command {
+#------------------------- detect_make_utility -------------------------
+sub detect_make_utility {
     my @make_utilities = (
         [ 'make',         '--version' ],
         [ 'nmake',        '/HELP'     ],
         [ 'mingw32-make', '--version' ]
     );
-    my $make_command;
+    my $make_utility;
     for my $make ( @make_utilities ) {
         my ( $command, $arguments ) = @{$make};
         if ( system( "$command $arguments" ) == 0 ) {
-            $make_command = $command;
+            $make_utility = $command;
             last;
         }
     }
-    return $make_command;
+    return $make_utility;
 }
 
-#--------------------------- make_directories --------------------------
-sub make_directories {
-    # Create all the directories that do not yet exist
+#------------------------- create_directories --------------------------
+sub create_directories {
+    # Create a list of directories if they do not yet exist
+    # It would have been nice to use File::Path->make_path here, but in
+    # Windows, "make_path .perl6" dies with "invalid path"
     for my $path ( @_ ) {
         # skip all the inner work if $path already exists
         unless ( -d $path ) {
-            # it would be nice to use File::Path->make_path here, but in
-            # Windows the directory .perl6 makes it say "invalid path"
             my ( $volume, $directories, $file ) = File::Spec->splitpath( $path, 1 );
             my @dirs = File::Spec->splitdir( $directories );
             # Because this uses mkdir, it must verify or create the
@@ -386,7 +423,7 @@ sub make_short_path {
         }
         $directories = File::Spec->catdir( @dirs );
         $path = File::Spec->catpath($volume, $directories, '' );
-        print "shortened $path to eliminate spaces\n";
+        # print "shortened $path to eliminate spaces\n";
     }
     return $path;
 }
@@ -419,7 +456,7 @@ sub create_default_config_file {
     my $proto_cache_dir = File::Spec->catdir( @proto_dirs );
     my $proto_cache_path = File::Spec->catpath( $home_vol, $proto_cache_dir, 'cache' );
     # create directories if they do not yet exist
-    make_directories( $perl6_lib_path, $proto_cache_path );
+    create_directories( $perl6_lib_path, $proto_cache_path );
     my $rakudo_build_dir = File::Spec->catpath( $home_vol, $perl6_dir, 'rakudo' );
     my $parrot_build_dir = File::Spec->catpath( $home_vol, $perl6_dir, 'parrot' );
     my $parrot_install_dir = File::Spec->catpath( $home_vol, $perl6_dir, 'parrot_install' );
@@ -436,7 +473,7 @@ sub create_default_config_file {
     }
 
     my $config_info = {
-        'proto.conf version'       => '2010-04-03',
+        'proto.conf version'       => '2010-04-06',
         'Rakudo version'           => '2010.03',
         'Parrot version'           => '2.2.0',
         'Proto projects cache'     => $projects_cache_dir,
@@ -445,6 +482,7 @@ sub create_default_config_file {
         'Parrot install directory' => $parrot_install_dir,
         'Perl 6 executable'        => $perl6exe,
         'Perl 6 library'           => $perl6_lib_path,
+        'Make utility'             => detect_make_utility(),
         'Test when building'       => 'no',
         'Test failure policy'      => 'die',
         'Perl 6 project developer' => 'no',
@@ -464,7 +502,8 @@ sub create_default_config_file {
         'Rakudo build directory'
             => [ 'Rakudo build directory -- Rakudo source is compiled here.' ],
         'Rakudo version'
-            => [ "Rakudo version -- either 'bleeding' (requires git) or a number such as '2010.02'" ],
+            => [ "Rakudo version -- either 'bleeding' (requires git) or a number such",
+                 "as '2010.02'" ],
         'Rakudo revision'
             => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
                  'download, if no such revision was found in $RAKUDO_DIR or',
@@ -476,7 +515,9 @@ sub create_default_config_file {
         'Parrot build directory'
             => [ 'Parrot build directory -- Parrot source is compiled here.' ],
         'Parrot version'
-            => [ "Parrot version -- either 'HEAD' (requires subversion) or a revision number such as 45370 (also requires subversion) or a release number such as '2.2.0'" ],
+            => [ "Parrot version -- either 'HEAD' (requires subversion) or a revision",
+                 "number such as 45370 (also requires subversion) or a release number",
+                 "such as '2.2.0'" ],
         'Perl 6 executable'
             => [ 'Perl 6 executable -- how to run perl6. ' ],
         'Perl 6 library'
@@ -485,6 +526,9 @@ sub create_default_config_file {
                  'by proto. If you set this to a different path after projects',
                  'have already been installed, be aware that the old projects',
                  'will have to be moved along if proto is to find them' ],
+        'Make utility'
+            => [ 'Make utility -- the name of the command on your system that builds',
+                 'Parrot, Rakudo and application projects using their Makefile.' ],
         'Test when building'
             => [ 'Test when building -- when building projects that were just',
                  'downloaded or updated, whether to also run the test suites',
@@ -618,9 +662,9 @@ proto - download and install Parrot, Rakudo Perl 6, and modules
     # The first proto run creates your default ~/.perl6/proto/proto.conf
     perl proto configure
     # After optionally editing proto.conf, do the bootstrap installation
-    perl proto installrakudo
+    perl proto install rakudo
     # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
-    sudo proto symlink # on Unix for example, TODO
+    sudo proto make commands   # on Unix for example, TODO
     # If the installation appears successful, verify that it works
     proto selftest # TODO
     # Read the fine manual
@@ -739,22 +783,28 @@ Proto has special project references for proto and each runtime, so that
 they can also be installed, updated or uninstalled.  The command
 C<perl6> could mean any one of C<rakudo>, C<pugs> and so on.
 
+As a start, proto could automate the checking out and compiling of
+Rakudo's alpha branch.
+
 =head2 Commands
 
 The C<proto> file, a Perl 5 program, has so far kept a very low profile.
-In future, C<proto> will intercept and run these commands.  Proto will
-pass everything else through to F<Installer.pm>:
+In future, C<proto> will intercept and run the following commands.
+Proto will pass everything else through to the Perl 6 F<Installer.pm>:
 
     configure       # create proto.conf if it does not exist
     install rakudo  # according to proto.conf (only if not installed)
-    link            # put 'proto', 'rakudo' and 'perl6' in your path
-    reconfigure     # interactively change the existing proto.conf
-    update rakudo   # update Rakudo according to settings in proto.conf
+    make commands   # add 'proto', 'rakudo' and 'perl6' into your path
+    reconfigure     # interactively change an existing proto.conf
+    update proto    # download proto's files if newer ones are available
+    test proto      # check the proto installation using mock drivers
+    update rakudo   # change installed Rakudo version
+    test rakudo     # uses the spectest suite to thoroughly check Rakudo
     help            # display commands and their arguments
 
-These first two of these actions used to be automagically carried out.
-To avoid surprises in future, the user will have to give each command
-explicitly.  If there is no command, proto will display the help.
+Proto used to carry the first two of these actions out silently.  To
+give the user more direct control in future, the user must explicitly
+give each command.  If the use gives no command, proto displays help.
 
 =head2 Modules
 
@@ -777,6 +827,8 @@ Add a 'modules.list' with these possible layouts:
     Namespace::and::Module:auth<name>:ver<number>:
         url: http://www.zzz.com/path/to/a/versioned/module.pm     or
         project: http://www.zzz.com/path/to/a/versioned/module.pm
+
+TODO: implementation design!
 
 =head2 Testing
 
@@ -824,8 +876,81 @@ If the Rakudo * distrubution opts to bundle a subset of the proto files,
 as now seems likely, it might be fitting to rename just the C<proto>
 command.  For example, C<rakudo-install>.  Let the discussions begin...
 
-Another avenue being explored is to publish proto as a Perl 5 module to
-be called something like p6::protoinstaller.
+=head1 CPAN
+
+Proto, as (merely) a prototype installer, can explore how any Perl 6
+software relates to CPAN, which is a Perl 5 oriented network.  Some
+aspects to examine are whether or how CPAN processes Perl 6 files,
+alternative systems to CPAN, and publishing Proto in CPAN.
+
+=head2 Perl 6 software on CPAN
+
+CPAN has over 100 modules in the Perl6:: namespace.  They all emulate
+parts of the Perl 6 language using Perl 5.  
+
+People disagree about whether all software in CPAN should be Perl 5
+compatible, as they do about whether Perl 6 is actually Perl.  The proto
+developers feel that Perl 6 is definitely Perl, and that Perl 6 software
+should be distributed via CPAN.  Discussion with CPAN maintainers
+(search the IRC logs) shows that if we suggest how CPAN can distribute
+Perl 6 content, they are willing to adapt their end.
+
+But CPAN should be changed as little as possible, to reduce possible
+problems for the existing Perl 5 content.
+
+=head2 Alternatives to CPAN
+
+Perl 6 developers have used mainly Git and Subversion for software
+distribution, They found that the CPAN standards and processes are Perl
+5 centric and difficult to use for Perl 6 software.  Proto uses mainly
+Git and also supports Subversion, but not yet CPAN.
+
+Other designs (references please) such as sixpan and cpan6 have also
+tackled the question of how to distribute Perl 6 (and other) content.
+Proto has yet to explore possible links to them.
+
+=head2 Proto as a CPAN module
+
+Another move being considered is to publish proto as a Perl 5 module to
+be called something like P6::Proto::Installer. Or Perl6::something.
+Or something else.  Comments are being actively sought.
+
+=head1 Proto status summary (2010-04-08 for jnthn)
+
+I see proto as an essential part of the Rakudo * distribution.  Thus it will need a more fitting name.
+
+Newly added:
+
+1. Rakudo/ng migration done, should still be Rakudo/alpha compatible.
+
+2. Building on Windows 32 bit mostly works (Strawberry and ActiveState, MinGW and MSVC++), 64 bit not yet.
+
+3. Self bootstrapping from a single Perl 5 script works (without Git or Subversion).
+
+4. Defaults all builds, executables and libraries in the $HOME/.perl6 directory hierarchy (overrideable).
+
+Missing / currently working on:
+
+1. "install" a project works.  "test", "update" and "uninstall" are broken.
+
+2. Adding "proto", "rakudo" and "perl6" commands to your PATH.
+
+3. Distributing proto as a CPAN module.
+
+4. Installing multiple Perl 6 implementations side by side, starting with Rakudo/alpha
+
+Planning for Rakudo *
+
+1. Keep multiple versions of modules side by side (S11-Versioning).
+
+2. Help the user easily install Git and Subversion.
+
+3. 64 bit support on Windows.
+
+After Rakudo *:
+
+
+1. Distribute Perl 6 modules via CPAN (up- and down-loads).
 
 =head1 TODO
 
@@ -985,7 +1110,7 @@ following:
     [OPTIONAL]
 
 23. Emulate Debian's 'popularity-contest' for package usage statistics,
-    based on anonymous submission via smtp or http.
+    based on voluntary anonymous submission via smtp or http.
     [OPTIONAL]
 
 =cut
