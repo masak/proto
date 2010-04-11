@@ -36,6 +36,8 @@ Choose the collaboration site you would like to use.
 
 1. Github     (http://github.com)
 2. Gitorious  (http://gitorious.org)
+3. GoogleCode (TODO)
+4. CPAN       (TODO)
 
 EOF
 
@@ -135,7 +137,6 @@ EOF
 cat >$PROJECTBASE/Makefile.in <<EOF
 PERL6=<PERL6>
 PERL6LIB=<PERL6LIB>
-RAKUDO_DIR=<RAKUDO_DIR>
 
 SOURCES=lib/Example/Hello.pm
 
@@ -146,9 +147,6 @@ all: \$(PIRS) lib/Test.pir
 
 %.pir: %.pm
 	\$(PERL6) --target=pir --output=\$@ \$<
-
-lib/Test.pir: \$(RAKUDO_DIR)/Test.pm \$(PERL6)
-	\$(PERL6) --target=pir --output=lib/Test.pir \$(RAKUDO_DIR)/Test.pm
 
 clean:
 	rm -f \$(PIRS)
@@ -172,12 +170,12 @@ help:
 EOF
 
 # The above 'Makefile.in' needs something active to transform it into
-# a Makefile. Copy the Configure.pm from proto and invoke it by the
-# following Configure.pl (Perl 6) script:
-cp lib/Configure.pm $PROJECTBASE/lib
-cat >$PROJECTBASE/Configure.pl <<EOF
-# Configure.pl - installer - see documentation in lib/Configure.pm
-use v6; BEGIN { @*INC.unshift( 'lib' ); }; use Configure;
+# a Makefile. Copy the Configure.pm6 from proto and invoke it by the
+# following Configure (Perl 6) script:
+cp lib/Configure.pm6 $PROJECTBASE/lib
+cat >$PROJECTBASE/Configure <<EOF
+# Configure - Makefile builder - see documentation in lib/Configure.pm6
+use v6; BEGIN { @*INC.unshift('lib'); }; use Configure;
 EOF
 
 # Notify proto about dependencies on other modules. The installer will

@@ -161,7 +161,11 @@ sub load-project-list(Str $filename) {
 
         # oops - did not match any of the above
         default {
-            warn "warning: cannot parse «$_», ignored by Ecosystem.pm" ~
+        # WORKAROUND: what happens to the embedded quotes?
+        # Missing « or » at line 168, near " ignored b"
+#           warn "warning: cannot parse «$_», ignored by Ecosystem.pm" ~
+#                " load-project-list('$filename')";
+            warn "warning: cannot parse '$_', ignored by Ecosystem.pm" ~
                  " load-project-list('$filename')";
         }
     }

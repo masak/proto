@@ -385,7 +385,10 @@ class Installer {
                     ?? 'perl'
                     !! $perl6;
                 my $conf-cmd = "$perl $config-file";
-                my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
+                # WORKAROUND: named parameter syntax
+                # Nominal type check failed for parameter '$project'; expected Str but got Block instead
+#               my $r = self.configured-run( $conf-cmd, :project{$project}, :dir{$project-dir} );
+                my $r = self.configured-run( $conf-cmd, :project($project), :dir($project-dir) );
                 if $r != 0 {
                     say "configure failed, see $project-dir/make.log";
                     return;
@@ -394,6 +397,7 @@ class Installer {
             }
         }
         if "$project-dir/Makefile" ~~ :f {
+            say "project type" ~ $project.WHAT;
             my $make-cmd = %!config-info{'Make utility'};
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {

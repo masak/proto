@@ -8,38 +8,16 @@ use File::Spec;        # OS independent volume, directory and file names
 use LWP::UserAgent;    # mirror() downloads tarballs and files
 
 #---------------------------- main program -----------------------------
-if ( @ARGV == 0 or $ARGV[0] eq 'help' ) {
-    print <<END_OF_HELP;
-Usage: proto <command> [arguments]
-# commands about proto:
-configure         # create proto.conf if it does not exist
-fetch
-# commands about rakudo:
-install rakudo    # according to proto.conf (only if not installed)
-# commands for modules:
-install <modules> # eg mod1 mod2:auth<name> mod3:ver<1.2.3>
-make commands     # add 'proto', 'rakudo' and 'perl6' into your path
-reconfigure       # interactively change an existing proto.conf
-refresh
-update proto      # download proto's files if newer ones are available
-test proto        # check the proto installation using mock drivers
-update rakudo     # change installed Rakudo version
-test rakudo       # uses the spectest suite to thoroughly check Rakudo
-help              # display commands and their arguments
-
-END_OF_HELP
-  clean test install uninstall showdeps showstate help update>; #TODO: add update
-    exit;
-}
+help( @ARGV ); # if requested, displays help and exits
 my ($config_file, $state_file) = get_config_file_names();
-if ( $ARGV[0] eq 'configure' ) {
+if ( @ARGV==2 and $ARGV[0] eq 'configure' and $ARGV[1] eq 'proto' ) {
     if ( -f $config_file ) {
         die "cannot configure: file '$config_file' already exists\n";
     }
     create_default_config_file($config_file);
 }
 unless ( -f $config_file ) {
-    die "first use $0 configure to create $config_file";
+    die "first use '$0 configure proto' to create $config_file";
 }
 create_default_state_file(  $state_file  ) unless ( -f $state_file );
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
@@ -63,7 +41,6 @@ exec( "$perl6 installer @ARGV" ); # Delegate to installer
 #--------------------------- install_rakudo ----------------------------
 sub install_rakudo {
     my ($config_info) = @_;
-#   my $silently = ' > /dev/null 2>&1'; # probably not Win32 compatible
     print "proto is installing Rakudo Perl 6.\n";
     download_parrot( $config_info ) and
     build_parrot(    $config_info ) and
@@ -122,15 +99,14 @@ sub download_parrot {
     }
     elsif ( $parrot_version =~ m/ ^ \d{5,6} $ /x or $parrot_version eq 'HEAD' ) {
         # use Subversion to checkout a Parrot revision such as 45370
-        print "proto is checking out Parrot $parrot_version...";
         # TODO: detect if Subversion missing, and install.
         my $svn_version = qx{svn --version};
         $svn_version =~ s/^svn.*?([0-9.]+).*/subversion $1/s;   # huge re-format
         # or install from http://subversion.apache.org/packages.html#windows
         my $revision_option = " --revision $parrot_version";
         print "proto is checking out Parrot $parrot_version...";
+        my $log_directive = '> proto-checkout.log 2> proto-checkout-error.log';
         my $command = qq{svn checkout$revision_option https://svn.parrot.org/parrot/trunk "$parrot_build_dir"};
-        print "\ncommand = $command\n";
         if ( system( $command ) != 0 ) {
             die "subversion checkout of Parrot failed";
         }
@@ -152,19 +128,13 @@ sub build_parrot {
     my $parrot_build_dir   = $config_info->{'Parrot build directory'};
     my $parrot_install_dir = $config_info->{'Parrot install directory'};
     my $parrot_version     = $config_info->{'Parrot version'};
-    if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
+    if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) { # for example "2.2.0"
         $parrot_build_dir = File::Spec->catdir( 
             $parrot_build_dir,
             "parrot-$parrot_version"
         );
     }
-    elsif ( $parrot_version =~ m/ ^ \d{5,6} $ /x ) {
-        ;
-    }
-    elsif ( $parrot_version eq 'HEAD' ) {
-        ;
-    }
-    else {
+    elsif ( $parrot_version !~ m/ ^ \d{5,6} $ /x and $parrot_version ne 'HEAD' ) {
         die "The Parrot version is '$parrot_version' but should be 'HEAD',\n" .
             "a revision such as 45370 or a release such as '2.2.0'";
     }
@@ -177,16 +147,20 @@ sub build_parrot {
         if ( $^O ne "MSWin32" ) {
             push @parrot_options, "--optimize";  # or does this also work on Windows now?
         }
-        my $command = "$^X Configure.pl @parrot_options";
         # run Parrot's Configure.pl
-        print "build_parrot Configure command = $command\n";
-        system( $command );
+        my $log_directive = '> proto-configure.log 2> proto-configure-error.log';
+        my $command = "$^X Configure.pl @parrot_options $log_directive";
+        if ( system( $command ) != 0 ) {
+            die "could not configure Parrot, see parrot/proto-configure-error.log";
+        }
     }
     # run Parrot's make
     my $log_directive = '> proto-make.log 2> proto-make-error.log';
     my $make = $config_info->{'Make utility'};
     my $command = "$make install $log_directive";
-    system( $command );
+    if ( system( $command ) != 0 ) {
+        die "proto got an error while bulding Parrot, see parrot/proto-make-error.log";
+    }
     chdir $cwd;
     # TODO: run a 'parrot --version' and verify the correct output, die noisily if wrong
     print "building Parrot done\n";
@@ -227,7 +201,8 @@ sub download_rakudo {
                 die "Couldn't remove $rakudo_build_dir";
             }
         }
-        my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir"};
+        my $log_directive = '> proto-clone.log 2> proto-clone-error.log';
+        my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir" $log_directive};
         print "\ncommand = $command\n";
         if ( system( $command ) != 0 ) {
             die "Downloading Rakudo using git clone failed";
@@ -237,7 +212,7 @@ sub download_rakudo {
         die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
     }
 
-    print "[ Rakudo download ok  ]\n";
+    print "Rakudo download ok\n";
     return 1;
 }
 
@@ -247,24 +222,21 @@ sub build_rakudo {
     my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
     my $rakudo_version = $config_info->{'Rakudo version'};
     my $parrot_install_dir = $config_info->{'Parrot install directory'};
-    if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
-        # versions like '2010.02' are release tarballs
+    if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) { # for example 2010.03
+        # versions like '2010.03' are release tarballs
         $rakudo_build_dir = File::Spec->catdir(
             $rakudo_build_dir,
             "rakudo-$rakudo_version"
         );
     }
-    elsif ($rakudo_version eq 'bleeding') {
-        # do not change $rakudo_build_dir
-    }
-    else {
+    elsif ($rakudo_version ne 'bleeding') {
         die "Rakudo version was neither 'bleeding' nor a number like '2010.03'";
     }
     my $rakudo_build_log = File::Spec->catfile(
         $rakudo_build_dir, '', 'rakudo-build.log'
     );
     if ( ! -f "$rakudo_build_dir/perl6" ) {
-        print "Building Rakudo in $rakudo_build_dir...";
+        print "Building Rakudo in $rakudo_build_dir...\n";
         my $cwd = Cwd->getcwd();
         chdir $rakudo_build_dir or die "cannot chdir";
         my $parrot_config = File::Spec->catfile(
@@ -272,9 +244,9 @@ sub build_rakudo {
         );
         $parrot_config = make_short_path( $parrot_config );
         my @rakudo_options = ( qq{--parrot-config="$parrot_config"} );
-        my $log_directive = '> proto-configure.log';
+        my $log_directive = '> proto-configure.log 2> proto-configure-error.log';
         my $command = "$^X Configure.pl @rakudo_options $log_directive";
-        print "Rakudo Configure command = $command\n";
+        # print "Rakudo Configure command = $command\n";
         if ( system( $command ) != 0 ) {
             die "error configuring Rakudo: $!";
         }
@@ -557,16 +529,16 @@ sub create_default_config_file {
 
 *** CONFIG FILE CREATED ***
 
-Greetings!  I have made a configuration file that you may want to review
+Hello!  I have made a configuration file that you may want to review,
 called '$config_file'.
-Next time you run $0
-these settings will be used to bootstrap your Perl 6 software ecosystem.
 
 If you're new to this, or reluctant to do configuration, you probably want
 the default settings anyway. The most important ones are:
 Perl 6 library         -> $config_info->{'Perl 6 library'}
 Perl 6 executable      -> $config_info->{'Perl 6 executable'}
 
+These settings will be used to bootstrap your Perl 6 software ecosystem
+if you run '$0 install rakudo'.
 PROTO_CONFIG_MESSAGE
 }
 
@@ -643,6 +615,111 @@ sub save_config_file {
     close $CONFIG_FILE;
 }
 
+#-------------------------------- help ---------------------------------
+sub help {
+    my ( @argv ) = @_;
+    if ( @argv == 0 ) {
+        print <<END_OF_HELP;
+Welcome to proto!  Give proto a command, for example:
+
+$0 help
+$0 configure proto
+$0 install rakudo
+
+END_OF_HELP
+        exit;
+    }
+    # continue if @argv > 0
+    if ( @argv == 1 and $argv[0] eq 'help' ) {
+        print <<END_OF_HELP;
+
+$0 has the following commands.  $0 help [command] shows the details:
+
+help         display commands and their arguments
+clean        remove downloaded projects from cache
+configure    create proto.conf if it does not exist
+fetch        download projects into cache but do not test or install
+install      (only if not installed) copy to Perl 6 library directories
+reconfigure  interactively change the existing proto.conf
+refresh      download newer project files into cache
+setup        add 'proto', 'rakudo' and 'perl6' into the search path
+showdeps     show dependencies of projects
+showstate    show the state of a project (fetched, built, tested)
+test         check a project for correct operation
+update       (only if installed) fetch, test and install newer version
+uninstall    erase from installation directories
+
+END_OF_HELP
+        exit;
+    }
+    if ( @argv == 2 and $argv[0] eq 'help' ) {
+        # display help for various commands (defined alphabetically).
+        # help clean
+        if ( $argv[1] eq 'clean' ) {
+            print <<END_OF_HELP;
+
+$0 clean project(s)
+
+Remove the named projects from proto's cache.  Any modules installed in
+the Perl 6 library directories will remain there, use 'uninstall' to
+remove a project's modules from the Perl 6 library directories.
+
+END_OF_HELP
+            exit;
+        }
+        # help configure
+        if ( $argv[1] eq 'configure' ) {
+            print <<END_OF_HELP;
+
+$0 configure proto
+
+Autodetects the Perl 6 configuration and writes the default values into
+proto.conf.
+
+END_OF_HELP
+            exit;
+        }
+        # help install
+        if ( $argv[1] eq 'install' ) {
+            print <<END_OF_HELP;
+
+$0 install project(s)
+
+Does a complete fetch, build, test and install process for one or more
+projects, and also any other projects these may depend on.
+
+END_OF_HELP
+            exit;
+        }
+        # help reconfigure
+        if ( $argv[1] eq 'reconfigure' ) {
+            print <<END_OF_HELP;
+
+$0 reconfigure proto
+
+Interactively updates an existing proto.conf file.  Proto displays each
+setting name, description and value, then lets the user type in a new
+value or just press Enter to keep the existing one.
+
+END_OF_HELP
+            exit;
+        }
+        # help setup
+        if ( $argv[1] eq 'setup' ) {
+            print <<END_OF_HELP;
+
+$0 setup commands
+
+Detects the operating system and displays the appropriate steps for you
+to create 'proto', 'rakudo' and 'perl6' commands.
+
+END_OF_HELP
+            exit;
+        }
+        die "Sorry, proto has no help for $argv[1]\n";
+    }
+}
+
 __END__
 
 =pod
@@ -655,23 +732,31 @@ proto - download and install Parrot, Rakudo Perl 6, and modules
 
     # Perl 5 must already be installed - see that it's >= v5.8
     perl -v
+
     # Fetch the proto bootstrap file this way, or with a browser:
     # (all on one line without the \ if not in a Unix compatible shell)
     perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
         'http://github.com/masak/proto/raw/master/proto', 'proto')"
-    # The first proto run creates your default ~/.perl6/proto/proto.conf
-    perl proto configure
+
+    # Create your default ~/.perl6/proto/proto.conf
+    perl proto configure proto
+
     # After optionally editing proto.conf, do the bootstrap installation
     perl proto install rakudo
+
     # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
-    sudo proto make commands   # on Unix for example, TODO
+    sudo proto setup commands
+
     # If the installation appears successful, verify that it works
-    proto selftest # TODO
-    # Read the fine manual
+    proto test proto                               # TODO
+
+    # Read the fine manuals
     proto help
+    proto help install
     perldoc proto
+
     # Use proto to install modules
-    proto install SVG HTTP::Daemon:auth<mberends> # TODO
+    proto install SVG HTTP::Daemon:auth<mberends>  # TODO
 
 =head1 OVERVIEW
 
@@ -1073,8 +1158,9 @@ following:
     in its Makefile. Document it as a guideline for module developers.
     This facility is new to proto, so it is also new to all projects.
     The 'make' utility will need to know where to find
-    'Perl 6 library', so do this: %*ENV<PERL6LIB> =
-    %!config-info{'Perl 6 library'}.
+    'Perl 6 library', so do this:
+
+      %*ENV<PERL6LIB> = %!config-info{'Perl 6 library'}
 
 17. When loading projects.list also load a projects.local if it exists.
     The projects.local file allows individual projects to be handled by
