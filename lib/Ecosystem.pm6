@@ -5,7 +5,7 @@ class Ecosystem:auth<masak>:ver<0.2.0>;
 
 has $cache-dir;
 has %!project-info;
-has %!project-state;
+has %!project-state is rw;
 has @.protected-files;
 
 #--------------------------------- new ---------------------------------
@@ -68,10 +68,10 @@ method get-state($project) {
 method set-state($project,$state) {
     %!project-state{$project} = {} unless %!project-state.exists($project);
     if $state {
-        warn "SET-STATE 71 project=$project state=$state";
-        warn %!project-state{$project}<state>;
+        warn "SET-STATE 71 project=$project new state=$state";
+        warn "existing state " ~ %!project-state{$project}<state>;
         %!project-state{$project}<state> = $state;
-        warn "SET-STATE 73 project=$project state=$state";
+        warn "SET-STATE 73 project=$project new state=$state";
     }
     else {
         warn "SET-STATE 76 project=$project state=$state";

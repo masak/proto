@@ -6,7 +6,7 @@ use Ecosystem:auth<masak>:ver<0.2.0>;
 
 class Installer {
     has %!config-info;
-    has Ecosystem $.ecosystem;
+    has Ecosystem $.ecosystem is rw;
 
     method new() {
         my $perl6lib = @*INC.grep(/\.perl6.lib$/)[0];
@@ -397,7 +397,7 @@ class Installer {
             }
         }
         if "$project-dir/Makefile" ~~ :f {
-            say "project type" ~ $project.WHAT;
+            say "project type " ~ $project.WHAT;
             my $make-cmd = %!config-info{'Make utility'};
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
             if $r != 0 {
@@ -616,7 +616,7 @@ class Installer {
             # WORKAROUND: Rakudo has a backtracking bug reported in
             # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608
 #           when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
-            when / (<-[:]>+) ':' <.ws> (.*) / { %settings{$0} = $1; }
+            when / (<-[:]>+) ':' <.ws> (.*) / { %settings{$0} = ~$1; }
         }
         return %settings;
     }

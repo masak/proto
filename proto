@@ -994,6 +994,8 @@ Other designs (references please) such as sixpan and cpan6 have also
 tackled the question of how to distribute Perl 6 (and other) content.
 Proto has yet to explore possible links to them.
 
+http://blogs.perl.org/users/brian_d_foy/2010/04/what-could-a-completely-different-cpan-client-do.html
+
 =head2 Proto as a CPAN module
 
 Another move being considered is to publish proto as a Perl 5 module to
