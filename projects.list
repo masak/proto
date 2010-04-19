@@ -177,3 +177,7 @@ tardis:
 yapsi:
     home:  github
     owner: masak
+
+mandelbrot:
+    home:  github
+    owner: colomon
