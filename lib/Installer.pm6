@@ -4,7 +4,7 @@ use Ecosystem:auth<masak>:ver<0.2.0>;
 # The installed-modules series would have been version 0.1.x
 # Changed the :auth name-part when using git branch to fork the project.
 
-class Installer {
+class Installer:auth<masak>:ver<0.2.0> {
     has %!config-info;
     has Ecosystem $.ecosystem is rw;
 
@@ -441,9 +441,17 @@ class Installer {
 
         # Add the built deps.
         # TODO: make sure that the project actually is installable.
-        @projects.unshift( @projects.map({ self.get-deps-deeply( $_ )})\
-                                    .grep({ $.ecosystem.get-state($_) ne 'installed' })
-                         );
+        # WORKAROUND: in alpha map() flattens, in rakudo map() doesn't.
+        # discussion: http://irclog.perlgeek.de/perl6/2010-04-21#i_2248165
+        # eg: my @a=<2 3>;my @b=@a.map({$_ xx 2});@b.perl.say
+        # alpha says ["2", "2", "3", "3"] rakudo says [["2", "2"], ["3", "3"]]
+        # @projects.unshift( @projects.map({ self.get-deps-deeply( $_ )})\
+        #                        .grep({ $.ecosystem.get-state($_) ne 'installed' })
+        #                  );
+        my @all-deps;
+        for @projects { @all-deps.push( self.get-deps-deeply($_) ); }
+        my @all-deps-to-install = @all-deps.grep({ $.ecosystem.get-state($_) ne 'installed' });
+        @projects.unshift( @all-deps-to-install );
         # Install each project either via a custom copy by 'make install' if
         # available, or otherwise a default copy from lib/
         for @projects -> $project { # Makefile exists

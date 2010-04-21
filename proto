@@ -633,7 +633,7 @@ END_OF_HELP
     if ( @argv == 1 and $argv[0] eq 'help' ) {
         print <<END_OF_HELP;
 
-$0 has the following commands.  $0 help [command] shows the details:
+'$0' has the following commands.  '$0 help <command>' explains each one:
 
 help         display commands and their arguments
 clean        remove downloaded projects from cache
@@ -978,7 +978,10 @@ compatible, as they do about whether Perl 6 is actually Perl.  The proto
 developers feel that Perl 6 is definitely Perl, and that Perl 6 software
 should be distributed via CPAN.  Discussion with CPAN maintainers
 (search the IRC logs) shows that if we suggest how CPAN can distribute
-Perl 6 content, they are willing to adapt their end.
+Perl 6 content, they are willing to adapt their end.  See:
+
+ http://www.nntp.perl.org/group/perl.cpan.workers/2010/01/msg639.html
+ http://www.nntp.perl.org/group/perl.cpan.workers/2010/04/msg819.html
 
 But CPAN should be changed as little as possible, to reduce possible
 problems for the existing Perl 5 content.

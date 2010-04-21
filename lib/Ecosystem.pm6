@@ -15,7 +15,8 @@ method new(:$cache-dir!) {
         cache-dir  => $cache-dir,
         project-info  => load-project-list('projects.list'),
         project-state => load-project-list('projects.state'),
-        protected-files => <Test.pm Test.pir Configure.pm Configure.pir>,
+        protected-files => <Configure.pm6 Configure.pir>,
+#       protected-files => <Test.pm Test.pir Configure.pm Configure.pir>,
     );
 }
 
@@ -66,21 +67,18 @@ method get-state($project) {
 
 #------------------------------ set-state ------------------------------
 method set-state($project,$state) {
-    %!project-state{$project} = {} unless %!project-state.exists($project);
+    unless %!project-state.exists($project) {
+        %!project-state{$project} = {};
+    }
     if $state {
-        warn "SET-STATE 71 project=$project new state=$state";
-        warn "existing state " ~ %!project-state{$project}<state>;
+        # WORKAROUND: you should not have to delete before updating
+        %!project-state{$project}.delete('state');
         %!project-state{$project}<state> = $state;
-        warn "SET-STATE 73 project=$project new state=$state";
     }
     else {
-        warn "SET-STATE 76 project=$project state=$state";
         %!project-state.delete($project); # because there was only <state>
-        warn "SET-STATE 78 project=$project state=$state";
     }
-    warn "SET-STATE 80 project=$project state=$state";
     save-project-list('projects.state', %!project-state);
-    warn "SET-STATE 82 project=$project state=$state";
 }
 
 #-------------------------- regular-projects ---------------------------
@@ -92,10 +90,12 @@ method regular-projects() {
 
 #----------------------------- project-dir -----------------------------
 method project-dir($project) {
-    return $cache-dir ~ ( %!project-info{$project}.exists('main_subdir')
-                          ?? "/$project/{%!project-info{$project}<main_subdir>}"
-                          !! "/$project"
-                        );
+    my $dir = $cache-dir ~ "/$project";
+    warn "PROJECT-DIR line 94 project=$project";
+    if %!project-info{$project}.exists('main_subdir') {
+        $dir ~= "/{%!project-info{$project}<main_subdir>}";
+    }
+    return $dir;
 }
 
 #------------------------- files-in-cache-lib --------------------------
