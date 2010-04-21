@@ -91,7 +91,6 @@ method regular-projects() {
 #----------------------------- project-dir -----------------------------
 method project-dir($project) {
     my $dir = $cache-dir ~ "/$project";
-    warn "PROJECT-DIR line 94 project=$project";
     if %!project-info{$project}.exists('main_subdir') {
         $dir ~= "/{%!project-info{$project}<main_subdir>}";
     }
