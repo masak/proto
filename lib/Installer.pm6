@@ -20,7 +20,7 @@ class Installer:auth<masak>:ver<0.2.0> {
         )
     }
 
-    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help update>; #TODO: add update
+    my @available-commands = <fetch refresh clean test install uninstall showdeps showstate help upgrade>;
 
     #----------------------- subcommand-dispatch -----------------------
     # Returns a block which calls the right subcommand with a variable number
@@ -95,15 +95,15 @@ class Installer:auth<masak>:ver<0.2.0> {
         self.fetch-or-refresh( 'refresh', @projects );
     }
 
-    #----------------------------- update ------------------------------
+    #----------------------------- upgrade -----------------------------
     method update(@projects is copy) {
         if @projects.grep('all') {
             @projects = $.ecosystem.fetched-projects.sort;
         }
         for @projects {
-            print "updating $_...";
+            print "upgrading $_...";
             my $location = %!config-info{'Proto projects cache'} ~ '/' ~ $_;
-            run "cp -r $location $location.temp"; # XXX Not portable
+            run "cp -r $location $location.temp"; # TODO: ExtUtils::Command
             # run( "perl -MExtUtils::Command -e cp ??" );
             my $proto-dir = $*CWD;
             chdir $location;
@@ -111,7 +111,7 @@ class Installer:auth<masak>:ver<0.2.0> {
             my $status = $where eq 'googlecode' ?? qqx{svn up} !! qqx{git pull};
             chdir $proto-dir;
             if $status ~~ /'At revision'/ | /'Already up-to-date'/ {
-                run "rm -rf $location.temp";
+                run "rm -rf $location.temp"; # TODO: ExtUtils::Command
                 say 'already up-to-date';
             }
         }
@@ -567,9 +567,9 @@ class Installer:auth<masak>:ver<0.2.0> {
     submethod get-deps($project) {
         my $deps-file = %!config-info{'Proto projects cache'}
                         ~ "/$project/deps.proto";
-        # WORKAROUND
-        # return unless $deps-file ~~ :f;
-        if $deps-file !~~ :f { return; }
+        # WORKAROUND: !~~ does not work with :f
+        # if $deps-file !~~ :f { return; }
+        unless $deps-file ~~ :f { return; }
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
         return lines($deps-file)\
                  .map({remove-line-ending-comment($^line)})\

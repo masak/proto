@@ -10,7 +10,7 @@ use LWP::UserAgent;    # mirror() downloads tarballs and files
 #---------------------------- main program -----------------------------
 help( @ARGV ); # if requested, displays help and exits
 my ($config_file, $state_file) = get_config_file_names();
-if ( @ARGV==2 and $ARGV[0] eq 'configure' and $ARGV[1] eq 'proto' ) {
+if ( "@ARGV" eq 'configure proto' ) {
     if ( -f $config_file ) {
         die "cannot configure: file '$config_file' already exists\n";
     }
@@ -19,35 +19,30 @@ if ( @ARGV==2 and $ARGV[0] eq 'configure' and $ARGV[1] eq 'proto' ) {
 unless ( -f $config_file ) {
     die "first use '$0 configure proto' to create $config_file";
 }
-create_default_state_file(  $state_file  ) unless ( -f $state_file );
+create_default_state_file( $state_file ) unless ( -f $state_file );
 my ( $config_info, $commentinfo ) = load_config_file($config_file);
-create_directories(
-    $config_info->{'Perl 6 library'},
-    $config_info->{'Proto projects cache'}
-);
+create_directories( $config_info->{'Perl 6 library'},
+    $config_info->{'Proto projects cache'} );
+if ( "@ARGV" eq 'install rakudo' ) { install_rakudo($config_info); }
+if ( "@ARGV" eq 'upgrade rakudo' ) { upgrade_rakudo($config_info); }
+make_pir_modules( $config_info );
 my $perl6 = $config_info->{'Perl 6 executable'};
-if ( $ARGV[0] eq 'install' and $ARGV[1] eq 'rakudo' ) {
-    die "rakudo is already installed" if -x $perl6;
-    install_rakudo( $config_info );
-    exit; # do nothing else after installing Rakudo
-}
-if ( $ARGV[0] eq 'update' and $ARGV[1] eq 'rakudo' ) {
-    die "cannot update, you should first install rakudo" unless -x $perl6;
-    update_rakudo( $config_info );
-}
-make_pir_modules( $perl6, $config_info->{'Perl 6 library'} );
-exec( "$perl6 installer @ARGV" ); # Delegate to installer
+#exec( "$perl6 installer @ARGV" );  # Delegate to installer
+exec( $config_info->{'Perl 6 executable'} . " installer @ARGV" );
 
 #--------------------------- install_rakudo ----------------------------
 sub install_rakudo {
     my ($config_info) = @_;
+    my $perl6 = $config_info->{'Perl 6 executable'};
+    if ( -x $perl6 ) {
+        die "$0 will not install rakudo because it is already installed\n";
+    }
     print "proto is installing Rakudo Perl 6.\n";
+    download_rakudo( $config_info ) and
     download_parrot( $config_info ) and
     build_parrot(    $config_info ) and
-    download_rakudo( $config_info ) and
     build_rakudo(    $config_info );
     # Perform a minimal check that the installation succeeded
-    my $perl6 = $config_info->{'Perl 6 executable'};
     unless ( -x $perl6 ) {
         die "proto was unable to install Rakudo Perl 6 :-(\n";
     }
@@ -55,7 +50,57 @@ sub install_rakudo {
     unless ( $output eq "Perl 6 rocks!\n" ) {
         die "perl 6 install error: $!";
     }
-    print "Rakudo Perl 6 has been installed.\n";
+    print "Rakudo Perl 6 has been installed.  Try '$0 help' or '$0 setup commands'\n";
+    exit; # do nothing else after installing Rakudo
+}
+
+#--------------------------- download_rakudo ---------------------------
+sub download_rakudo {
+    my ( $config_info ) = @_;
+    my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
+    create_directories( $rakudo_build_dir );
+    my $rakudo_version = $config_info->{'Rakudo version'};
+    if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
+        my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
+        my $filename = File::Spec->catfile(
+            $rakudo_build_dir,
+            $rakudo_release_tarfile
+        );
+        if ( -f $filename ) {
+            my $filesize = -s ( $filename );
+            print "$rakudo_release_tarfile already downloaded ($filesize bytes)\n";
+        }
+        else {
+            print "proto is downloading a $rakudo_release_tarfile...\n";
+            my $ua = LWP::UserAgent -> new;
+            $ua->show_progress( 1 );
+            my $url = "http://cloud.github.com/downloads/rakudo/rakudo/$rakudo_release_tarfile";
+            print "filename = $filename\n";
+            $ua->mirror( $url, $filename );
+        }
+        my $ae = Archive::Extract->new( archive => $filename );
+        $ae->extract( to => $rakudo_build_dir )
+            or die "cannot extract from archive";
+    }
+    elsif ($rakudo_version eq 'bleeding') {
+        if ( -d $rakudo_build_dir ) {
+            if ( system("$^X -MExtUtils::Command -e rm_rf $rakudo_build_dir") != 0 ) {
+                die "Couldn't remove $rakudo_build_dir";
+            }
+        }
+        my $log_directive = '> rakudo-download.log 2> rakudo-download.err';
+        my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir" $log_directive};
+#       print "\ngit command = $command\n";
+        if ( system( $command ) != 0 ) {
+            die "Downloading Rakudo using git clone failed";
+        }
+    }
+    else {
+        die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
+    }
+
+    print "Rakudo download ok\n";
+    return 1;
 }
 
 #--------------------------- download_parrot ---------------------------
@@ -65,6 +110,20 @@ sub download_parrot {
     $parrot_build_dir = make_short_path( $parrot_build_dir );
     create_directories( $parrot_build_dir );
     my $parrot_version = $config_info->{'Parrot version'};
+    if ( $parrot_version eq 'Rakudo-decides' ) {
+        # Rakudo has already been downloaded. Read build/PARROT_REVISION
+        my $version_filename = File::Spec->catfile(
+            $config_info->{'Rakudo build directory'}, 'build',
+            'PARROT_REVISION'
+        );
+        open my $version_file, '<', $version_filename
+            or die "$0 cannot open $version_filename: $!";
+        my $version_line = <$version_file>;
+        close $version_file;
+        $version_line =~ m/ (\d+) /x
+            or die "$0 cannot extract Parrot version: $!";
+        $parrot_version = $1;
+    }
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
         # a tested release
         my $parrot_tarfile = "parrot-$parrot_version.tar.gz";
@@ -105,15 +164,16 @@ sub download_parrot {
         # or install from http://subversion.apache.org/packages.html#windows
         my $revision_option = " --revision $parrot_version";
         print "proto is checking out Parrot $parrot_version...";
-        my $log_directive = '> proto-checkout.log 2> proto-checkout-error.log';
-        my $command = qq{svn checkout$revision_option https://svn.parrot.org/parrot/trunk "$parrot_build_dir"};
+        my $log_directive = '> parrot-download.log 2> parrot-download.err';
+        my $command = qq{svn checkout$revision_option https://svn.parrot.org/parrot/trunk "$parrot_build_dir"$log_directive};
+        print "\nsvn command = $command\n";
         if ( system( $command ) != 0 ) {
             die "subversion checkout of Parrot failed";
         }
     }
     else {
-        die "The Parrot version is $parrot_version" .
-            " but should be 'HEAD' or a number such as '2.2.0'";
+        die "\nThe Parrot version is $parrot_version" .
+            " but should be 'Rakudo-decides', 'HEAD' or a number such as '2.2.0'";
     }
     # TODO: verify the download and die noisily if it seems wrong
     print "parrot download done\n";
@@ -134,9 +194,11 @@ sub build_parrot {
             "parrot-$parrot_version"
         );
     }
-    elsif ( $parrot_version !~ m/ ^ \d{5,6} $ /x and $parrot_version ne 'HEAD' ) {
-        die "The Parrot version is '$parrot_version' but should be 'HEAD',\n" .
-            "a revision such as 45370 or a release such as '2.2.0'";
+    elsif ( $parrot_version ne 'Rakudo-decides' and $parrot_version ne 'HEAD'
+            and $parrot_version !~ m/ ^ \d{5,6} $ /x ) {
+        die "\nThe Parrot version is '$parrot_version' but should be " .
+            "'Rakudo-decides', 'HEAD', a revision such as 45822 or a " .
+            "release such as '2.3.0'";
     }
     chdir $parrot_build_dir or die "cannot chdir";
     unless ( -f 'Makefile' ) {
@@ -164,55 +226,6 @@ sub build_parrot {
     chdir $cwd;
     # TODO: run a 'parrot --version' and verify the correct output, die noisily if wrong
     print "building Parrot done\n";
-    return 1;
-}
-
-#--------------------------- download_rakudo ---------------------------
-sub download_rakudo {
-    my ( $config_info ) = @_;
-    my $rakudo_build_dir = $config_info->{'Rakudo build directory'};
-    create_directories( $rakudo_build_dir );
-    my $rakudo_version = $config_info->{'Rakudo version'};
-    if ( $rakudo_version =~ m/ \d{4}\.\d{2} /x ) {
-        my $rakudo_release_tarfile = "rakudo-$rakudo_version.tar.gz";
-        my $filename = File::Spec->catfile(
-            $rakudo_build_dir,
-            $rakudo_release_tarfile
-        );
-        if ( -f $filename ) {
-            my $filesize = -s ( $filename );
-            print "$rakudo_release_tarfile already downloaded ($filesize bytes)\n";
-        }
-        else {
-            print "proto is downloading a $rakudo_release_tarfile...\n";
-            my $ua = LWP::UserAgent -> new;
-            $ua->show_progress( 1 );
-            my $url = "http://cloud.github.com/downloads/rakudo/rakudo/$rakudo_release_tarfile";
-            print "filename = $filename\n";
-            $ua->mirror( $url, $filename );
-        }
-        my $ae = Archive::Extract->new( archive => $filename );
-        $ae->extract( to => $rakudo_build_dir )
-            or die "cannot extract from archive";
-    }
-    elsif ($rakudo_version eq 'bleeding') {
-        if ( -d $rakudo_build_dir ) {
-            if ( system("$^X -MExtUtils::Command -e rm_rf $rakudo_build_dir") != 0 ) {
-                die "Couldn't remove $rakudo_build_dir";
-            }
-        }
-        my $log_directive = '> proto-clone.log 2> proto-clone-error.log';
-        my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir" $log_directive};
-        print "\ncommand = $command\n";
-        if ( system( $command ) != 0 ) {
-            die "Downloading Rakudo using git clone failed";
-        }
-    }
-    else {
-        die "Rakudo version was neither 'bleeding' nor a number like '2010.02'";
-    }
-
-    print "Rakudo download ok\n";
     return 1;
 }
 
@@ -254,7 +267,7 @@ sub build_rakudo {
         my $make = $config_info->{'Make utility'};
         $command = "$make install $log_directive";
         if ( system( $command ) != 0 ) {
-            die "error building/installing Rakudo: $!";
+            die "cannot run '$command': $!";
         }
         print "\nBuilding Rakudo done\n";
         chdir $cwd;
@@ -262,15 +275,29 @@ sub build_rakudo {
     return 1;
 }
 
+#--------------------------- upgrade_rakudo ----------------------------
+sub upgrade_rakudo {
+    my ($config_info) = @_;
+    unless ( -x $config_info->{'Perl 6 executable'} ) {
+        die "cannot upgrade, you should first install rakudo";
+    }
+    if ( $config_info->{'Rakudo version'} eq 'bleeding' ) {
+        print "Upgrading Rakudo\n";
+    }
+    exit;
+}
+
 #-------------------------- make_pir_modules ---------------------------
 sub make_pir_modules {
+    my ( $config_info ) = @_;
     # Copy the modules of proto itself from the local lib directory to
     # ~/.perl6/lib, and then compile to .pir format.
     # TODO: multiple versions of the Ecosystem and Installer modules
-    my ($perl6exe, $perl6libdir) = @_;
+    my $perl6 = $config_info->{'Perl 6 executable'};
+    my $perl6libdir = $config_info->{'Perl 6 library'};
     my $displayed_building = 0;
     # Precompile these modules to PIR
-    for my $name ( 'Ecosystem', 'Installer' ) {
+    for my $name ( 'Configure', 'Ecosystem', 'Installer' ) {
         my $module_install_path = File::Spec->catfile(
             $perl6libdir, "$name.pm6"
         );
@@ -445,9 +472,9 @@ sub create_default_config_file {
     }
 
     my $config_info = {
-        'proto.conf version'       => '2010-04-06',
-        'Rakudo version'           => '2010.03',
-        'Parrot version'           => '2.2.0',
+        'proto.conf version'       => '2010-04-21',
+        'Rakudo version'           => 'bleeding',
+        'Parrot version'           => 'Rakudo-decides',
         'Proto projects cache'     => $projects_cache_dir,
         'Rakudo build directory'   => $rakudo_build_dir,
         'Parrot build directory'   => $parrot_build_dir,
@@ -474,7 +501,7 @@ sub create_default_config_file {
         'Rakudo build directory'
             => [ 'Rakudo build directory -- Rakudo source is compiled here.' ],
         'Rakudo version'
-            => [ "Rakudo version -- either 'bleeding' (requires git) or a number such",
+            => [ "Rakudo version -- 'release', 'bleeding' (requires git), or a number such",
                  "as '2010.02'" ],
         'Rakudo revision'
             => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
@@ -633,7 +660,7 @@ END_OF_HELP
     if ( @argv == 1 and $argv[0] eq 'help' ) {
         print <<END_OF_HELP;
 
-'$0' has the following commands.  '$0 help <command>' explains each one:
+Use '$0 help <command>' to read more about each command:
 
 help         display commands and their arguments
 clean        remove downloaded projects from cache
@@ -673,8 +700,8 @@ END_OF_HELP
 
 $0 configure proto
 
-Autodetects the Perl 6 configuration and writes the default values into
-proto.conf.
+Detects your Perl 6 configuration and writes default settings into proto.conf.
+You can edit the file or use '$0 reconfigure proto' before proceeding.
 
 END_OF_HELP
             exit;
@@ -1203,5 +1230,9 @@ following:
 23. Emulate Debian's 'popularity-contest' for package usage statistics,
     based on voluntary anonymous submission via smtp or http.
     [OPTIONAL]
+
+=pod SEE ALSO
+
+App::cpanminus Module::Build (make substitute)
 
 =cut
