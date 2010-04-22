@@ -63,7 +63,6 @@ create_directories( $config_info->{'Perl 6 library'},
 if ( "@ARGV" eq 'install rakudo' ) { install_rakudo($config_info); }
 if ( "@ARGV" eq 'upgrade rakudo' ) { upgrade_rakudo($config_info); }
 make_pir_modules( $config_info );
-my $perl6 = $config_info->{'Perl 6 executable'};
 exec( $config_info->{'Perl 6 executable'} .
     ' -e"use Installer; Installer.new.subcommand-dispatch(@*ARGS.shift).(@*ARGS)" '
      . "@ARGV" );

@@ -571,9 +571,12 @@ class Installer:auth<masak>:ver<0.2.0> {
         # if $deps-file !~~ :f { return; }
         unless $deps-file ~~ :f { return; }
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
+# WORKAROUND: from moritz_++ to solve an NPMCA in find_method('params')
+# http://irclog.perlgeek.de/perl6/2010-04-22#i_2253823 and before
+#                .map(*.trim)\
         return lines($deps-file)\
                  .map({remove-line-ending-comment($^line)})\
-                 .map(*.trim)\
+                 .map({.trim})\
                  .grep({$^keep-all-nonempty-lines});
     }
 
