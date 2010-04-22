@@ -802,8 +802,8 @@ __END__
 
 The C<proto> utility is a Perl 5 script that installs Parrot and Rakudo
 Perl 6 if they are not already installed, or works with your existing
-Perl 6 installation.  Proto uses its Perl 6 C<Installer> script to
-download, test and install your choice of Perl 6 modules.
+Perl 6 installation.  Proto uses its Perl 6 C<Installer> module to
+download, test and install your choice of Perl 6 projects.
 
 The Installer script loads Proto's F<Installer.pm> and F<Ecosystem.pm>
 modules, and executes commands such as C<install> or C<test>.
@@ -862,17 +862,17 @@ included below for reference, but not necessarily to be implemented.
 Simplify the initial download to only the F<proto> file, which can run
 in any temporary directory.  Use the Perl 5 L<LWP::UserAgent> and
 L<Archive::Extract> to download and process the Parrot and Rakudo
-release archive files.
+release archive files. [mostly done]
 
 Use a setting in proto.conf to control whether to remove the source code
-trees after a successful installation (the default is to remove).
+trees after a successful installation (the default will be to remove).
 
 =head2 Platforms
 
 Run in more than just Unix compatible environments.  So far, proto has
 conque^Wbeen used in Linux and OS X.  In particilar, it should embrace
 Microsoft Windows.  To be Windows compatible, proto uses Perl 5 modules
-such as File::Spec to handle all directory and file names.
+such as File::Spec to handle all directory and file names. [mostly done]
 
 =head2 Directories
 
@@ -898,6 +898,17 @@ each other, there is more flexibility for customization.  If a user
 wants the directory nesting done by Rakudo's --gen-parrot option, she
 can edit proto.conf to use that, or any other layout.
 
+TODO: plan a system wide parrot_install (root privileges required).
+Correctly handle system wide *.pm,, *.pir and *.pbc files in
+F<parrot_install/lib/2.3.0-devel/languages/perl6/lib> when Parrot 2.4.0
+comes out.  (BTW, since 2.3.0 is a "supported" release, why the -devel?)
+
+TODO: install symlinks in a Unix PATH directory (root required) for
+system wide commands such as 'perl6', 'rakudo' and 'proto'.  Windows
+has no symlinks, so try batch files, F<*.lnk> files etc.  If that all
+fails, designate preferably just one new F<bin> directory to contain
+perl6.exe, parrot.exe etc. and add that to the Windows PATH.
+
 =head2 Runtimes
 
 The F<.perl6> base directory makes it easier to install multiple Perl 6
@@ -909,7 +920,7 @@ they can also be installed, updated or uninstalled.  The command
 C<perl6> could mean any one of C<rakudo>, C<pugs> and so on.
 
 As a start, proto could automate the checking out and compiling of
-Rakudo's alpha branch.
+Rakudo's alpha branch alongside master.
 
 =head2 Commands
 
@@ -917,19 +928,19 @@ The C<proto> file, a Perl 5 program, has so far kept a very low profile.
 In future, C<proto> will intercept and run the following commands.
 Proto will pass everything else through to the Perl 6 F<Installer.pm>:
 
+    help            # display commands and their arguments
     configure       # create proto.conf if it does not exist
-    install rakudo  # according to proto.conf (only if not installed)
     make commands   # add 'proto', 'rakudo' and 'perl6' into your path
     reconfigure     # interactively change an existing proto.conf
-    update proto    # download proto's files if newer ones are available
-    test proto      # check the proto installation using mock drivers
-    update rakudo   # change installed Rakudo version
+    upgrade proto   # download proto's files if newer ones are available
+    selftest        # check the proto installation using mock drivers
+    install rakudo  # according to proto.conf (only if not installed)
+    upgrade rakudo  # change installed Rakudo version
     test rakudo     # uses the spectest suite to thoroughly check Rakudo
-    help            # display commands and their arguments
 
 Proto used to carry the first two of these actions out silently.  To
 give the user more direct control in future, the user must explicitly
-give each command.  If the use gives no command, proto displays help.
+issue each command.  If the use gives no command, proto displays help.
 
 =head2 Modules
 
@@ -1089,7 +1100,7 @@ After Rakudo *:
 
 2.  For Windows compatibility, change all hard coded mkdir and cp
     commands to use the Perl 5's L<ExtUtils::Command> with C<-e mkpath>
-    and C<-e cp> instead.  [done]
+    and C<-e cp> instead.  [mostly done]
 
 3.  The install command will need to be able specify :auth<> and :ver<>
     and look them up in projects.list.

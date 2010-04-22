@@ -4,64 +4,64 @@ Proto is (C) Copyright 2010 by the Proto contributors (as listed in
 AUTHORS). The license is Artistic 2.0; see LICENCE.
 
 Proto is a hyper-lightweight dependency tracking and module installation
-system. Its only purpose is to help you set up a running environment where
-you can play with Perl 6 modules with as little hassle and as few questions
-as possible. It is not to be taken seriously in any way. It is not a full-
-fledged module installation system. It is a prototype; in fact, its very name
-was chosen to indicate this fact. The conditions under which it can work are
-temporary -- the mechanism by which it ties together modules is a short-term
-hack in Rakudo Perl 6. Nothing lasts forever, but that holds especially true
-for this installer.
+system.  It's only purpose is to help you set up a running environment
+where you can play with Perl 6 modules with minimal hassle.  It is not
+to be taken too seriously.  It is not a full-fledged module installation
+system, as Parrot's Plumage aims to be.  It is a prototype; in fact, its
+very name was chosen to indicate this fact.  It is currently trying to
+prototype ideas for the loadable module ecosystem of Rakudo *, which can
+also handle multiple copies of modules distinguished by :auth and :ver
+name parts.  But nothing lasts forever, especially in this installer.
 
-Proto is terse, clear and no-nonsense. It doesn't spew output all over your
-terminal when building things. It doesn't have a lot of different flags. It
-tries to do one thing, and do it well: handle the dependencies between your
-projects.
+Proto bootstraps on Unix and Windows from a single file download.  It
+keeps terminal output concise.  It has few commands and options.  It
+does automatically handle the dependencies between your projects.
 
 What proto will do for you:
 
-1. Install Parrot
-2. Install Rakudo
-3. Install and test Perl 6 modules
-4. Create new modules (in projects, with tests)
-5. Help Perl 6 code use all these modules
+1. Download, compile and install Parrot and Rakudo
+2. Download, test and install Perl 6 modules
+3. Create new modules (in projects, with tests)
+4. Help your Perl 6 code use all these modules
 
-To install Parrot and Rakudo, type the following at the prompt:
+To install Rakudo (and Parrot), type the following at the prompt:
 
-  % ./proto
+  % ./proto configure
+  % ./proto install rakudo
 
-Installation of Parrot and Rakudo is merely a convenience; what proto was
-really built for is installing modules. The command
+Installation of Parrot and Rakudo is merely a convenience; what proto
+was really built for is installing modules. The command
 
-  % ./proto install <module>
+  % ./proto install <module> [<module> ...]
 
-will look among its list of registered modules for <module>, and download and
-build whatever it finds.
+will look among its list of registered modules for <module>, and
+download and build whatever it finds.
 
-Should the downloaded module happen to explicitly depend on other modules,
-these will be downloaded and built before the dependent module is built. And so
-on, until it all bottoms out.
+Should the downloaded module happen to explicitly depend on other
+modules, these will be downloaded and built before the dependent module
+is built. And so on, until it all bottoms out.
 
-The update command
+The upgrade command
 
-  % ./proto update <module>
+  % ./proto upgrade <module>
 
-will check the module <module> and all that depend on it for updates, and
-rebuild them in the required order. Omit the name of the module, and all your
-installed modules will be updated.
+will check the module <module> and all that depend on it for upgrades,
+and rebuild them in the required order. Omit the name of the module, and
+all your installed modules will be upgraded.
 
-See the file PIONEER for how to set up your project with proto, or let the
-create-new-project script make one semi-automatically.
+See the file PIONEER for how to set up your project with proto, or let
+the create-new-project script make one semi-automatically. TODO: convert
+create-new-project (a bash script) into another Perl 6 module.
 
 Removing a module is as simple as
 
   % ./proto uninstall <module>
 
-If a dependency cycle is detected during the download process, the install
-is aborted and the dependency cycle is described. It might still be possible
-to install all modules despite the cycle, but the mere fact that there's a
-cycle merits human attention.
+If a dependency cycle is detected during the download process, the
+install is aborted and the dependency cycle is described. It might still
+be possible to install all modules despite the cycle, but the mere fact
+that there's a cycle merits human attention.
 
-There are many things which proto does not do. Even so, it is the hope of its
-authors that it might be of some use, and make Perl 6 poets bold in splitting
-up their work into logical independent units.
+There are many things which proto does not do. Even so, it is the hope
+of its authors that it might be of some use, and make Perl 6 poets bold
+in splitting up their work into logical independent units.
