@@ -1,4 +1,41 @@
 #!/usr/bin/perl -w
+
+=head1 NAME
+
+proto - create and maintain a Perl 6 software environment
+
+=head1 SYNOPSIS
+
+    # Perl 5 must already be installed - ensure that it's >= v5.8
+    perl -v
+
+    # Fetch the proto bootstrap file this way, or with a browser:
+    # (all on one line without the \ if not in a Unix compatible shell)
+    perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
+        'http://github.com/masak/proto/raw/master/proto', 'proto')"
+
+    # Create your default ~/.perl6/proto/proto.conf
+    perl proto configure
+
+    # After optionally editing proto.conf, do the bootstrap installation
+    perl proto install rakudo
+
+    # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
+    sudo proto setup commands
+
+    # If the installation appears successful, verify that it works
+    proto selftest                               # TODO
+
+    # Read the fine manuals
+    proto help
+    proto help install
+    perldoc proto
+
+    # Use proto to install modules
+    proto install SVG HTTP::Daemon:auth<mberends>  # TODO
+
+=cut
+
 use strict;
 $| = 1; # flush after every print
 
@@ -50,7 +87,9 @@ sub install_rakudo {
     unless ( $output eq "Perl 6 rocks!\n" ) {
         die "perl 6 install error: $!";
     }
-    print "Rakudo Perl 6 has been installed.  Try '$0 help' or '$0 setup commands'\n";
+    print "Rakudo Perl 6 has been installed.  " .
+        "Create a path or shortcut to:\n\n    $perl6 \n\n" .
+        "You can also use '$0 help' or '$0 setup commands' to proceed\n";
     exit; # do nothing else after installing Rakudo
 }
 
@@ -125,7 +164,7 @@ sub download_parrot {
         $parrot_version = $1;
     }
     if ( $parrot_version =~ m/\d+\.\d+\.\d+/x ) {
-        # a tested release
+        # a Parrot release, either development or supported
         my $parrot_tarfile = "parrot-$parrot_version.tar.gz";
         my $filename = File::Spec->catfile( $parrot_build_dir, $parrot_tarfile );
         # check whether a download has already been done, skip if ok
@@ -137,7 +176,13 @@ sub download_parrot {
             print "proto is downloading $parrot_tarfile...\n";
             my $ua = LWP::UserAgent -> new;
             $ua->show_progress( 1 );
-            my $url = "http://ftp.parrot.org/releases/devel/$parrot_version/$parrot_tarfile";
+            # Parrot now makes every third release a "supported" one
+            
+            my $release_path = 'releases/devel';
+            if ( $parrot_version =~ m/ ^ \d+ \. (3|6|9|12) \. \d+ $ /x ) {
+                $release_path = 'releases/supported';
+            }
+            my $url = "http://ftp.parrot.org/$release_path/$parrot_version/$parrot_tarfile";
             my $response = $ua->mirror( $url, $filename );
             $response->is_success or die "cannot download $url";
             print "downloaded.\n";
@@ -282,7 +327,10 @@ sub upgrade_rakudo {
         die "cannot upgrade, you should first install rakudo";
     }
     if ( $config_info->{'Rakudo version'} eq 'bleeding' ) {
-        print "Upgrading Rakudo\n";
+        print "Upgrading bleeding edge Rakudo\n";
+    }
+    else {
+        print "Upgrading release Rakudo\n";
     }
     exit;
 }
@@ -469,12 +517,13 @@ sub create_default_config_file {
     else { # default: install rakudo in ~/.perl6/parrot_install/bin
         my $parrot_install_bin_dir = File::Spec->catdir( @perl6_dirs, 'parrot_install', 'bin' );
         $perl6exe = File::Spec->catpath( $home_vol, $parrot_install_bin_dir, 'perl6' );
+        if ( $^O eq 'MSWin32' ) { $perl6exe = make_short_path($perl6exe) . '.exe'; }
     }
 
     my $config_info = {
         'proto.conf version'       => '2010-04-21',
-        'Rakudo version'           => 'bleeding',
-        'Parrot version'           => 'Rakudo-decides',
+        'Rakudo version'           => '2010.04',
+        'Parrot version'           => '2.3.0',
         'Proto projects cache'     => $projects_cache_dir,
         'Rakudo build directory'   => $rakudo_build_dir,
         'Parrot build directory'   => $parrot_build_dir,
@@ -502,7 +551,7 @@ sub create_default_config_file {
             => [ 'Rakudo build directory -- Rakudo source is compiled here.' ],
         'Rakudo version'
             => [ "Rakudo version -- 'release', 'bleeding' (requires git), or a number such",
-                 "as '2010.02'" ],
+                 "as '2010.04'" ],
         'Rakudo revision'
             => [ 'Rakudo revision -- the revision of Rakudo Perl 6 to',
                  'download, if no such revision was found in $RAKUDO_DIR or',
@@ -515,10 +564,10 @@ sub create_default_config_file {
             => [ 'Parrot build directory -- Parrot source is compiled here.' ],
         'Parrot version'
             => [ "Parrot version -- either 'HEAD' (requires subversion) or a revision",
-                 "number such as 45370 (also requires subversion) or a release number",
-                 "such as '2.2.0'" ],
+                 "number such as 45822 (also requires subversion) or a release number",
+                 "such as '2.3.0'" ],
         'Perl 6 executable'
-            => [ 'Perl 6 executable -- how to run perl6. ' ],
+            => [ 'Perl 6 executable -- how to run perl6, with a possible file extension' ],
         'Perl 6 library'
             => [ 'Perl 6 library -- the path to a directory, which will be created',
                  'if it does not exist, which will contain the projects installed',
@@ -669,11 +718,12 @@ fetch        download projects into cache but do not test or install
 install      (only if not installed) copy to Perl 6 library directories
 reconfigure  interactively change the existing proto.conf
 refresh      download newer project files into cache
+selftest     verify proto operation using mock drivers and data (TODO)
 setup        add 'proto', 'rakudo' and 'perl6' into the search path
 showdeps     show dependencies of projects
 showstate    show the state of a project (fetched, built, tested)
 test         check a project for correct operation
-update       (only if installed) fetch, test and install newer version
+upgrade      (only if installed) fetch, test and install newer version
 uninstall    erase from installation directories
 
 END_OF_HELP
@@ -748,42 +798,6 @@ END_OF_HELP
 }
 
 __END__
-
-=pod
-
-=head1 NAME
-
-proto - download and install Parrot, Rakudo Perl 6, and modules
-
-=head1 SYNOPSIS
-
-    # Perl 5 must already be installed - see that it's >= v5.8
-    perl -v
-
-    # Fetch the proto bootstrap file this way, or with a browser:
-    # (all on one line without the \ if not in a Unix compatible shell)
-    perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
-        'http://github.com/masak/proto/raw/master/proto', 'proto')"
-
-    # Create your default ~/.perl6/proto/proto.conf
-    perl proto configure proto
-
-    # After optionally editing proto.conf, do the bootstrap installation
-    perl proto install rakudo
-
-    # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
-    sudo proto setup commands
-
-    # If the installation appears successful, verify that it works
-    proto test proto                               # TODO
-
-    # Read the fine manuals
-    proto help
-    proto help install
-    perldoc proto
-
-    # Use proto to install modules
-    proto install SVG HTTP::Daemon:auth<mberends>  # TODO
 
 =head1 OVERVIEW
 
