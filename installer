@@ -1,3 +1,0 @@
-use v6;
-use Installer;
-Installer.new.subcommand-dispatch(@*ARGS.shift).(@*ARGS);

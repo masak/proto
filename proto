@@ -64,8 +64,9 @@ if ( "@ARGV" eq 'install rakudo' ) { install_rakudo($config_info); }
 if ( "@ARGV" eq 'upgrade rakudo' ) { upgrade_rakudo($config_info); }
 make_pir_modules( $config_info );
 my $perl6 = $config_info->{'Perl 6 executable'};
-#exec( "$perl6 installer @ARGV" );  # Delegate to installer
-exec( $config_info->{'Perl 6 executable'} . " installer @ARGV" );
+exec( $config_info->{'Perl 6 executable'} .
+    ' -e"use Installer; Installer.new.subcommand-dispatch(@*ARGS.shift).(@*ARGS)" '
+     . "@ARGV" );
 
 #--------------------------- install_rakudo ----------------------------
 sub install_rakudo {
@@ -129,7 +130,6 @@ sub download_rakudo {
         }
         my $log_directive = '> rakudo-download.log 2> rakudo-download.err';
         my $command = qq{git clone git://github.com/rakudo/rakudo.git "$rakudo_build_dir" $log_directive};
-#       print "\ngit command = $command\n";
         if ( system( $command ) != 0 ) {
             die "Downloading Rakudo using git clone failed";
         }
