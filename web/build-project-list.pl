@@ -67,7 +67,7 @@ sub get_html_list {
 			$li .= qq(<li><a href="$project->{url}">$project->{name}</a>: $project->{description}</li>\n);
 		}
 	}
-	return "<!DOCTYPE HTML><html><head><title>Proto List</title></head><body><ul>\n"
+	return '<!DOCTYPE HTML><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Proto List</title></head><body><ul>'."\n"
 			.$li
 			.'</ul></body>';
 }
