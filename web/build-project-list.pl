@@ -5,6 +5,8 @@ use LWP::Simple;
 use JSON ;
 use YAML qw (Load LoadFile);
 
+my $output_dir = shift(@ARGV) || './';
+
 local $|=1;
 
 my $list_url = 'http://github.com/masak/proto/raw/master/projects.list';
@@ -78,6 +80,6 @@ sub get_json {
 }
 
 my $projects = get_projects($list_url);
-spew ('proto.html'  ,get_html_list( $projects ) );
-spew ('proto.json'  ,get_json( $projects ) );
+spew ($output_dir . 'index.html'  ,get_html_list( $projects ) );
+spew ($output_dir . 'proto.json'  ,get_json( $projects ) );
 
