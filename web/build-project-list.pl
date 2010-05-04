@@ -33,10 +33,14 @@ sub get_projects {
 		my $project = $projects->{$project_name};
 		$project->{name} = $project_name;
 		print "$project_name\n";
-		next unless ($project->{home}) ;
+		if (!$project->{home}) {
+			delete $projects->{$project_name};
+			next;
+		}
 
 		my $home = $site_info->{  $project->{home} };
 		if (!$home) {
+			delete $projects->{$project_name};
 			$stats->{failed}++;
 			push @{ $stats->{errors} } , "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
 			next;
@@ -46,6 +50,7 @@ sub get_projects {
 
 		my $project_page = get ($project->{url});
 		if (!$project_page) {
+			delete $projects->{$project_name};
 			$stats->{failed}++;
 			push @{ $stats->{errors} } , "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
 			next;
@@ -59,6 +64,7 @@ sub get_projects {
 			$stats->{success}++;
 			$project->{description} = $desc ;
 		} else {
+			delete $projects->{$project_name};
 			$stats->{failed}++;
 			push @{ $stats->{errors} } , "Could not get a description for $project->{name} from $project->{url}, that's BAD!\n";
 			$project->{description} = '';
