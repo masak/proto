@@ -4,6 +4,7 @@ use Data::Dumper;
 use LWP::Simple;
 use JSON ;
 use YAML qw (Load LoadFile);
+use HTML::Template;
 
 my $output_dir = shift(@ARGV) || './';
 
@@ -71,15 +72,15 @@ sub get_projects {
 sub get_html_list {
 	my ($projects) = @_;
 	my $li ;
-	foreach (sort { lc($a) cmp lc($b) } keys %$projects) {
-		my $project = $projects->{$_};
-		if ($project->{description}) {
-			$li .= qq(<li><a href="$project->{url}">$project->{name}</a>: $project->{description}</li>\n);
-		}
-	}
-	return '<!DOCTYPE HTML><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Proto List</title></head><body><ul>'."\n"
-			.$li
-			.'</ul></body>';
+    my $template = HTML::Template->new(
+        filename          => 'index.tmpl',
+        die_on_bad_params => 0,
+    );
+
+    my @projects = map { $projects->{$_} }
+                   sort { lc($a) cmp lc($b) } keys %$projects;
+    $template->param(projects => \@projects);
+    return $template->output;
 }
 
 sub get_json {
@@ -99,4 +100,4 @@ die "Too many errors no output generated" if $stats->{failed} > $stats->{success
 spew ($output_dir . 'index.html'  ,get_html_list( $projects ) );
 spew ($output_dir . 'proto.json'  ,get_json( $projects ) );
 
-print "proto.html and proto.json files generated\n";
+print "index.html and proto.json files generated\n";
