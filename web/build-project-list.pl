@@ -8,6 +8,7 @@ use YAML qw (Load LoadFile);
 my $output_dir = shift(@ARGV) || './';
 
 local $|=1;
+my $stats = {success=>0,failed=>0,errors=>[]};
 
 my $list_url = 'http://github.com/masak/proto/raw/master/projects.list';
 
@@ -35,7 +36,8 @@ sub get_projects {
 
 		my $home = $site_info->{  $project->{home} };
 		if (!$home) {
-			print STDERR "Don't know how toget info for $project->{name} from $project->{home}\n";
+			$stats->{failed}++;
+			push @{ $stats->{errors} } , "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
 			next;
 		}
 
@@ -43,7 +45,8 @@ sub get_projects {
 
 		my $project_page = get ($project->{url});
 		if (!$project_page) {
-			print STDERR "Error for project $project->{name} : $project->{url}\n";
+			$stats->{failed}++;
+			push @{ $stats->{errors} } , "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
 			next;
 		}
 
@@ -51,8 +54,15 @@ sub get_projects {
 		my ($desc) = $project_page =~ $home->{get_description} ;
 		$desc =~ s/^\s+//;$desc =~ s/\s+$//; #trim spaces
 		$desc =~ s/^<p>//;$desc =~ s/<\/p>//; #Remove the p tag
-		$project->{description} = $desc ||'no description';
-		print "$project->{description}\n\n" if $project->{description};
+		if ($desc) {
+			$stats->{success}++;
+			$project->{description} = $desc ;
+		} else {
+			$stats->{failed}++;
+			push @{ $stats->{errors} } , "Could not get a description for $project->{name} from $project->{url}, that's BAD!\n";
+			$project->{description} = '';
+		}
+		print "$project->{description}\n\n";
 
 	}
 	return $projects;
@@ -80,6 +90,13 @@ sub get_json {
 }
 
 my $projects = get_projects($list_url);
+
+print "ok - $stats->{success}\nnok - $stats->{failed}\n";
+print STDERR join '', @{ $stats->{errors} }  if $stats->{errors};
+
+die "Too many errors no output generated" if $stats->{failed} > $stats->{success};
+
 spew ($output_dir . 'index.html'  ,get_html_list( $projects ) );
 spew ($output_dir . 'proto.json'  ,get_json( $projects ) );
 
+print "proto.html and proto.json files generated\n";
