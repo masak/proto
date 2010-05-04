@@ -49,8 +49,10 @@ dl.table-display {
         <p><a href="proto.json">JSON version of this list</a>.</p>
         <dl class="table-display">
         <TMPL_LOOP projects>
+            <TMPL_IF description>
             <dt><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt><dd>
                 <TMPL_VAR description></dd>
+            </TMPL_IF>
         </TMPL_LOOP>
         </dl>
      </div>
