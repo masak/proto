@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-US">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	    <link rel="icon" href="/favicon.ico" type="favicon.ico" />
+        <title>Proto - A module installer for Perl 6</title>
+    </head>
+    <body>
+        <h1>Proto - A module installer for Perl 6</h1>
+        <h2>Project list</h2>
+        <p><a href="proto.json">JSON version of this list</a>.</p>
+        <ul>
+        <TMPL_LOOP projects>
+            <li><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a>:
+                <TMPL_VAR description></li>
+        </TMPL_LOOP>
+        </ul>
+    </body>
+</html>
