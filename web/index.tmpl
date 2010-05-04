@@ -10,11 +10,30 @@
 body {
 	font-family:helvetica,arial,sans-serif;
 	color:#000;
-    padding-bottom: 2em;
+	padding-bottom: 2em;
 }
 a {color:#000;}
-#about {margin: 0 auto 0 auto;width: 320px; text-align: justify}
-#content {margin: 0 auto 0 auto;width: 620px}
+#header {
+	margin:0 0 3em;min-height:200px;
+	-moz-border-radius:1em 1em 1em 1em;
+	-moz-box-shadow:5px 5px 10px #888888;
+	border-radius:1em 1em 1em 1em;
+	background:none repeat scroll 0 0 #80B5FF;
+	border:0.2em solid #63A4FF;
+	font-weight:bold;
+	padding:0 1em;
+	position:relative;
+}
+#header img{
+	border:0 none;
+	float:right;
+	position:relative;
+	right:-2em;
+	top:-1.5em;
+	z-index:1;
+}
+#header , #content {margin: 0 auto 0 auto;width: 700px;}
+#about {margin: 40px auto 0 auto;text-align: justify}
 
 dl.table-display {
 	float: left;
@@ -46,8 +65,11 @@ dl.table-display {
 
     </head>
     <body>
-        <h1>Proto - A module installer for Perl 6</h1>
-        <h2>Project list</h2>
+		<div id="header"> 
+			<a href="http://svn.pugscode.org/pugs/misc/camelia.txt"><img alt="camelia perl bug logo" src="http://perl6.org/camelia-logo.png"></a> 
+			<h1>Proto - A module installer for Perl 6</h1> 
+		</div> 
+        <div id="content">
         <div id="about">
             Proto is a hyper-lightweight dependency tracking and module installation
             system.  It's only purpose is to help you set up a running environment
@@ -59,7 +81,7 @@ dl.table-display {
             also handle multiple copies of modules distinguished by :auth and :ver
             name parts.  But nothing lasts forever, especially in this installer.
         </div>
-        <div id="content">
+        <h2>Project list</h2>
         <p><a href="proto.json">JSON version of this list</a>.</p>
         <dl class="table-display">
         <TMPL_LOOP projects>
