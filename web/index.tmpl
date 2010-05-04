@@ -6,16 +6,53 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	    <link rel="icon" href="/favicon.ico" type="favicon.ico" />
         <title>Proto - A module installer for Perl 6</title>
+<style>
+body {
+	font-family:helvetica,arial,sans-serif;
+	color:#000;
+}
+a {color:#000;}
+#content {margin: 0 auto 0 auto;width: 620px;}
+dl.table-display {
+	float: left;
+	width: 620px;
+	margin: 1em auto 0 auto;
+	padding: 0;
+	border-bottom: 1px solid #999;
+}
+
+.table-display dt {
+	clear: left;
+	float: left;
+	width: 200px;
+	margin: 0;
+	padding: 5px;
+	border-top: 1px solid #999;
+	font-weight: bold;
+}
+
+.table-display dd
+{
+	float: left;
+	width: 400px;
+	margin: 0;
+	padding: 5px;
+	border-top: 1px solid #999;
+}
+</style>
+
     </head>
     <body>
         <h1>Proto - A module installer for Perl 6</h1>
         <h2>Project list</h2>
+        <div id="content">
         <p><a href="proto.json">JSON version of this list</a>.</p>
-        <ul>
+        <dl class="table-display">
         <TMPL_LOOP projects>
-            <li><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a>:
-                <TMPL_VAR description></li>
+            <dt><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></dt><dd>
+                <TMPL_VAR description></dd>
         </TMPL_LOOP>
-        </ul>
+        </dl>
+     </div>
     </body>
 </html>
