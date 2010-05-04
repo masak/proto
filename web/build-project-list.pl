@@ -61,7 +61,7 @@ sub get_projects {
 sub get_html_list {
 	my ($projects) = @_;
 	my $li ;
-	foreach (sort keys %$projects) {
+	foreach (sort { lc($a) cmp lc($b) } keys %$projects) {
 		my $project = $projects->{$_};
 		if ($project->{description}) {
 			$li .= qq(<li><a href="$project->{url}">$project->{name}</a>: $project->{description}</li>\n);
