@@ -81,6 +81,7 @@ sub get_html_list {
     my $template = HTML::Template->new(
         filename          => 'index.tmpl',
         die_on_bad_params => 0,
+        default_escape    => 'html',
     );
 
     my @projects = map { $projects->{$_} }
