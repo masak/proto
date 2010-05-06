@@ -33,6 +33,19 @@ my $site_info = {
     },
 };
 
+my $projects = get_projects($list_url);
+
+print "ok - $stats->{success}\nnok - $stats->{failed}\n";
+print STDERR join '', @{ $stats->{errors} } if $stats->{errors};
+
+die "Too many errors no output generated"
+  if $stats->{failed} > $stats->{success};
+
+spew( $output_dir . 'index.html', get_html_list($projects) );
+spew( $output_dir . 'proto.json', get_json($projects) );
+
+print "index.html and proto.json files generated\n";
+
 sub spew {
     open( my $fh, ">", shift ) or return -1;
     print $fh @_;
@@ -117,16 +130,3 @@ sub get_json {
     #$json =~ s/},/},\n/g;
     return $json;
 }
-
-my $projects = get_projects($list_url);
-
-print "ok - $stats->{success}\nnok - $stats->{failed}\n";
-print STDERR join '', @{ $stats->{errors} } if $stats->{errors};
-
-die "Too many errors no output generated"
-  if $stats->{failed} > $stats->{success};
-
-spew( $output_dir . 'index.html', get_html_list($projects) );
-spew( $output_dir . 'proto.json', get_json($projects) );
-
-print "index.html and proto.json files generated\n";
