@@ -55,7 +55,8 @@ sub spew {
 
 sub get_projects {
     my ($list_url) = @_;
-    my $projects = Load( get($list_url) );
+    my $projects = eval { LoadFile('projects.list.local') } || Load( get($list_url) );
+
     foreach my $project_name ( keys %$projects ) {
         my $project = $projects->{$project_name};
         $project->{name} = $project_name;
