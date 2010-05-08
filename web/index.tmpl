@@ -102,7 +102,7 @@ dl.table-display {
             <TMPL_IF description>
             <dt><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
 	    <dd>
-	    <TMPL_IF badge_has_readme><span  class="badge badge-readme" title="This project has a readme file">README</span> </TMPL_IF>
+	    <TMPL_IF badge_has_readme><span  class="badge badge-readme" title="This project has a readme file"><a href="<TMPL_VAR badge_has_readme>">README</a></span> </TMPL_IF>
 	    <TMPL_IF badge_is_fresh><span class="badge badge-fresh" title="This project is fresh">FRESH</span> </TMPL_IF>
 	    <br><TMPL_VAR description></dd>
             </TMPL_IF>
