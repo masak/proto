@@ -99,9 +99,9 @@ dl.table-display {
             <dt><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
 	    <dd>
         <div class='badges'>
-            <TMPL_IF badge_has_readme><span  class="badge badge-readme" title="This project has a readme file"><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' /></a></span><TMPL_ELSE><img src='unachieved.png' /></TMPL_IF>
-            <img src='unachieved.png' />
-            <TMPL_IF badge_is_fresh><span class="badge badge-fresh" title="This project is fresh"><img src='fresh.png' /></span><TMPL_ELSE><img src='unachieved.png' /></TMPL_IF>
+            <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" /></TMPL_IF>
+            <img src='unachieved.png' title="Doesn't have tests" />
+            <TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' /></TMPL_IF>
         </div>
 	    <TMPL_VAR description></dd>
             </TMPL_IF>
