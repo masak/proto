@@ -9,6 +9,7 @@ use YAML qw (Load LoadFile);
 use HTML::Template;
 
 my $output_dir = shift(@ARGV) || './';
+my @MEDALS = qw<fresh medal readme tests unachieved>;
 binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
@@ -72,6 +73,9 @@ print STDERR join '', @{ $stats->{errors} } if $stats->{errors};
 die "Too many errors no output generated"
   if $stats->{failed} > $stats->{success};
 
+unless ($output_dir eq './') {
+    system("cp $_.png $output_dir") for @MEDALS;
+}
 spew( $output_dir . 'index.html', get_html_list($projects) );
 spew( $output_dir . 'proto.json', get_json($projects) );
 
