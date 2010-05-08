@@ -9,6 +9,7 @@ use YAML qw (Load LoadFile);
 use HTML::Template;
 
 my $output_dir = shift(@ARGV) || './';
+binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
 my $stats = { success => 0, failed => 0, errors => [] };
@@ -77,7 +78,7 @@ spew( $output_dir . 'proto.json', get_json($projects) );
 print "index.html and proto.json files generated\n";
 
 sub spew {
-    open( my $fh, ">", shift ) or return -1;
+    open( my $fh, ">:encoding(UTF-8)", shift ) or return -1;
     print $fh @_;
     close $fh;
     return;
