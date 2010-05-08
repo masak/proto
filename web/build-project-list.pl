@@ -34,7 +34,7 @@ my $site_info = {
 		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{owner}/$project->{name}/$latest->{id}");
 		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
 		
-		$project ->{badge_has_readme} = $files{README};
+		$project ->{badge_has_readme} = $files{README} ? "http://github.com/$project->{owner}/$project->{name}/blob/master/README" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
 		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
 		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge sprintf ("%04d-%02d-%02d" ,$yyy,$mm,$dd); #fresh is newer than 30 days ago
