@@ -18,18 +18,38 @@ my $list_url = 'http://github.com/masak/proto/raw/master/projects.list';
 
 my $site_info = {
     'github' => {
-        url => sub {
-            my $project = shift;
-            return "http://github.com/$project->{owner}/$project->{name}/";
-        },
-        get_description => qr/id="repository_description" rel="repository_description_edit">(.*)<span id="read_more"/s,
+        set_project_info => sub {
+		my $project = shift;
+		$project ->{url}= "http://github.com/$project->{owner}/$project->{name}/";
+		my $project_page = get ("http://github.com/api/v2/json/repos/show/$project->{owner}/$project->{name}");
+		if ( !$project_page ) {
+			return "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
+		}
+		
+		my $info = decode_json $project_page;
+		$project ->{description}= $info->{repository}->{description};
+		sleep(1) ; #We are allowed 60 calls/min = 1 api call per second
+		return;
+	}
     },
     'gitorious' => {
-        url => sub {
-            my $project = shift;
-            return "http://gitorious.org/$project->{name}/";
-        },
-        get_description => qr/<div id="project-description" class="page">(.*?)<\/div>/s,
+        set_project_info => sub {
+		my $project = shift;
+		$project ->{url}= "http://gitorious.org/$project->{name}/";
+
+		my $project_page = get( $project->{url} );
+		if ( !$project_page ) {
+			return "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
+		}
+
+		#Please forgive me for parsing html this way
+		my ($desc) = $project_page =~ qr[<div id="project-description" class="page">\s*<p>(.*?)</p>\s*</div>]s;
+		if (!$desc) {
+			return "Could not get a description for $project->{name} from $project->{url}, that's BAD!\n";
+		}
+		$project->{description} = $desc;
+		return ;
+	},
     },
 };
 
@@ -60,50 +80,27 @@ sub get_projects {
     foreach my $project_name ( keys %$projects ) {
         my $project = $projects->{$project_name};
         $project->{name} = $project_name;
-        print "$project_name\n";
+	
+        print "$stats->{success} $project_name\n";
         if ( !$project->{home} ) {
             delete $projects->{$project_name};
             next;
         }
-
+	my $error;
         my $home = $site_info->{ $project->{home} };
         if ( !$home ) {
-            delete $projects->{$project_name};
-            $stats->{failed}++;
-            push @{ $stats->{errors} },
-                "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
-            next;
+		$error = "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
         }
 
-        $project->{url} = $home->{url}->($project);
-
-        my $project_page = get( $project->{url} );
-        if ( !$project_page ) {
-            delete $projects->{$project_name};
-            $stats->{failed}++;
-            push @{ $stats->{errors} },
-                "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
-            next;
-        }
-
-        #Please forgive me for parsing html this way
-        my ($desc) = $project_page =~ $home->{get_description};
-        $desc =~ s/^\s+//;
-        $desc =~ s/\s+$//;     #trim spaces
-        $desc =~ s/^<p>//;
-        $desc =~ s/<\/p>//;    #Remove the p tag
-        if ($desc) {
-            $stats->{success}++;
-            $project->{description} = $desc;
-        }
-        else {
-            delete $projects->{$project_name};
-            $stats->{failed}++;
-            push @{ $stats->{errors} },
-                "Could not get a description for $project->{name} from $project->{url}, that's BAD!\n";
-            $project->{description} = '';
-        }
-        print "$project->{description}\n\n";
+        $error ||= $home->{set_project_info}->($project);
+        if ($error) {
+		$stats->{failed}++;
+		push @{ $stats->{errors} }, $error ;
+		delete $projects->{$project_name};
+        } else {
+		$stats->{success}++;
+	}
+        print $project->{description}||$error,"\n\n";
 
     }
     return $projects;
