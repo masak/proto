@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-
 use strict;
 use warnings;
 
@@ -26,9 +25,20 @@ my $site_info = {
 			return "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
 		}
 		
-		my $info = decode_json $project_page;
-		$project ->{description}= $info->{repository}->{description};
-		sleep(1) ; #We are allowed 60 calls/min = 1 api call per second
+		my $repository = decode_json $project_page;
+		$project ->{description}= $repository->{repository}->{description};
+		
+		my $commits = decode_json get("http://github.com/api/v2/json/commits/list/$project->{owner}/$project->{name}/master");
+		my $latest = $commits->{commits}->[0];
+		$project ->{last_updated}= $latest->{committed_date};
+		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{owner}/$project->{name}/$latest->{id}");
+		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
+		
+		$project ->{badge_has_readme} = $files{README};
+		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
+		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
+		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge sprintf ("%04d-%02d-%02d" ,$yyy,$mm,$dd); #fresh is newer than 30 days ago
+		sleep(3) ; #We are allowed 60 calls/min = 1 api call per second, and we are wasting 3 per request so we sleep for 3 secs to make up
 		return;
 	}
     },
@@ -101,7 +111,6 @@ sub get_projects {
 		$stats->{success}++;
 	}
         print $project->{description}||$error,"\n\n";
-
     }
     return $projects;
 }
