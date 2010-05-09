@@ -36,6 +36,17 @@ my $site_info = {
 		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{owner}/$project->{name}/$latest->{id}");
 		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
 		
+		#try to get the logo if any
+		if ( -e "$output_dir/logos" && $files{logotype} ) {
+			my $logo_url = "http://github.com/$project->{owner}/$project->{name}/raw/master/logotype/logo_32x32.png";
+			if ( head($logo_url) ) { 
+				my $logo_name = $project->{name};
+				$logo_name =~ s/\W+/_/;
+				getstore ($logo_url , "$output_dir/logos/$logo_name.png") ; #TODO: unless filesize is same as the one we already have 
+				$project ->{logo} = "./logos/$logo_name.png";
+			}
+		}
+		
 		$project ->{badge_has_readme} = $files{README} ? "http://github.com/$project->{owner}/$project->{name}/blob/master/README" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
 		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
@@ -64,6 +75,8 @@ my $site_info = {
 	},
     },
 };
+
+system("mkdir $output_dir/logos") unless -e "$output_dir/logos" ;
 
 my $projects = get_projects($list_url);
 

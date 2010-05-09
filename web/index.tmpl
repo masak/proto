@@ -14,6 +14,7 @@ body {
 	padding-bottom: 2em;
 }
 a {color:#000;}
+.project-logo {width:32px;margin-right:5px;float:left;}
 .badges { float: right }
 #header {
 	margin:0 0 3em;min-height:200px;
@@ -96,7 +97,7 @@ dl.table-display {
         <dl class="table-display">
         <TMPL_LOOP projects>
             <TMPL_IF description>
-            <dt><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
+            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>"></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
 	    <dd>
         <div class='badges'>
             <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" /></TMPL_IF>
