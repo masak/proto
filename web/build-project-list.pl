@@ -7,6 +7,7 @@ use LWP::Simple;
 use JSON;
 use YAML qw (Load LoadFile);
 use HTML::Template;
+use File::Slurp;
 
 my $output_dir = shift(@ARGV) || './';
 my @MEDALS = qw<fresh medal readme tests unachieved>;
@@ -90,17 +91,10 @@ die "Too many errors no output generated"
 unless ($output_dir eq './') {
     system("cp $_.png $output_dir") for @MEDALS;
 }
-spew( $output_dir . 'index.html', get_html_list($projects) );
-spew( $output_dir . 'proto.json', get_json($projects) );
+write_file( $output_dir . 'index.html',{binmode => ':encoding(UTF-8)'}, get_html_list($projects) );
+write_file( $output_dir . 'proto.json',{binmode => ':encoding(UTF-8)'}, get_json($projects) );
 
 print "index.html and proto.json files generated\n";
-
-sub spew {
-    open( my $fh, ">:encoding(UTF-8)", shift ) or return -1;
-    print $fh @_;
-    close $fh;
-    return;
-}    #spew ($filename,$data) ... saves $data in $filename.
 
 sub get_projects {
     my ($list_url) = @_;
