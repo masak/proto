@@ -97,19 +97,18 @@ dl.table-display {
         <dl class="table-display">
         <TMPL_LOOP projects>
             <TMPL_IF description>
-            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>"></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
+            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
 	    <dd>
         <div class='badges'>
-            <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" /></TMPL_IF>
-            <TMPL_IF badge_has_tests><a href="<TMPL_VAR badge_has_tests>"><img src='tests.png' title='Has tests' /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have tests" /></TMPL_IF>
-            <TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' /></TMPL_IF>
+            <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
+            <TMPL_IF badge_has_tests><a href="<TMPL_VAR badge_has_tests>"><img src='tests.png' title='Has tests' alt="Tests badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have tests" alt="Unachieved badge" /></TMPL_IF>
+            <TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' alt="Fresh badge" /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' alt="Unachieved badge" /></TMPL_IF>
         </div>
 	    <TMPL_VAR description></dd>
             </TMPL_IF>
         </TMPL_LOOP>
         </dl>
      </div>
-     <br />
      <p style="clear:both; padding-top: 2em">
         This page is generated from the files in the <a
         href="http://github.com/masak/proto/tree/master/web/">web/ folder of
