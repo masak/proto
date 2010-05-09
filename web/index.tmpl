@@ -97,7 +97,7 @@ dl.table-display {
         <dl class="table-display">
         <TMPL_LOOP projects>
             <TMPL_IF description>
-            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>"></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
+            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
 	    <dd>
         <div class='badges'>
             <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
