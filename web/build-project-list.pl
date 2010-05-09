@@ -21,19 +21,30 @@ my $list_url = 'http://github.com/masak/proto/raw/master/projects.list';
 my $site_info = {
     'github' => {
         set_project_info => sub {
-		my $project = shift;
+		my ($project , $previous )= @_;
 		$project ->{url}= "http://github.com/$project->{owner}/$project->{name}/";
-		my $project_page = get ("http://github.com/api/v2/json/repos/show/$project->{owner}/$project->{name}");
-		if ( !$project_page ) {
+		if ( ! head( $project ->{url} ) ) {
 			return "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
 		}
-		
-		my $repository = decode_json $project_page;
-		$project ->{description}= $repository->{repository}->{description};
-		
+
 		my $commits = decode_json get("http://github.com/api/v2/json/commits/list/$project->{owner}/$project->{name}/master");
 		my $latest = $commits->{commits}->[0];
 		$project ->{last_updated}= $latest->{committed_date};
+		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
+		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge sprintf ("%04d-%02d-%02d" ,$yyy,$mm,$dd); #fresh is newer than 30 days ago
+		
+		if ( $previous && $previous->{last_updated} eq $latest->{committed_date} ) {
+			$previous->{badge_is_fresh} = $project->{badge_is_fresh} ; #Even if the project was not modified we need to update this
+			%$project = %$previous;
+			print "Not updated since last check, loading from cache\n";
+			sleep(1); #We only did one api call
+			return;
+		}
+		print "Updated since last check\n";
+		
+		my $repository = decode_json get ("http://github.com/api/v2/json/repos/show/$project->{owner}/$project->{name}");
+		$project ->{description}= $repository->{repository}->{description};
+		
 		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{owner}/$project->{name}/$latest->{id}");
 		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
 		
@@ -51,8 +62,6 @@ my $site_info = {
 		$project ->{badge_has_tests} = $files{t} || $files{test} || $files{tests} ;
 		$project ->{badge_has_readme} = $files{README} ? "http://github.com/$project->{owner}/$project->{name}/blob/master/README" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
-		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
-		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge sprintf ("%04d-%02d-%02d" ,$yyy,$mm,$dd); #fresh is newer than 30 days ago
 		sleep(3) ; #We are allowed 60 calls/min = 1 api call per second, and we are wasting 3 per request so we sleep for 3 secs to make up
 		return;
 	}
@@ -99,6 +108,7 @@ print "index.html and proto.json files generated\n";
 sub get_projects {
     my ($list_url) = @_;
     my $projects = eval { LoadFile('projects.list.local') } || Load( get($list_url) );
+    my $cached_projects = eval { decode_json read_file( $output_dir . 'proto.json' , binmode => ':encoding(UTF-8)' )  };
 
     foreach my $project_name ( keys %$projects ) {
         my $project = $projects->{$project_name};
@@ -115,7 +125,7 @@ sub get_projects {
 		$error = "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
         }
 
-        $error ||= $home->{set_project_info}->($project);
+        $error ||= $home->{set_project_info}->($project , $cached_projects->{$project_name} );
         if ($error) {
 		$stats->{failed}++;
 		push @{ $stats->{errors} }, $error ;
