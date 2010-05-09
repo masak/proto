@@ -47,6 +47,7 @@ my $site_info = {
 			}
 		}
 		
+		$project ->{badge_has_tests} = $files{t} || $files{test} || $files{tests} ;
 		$project ->{badge_has_readme} = $files{README} ? "http://github.com/$project->{owner}/$project->{name}/blob/master/README" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
 		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
