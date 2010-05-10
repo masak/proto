@@ -20,7 +20,7 @@ druid:
 
 perl6-examples:
     home:   github
-    owner:  perl6 
+    owner:  perl6
 
 uri:
     home:   github
