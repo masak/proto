@@ -177,3 +177,11 @@ yapsi:
 mandelbrot:
     home:  github
     owner: colomon
+
+zavolaj:
+    home:  github
+    owner: jnthn
+
+fakedbi:
+    home:  github
+    owner: mberends
