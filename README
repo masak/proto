@@ -1,40 +1,36 @@
-Proto -- making your life slightly easier
+Proto -- making your Perl 6 work slightly easier
 
 Proto is a hyper-lightweight dependency tracking and module installation
-system.  Its only purpose is to help you set up a running environment
-where you can play with Perl 6 modules with minimal hassle.  It is not a
-fully fledged module installation system, as Parrot's Plumage will be.
-It is a prototype; the name says so.  It is currently trying out ideas
-for the loadable module ecosystem of Rakudo *, which can also handle
-multiple copies of modules distinguished by :auth and :ver name parts.
+system.  It helps you set up a running environment where you can play
+with Rakudo Perl 6 and library modules with minimal hassle.  It's not
+comprehensive like Parrot's Plumage will be, it's an unreliable
+prototype, as the name suggests.  It is currently experimenting with the
+module ecosystem of Rakudo *, which should accommodate multiple
+instances of modules distinguished by :auth and :ver name parts.
 
 Proto can bootstrap on Unix and Windows from a single file download, or
 by cloning its Github repository.  It keeps terminal output concise and
-has few commands and options.  It does automatically handle the
-dependencies between your projects.
+has few commands and options.  You can use it to:
 
-What proto will do for you:
+ 1. Download, compile and install Parrot and Rakudo
+ 2. Download, compile, test and install Perl 6 modules
+ 3. Create new modules (in projects, with tests)
 
-1. Download, compile and install Parrot and Rakudo
-2. Download, test and install Perl 6 modules
-3. Create new modules (in projects, with tests)
-4. Help your Perl 6 code use all these modules
-
-To install Proto, get the main proto file with this command or a browser
+To install Proto, get the main script with this command (or a browser)
 (all on one line without the \ if not in a Unix compatible shell):
 
-  % perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
-        'http://github.com/masak/proto/raw/master/proto', 'proto')"
+ perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
+    'http://github.com/masak/proto/raw/master/proto', 'proto.pl')"
 
 To install Rakudo (and Parrot), type the following at the prompt:
 
-  % perl proto configure
-  % perl proto install rakudo
+ perl proto.pl configure proto
+ perl proto.pl install rakudo
 
 Installation of Parrot and Rakudo is merely a convenience; what proto
 was really built for is installing modules. The command
 
-  % perl proto install <module> [<module> ...]
+ perl proto.pl install <module> [<module> ...]
 
 will look among its list of registered modules for <module>, and
 download and build whatever it finds.
@@ -45,7 +41,7 @@ is built. And so on, until it all bottoms out.
 
 The upgrade command
 
-  % perl proto upgrade <module>
+ perl proto.pl upgrade <module>
 
 will check the module <module> and all that depend on it for upgrades,
 and rebuild them in the required order. Omit the name of the module, and
@@ -57,7 +53,7 @@ create-new-project (a bash script) into another Perl 6 module.
 
 Removing a module is as simple as
 
-  % perl proto uninstall <module>
+ perl proto.pl uninstall <module>
 
 If a dependency cycle is detected during the download process, the
 install is aborted and the dependency cycle is described. It might still

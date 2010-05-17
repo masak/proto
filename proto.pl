@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-proto - create and maintain a Perl 6 software environment
+proto.pl - create and maintain a Perl 6 software environment
 
 =head1 SYNOPSIS
 
@@ -12,27 +12,27 @@ proto - create and maintain a Perl 6 software environment
     # Fetch the proto bootstrap file this way, or with a browser:
     # (all on one line without the \ if not in a Unix compatible shell)
     perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
-        'http://github.com/masak/proto/raw/master/proto', 'proto')"
+        'http://github.com/masak/proto/raw/master/proto', 'proto.pl')"
 
     # Create your default ~/.perl6/proto/proto.conf
-    perl proto configure
+    perl proto.pl configure proto
 
     # After optionally editing proto.conf, do the bootstrap installation
-    perl proto install rakudo
+    perl proto.pl install rakudo
 
     # Proto suggests you make 'proto', 'rakudo' and 'perl6' commands
-    sudo proto setup commands
+    sudo perl proto.pl setup commands
 
     # If the installation appears successful, verify that it works
-    proto selftest                               # TODO
+    perl proto.pl selftest                              # TODO
 
     # Read the fine manuals
-    proto help
-    proto help install
-    perldoc proto
+    perl proto.pl help
+    perl proto.pl help install
+    perldoc proto.pl
 
     # Use proto to install modules
-    proto install SVG HTTP::Daemon:auth<mberends>  # TODO
+    perl proto.pl install SVG HTTP::Daemon:auth<mberends>  # TODO
 
 =cut
 
@@ -859,10 +859,10 @@ included below for reference, but not necessarily to be implemented.
 
 =head2 Bootstrap
 
-Simplify the initial download to only the F<proto> file, which can run
-in any temporary directory.  Use the Perl 5 L<LWP::UserAgent> and
+Simplify the initial download to only the F<proto.pl> file, which can
+run in any temporary directory.  Use the Perl 5 L<LWP::UserAgent> and
 L<Archive::Extract> to download and process the Parrot and Rakudo
-release archive files. [mostly done]
+release archive files.
 
 Use a setting in proto.conf to control whether to remove the source code
 trees after a successful installation (the default will be to remove).
