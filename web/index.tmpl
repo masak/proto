@@ -36,8 +36,10 @@ a img {border:none;}
 	top:-1.5em;
 	z-index:1;
 }
+h2 {margin:30px 0 0 0;}
 #header, #content {margin: 0 auto 0 auto;width: 700px;}
 #about, p {margin: 40px auto 0 auto;text-align: justify}
+#json_link {float:right;margin-top:-22px;font-size:smaller;}
 
 dl.table-display {
 	float: left;
@@ -94,7 +96,7 @@ dl.table-display {
         </p>
         </div>
         <h2>Project list</h2>
-        <p><a href="proto.json">JSON version of this list</a>.</p>
+        <p id="json_link"><a href="proto.json">JSON version of this list</a>.</p>
         <dl class="table-display">
         <TMPL_LOOP projects>
             <TMPL_IF description>
