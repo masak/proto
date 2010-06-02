@@ -198,6 +198,6 @@ ufo:
     home:  github
     owner: masak
 
-Math-RungeKutta
+Math-RungeKutta:
     home:  github
     owner: moritz
