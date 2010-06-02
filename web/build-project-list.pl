@@ -99,6 +99,7 @@ die "Too many errors no output generated"
 
 unless ($output_dir eq './') {
     system("cp $_.png $output_dir") for @MEDALS;
+    system("cp fame-and-profit.html $output_dir");
 }
 write_file( $output_dir . 'index.html',{binmode => ':encoding(UTF-8)'}, get_html_list($projects) );
 write_file( $output_dir . 'proto.json',{binmode => ':encoding(UTF-8)'}, get_json($projects) );
