@@ -201,3 +201,7 @@ ufo:
 Math-RungeKutta:
     home:  github
     owner: moritz
+
+perl6-puppet-parser:
+    home:  github
+    owner: cosimo
