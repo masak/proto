@@ -205,3 +205,7 @@ Math-RungeKutta:
 perl6-puppet-parser:
     home:  github
     owner: cosimo
+
+Algorithm-Viterbi:
+    home:  github
+    owner: arnsholt
