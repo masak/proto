@@ -205,3 +205,8 @@ perl6-puppet-parser:
 Algorithm-Viterbi:
     home:  github
     owner: arnsholt
+
+perl6-digest-md5:
+    home:  github
+    owner: cosimo
+
