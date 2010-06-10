@@ -54,10 +54,6 @@ io-prompt:
     home:   github
     owner:  pnu
 
-wtop:
-    home:   github
-    owner:  masak
-
 xml:
     home:   github
     owner:  krunen
