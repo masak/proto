@@ -54,14 +54,14 @@ given $core {
     is .install(<won't-test>, :force), forced-success, #'
         "Testing fails, install anyway";
     is ~@actions, "test[won't-test] install[won't-test]", "Tested, installed";
-    is .state-of("won't test"), installed, "State after: 'installed'";
+    is .state-of("won't test"), 'installed', "State after: 'installed'";
 
     # [T] Force install an unbuilt project; build fails. Fail.
     @actions = ();
     is .install(<won't-build>, :force), failure, #'
         "Build fails, won't install";
     is ~@actions, "build[won't-build]", "Didn't try to install";
-    is .state-of("won't-build"), fetched, "State after: unchanged";
+    is .state-of("won't-build"), 'fetched', "State after: unchanged";
 
     # [T] Force install an unbuilt project; testing fails. Install anyway.
     @actions = ();
@@ -70,14 +70,14 @@ given $core {
     is ~@actions, "build[won't-test-2] test[won't-test-2] "
                   ~ "install[won't-test-2]",
         "Built, tested and installed";
-    is .state-of("won't-test-2"), installed, "State after: 'installed'";
+    is .state-of("won't-test-2"), 'installed', "State after: 'installed'";
 
     # [T] Force install an unfetched project; fetch fails. Fail.
     @actions = ();
     is .install(<won't-fetch>, :force), failure, #'
         "Fetching fails, won't install";
     is ~@actions, "fetch[won't-fetch]", "Tried to fetch, not build etc";
-    is .state-of("won't-fetch"), gone, "State after: unchanged";
+    is .state-of("won't-fetch"), 'gone', "State after: unchanged";
 
     # [T] Force install an unfetched project; build fails. Fail.
     @actions = ();
@@ -85,7 +85,7 @@ given $core {
         "Build fails, won't install";
     is ~@actions, "fetch[won't-build-2] build[won't-build-2]",
         "Tried to fetch and build, not test etc";
-    is .state-of("won't-build-2"), fetched, "State after: 'fetched'";
+    is .state-of("won't-build-2"), 'fetched', "State after: 'fetched'";
 
     # [T] Force install an unfetched project; testing fails. Install anyway.
     @actions = ();
@@ -94,7 +94,7 @@ given $core {
     is ~@actions, "fetch[won't-test-3] build[won't-test-3] test[won't-test-3] "
                   ~ "install[won't-test-3]",
         "Fetch, build, test and install";
-    is .state-of("won't-test-3"), built, "State after: 'built'";
+    is .state-of("won't-test-3"), 'built', "State after: 'built'";
 
     # [T] Force install a project with dependencies: Install dependencies too.
     @actions = ();
@@ -104,10 +104,10 @@ given $core {
                   ~ 'test[C] test[D] test[B] test[has-deps] '
                   ~ 'install[C] install[D] install[B] install[has-deps]',
         "fetch, build, test and install (all postorder and by need)";
-    is .state-of("has-deps"), installed,
+    is .state-of("has-deps"), 'installed',
         "State after of has-deps: 'installed'";
     for <A B C D> -> $dep {
-        is .state-of($dep), installed, "State after of $dep: 'installed'";
+        is .state-of($dep), 'installed', "State after of $dep: 'installed'";
     }
 
     # [T] Force install a project with circular dependencies: Fail.
@@ -115,8 +115,8 @@ given $core {
     is .install(<circ-deps>, :force), failure,
         "Circular dependency install: fail";
     is ~@actions, '', "Nothing was done";
-    is .state-of("circ-deps"), tested, "State after of circ-deps: unchanged";
-    is .state-of("E"), tested, "State after of E: unchanged";
+    is .state-of("circ-deps"), 'tested', "State after of circ-deps: unchanged";
+    is .state-of("E"), 'tested', "State after of E: unchanged";
 
     # [T] Froce install a project whose direct dependency fails:
     #     Install anyway.
@@ -125,9 +125,9 @@ given $core {
         "Direct dependency fails but project itself succeds: succeed";
     is ~@actions, "install[won't-install] install[dirdep-fails]",
         "Install proceeds even after failure";
-    is .state-of("won't-install"), tested,
+    is .state-of("won't-install"), 'tested',
         "State after of won't-install: unchanged";
-    is .state-of("dirdep-fails"), installed,
+    is .state-of("dirdep-fails"), 'installed',
         "State after of dirdep-fails: 'installed'";
 
     # [T] Force install a project whose indirect dependency fails:
@@ -138,10 +138,10 @@ given $core {
     is ~@actions, "install[won't-install] install[G] install[H] install[F] "
                   ~ "install[indir-fails]",
         "Installation of all projects are made, though the first fails";
-    is .state-of("won't-install"), tested, "State after: unchanged";
+    is .state-of("won't-install"), 'tested', "State after: unchanged";
     for <F G H> -> $dep {
-        is .state-of($dep), installed, "State after of $dep: 'installed'";
+        is .state-of($dep), 'installed', "State after of $dep: 'installed'";
     }
-    is .state-of("indir-fails"), installed,
+    is .state-of("indir-fails"), 'installed',
         "State after of indir-fails: 'installed'";
 }
