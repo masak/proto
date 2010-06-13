@@ -32,15 +32,39 @@ my %projects =
 my @actions;
 
 class Mock::Fetcher does App::Pls::Fetcher {
+    method fetch($project) {
+        push @actions, "fetch[$project]";
+        return failure
+            if $project eq "won't-fetch";
+        return success;
+    }
 }
 
 class Mock::Builder does App::Pls::Builder {
+    method build($project) {
+        push @actions, "build[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-build/;
+        return success;
+    }
 }
 
 class Mock::Tester does App::Pls::Tester {
+    method test($project) {
+        push @actions, "test[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-test/;
+        return success;
+    }
 }
 
 class Mock::Installer does App::Pls::Installer {
+    method install($project) {
+        push @actions, "install[$project]";
+        return failure
+            if $project eq "won't-install";
+        return success;
+    }
 }
 
 my $core = App::Pls::Core.new(
@@ -63,7 +87,7 @@ given $core {
     is .install(<won't-test>, :skip-test), success, #'
         "Tests are never run, go directly to install";
     is ~@actions, "install[won't-test]", "Tests skipped, installed";
-    is .state-of("won't test"), 'installed', "State after: 'installed'";
+    is .state-of("won't-test"), 'installed', "State after: 'installed'";
 
     # [T] Install-ST an unbuilt project: Build, don't test, install.
     @actions = ();
@@ -119,8 +143,8 @@ given $core {
     is .install(<circ-deps>, :skip-test), failure,
         "Circular dependency install: fail";
     is ~@actions, '', "Nothing was done";
-    is .state-of("circ-deps"), 'tested', "State after of circ-deps: unchanged";
-    is .state-of("E"), 'tested', "State after of E: unchanged";
+    is .state-of("circ-deps"), 'built', "State after of circ-deps: unchanged";
+    is .state-of("E"), 'built', "State after of E: unchanged";
 
     # [T] Install-ST a project whose direct dependency fails: Fail.
     @actions = ();

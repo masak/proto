@@ -18,6 +18,7 @@ my %projects =
     "circ-deps"     => { :state<tested>, :deps<E> },
     E               => { :state<tested>, :deps<circ-deps> },
     "dirdep-fails"  => { :state<tested>, :deps<won't-install> }, #'
+    "won't-install" => { :state<tested> },
     "indir-fails"   => { :state<tested>, :deps<F> },
     F               => { :state<tested>, :deps<won't-install G H> }, #'
     G               => { :state<tested> },
@@ -27,15 +28,39 @@ my %projects =
 my @actions;
 
 class Mock::Fetcher does App::Pls::Fetcher {
+    method fetch($project) {
+        push @actions, "fetch[$project]";
+        return failure
+            if $project eq "won't-fetch";
+        return success;
+    }
 }
 
 class Mock::Builder does App::Pls::Builder {
+    method build($project) {
+        push @actions, "build[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-build/;
+        return success;
+    }
 }
 
 class Mock::Tester does App::Pls::Tester {
+    method test($project) {
+        push @actions, "test[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-test/;
+        return success;
+    }
 }
 
 class Mock::Installer does App::Pls::Installer {
+    method install($project) {
+        push @actions, "install[$project]";
+        return failure
+            if $project eq "won't-install";
+        return success;
+    }
 }
 
 my $core = App::Pls::Core.new(
@@ -54,7 +79,7 @@ given $core {
     is .install(<won't-test>, :force), forced-success, #'
         "Testing fails, install anyway";
     is ~@actions, "test[won't-test] install[won't-test]", "Tested, installed";
-    is .state-of("won't test"), 'installed', "State after: 'installed'";
+    is .state-of("won't-test"), 'installed', "State after: 'installed'";
 
     # [T] Force install an unbuilt project; build fails. Fail.
     @actions = ();
@@ -94,7 +119,7 @@ given $core {
     is ~@actions, "fetch[won't-test-3] build[won't-test-3] test[won't-test-3] "
                   ~ "install[won't-test-3]",
         "Fetch, build, test and install";
-    is .state-of("won't-test-3"), 'built', "State after: 'built'";
+    is .state-of("won't-test-3"), 'installed', "State after: 'installed'";
 
     # [T] Force install a project with dependencies: Install dependencies too.
     @actions = ();

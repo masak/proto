@@ -29,15 +29,39 @@ my %projects =
 my @actions;
 
 class Mock::Fetcher does App::Pls::Fetcher {
+    method fetch($project) {
+        push @actions, "fetch[$project]";
+        return failure
+            if $project eq "won't-fetch";
+        return success;
+    }
 }
 
 class Mock::Builder does App::Pls::Builder {
+    method build($project) {
+        push @actions, "build[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-build/;
+        return success;
+    }
 }
 
 class Mock::Tester does App::Pls::Tester {
+    method test($project) {
+        push @actions, "test[$project]";
+        return failure
+            if $project ~~ /^ won\'t\-test/;
+        return success;
+    }
 }
 
 class Mock::Installer does App::Pls::Installer {
+    method install($project) {
+        push @actions, "install[$project]";
+        return failure
+            if $project eq "won't-install";
+        return success;
+    }
 }
 
 my $core = App::Pls::Core.new(
@@ -72,7 +96,7 @@ given $core {
     @actions = ();
     is .install(<won't-test>), failure, "Testing fails, won't install"; #"
     is ~@actions, "test[won't-test]", "Tested, didn't install";
-    is .state-of("won't test"), 'built', "State after: unchanged";
+    is .state-of("won't-test"), 'built', "State after: unchanged";
 
     # [T] Install an unbuilt project: Build, test, install.
     @actions = ();
@@ -98,7 +122,7 @@ given $core {
     @actions = ();
     is .install(<unfetched>), success, "Fetch, build, test, install";
     is ~@actions,
-        'fetch[unfetched] build[unfetched] test[unfetched] install[unfected]',
+        'fetch[unfetched] build[unfetched] test[unfetched] install[unfetched]',
         "Correct order";
     is .state-of("unfetched"), 'installed', "State after: 'installed'";
 

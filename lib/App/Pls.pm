@@ -58,6 +58,7 @@ role App::Pls::Tester {
 }
 
 role App::Pls::Installer {
+    method install($project) { !!! }
 }
 
 class App::Pls::Core {
@@ -65,6 +66,7 @@ class App::Pls::Core {
     has App::Pls::Fetcher       $!fetcher;
     has App::Pls::Builder       $!builder;
     has App::Pls::Tester        $!tester;
+    has App::Pls::Installer     $!installer;
 
     method state-of($project) {
         return $!projects.state-of($project);
@@ -162,6 +164,45 @@ class App::Pls::Core {
     }
 
     method install(*@projects, Bool :$force, Bool :$skip-test) {
-        return;
+        my $*needed-force = False;
+        for @projects -> $project {
+            my %*seen-projects;
+            return failure
+                if self!fetch-helper($project) == failure;
+            return failure
+                if self!build-helper($project) == failure;
+            unless $skip-test {
+                if self!test-helper($project) == failure {
+                    return failure
+                        unless $force;
+                    $*needed-force = True;
+                }
+            }
+            # RAKUDO: an unspecified $force should be False, is Any
+            return failure
+                if self!install-helper($project, :force(?$force)) == failure;
+        }
+        return $*needed-force ?? forced-success !! success;
+    }
+
+    method !install-helper($project, Bool :$force --> Result) {
+        for $!projects.deps-of($project) -> $dep {
+            # RAKUDO: an unspecified $force should be False, is Any
+            if self!install-helper($dep, :force(?$force)) == failure {
+                return failure
+                    unless $force;
+                $*needed-force = True;
+            }
+        }
+        if $!projects.reached-state($project, 'installed') {
+            return success;
+        }
+        elsif $!installer.install($project) == success {
+            $!projects.set-state-of($project, 'installed');
+            return success;
+        }
+        else {
+            return failure;
+        }
     }
 }
