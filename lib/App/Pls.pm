@@ -54,6 +54,7 @@ role App::Pls::Builder {
 }
 
 role App::Pls::Tester {
+    method test($project) { !!! }
 }
 
 role App::Pls::Installer {
@@ -63,6 +64,7 @@ class App::Pls::Core {
     has App::Pls::ProjectsState $!projects;
     has App::Pls::Fetcher       $!fetcher;
     has App::Pls::Builder       $!builder;
+    has App::Pls::Tester        $!tester;
 
     method state-of($project) {
         return $!projects.state-of($project);
@@ -126,7 +128,37 @@ class App::Pls::Core {
     }
 
     method test(*@projects, Bool :$ignore-deps) {
-        return;
+        for @projects -> $project {
+            my %*seen-projects;
+            return failure
+                if self!fetch-helper($project) == failure;
+            return failure
+                if self!build-helper($project) == failure;
+            # RAKUDO: an unspecified $ignore-deps should be False, is Any
+            return failure
+                if self!test-helper($project, :ignore-deps(?$ignore-deps))
+                    == failure;
+        }
+        return success;
+    }
+
+    method !test-helper($project, Bool :$ignore-deps --> Result) {
+        unless $ignore-deps {
+            for $!projects.deps-of($project) -> $dep {
+                return failure
+                    if self!test-helper($dep) == failure;
+            }
+        }
+        if $!projects.reached-state($project, 'tested') {
+            return success;
+        }
+        elsif $!tester.test($project) == success {
+            $!projects.set-state-of($project, 'tested');
+            return success;
+        }
+        else {
+            return failure;
+        }
     }
 
     method install(*@projects, Bool :$force, Bool :$skip-test) {

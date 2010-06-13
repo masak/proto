@@ -26,12 +26,24 @@ my %projects =
 my @actions;
 
 class Mock::Fetcher does App::Pls::Fetcher {
+    method fetch($project) {
+        push @actions, "fetch[$project]";
+        $project eq "won't-fetch" ?? failure !! success;
+    }
 }
 
 class Mock::Builder does App::Pls::Builder {
+    method build($project) {
+        push @actions, "build[$project]";
+        $project ~~ /^won\'t\-build/ ?? failure !! success;
+    }
 }
 
 class Mock::Tester does App::Pls::Tester {
+    method test($project) {
+        push @actions, "test[$project]";
+        $project eq "won't-test" ?? failure !! success;
+    }
 }
 
 my $core = App::Pls::Core.new(
@@ -70,6 +82,7 @@ given $core {
     is .state-of("unfetched"), 'tested', "State after: 'tested'";
 
     # [T] Test an unfetched project; fetch fails. Fail.
+    @actions = ();
     is .test(<won't-fetch>), failure, "Won't fetch and thus won't test"; #'
     is ~@actions, "fetch[won't-fetch]",
         "Tried fetching, not building or testing";
@@ -90,7 +103,7 @@ given $core {
     @actions = ();
     is .test(<has-deps>), success, "Test a project with dependencies";
     is ~@actions,
-        'fetch[C] build[D] build[B] '
+        'fetch[C] build[C] build[D] build[B] '
         ~ 'test[A] test[C] test[D] test[B] test[has-deps]',
         "Fetch first, then build (postorder), then test (postorder)";
     is .state-of("has-deps"), 'tested', "State after of has-deps: 'tested'";
@@ -102,9 +115,10 @@ given $core {
     #     dependencies: test only the project, do not fetch/build dependencies
     @actions = ();
     is .test(<ignore-deps>, :ignore-deps), success, "Test-ignore-deps works";
-    is ~@actions, 'test[ignore-deps]', "Only ignore-deps is tested";
+    is ~@actions, 'fetch[E] build[E] build[F] test[ignore-deps]',
+        "Only ignore-deps is tested";
     is .state-of("ignore-deps"), 'tested', "State after: 'tested'";
-    is .state-of("E"), 'gone', "State after of E: unchanged";
-    is .state-of("F"), 'fetched', "State after of F: unchanged";
+    is .state-of("E"), 'built', "State after of E: 'built'";
+    is .state-of("F"), 'built', "State after of F: 'built'";
     is .state-of("G"), 'built', "State after of G: unchanged";
 }
