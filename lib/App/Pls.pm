@@ -20,21 +20,24 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
     }
 
     method state-of($project --> State) {
-        (%!projects{$project} // { :state<absent> })<state> // 'absent';
+        die "No such project: $project"
+            unless %!projects.exists($project);
+        return %!projects{$project}<state> //= 'absent';
     }
 
     method set-state-of($project, State $state) {
+        die "No such project: $project"
+            unless %!projects.exists($project);
         %!projects{$project}<state> = $state;
     }
 
     method deps-of($project) {
-        if %!projects.exists($project) {
-            if %!projects{$project}.exists('deps') {
-                return %!projects{$project}<deps>.list;
-            }
-            return ();
+        die "No such project: $project"
+            unless %!projects.exists($project);
+        if %!projects{$project}.exists('deps') {
+            return %!projects{$project}<deps>.list;
         }
-        die "No such project: $project";
+        return ();
     }
 
     method reached-state($project, $goal-state --> Bool) {
