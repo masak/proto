@@ -1,14 +1,15 @@
 use v6;
 
-subset State of Str where {
+subset State of Str where
     'gone' | 'fetched' | 'built' | 'tested' | 'installed'
-};
+;
 enum Result <failure success forced-success>;
 
 role App::Pls::ProjectsState {
     method state-of($project --> State) { !!! }
     method set-state-of($project, State $state) { !!! }
     method deps-of($project) { !!! }
+    method reached-state($project, State $state --> Bool) { !!! }
 }
 
 class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
@@ -35,6 +36,13 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
         }
         die "No such project: $project";
     }
+
+    method reached-state($project, $goal-state --> Bool) {
+        my $actual-state = self.state-of($project);
+        my @states = <gone fetched built tested installed>;
+        my %state-levels = invert @states;
+        return %state-levels{$actual-state} >= %state-levels{$goal-state};
+    }
 }
 
 role App::Pls::Fetcher {
@@ -42,6 +50,7 @@ role App::Pls::Fetcher {
 }
 
 role App::Pls::Builder {
+    method build($project) { !!! }
 }
 
 role App::Pls::Tester {
@@ -76,7 +85,10 @@ class App::Pls::Core {
             return failure
                 if self!fetch-helper($dep) == failure;
         }
-        if $!fetcher.fetch($project) == success {
+        if $!projects.reached-state($project, 'fetched') {
+            return success;
+        }
+        elsif $!fetcher.fetch($project) == success {
             $!projects.set-state-of($project, 'fetched');
             return success;
         }
@@ -86,7 +98,31 @@ class App::Pls::Core {
     }
 
     method build(*@projects) {
-        return;
+        for @projects -> $project {
+            my %*seen-projects;
+            return failure
+                if self!fetch-helper($project) == failure;
+            return failure
+                if self!build-helper($project) == failure;
+        }
+        return success;
+    }
+
+    method !build-helper($project --> Result) {
+        for $!projects.deps-of($project) -> $dep {
+            return failure
+                if self!build-helper($dep) == failure;
+        }
+        if $!projects.reached-state($project, 'built') {
+            return success;
+        }
+        elsif $!builder.build($project) == success {
+            $!projects.set-state-of($project, 'built');
+            return success;
+        }
+        else {
+            return failure;
+        }
     }
 
     method test(*@projects, Bool :$ignore-deps) {
