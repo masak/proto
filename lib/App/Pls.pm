@@ -1,7 +1,7 @@
 use v6;
 
 enum State <gone fetched built tested installed>;
-enum Result <success failure>;
+enum Result <failure success forced-success>;
 
 role App::Pls::ProjectsState {
 }
@@ -42,7 +42,7 @@ class App::Pls::Core {
         return;
     }
 
-    method install(*@projects) {
+    method install(*@projects, Bool :$force) {
         return;
     }
 }
