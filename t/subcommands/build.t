@@ -52,7 +52,7 @@ given $core {
 
     # [T] Build an unfetched project: Fetch, build.
     @actions = ();
-    is .state-of('unfetched'), 'gone', "State before: 'gone'";
+    is .state-of('unfetched'), 'absent', "State before: 'absent'";
     is .build(<unfetched>), success, "Building unfetched project succeeded";
     is ~@actions, 'fetch[unfetched] build[unfetched]',
         "Fetched the project before building it";
@@ -62,7 +62,7 @@ given $core {
     @actions = ();
     is .build(<won't-fetch>), failure, "Won't build if fetch fails"; # "
     is ~@actions, "fetch[won't-fetch]", "Didn't try building";
-    is .state-of("won't-fetch"), 'gone',
+    is .state-of("won't-fetch"), 'absent',
         "State after of won't-fetch: unchanged";
 
     # [T] Build a project; a build error occurs: Fail.

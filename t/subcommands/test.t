@@ -86,7 +86,7 @@ given $core {
     is .test(<won't-fetch>), failure, "Won't fetch and thus won't test"; #'
     is ~@actions, "fetch[won't-fetch]",
         "Tried fetching, not building or testing";
-    is .state-of("won't-fetch"), 'gone', "State after: unchanged";
+    is .state-of("won't-fetch"), 'absent', "State after: unchanged";
 
     # [T] Test an unfetched project; build fails. Fail.
     @actions = ();

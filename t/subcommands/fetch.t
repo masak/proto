@@ -33,17 +33,17 @@ plan 24;
 
 given $core {
     # [T] Fetch a project: Succeed.
-    is .state-of('will-succeed'), 'gone', "State is now 'gone'";
+    is .state-of('will-succeed'), 'absent', "State is now 'absent'";
     is .fetch(<will-succeed>), success, "Fetch a project: Succeed";
     is .state-of('will-succeed'), 'fetched', "State after: 'fetched'";
 
     # [T] Fetch a project; an unexpected error occurs: Fail.
     is .fetch(<will-fail>), failure, "Fetch a project: Fail";
-    is .state-of('will-fail'), 'gone', "State after: 'gone'";
+    is .state-of('will-fail'), 'absent', "State after: 'absent'";
 
     # [T] Fetch a project with dependencies: Fetch dependencies too.
     for <A B C D> -> $dep {
-        is .state-of($dep), 'gone', "State before of $dep: 'gone'";
+        is .state-of($dep), 'absent', "State before of $dep: 'absent'";
     }
     is .fetch(<has-deps>), success, "Fetch project's dependencies, too";
     for <A B C D> -> $dep {
@@ -52,17 +52,20 @@ given $core {
 
     # [T] Fetch a project with circular dependencies: Fail.
     is .fetch(<circ-deps>), failure, "Fetch a project with circ deps: fail";
-    is .state-of('circ-deps'), 'gone', "State after of circ-deps: 'gone'";
-    is .state-of('E'), 'gone', "State after of E: 'gone'";
+    is .state-of('circ-deps'), 'absent', "State after of circ-deps: 'absent'";
+    is .state-of('E'), 'absent', "State after of E: 'absent'";
 
     # [T] Fetch a project whose direct dependency fails: Fail.
     is .fetch(<dirdep-fails>), failure, "Fail on direct dependency failure";
-    is .state-of('dirdep-fails'), 'gone', "State after of dirdep-fails: 'gone'";
-    is .state-of('will-fail'), 'gone', "State after of will-fail: 'gone'";
+    is .state-of('dirdep-fails'), 'absent',
+        "State after of dirdep-fails: 'absent'";
+    is .state-of('will-fail'), 'absent', "State after of will-fail: 'absent'";
 
     # [T] Fetch a project whose indirect dependency fails: Fail.
     is .fetch(<indir-fails>), failure, "Fail on indirect dependency failure";
-    is .state-of('indir-fails'), 'gone', "State after of indir-fails: 'gone'";
-    is .state-of('dirdep-fails'), 'gone', "State after of dirdep-fails: 'gone'";
-    is .state-of('will-fail'), 'gone', "State after of will-fail: 'gone'";
+    is .state-of('indir-fails'), 'absent',
+        "State after of indir-fails: 'absent'";
+    is .state-of('dirdep-fails'), 'absent',
+        "State after of dirdep-fails: 'absent'";
+    is .state-of('will-fail'), 'absent', "State after of will-fail: 'absent'";
 }

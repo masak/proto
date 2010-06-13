@@ -115,7 +115,7 @@ given $core {
     is .install(<won't-fetch>, :skip-test), failure, #'
         "Fetching fails, won't install";
     is ~@actions, "fetch[won't-fetch]", "Tried to fetch, not build etc";
-    is .state-of("won't-fetch"), 'gone', "State after: unchanged";
+    is .state-of("won't-fetch"), 'absent', "State after: unchanged";
 
     # [T] Install-ST an unfetched project; build fails. Fail.
     @actions = ();

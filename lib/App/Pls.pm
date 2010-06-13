@@ -1,7 +1,7 @@
 use v6;
 
 subset State of Str where
-    'gone' | 'fetched' | 'built' | 'tested' | 'installed'
+    'absent' | 'fetched' | 'built' | 'tested' | 'installed'
 ;
 enum Result <failure success forced-success>;
 
@@ -20,7 +20,7 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
     }
 
     method state-of($project --> State) {
-        (%!projects{$project} // { :state<gone> })<state> // 'gone';
+        (%!projects{$project} // { :state<absent> })<state> // 'absent';
     }
 
     method set-state-of($project, State $state) {
@@ -39,7 +39,7 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
 
     method reached-state($project, $goal-state --> Bool) {
         my $actual-state = self.state-of($project);
-        my @states = <gone fetched built tested installed>;
+        my @states = <absent fetched built tested installed>;
         my %state-levels = invert @states;
         return %state-levels{$actual-state} >= %state-levels{$goal-state};
     }
