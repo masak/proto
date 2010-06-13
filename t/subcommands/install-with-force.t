@@ -4,14 +4,9 @@ use Test;
 use App::Pls;
 
 my %projects =
-    uninstalled     => { :state<tested> },
-    "won't-install" => { :state<tested> },
-    untested        => { :state<built> },
     "won't-test"    => { :state<built> },
-    unbuilt         => { :state<fetched> },
     "won't-build"   => { :state<fetched> },
     "won't-test-2"  => { :state<fetched> },
-    unfetched       => {},
     "won't-fetch"   => {},
     "won't-build-2" => {},
     "won't-test-3"  => {},
@@ -58,7 +53,7 @@ given $core {
     @actions = ();
     is .install(<won't-test>, :force), forced-success, #'
         "Testing fails, install anyway";
-    is ~@actions, "install[won't-test]", "Tested, installed";
+    is ~@actions, "test[won't-test] install[won't-test]", "Tested, installed";
     is .state-of("won't test"), installed, "State after: 'installed'";
 
     # [T] Force install an unbuilt project; build fails. Fail.
