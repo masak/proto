@@ -48,29 +48,51 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
     }
 }
 
+subset Project of Hash;
+
+role App::Pls::Ecosystem {
+    method project-info(Str $project --> Project) { !!! }
+}
+
+class App::Pls::Ecosystem::Hash {
+    has %!projects;
+
+    method new(%projects is rw) {
+        self.bless(*, :%projects);
+    }
+
+    method project-info(Str $project --> Project) {
+        die "No such project: $project"
+            unless %!projects.exists($project);
+        return { name => $project };
+    }
+}
+
 role App::Pls::Fetcher {
-    method fetch($project) { !!! }
+    method fetch(Project $project) { !!! }
 }
 
 role App::Pls::Builder {
-    method build($project) { !!! }
+    method build(Project $project) { !!! }
 }
 
 role App::Pls::Tester {
-    method test($project) { !!! }
+    method test(Project $project) { !!! }
 }
 
 role App::Pls::Installer {
-    method install($project) { !!! }
+    method install(Project $project) { !!! }
 }
 
 class App::Pls::Core {
-    has App::Pls::ProjectsState $!projects;
+    has App::Pls::ProjectsState $!projects   handles <state-of>;
+    has App::Pls::Ecosystem     $!ecosystem;
     has App::Pls::Fetcher       $!fetcher;
     has App::Pls::Builder       $!builder;
     has App::Pls::Tester        $!tester;
     has App::Pls::Installer     $!installer;
 
+    # RAKUDO: The 'handles' trait above should be enough.
     method state-of($project) {
         return $!projects.state-of($project);
     }
@@ -95,7 +117,7 @@ class App::Pls::Core {
         if $!projects.reached-state($project, 'fetched') {
             return success;
         }
-        elsif $!fetcher.fetch($project) == success {
+        elsif $!fetcher.fetch($!ecosystem.project-info($project)) != failure {
             $!projects.set-state-of($project, 'fetched');
             return success;
         }
@@ -123,7 +145,7 @@ class App::Pls::Core {
         if $!projects.reached-state($project, 'built') {
             return success;
         }
-        elsif $!builder.build($project) == success {
+        elsif $!builder.build($!ecosystem.project-info($project)) != failure {
             $!projects.set-state-of($project, 'built');
             return success;
         }
@@ -157,7 +179,7 @@ class App::Pls::Core {
         if $!projects.reached-state($project, 'tested') {
             return success;
         }
-        elsif $!tester.test($project) == success {
+        elsif $!tester.test($!ecosystem.project-info($project)) != failure {
             $!projects.set-state-of($project, 'tested');
             return success;
         }
@@ -200,7 +222,8 @@ class App::Pls::Core {
         if $!projects.reached-state($project, 'installed') {
             return success;
         }
-        elsif $!installer.install($project) == success {
+        elsif $!installer.install($!ecosystem.project-info($project))
+                != failure {
             $!projects.set-state-of($project, 'installed');
             return success;
         }

@@ -24,20 +24,21 @@ my @actions;
 
 class Mock::Fetcher does App::Pls::Builder {
     method fetch($project --> Result) {
-        push @actions, "fetch[$project]";
-        $project eq "won't-fetch" ?? failure !! success;
+        push @actions, "fetch[$project<name>]";
+        $project<name> eq "won't-fetch" ?? failure !! success;
     }
 }
 
 class Mock::Builder does App::Pls::Builder {
     method build($project --> Result) {
-        push @actions, "build[$project]";
-        $project eq "won't-build" ?? failure !! success;
+        push @actions, "build[$project<name>]";
+        $project<name> eq "won't-build" ?? failure !! success;
     }
 }
 
 my $core = App::Pls::Core.new(
     :projects(App::Pls::ProjectsState::Hash.new(%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
 );

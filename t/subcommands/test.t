@@ -26,28 +26,29 @@ my %projects =
 my @actions;
 
 class Mock::Fetcher does App::Pls::Fetcher {
-    method fetch($project) {
-        push @actions, "fetch[$project]";
-        $project eq "won't-fetch" ?? failure !! success;
+    method fetch($project --> Result) {
+        push @actions, "fetch[$project<name>]";
+        $project<name> eq "won't-fetch" ?? failure !! success;
     }
 }
 
 class Mock::Builder does App::Pls::Builder {
-    method build($project) {
-        push @actions, "build[$project]";
-        $project ~~ /^won\'t\-build/ ?? failure !! success;
+    method build($project --> Result) {
+        push @actions, "build[$project<name>]";
+        $project<name> ~~ /^won\'t\-build/ ?? failure !! success;
     }
 }
 
 class Mock::Tester does App::Pls::Tester {
-    method test($project) {
-        push @actions, "test[$project]";
-        $project eq "won't-test" ?? failure !! success;
+    method test($project --> Result) {
+        push @actions, "test[$project<name>]";
+        $project<name> eq "won't-test" ?? failure !! success;
     }
 }
 
 my $core = App::Pls::Core.new(
     :projects(App::Pls::ProjectsState::Hash.new(%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
     :tester(Mock::Tester.new()),

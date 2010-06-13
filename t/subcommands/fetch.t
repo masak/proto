@@ -20,12 +20,13 @@ my %projects =
 
 class Mock::Fetcher does App::Pls::Fetcher {
     method fetch($project --> Result) {
-        $project eq 'will-fail' ?? failure !! success;
+        $project<name> eq 'will-fail' ?? failure !! success;
     }
 }
 
 my $core = App::Pls::Core.new(
     :projects(App::Pls::ProjectsState::Hash.new(%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
     :fetcher(Mock::Fetcher.new()),
 );
 
