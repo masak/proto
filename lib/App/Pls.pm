@@ -1,6 +1,6 @@
 use v6;
 
-enum State <gone fetched built tested>;
+enum State <gone fetched built tested installed>;
 enum Result <success failure>;
 
 role App::Pls::ProjectsState {
@@ -16,6 +16,9 @@ role App::Pls::Builder {
 }
 
 role App::Pls::Tester {
+}
+
+role App::Pls::Installer {
 }
 
 class App::Pls::Core {
@@ -36,6 +39,10 @@ class App::Pls::Core {
     }
 
     method test(*@projects, Bool :$ignore-deps) {
+        return;
+    }
+
+    method install(*@projects) {
         return;
     }
 }
