@@ -19,6 +19,9 @@ my %projects =
 ;
 
 class Mock::Fetcher does App::Pls::Fetcher {
+    method fetch($project --> Result) {
+        $project eq 'will-fail' ?? failure !! success;
+    }
 }
 
 my $core = App::Pls::Core.new(
