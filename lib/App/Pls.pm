@@ -42,7 +42,7 @@ class App::Pls::Core {
         return;
     }
 
-    method install(*@projects, Bool :$force) {
+    method install(*@projects, Bool :$force, Bool :$skip-test) {
         return;
     }
 }
