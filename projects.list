@@ -217,3 +217,7 @@ Math-Model:
 Perl6-MIME-Base64:
     home:  github
     owner: snarkyboojum
+
+SCGI:
+    home:  github
+    owner: supernovus
