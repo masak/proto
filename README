@@ -22,10 +22,17 @@ To install Proto, get the main script with this command (or a browser)
  perl -MLWP::UserAgent -e"LWP::UserAgent->new->mirror( \
     'http://github.com/masak/proto/raw/master/proto', 'proto.pl')"
 
-To install Rakudo (and Parrot), type the following at the prompt:
+To configure proto, type the following at the prompt:
 
  perl proto.pl configure proto
+
+To then install Rakudo (and Parrot), type the following at the prompt:
+
  perl proto.pl install rakudo
+
+If you already had a Rakudo installed, instead of having proto install
+it again, you can simply adjust ~/.perl6/proto/proto.conf to tell it 
+where Rakudo and Parrot are on the system.
 
 Installation of Parrot and Rakudo is merely a convenience; what proto
 was really built for is installing modules. The command
