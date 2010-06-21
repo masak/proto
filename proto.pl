@@ -605,7 +605,7 @@ sub create_default_config_file {
 *** CONFIG FILE CREATED ***
 
 Hello!  I have made a configuration file that you may want to review,
-called '$config_file'.
+called '$proto_config_file'.
 
 If you're new to this, or reluctant to do configuration, you probably want
 the default settings anyway. The most important ones are:
