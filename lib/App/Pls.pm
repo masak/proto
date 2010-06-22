@@ -85,7 +85,9 @@ role App::Pls::Installer {
 }
 
 class App::Pls::Core {
-    has App::Pls::ProjectsState $!projects   handles <state-of>;
+    # RAKUDO: Using 'handles' introduces a strange parameter-counting bug.
+    #         [perl #75966]
+    has App::Pls::ProjectsState $!projects; #   handles <state-of>;
     has App::Pls::Ecosystem     $!ecosystem;
     has App::Pls::Fetcher       $!fetcher;
     has App::Pls::Builder       $!builder;
