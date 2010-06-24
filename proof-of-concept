@@ -80,9 +80,9 @@ class POC::Builder does App::Pls::Builder {
     method build($project --> Result) {
         say "Building $project<name>...";
         my $target-dir = "cache/$project<name>";
-        my $cwd = qx[pwd].chomp ~ '/' ~ $target-dir;
         if "$target-dir/Makefile" !~~ :e {
             my $binary = 'perl6';
+            my $cwd = qx[pwd].chomp ~ '/' ~ $target-dir;
 
             if "$cwd/lib" !~~ :e {
                 note "lib/ doesn't exist. Nothing to do.";
@@ -230,8 +230,10 @@ test: all
             $makefile.say(q[]);
             $makefile.say(q[install-src:]);
             write-install();
+
+            $makefile.close;
         }
-        run( "cd $cwd && make" ) and return failure;
+        run( "cd $target-dir; make" ) and return failure;
         return success;
     }
 }
