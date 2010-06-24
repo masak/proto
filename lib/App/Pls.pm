@@ -13,21 +13,19 @@ role App::Pls::ProjectsState {
 }
 
 class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
-    has %!projects;
-
-    method new(%projects is rw) {
-        self.bless(*, :%projects);
-    }
+    has %.projects is rw;
 
     method state-of($project --> State) {
-        die "No such project: $project"
-            unless %!projects.exists($project);
+        unless %!projects.exists($project) {
+            %!projects{$project} = {};
+        }
         return %!projects{$project}<state> //= 'absent';
     }
 
     method set-state-of($project, State $state) {
-        die "No such project: $project"
-            unless %!projects.exists($project);
+        unless %!projects.exists($project) {
+            %!projects{$project} = {};
+        }
         %!projects{$project}<state> = $state;
     }
 
@@ -54,12 +52,8 @@ role App::Pls::Ecosystem {
     method project-info(Str $project --> Project) { !!! }
 }
 
-class App::Pls::Ecosystem::Hash {
-    has %!projects;
-
-    method new(%projects is rw) {
-        self.bless(*, :%projects);
-    }
+class App::Pls::Ecosystem::Hash does App::Pls::Ecosystem {
+    has %.projects is rw;
 
     method project-info(Str $project --> Project) {
         die "No such project: $project"
