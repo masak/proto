@@ -37,8 +37,8 @@ class Mock::Builder does App::Pls::Builder {
 }
 
 my $core = App::Pls::Core.new(
-    :projects(App::Pls::ProjectsState::Hash.new(%projects)),
-    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
+    :projects(App::Pls::ProjectsState::Hash.new(:%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(:%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
 );

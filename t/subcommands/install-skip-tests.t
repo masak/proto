@@ -68,8 +68,8 @@ class Mock::Installer does App::Pls::Installer {
 }
 
 my $core = App::Pls::Core.new(
-    :projects(App::Pls::ProjectsState::Hash.new(%projects)),
-    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
+    :projects(App::Pls::ProjectsState::Hash.new(:%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(:%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
     :tester(Mock::Tester.new()),

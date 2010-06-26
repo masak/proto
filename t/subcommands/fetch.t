@@ -25,8 +25,8 @@ class Mock::Fetcher does App::Pls::Fetcher {
 }
 
 my $core = App::Pls::Core.new(
-    :projects(App::Pls::ProjectsState::Hash.new(%projects)),
-    :ecosystem(App::Pls::Ecosystem::Hash.new(%projects)),
+    :projects(App::Pls::ProjectsState::Hash.new(:%projects)),
+    :ecosystem(App::Pls::Ecosystem::Hash.new(:%projects)),
     :fetcher(Mock::Fetcher.new()),
 );
 
