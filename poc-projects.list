@@ -48,6 +48,8 @@
   "gge" : { "home" : "github", "auth" : "masak" },
   "ufo" : { "home" : "github", "auth" : "masak" },
   "Math-RungeKutta" : { "home" : "github", "auth" : "moritz" },
+  "Math-Model" : { "home" : "github", "auth" : "moritz" },
+  "CGI-Application" : { "home" : "github", "auth" : "moritz" },
   "perl6-puppet-parser" : { "home" : "github", "auth" : "cosimo" },
   "Algorithm-Viterbi" : { "home" : "github", "auth" : "arnsholt" },
   "perl6-digest-md5" : { "home" : "github", "auth" : "cosimo" }
