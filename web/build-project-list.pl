@@ -148,8 +148,10 @@ sub get_html_list {
         default_escape    => 'html',
     );
 
-    my @projects = map { $projects->{$_} }
-      sort { lc($a) cmp lc($b) } keys %$projects;
+    my @projects = keys %$projects;
+    @projects = sort projects_list_order @projects;
+    @projects = map { $projects->{$_} } @projects;
+
     $template->param( projects => \@projects );
     return $template->output;
 }
@@ -161,3 +163,15 @@ sub get_json {
     #$json =~ s/},/},\n/g;
     return $json;
 }
+
+sub projects_list_order {
+    my $prj1 = $a;
+    my $prj2 = $b;
+
+    # Disregard the [Pp]erl6-* prefix that some projects have
+    $prj1 =~ s{^perl6-}{}i;
+    $prj2 =~ s{^perl6-}{}i;
+
+    return lc($prj1) cmp lc($prj2);
+}
+
