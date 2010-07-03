@@ -61,12 +61,22 @@ sub relative-to($dir, $command) {
     "cd $dir; $command";
 }
 
+sub announce-start-of(Str $action, Str $project) {
+    my $participle = "$action.ucfirst()ing";
+    my $message = $participle ~ " " x (11 - $participle.chars) ~ "$project ";
+    print $message, "." x 39 - $message.chars, ' ';
+}
+
+# RAKUDO: Can't type $result with Result, due to [perl #75370]
+sub announce-end-of(Str $action, $result) {
+    say $result == success ?? "[done]" !! "[FAIL]";
+}
+
 class POC::Fetcher does App::Pls::Fetcher {
     # RAKUDO: Can't use '--> Result' after a 'where' block
     # RAKUDO: Havn't tracked down why, but can't use a multi here to
     #         dispatch on $project<home>
     method fetch($project) {
-        say "Fetching $project<name>...";
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
         if "cache" !~~ :e {
@@ -82,26 +92,23 @@ class POC::Fetcher does App::Pls::Fetcher {
         my $command
             = sprintf 'git clone git://github.com/%s/%s.git %s',
                       $project.<auth>, $project.<name>, $target-dir;
-        my $state = run-silently( $command ) ?? failure !! success;
+        my $result = run-silently( $command ) ?? failure !! success;
 
-       return $state;
-   }
+        return $result;
+    }
 }
 
 class POC::Builder does App::Pls::Builder {
     method build($project --> Result) {
-        say "Building $project<name>...";
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
             my $binary = 'perl6';
             my $cwd = qx[pwd].chomp ~ '/' ~ $target-dir;
 
             if "$cwd/lib" !~~ :e {
-                note "lib/ doesn't exist. Nothing to do.";
                 return success;
             }
             elsif "$cwd/lib" !~~ :d {
-                note "lib isn't a directory. Nothing to do.";
                 return failure;
             }
 
@@ -114,8 +121,7 @@ class POC::Builder does App::Pls::Builder {
                   qqx[cd $cwd; find lib -name \*.pm -or -name \*.pm6];
 
             if !@module-files || @module-files[0].lc ~~ /'no such file'/ {
-                note "Found no modules in lib/. Nothing to do.";
-                return failure;
+                return success;
             }
 
             # To know the best order of compilation, we build a dependency
@@ -245,29 +251,31 @@ test: all
 
             $makefile.close;
         }
-        run-silently( relative-to $target-dir, "make" )
-            and return failure;
+        if run-silently( relative-to $target-dir, "make" ) {
+            return failure;
+        }
+
         return success;
     }
 }
 
 class POC::Tester does App::Pls::Tester {
     method test($project --> Result) {
-        say "Testing $project<name>...";
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
             say "No Makefile.";
             return failure;
         }
-        run-silently( relative-to $target-dir, "make test" )
-            and return failure;
+        if run-silently( relative-to $target-dir, "make test" ) {
+            return failure;
+        }
+
         return success;
     }
 }
 
 class POC::Installer does App::Pls::Installer {
     method install($project --> Result) {
-        say "Installing $project<name>...";
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
             say "No Makefile.";
@@ -279,27 +287,58 @@ class POC::Installer does App::Pls::Installer {
     }
 }
 
+role POC::FetchAnnouncer {
+    method fetch($project --> Result) {
+        announce-start-of('fetch', $project<name>);
+        my $result = callsame;
+        announce-end-of('fetch', $result);
+        return $result;
+    }
+}
+
+role POC::BuildAnnouncer {
+    method build($project --> Result) {
+        announce-start-of('build', $project<name>);
+        my $result = callsame;
+        announce-end-of('build', $result);
+        return $result;
+    }
+}
+
+role POC::TestAnnouncer {
+    method test($project --> Result) {
+        announce-start-of('test', $project<name>);
+        my $result = callsame;
+        announce-end-of('test', $result);
+        return $result;
+    }
+}
+
+role POC::InstallAnnouncer {
+    method install($project --> Result) {
+        announce-start-of('install', $project<name>);
+        my $result = callsame;
+        announce-end-of('install', $result);
+        return $result;
+    }
+}
+
 sub MAIN(Bool :$force) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
     $projstate.load-from-file;
-    my $ecosystem = POC::Ecosystem.new(:filename("poc-projects.list"));
 
     my $core = App::Pls::Core.new(
         :projects($projstate),
-        :ecosystem($ecosystem),
-        :fetcher(POC::Fetcher.new()),
-        :builder(POC::Builder.new()),
-        :tester(POC::Tester.new()),
-        :installer(POC::Installer.new()),
+        :ecosystem( POC::Ecosystem.new(:filename("poc-projects.list")) ),
+        :fetcher(   POC::Fetcher.new()   but POC::FetchAnnouncer   ),
+        :builder(   POC::Builder.new()   but POC::BuildAnnouncer   ),
+        :tester(    POC::Tester.new()    but POC::TestAnnouncer    ),
+        :installer( POC::Installer.new() but POC::InstallAnnouncer ),
     );
 
-    given $core {
-        say "Before installation: 'json' is ", .state-of("json");
-        # RAKUDO: Below line required because non-supplied named Bool
-        #         comes in as Any(). [perl #73680]
-        my Bool $_force = ?$force;
-        .install("json", :force($_force));
-        say "After installation: 'json' is ", .state-of("json");
-    }
+    # RAKUDO: Below line required because non-supplied named Bool
+    #         comes in as Any(). [perl #73680]
+    my Bool $_force = ?$force;
+    $core.install("json", :force($_force));
     $projstate.save-to-file();
 }

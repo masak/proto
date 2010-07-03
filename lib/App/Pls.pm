@@ -30,8 +30,9 @@ class App::Pls::ProjectsState::Hash does App::Pls::ProjectsState {
     }
 
     method deps-of($project) {
-        die "No such project: $project"
-            unless %!projects.exists($project);
+        unless %!projects.exists($project) {
+            %!projects{$project} = {};
+        }
         if %!projects{$project}.exists('deps') {
             return %!projects{$project}<deps>.list;
         }
