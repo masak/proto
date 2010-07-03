@@ -52,5 +52,6 @@
   "CGI-Application" : { "home" : "github", "auth" : "moritz" },
   "perl6-puppet-parser" : { "home" : "github", "auth" : "cosimo" },
   "Algorithm-Viterbi" : { "home" : "github", "auth" : "arnsholt" },
-  "perl6-digest-md5" : { "home" : "github", "auth" : "cosimo" }
+  "perl6-digest-md5" : { "home" : "github", "auth" : "cosimo" },
+  "xml-opml" : { "home" : "github", "auth" : "radus" }
 }
