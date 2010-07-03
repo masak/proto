@@ -3,4 +3,7 @@ cache/*
 *~
 poc-projects.state
 Makefile
-pls.log
+fetch-*.log
+build-*.log
+test-*.log
+install-*.log

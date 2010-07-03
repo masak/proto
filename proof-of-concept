@@ -53,8 +53,8 @@ class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
     }
 }
 
-sub run-logged($command) {
-    my $logfile = "pls.log";
+sub run-logged($command, :$step!, :$project!) {
+    my $logfile = [~] $step, '-', $project<name>, '.log';
     if $command ~~ /^'cd '(\S+)/ && $0 -> $subdir {
         $logfile = '../' ~ $logfile
             for $subdir.comb(/ ['\\/' || <-[/]> ]+ /); #'
@@ -95,19 +95,20 @@ class POC::Fetcher does App::Pls::Fetcher {
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
         if "cache" !~~ :e {
-            run-logged "mkdir cache";
+            run-logged "mkdir cache", :step('fetch'), :$project;
         }
         if "cache" !~~ :d {
             die "Cannot proceed, cache inexplicably isn't a directory";
         }
         my $target-dir = "cache/$project<name>";
         if $target-dir ~~ :e {
-            run-logged("rm -rf $target-dir");
+            run-logged "rm -rf $target-dir", :step('fetch'), :$project;
         }
         my $command
             = sprintf 'git clone git://github.com/%s/%s.git %s',
                       $project.<auth>, $project.<name>, $target-dir;
-        my $result = run-logged( $command ) ?? success !! failure;
+        my $result = run-logged( $command, :step('fetch'), :$project )
+                     ?? success !! failure;
 
         return $result;
     }
@@ -266,7 +267,8 @@ test: all
 
             $makefile.close;
         }
-        unless run-logged( relative-to $target-dir, "make" ) {
+        unless run-logged( relative-to($target-dir, "make"),
+                           :step('build'), :$project ) {
             return failure;
         }
 
@@ -280,7 +282,8 @@ class POC::Tester does App::Pls::Tester {
         if "$target-dir/Makefile" !~~ :e {
             return failure;
         }
-        unless run-logged( relative-to $target-dir, "make test" ) {
+        unless run-logged( relative-to($target-dir, "make test"),
+                           :step('test'), :$project ) {
             return failure;
         }
 
@@ -294,7 +297,8 @@ class POC::Installer does App::Pls::Installer {
         if "$target-dir/Makefile" !~~ :e {
             return failure;
         }
-        unless run-logged( relative-to $target-dir, "make install" ) {
+        unless run-logged( relative-to($target-dir, "make install"),
+                           :step('install'), :$project ) {
             return failure;
         }
         return success;
@@ -337,7 +341,7 @@ role POC::InstallAnnouncer {
     }
 }
 
-sub MAIN(Bool :$force) {
+sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
     $projstate.load-from-file;
 
@@ -352,7 +356,35 @@ sub MAIN(Bool :$force) {
 
     # RAKUDO: Below line required because non-supplied named Bool
     #         comes in as Any(). [perl #73680]
-    my Bool $_force = ?$force;
-    $core.install("json", :force($_force));
+    $core.install($project, :force(?$force), :skip-test(?$skip-test));
+    say "";
+    if $core.state-of($project) eq 'installed' {
+        say "$project installed."
+    }
+    else {
+        say "===SORRY!===";
+        say "";
+        my $step = do given $core.state-of($project) {
+            when 'absent' { "fetch" }
+            when 'fetched' { "build" }
+            when 'built' { "test" } # XXX: This will be wrong for :skip-test
+        };
+        say "Couldn't install $project: the $step step failed.";
+        if $step eq "fetch" {
+            .say for "",
+                     "Check to see if your internet connection is working.";
+        }
+        if $step eq "test" {
+            .say for "",
+                     "This project has failing tests, which happens sometimes",
+                     "for various reasons. If you want to install it despite",
+                     "the failing tests, you can re-invoke $*PROGRAM_NAME",
+                     "with the option '--skip-test'.";
+        }
+        .say for "",
+                 "You'll find a log file `$step-$project.log` in the current",
+                 "directory, with output from the failing step."
+    }
+    say "";
     $projstate.save-to-file();
 }
