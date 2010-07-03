@@ -375,7 +375,7 @@ sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
         my $step = do given $core.state-of($project) {
             when 'absent' { "fetch" }
             when 'fetched' { "build" }
-            when 'built' { "test" } # XXX: This will be wrong for :skip-test
+            when 'built' { $skip-test ?? "install" !! "test" }
         };
         say "Couldn't install $project: the $step step failed.";
         if $step eq "fetch" {
