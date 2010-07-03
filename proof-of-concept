@@ -67,7 +67,7 @@ sub run-logged($command, :$step!, :$project!) {
     #         something like `5 but False` evaluates to true in and 'if'
     #         statement.
     if !$result {
-        unlink "pls.log";
+        unlink $logfile;
     }
     return !$result;
 }
