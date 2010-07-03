@@ -53,12 +53,27 @@ class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
     }
 }
 
-sub run-silently($command) {
-    run "$command > /dev/null 2>&1";
+sub run-logged($command) {
+    my $logfile = "pls.log";
+    if $command ~~ /^'cd '(\S+)/ && $0 -> $subdir {
+        $logfile = '../' ~ $logfile
+            for $subdir.comb(/ ['\\/' || <-[/]> ]+ /); #'
+    }
+    my $result = run "$command > $logfile 2>&1";
+    # RAKUDO: The actual result should have a boolean value opposite that of
+    #         the numeric value, but that's not so in Rakudo yet, and
+    #         seemingly for two reasons: (1) &run doesn't create those
+    #         integers with overloaded boolifications, and (2) even if it did
+    #         something like `5 but False` evaluates to true in and 'if'
+    #         statement.
+    if !$result {
+        unlink "pls.log";
+    }
+    return !$result;
 }
 
 sub relative-to($dir, $command) {
-    "cd $dir; $command";
+    "cd $dir && $command";
 }
 
 sub announce-start-of(Str $action, Str $project) {
@@ -80,19 +95,19 @@ class POC::Fetcher does App::Pls::Fetcher {
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
         if "cache" !~~ :e {
-            run-silently "mkdir cache";
+            run-logged "mkdir cache";
         }
         if "cache" !~~ :d {
             die "Cannot proceed, cache inexplicably isn't a directory";
         }
         my $target-dir = "cache/$project<name>";
         if $target-dir ~~ :e {
-            run-silently("rm -rf $target-dir");
+            run-logged("rm -rf $target-dir");
         }
         my $command
             = sprintf 'git clone git://github.com/%s/%s.git %s',
                       $project.<auth>, $project.<name>, $target-dir;
-        my $result = run-silently( $command ) ?? failure !! success;
+        my $result = run-logged( $command ) ?? success !! failure;
 
         return $result;
     }
@@ -251,7 +266,7 @@ test: all
 
             $makefile.close;
         }
-        if run-silently( relative-to $target-dir, "make" ) {
+        unless run-logged( relative-to $target-dir, "make" ) {
             return failure;
         }
 
@@ -263,10 +278,9 @@ class POC::Tester does App::Pls::Tester {
     method test($project --> Result) {
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
-            say "No Makefile.";
             return failure;
         }
-        if run-silently( relative-to $target-dir, "make test" ) {
+        unless run-logged( relative-to $target-dir, "make test" ) {
             return failure;
         }
 
@@ -278,11 +292,11 @@ class POC::Installer does App::Pls::Installer {
     method install($project --> Result) {
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
-            say "No Makefile.";
             return failure;
         }
-        run-silently( relative-to $target-dir, "make install" )
-            and return failure;
+        unless run-logged( relative-to $target-dir, "make install" ) {
+            return failure;
+        }
         return success;
     }
 }
