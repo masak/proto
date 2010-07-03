@@ -53,6 +53,14 @@ class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
     }
 }
 
+sub run-silently($command) {
+    run "$command > /dev/null 2>&1";
+}
+
+sub relative-to($dir, $command) {
+    "cd $dir; $command";
+}
+
 class POC::Fetcher does App::Pls::Fetcher {
     # RAKUDO: Can't use '--> Result' after a 'where' block
     # RAKUDO: Havn't tracked down why, but can't use a multi here to
@@ -62,20 +70,19 @@ class POC::Fetcher does App::Pls::Fetcher {
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
         if "cache" !~~ :e {
-            run "mkdir cache";
+            run-silently "mkdir cache";
         }
         if "cache" !~~ :d {
             die "Cannot proceed, cache inexplicably isn't a directory";
         }
         my $target-dir = "cache/$project<name>";
         if $target-dir ~~ :e {
-            run("rm -rf $target-dir");
+            run-silently("rm -rf $target-dir");
         }
         my $command
             = sprintf 'git clone git://github.com/%s/%s.git %s',
                       $project.<auth>, $project.<name>, $target-dir;
-        say "Running `$command`...";
-        my $state = run( $command ) ?? failure !! success;
+        my $state = run-silently( $command ) ?? failure !! success;
 
        return $state;
    }
@@ -238,7 +245,8 @@ test: all
 
             $makefile.close;
         }
-        run( "cd $target-dir; make" ) and return failure;
+        run-silently( relative-to $target-dir, "make" )
+            and return failure;
         return success;
     }
 }
@@ -251,7 +259,8 @@ class POC::Tester does App::Pls::Tester {
             say "No Makefile.";
             return failure;
         }
-        run( "cd $target-dir; make test" ) and return failure;
+        run-silently( relative-to $target-dir, "make test" )
+            and return failure;
         return success;
     }
 }
@@ -264,7 +273,8 @@ class POC::Installer does App::Pls::Installer {
             say "No Makefile.";
             return failure;
         }
-        run( "cd $target-dir; make install" ) and return failure;
+        run-silently( relative-to $target-dir, "make install" )
+            and return failure;
         return success;
     }
 }
