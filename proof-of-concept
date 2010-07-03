@@ -149,7 +149,15 @@ class POC::Builder does App::Pls::Builder {
             my @modules = map { path-to-module-name($_) }, @module-files;
             my %usages_of;
             for @module-files -> $module-file {
-                my $fh = open($module-file, :r);
+                my $fh;
+                my $succeeded = False;
+                try {
+                    $fh = open($cwd ~ '/' ~ $module-file, :r);
+                    $succeeded = True;
+                }
+                unless $succeeded {
+                    return failure;
+                }
                 my $module = path-to-module-name($module-file);
                 %usages_of{$module} = [];
                 for $fh.lines() {
