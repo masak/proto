@@ -150,9 +150,9 @@ given $core {
     # [T] Install a project with dependencies: Install dependencies too.
     @actions = ();
     is .install(<has-deps>), success, "Install a project with dependencies";
-    is ~@actions, 'fetch[C] build[C] build[has-deps] '
-                  ~ 'test[C] test[D] test[B] test[has-deps] '
-                  ~ 'install[C] install[D] install[B] install[has-deps]',
+    is ~@actions, 'fetch[C] build[C] test[C] install[C] test[D] install[D] '
+                  ~ 'test[B] install[B] build[has-deps] test[has-deps] '
+                  ~ 'install[has-deps]',
         "fetch, build, test and install (all postorder and by need)";
     is .state-of("has-deps"), 'installed',
         "State after of has-deps: 'installed'";

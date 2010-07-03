@@ -133,45 +133,46 @@ class App::Pls::Core {
         return success;
     }
 
-    method !build-helper($project --> Result) {
+    method !build-helper($project, Bool :$force, Bool :$skip-test --> Result) {
+        my $needed-force = False;
         for $!projects.deps-of($project) -> $dep {
-            return failure
-                if self!build-helper($dep) == failure;
+            given self.install($dep,
+                               :force(?$force), :skip-test(?$skip-test)) {
+                when failure {
+                    return failure
+                        if !$force
+                           || !$!projects.reached-state($project, 'built');
+                    $needed-force = True;
+                }
+                when forced-success { $needed-force = True }
+            }
         }
         if $!projects.reached-state($project, 'built') {
-            return success;
+            return $needed-force ?? forced-success !! success;
         }
         elsif $!builder.build($!ecosystem.project-info($project)) != failure {
             $!projects.set-state-of($project, 'built');
-            return success;
+            return $needed-force ?? forced-success !! success;
         }
         else {
             return failure;
         }
     }
 
-    method test(*@projects, Bool :$ignore-deps) {
+    method test(*@projects) {
         for @projects -> $project {
             my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
             return failure
-                if self!build-helper($project) == failure;
-            # RAKUDO: an unspecified $ignore-deps should be False, is Any
+                if self!build-helper($project) != success;
             return failure
-                if self!test-helper($project, :ignore-deps(?$ignore-deps))
-                    == failure;
+                if self!test-helper($project) == failure;
         }
         return success;
     }
 
-    method !test-helper($project, Bool :$ignore-deps --> Result) {
-        unless $ignore-deps {
-            for $!projects.deps-of($project) -> $dep {
-                return failure
-                    if self!test-helper($dep) == failure;
-            }
-        }
+    method !test-helper($project --> Result) {
         if $!projects.reached-state($project, 'tested') {
             return success;
         }
@@ -185,36 +186,34 @@ class App::Pls::Core {
     }
 
     method install(*@projects, Bool :$force, Bool :$skip-test) {
-        my $*needed-force = False;
+        my $needed-force = False;
         for @projects -> $project {
             my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
+            # RAKUDO: an unspecified $force should be False, is Any
+            my $build-result = self!build-helper($project, :force(?$force),
+                                                 :skip-test(?$skip-test));
             return failure
-                if self!build-helper($project) == failure;
+                if $build-result == failure;
+            if $build-result == forced-success {
+                $needed-force = True;
+            }
             unless $skip-test {
                 if self!test-helper($project) == failure {
                     return failure
                         unless $force;
-                    $*needed-force = True;
+                    $needed-force = True;
                 }
             }
             # RAKUDO: an unspecified $force should be False, is Any
             return failure
                 if self!install-helper($project, :force(?$force)) == failure;
         }
-        return $*needed-force ?? forced-success !! success;
+        return $needed-force ?? forced-success !! success;
     }
 
     method !install-helper($project, Bool :$force --> Result) {
-        for $!projects.deps-of($project) -> $dep {
-            # RAKUDO: an unspecified $force should be False, is Any
-            if self!install-helper($dep, :force(?$force)) == failure {
-                return failure
-                    unless $force;
-                $*needed-force = True;
-            }
-        }
         if $!projects.reached-state($project, 'installed') {
             return success;
         }

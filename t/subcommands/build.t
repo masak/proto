@@ -36,11 +36,27 @@ class Mock::Builder does App::Pls::Builder {
     }
 }
 
+class Mock::Tester does App::Pls::Tester {
+    method test($project --> Result) {
+        push @actions, "test[$project<name>]";
+        success;
+    }
+}
+
+class Mock::Installer does App::Pls::Installer {
+    method install($project --> Result) {
+        push @actions, "install[$project<name>]";
+        success;
+    }
+}
+
 my $core = App::Pls::Core.new(
     :projects(App::Pls::ProjectsState::Hash.new(:%projects)),
     :ecosystem(App::Pls::Ecosystem::Hash.new(:%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
+    :tester(Mock::Tester.new()),
+    :installer(Mock::Installer.new()),
 );
 
 plan 31;
@@ -73,14 +89,16 @@ given $core {
     is .state-of("won't-build"), 'fetched',
         "State after of won't-build: 'fetched'";
 
-    # [T] Build a project with dependencies: Build dependencies first.
+    # [T] Build a project with dependencies: Install dependencies first.
     @actions = ();
     is .build(<has-deps>), success, "Building project with deps succeeds";
-    is ~@actions, "fetch[C] build[A] build[C] build[B] build[has-deps]",
-        "Fetch before build, build with postorder traversal";
+    is ~@actions, "fetch[C] build[A] test[A] install[A] build[C] test[C] "
+                  ~ "install[C] test[D] install[D] build[B] test[B] "
+                  ~ "install[B] build[has-deps]",
+        "Fetch before build, build-test-install each module";
     is .state-of('has-deps'), 'built', "State after of has-deps: built";
     for <A B C D> -> $dep {
-        is .state-of($dep), 'built', "State after of $dep: built";
+        is .state-of($dep), 'installed', "State after of $dep: installed";
     }
 
     # [T] Build a project with circular dependencies: Fail.

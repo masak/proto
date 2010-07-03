@@ -46,15 +46,24 @@ class Mock::Tester does App::Pls::Tester {
     }
 }
 
+class Mock::Installer does App::Pls::Installer {
+    method install($project --> Result) {
+        push @actions, "install[$project<name>]";
+        success;
+    }
+}
+
+
 my $core = App::Pls::Core.new(
     :projects(App::Pls::ProjectsState::Hash.new(:%projects)),
     :ecosystem(App::Pls::Ecosystem::Hash.new(:%projects)),
     :fetcher(Mock::Fetcher.new()),
     :builder(Mock::Builder.new()),
     :tester(Mock::Tester.new()),
+    :installer(Mock::Installer.new()),
 );
 
-plan 34;
+plan 28;
 
 given $core {
     # [T] Test a project: Succeed.
@@ -104,22 +113,11 @@ given $core {
     @actions = ();
     is .test(<has-deps>), success, "Test a project with dependencies";
     is ~@actions,
-        'fetch[C] build[C] build[D] build[B] '
-        ~ 'test[A] test[C] test[D] test[B] test[has-deps]',
-        "Fetch first, then build (postorder), then test (postorder)";
+        'fetch[C] test[A] install[A] build[C] test[C] install[C] build[D] '
+        ~ 'test[D] install[D] build[B] test[B] install[B] test[has-deps]',
+        "Fetch first, then build-test each project bottom-up";
     is .state-of("has-deps"), 'tested', "State after of has-deps: 'tested'";
     for <A B C D> -> $dep {
-        is .state-of($dep), 'tested', "State after of $dep: 'tested'";
+        is .state-of($dep), 'installed', "State after of $dep: 'installed'";
     }
-
-    # [T] Test a projects with dependencies, but explicitly ignoring the
-    #     dependencies: test only the project, do not fetch/build dependencies
-    @actions = ();
-    is .test(<ignore-deps>, :ignore-deps), success, "Test-ignore-deps works";
-    is ~@actions, 'fetch[E] build[E] build[F] test[ignore-deps]',
-        "Only ignore-deps is tested";
-    is .state-of("ignore-deps"), 'tested', "State after: 'tested'";
-    is .state-of("E"), 'built', "State after of E: 'built'";
-    is .state-of("F"), 'built', "State after of F: 'built'";
-    is .state-of("G"), 'built', "State after of G: unchanged";
 }

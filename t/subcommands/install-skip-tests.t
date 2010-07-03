@@ -130,9 +130,9 @@ given $core {
     @actions = ();
     is .install(<has-deps>, :skip-test), success,
         "Install a project with dependencies";
-    is ~@actions, 'fetch[C] build[C] build[has-deps] '
-                  ~ 'install[C] install[D] install[B] install[has-deps]',
-        "fetch, build and install (all postorder and by need). no test.";
+    is ~@actions, 'fetch[C] build[C] install[C] install[D] install[B] '
+                  ~ 'build[has-deps] install[has-deps]',
+        "fetch all, build-install each project bottom-up. no tests";
     is .state-of("has-deps"), 'installed',
         "State after of has-deps: 'installed'";
     for <A B C D> -> $dep {
