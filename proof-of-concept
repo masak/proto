@@ -330,10 +330,10 @@ sub MAIN(Bool :$force) {
     my $core = App::Pls::Core.new(
         :projects($projstate),
         :ecosystem( POC::Ecosystem.new(:filename("poc-projects.list")) ),
-        :fetcher(   POC::Fetcher.new()   but POC::FetchAnnouncer   ),
-        :builder(   POC::Builder.new()   but POC::BuildAnnouncer   ),
-        :tester(    POC::Tester.new()    but POC::TestAnnouncer    ),
-        :installer( POC::Installer.new() but POC::InstallAnnouncer ),
+        :fetcher(   POC::Fetcher.new()   does POC::FetchAnnouncer   ),
+        :builder(   POC::Builder.new()   does POC::BuildAnnouncer   ),
+        :tester(    POC::Tester.new()    does POC::TestAnnouncer    ),
+        :installer( POC::Installer.new() does POC::InstallAnnouncer ),
     );
 
     # RAKUDO: Below line required because non-supplied named Bool
