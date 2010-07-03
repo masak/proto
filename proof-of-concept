@@ -38,8 +38,13 @@ class POC::ProjectsState is App::Pls::ProjectsState::Hash does FileBackend {
 
 class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
     has %.projects is rw;
+    has $!loaded-projects-file = False;
 
     method project-info(Str $project --> Project) {
+        # This is *so* nice!
+        unless $!loaded-projects-file++ {
+            self.load-from-file;
+        }
         die "No such project: $project"
             unless %!projects.exists($project);
         my %info = %.projects{$project};
@@ -266,13 +271,8 @@ class POC::Installer does App::Pls::Installer {
 
 sub MAIN(Bool :$force) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
-    note "Loading projects state...";
     $projstate.load-from-file;
-    note "...done.";
     my $ecosystem = POC::Ecosystem.new(:filename("poc-projects.list"));
-    note "Loading ecosystem...";
-    $ecosystem.load-from-file;
-    note "...done.";
 
     my $core = App::Pls::Core.new(
         :projects($projstate),
