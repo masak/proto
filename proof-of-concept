@@ -84,7 +84,7 @@ sub announce-start-of(Str $action, Str $project) {
 
 # RAKUDO: Can't type $result with Result, due to [perl #75370]
 sub announce-end-of(Str $action, $result) {
-    say $result == success ?? "[done]" !! "[FAIL]";
+    say $result == success ?? "[ done ]" !! "[ FAIL ]";
 }
 
 class POC::Fetcher does App::Pls::Fetcher {
