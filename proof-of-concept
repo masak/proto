@@ -43,7 +43,9 @@ class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
     method project-info(Str $project --> Project) {
         # This is *so* nice!
         unless $!loaded-projects-file++ {
+            announce-start-of('load', 'ecosystem');
             self.load-from-file;
+            announce-end-of('load', success);
         }
         die "No such project: $project"
             unless %!projects.exists($project);
