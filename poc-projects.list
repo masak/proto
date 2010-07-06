@@ -54,5 +54,6 @@
   "Algorithm-Viterbi" : { "home" : "github", "auth" : "arnsholt" },
   "perl6-digest-md5" : { "home" : "github", "auth" : "cosimo" },
   "xml-opml" : { "home" : "github", "auth" : "radus" },
-  "test-mock" : { "home" : "github", "auth" : "jnthn" }
+  "test-mock" : { "home" : "github", "auth" : "jnthn" },
+  "testml-pm6" : { "home" : "github", "auth" : "ingydotnet" }
 }
