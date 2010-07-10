@@ -56,5 +56,6 @@
   "xml-opml" : { "home" : "github", "auth" : "radus" },
   "test-mock" : { "home" : "github", "auth" : "jnthn" },
   "testml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
-  "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" }
+  "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" },
+  "bennu" : { "home" : "github", "auth" : "ekiru" }
 }
