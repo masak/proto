@@ -6,7 +6,7 @@
   "perl6-examples" : { "home" : "github", "auth" : "perl6" },
   "uri" : { "home" : "github", "auth" : "ihrd" },
   "web" : { "home" : "github", "auth" : "masak" },
-  "svg" : { "home" : "github", "auth" : "masak" },
+  "xml-writer" : { "home" : "github", "auth" : "masak" },
   "svg-plot" : { "home" : "github", "auth" : "moritz" },
   "maya" : { "home" : "github", "auth" : "ihrd" },
   "form" : { "home" : "github", "auth" : "mattw" },
