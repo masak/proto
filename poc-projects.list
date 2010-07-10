@@ -57,5 +57,6 @@
   "test-mock" : { "home" : "github", "auth" : "jnthn" },
   "testml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
   "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" },
+  "svg" : { "home" : "github", "auth" : "moritz" },
   "bennu" : { "home" : "github", "auth" : "ekiru" }
 }
