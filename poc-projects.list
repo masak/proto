@@ -58,5 +58,6 @@
   "testml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
   "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" },
   "svg" : { "home" : "github", "auth" : "moritz" },
-  "bennu" : { "home" : "github", "auth" : "ekiru" }
+  "bennu" : { "home" : "github", "auth" : "ekiru" },
+  "yaml-pm6" : { "home" : "github", "auth" : "ingydotnet" }
 }
