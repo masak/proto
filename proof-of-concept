@@ -97,7 +97,7 @@ class POC::Fetcher does App::Pls::Fetcher {
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
         if "cache" !~~ :e {
-            run-logged "mkdir cache", :step('fetch'), :$project;
+            mkdir('cache');
         }
         if "cache" !~~ :d {
             die "Cannot proceed, cache inexplicably isn't a directory";
@@ -117,6 +117,21 @@ class POC::Fetcher does App::Pls::Fetcher {
 }
 
 class POC::Builder does App::Pls::Builder {
+    sub find-files($in-dir, $pattern) {
+        my @files = dir($in-dir);
+        my @found;
+        for @files -> $f {
+            next if $f eq '.' | '..';
+            if "$in-dir/$f" ~~ :d {
+                @found.push(find-files("$in-dir/$f", $pattern));
+            }
+            elsif $f ~~ $pattern {
+                @found.push("$in-dir/$f");
+            }
+        }
+        return @found;
+    }
+    
     method build($project --> Result) {
         my $target-dir = "cache/$project<name>";
         if "$target-dir/Makefile" !~~ :e {
@@ -129,17 +144,13 @@ class POC::Builder does App::Pls::Builder {
                 return failure;
             }
 
-            # The grep is needed because 'find' prints a final newline, so
-            # there'll be an empty-string element at the end of the list.
+            # Locate Perl 6 module files.
 
-            my @module-files
-                = grep { $_ },
-                  split "\n",
-                  qqx[cd $target-dir; find lib -name \*.pm -or -name \*.pm6];
-
-            if !@module-files || @module-files[0].lc ~~ /'no such file'/ {
+            my @module-files = find-files("$target-dir/lib", /\.pm6?$/);
+            if !@module-files {
                 return success;
             }
+            @module-files>>.=subst("$target-dir/", "");
 
             # To know the best order of compilation, we build a dependency
             # graph of all the modules in lib/. %usages_of ends up containing
