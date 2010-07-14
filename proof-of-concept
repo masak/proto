@@ -287,7 +287,7 @@ test: all
 
             $makefile.close;
         }
-        unless run-logged( relative-to($target-dir, "make"),
+        unless run-logged( relative-to($target-dir, $*make-program),
                            :step('build'), :$project ) {
             return failure;
         }
@@ -302,7 +302,7 @@ class POC::Tester does App::Pls::Tester {
         if "$target-dir/Makefile" !~~ :e {
             return failure;
         }
-        unless run-logged( relative-to($target-dir, "make test"),
+        unless run-logged( relative-to($target-dir, "$*make-program test"),
                            :step('test'), :$project ) {
             return failure;
         }
@@ -317,7 +317,7 @@ class POC::Installer does App::Pls::Installer {
         if "$target-dir/Makefile" !~~ :e {
             return failure;
         }
-        unless run-logged( relative-to($target-dir, "make install"),
+        unless run-logged( relative-to($target-dir, "$*make-program install"),
                            :step('install'), :$project ) {
             return failure;
         }
@@ -361,9 +361,17 @@ role POC::InstallAnnouncer {
     }
 }
 
+sub determine-make-program() {
+    my $result = run 'nmake /? > nmake.tmp 2>&1';
+    unlink('nmake.tmp') if 'nmake.tmp' ~~ :e;
+    return $result ?? 'make' !! 'nmake'
+}
+
 sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
     $projstate.load-from-file;
+
+    my $*make-program = determine-make-program();
 
     my $core = App::Pls::Core.new(
         :projects($projstate),
