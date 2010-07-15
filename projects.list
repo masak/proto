@@ -225,3 +225,7 @@ SCGI:
 file-spec:
     home:  github
     owner: uasi
+
+MiniDBI:
+    home: github
+    owner: mberends
