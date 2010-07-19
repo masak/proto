@@ -166,15 +166,15 @@ class Installer:auth<masak>:ver<0.2.0> {
             my $project-dir = $.ecosystem.project-dir($project);
             print "Testing $project...";
             my $command = '';
-            if "$project-dir/Makefile" ~~ :e {
+            if "$project-dir/Makefile".IO ~~ :e {
                 if slurp("$project-dir/Makefile") ~~ /^test:/ {
                     my $make = %!config-info{'Make utility'};
                     $command = "$make test";
                 }
             }
             unless $command {
-                if "$project-dir/t" ~~ :d
-                    && any(map { "$_/prove" }, %*ENV<PATH>.split(":")) ~~ :e
+                if "$project-dir/t".IO ~~ :d
+                    && any(map { "$_/prove" }, %*ENV<PATH>.split(":")).IO ~~ :e
                 {
                     $command = 'prove -e "'
                         ~ %!config-info{'Perl 6 executable'}
@@ -313,7 +313,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                 for $.ecosystem.files-in-cache-lib($project) {
                     next unless $_;
                     my $location = %!config-info{'Perl 6 library'} ~ '/' ~ $_;
-                    if $location ~~ :f { unlink $location }
+                    if $location.IO ~~ :f { unlink $location }
                     else { @directories.push: $location }
                 }
                 for @directories { unlink $_ }
@@ -380,7 +380,7 @@ class Installer:auth<masak>:ver<0.2.0> {
         #     ~ '/languages/perl6/lib'; # point to Test.pm
         my $perl6 = %!config-info{'Perl 6 executable'};
         for <Makefile.PL Configure.pl Configure.p6 Configure> -> $config-file {
-            if "$project-dir/$config-file" ~~ :f {
+            if "$project-dir/$config-file".IO ~~ :f {
                 my $perl = $config-file eq 'Makefile.PL'
                     ?? 'perl'
                     !! $perl6;
@@ -396,7 +396,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                 last;
             }
         }
-        if "$project-dir/Makefile" ~~ :f {
+        if "$project-dir/Makefile".IO ~~ :f {
             say "project type " ~ $project.WHAT;
             my $make-cmd = %!config-info{'Make utility'};
             my $r = self.configured-run( $make-cmd, :project( $project ), :dir( $project-dir ) );
@@ -462,7 +462,7 @@ class Installer:auth<masak>:ver<0.2.0> {
             }
 
             my $project-dir = $.ecosystem.project-dir($project);
-            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
+            if "$project-dir/Makefile".IO ~~ :f && slurp("$project-dir/Makefile") ~~ /^install\:/ {
                 my $make = %!config-info{'Make utility'};
                 my $r = self.configured-run( "$make install", :project( $project ), :dir( $project-dir ) );
                 if $r != 0 {
@@ -481,7 +481,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                 # not welcome in the shared Perl 6 library
                 for @files -> $file {
                     my $destination = $perl6lib ~ '/' ~ $file;
-                    if $destination ~~ :f {
+                    if $destination.IO ~~ :f {
                         say "won't install since the file '$destination' already exists";
                         return False;
                     }
@@ -500,7 +500,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                     }
                     # TODO: a non clobbering, OS neutral alternative to
                     #       cp, replace with slurp() and squirt()
-                    if "$project-dir/lib/$file" ~~ :f {
+                    if "$project-dir/lib/$file".IO ~~ :f {
                         # my $command = "";
                         my $command = "cp $project-dir/lib/$file $perl6lib/$file";
                         my $status = run($command); # TODO: check status
@@ -540,12 +540,12 @@ class Installer:auth<masak>:ver<0.2.0> {
         for @projects -> $project {
             print "Uninstalling $project...";
             my $project-dir = $.ecosystem.project-dir($project);
-            if "$project-dir/Makefile" ~~ :f && slurp("$project-dir/Makefile") ~~ /^uninstall\:/ {
+            if "$project-dir/Makefile".IO ~~ :f && slurp("$project-dir/Makefile") ~~ /^uninstall\:/ {
                 my $make = %!config-info{'Make utility'};
                 self.configured-run( "$make uninstall", :project( $project ), :dir( $project-dir ) );
             }
             else {
-                for $.ecosystem.files-in-cache-lib($project).map({"$perl6lib/$_"}).grep({ $_ ~~ :f }) -> $file
+                for $.ecosystem.files-in-cache-lib($project).map({"$perl6lib/$_"}).grep({ .IO ~~ :f }) -> $file
                 {
                     run("rm $file")
                 }
@@ -569,7 +569,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                         ~ "/$project/deps.proto";
         # WORKAROUND: !~~ does not work with :f
         # if $deps-file !~~ :f { return; }
-        unless $deps-file ~~ :f { return; }
+        unless $deps-file.IO ~~ :f { return; }
         my &remove-line-ending-comment = { .subst(/ '#' .* $ /, '') };
 # WORKAROUND: from moritz_++ to solve an NPMCA in find_method('params')
 # http://irclog.perlgeek.de/perl6/2010-04-22#i_2253823 and before
@@ -627,7 +627,7 @@ class Installer:auth<masak>:ver<0.2.0> {
             # WORKAROUND: Rakudo has a backtracking bug reported in
             # http://rt.perl.org/rt3/Public/Bug/Display.html?id=73608
 #           when / (.*) ':' <.ws> (.*) / { %settings{$0} = $1; }
-            when / (<-[:]>+) ':' <.ws> (.*) / { %settings{$0} = ~$1; }
+            when / (<-[:]>+) ':' <.ws> (.*) / { %settings{~$0} = ~$1; }
         }
         return %settings;
     }

@@ -45,7 +45,7 @@ method get-info-on($project) {
 #   tested     or  test-failed
 #   installed  or  install-failed
 method is-state($project,$state) {
-    if $state eq 'fetched' { return ?( "$cache-dir/$project" ~~ :d ); }
+    if $state eq 'fetched' { return ?( "$cache-dir/$project".IO ~~ :d ); }
     if %!project-state.exists($project)
         and %!project-state{$project}.exists('state')
         and $state eq %!project-state{$project}<state> {
@@ -101,7 +101,7 @@ method project-dir($project) {
 method files-in-cache-lib($project) {
     my $project-dir = self.project-dir($project);
     
-    if "$project-dir/lib" !~~ :d {
+    if "$project-dir/lib".IO !~~ :d {
         return ();
     }
 
@@ -114,12 +114,12 @@ method files-in-cache-lib($project) {
 
 #-------------------------- fetched-projects ---------------------------
 method fetched-projects() {
-    return self.regular-projects.grep: { "$cache-dir/$_" ~~ :d };
+    return self.regular-projects.grep: { "$cache-dir/$_".IO ~~ :d };
 }
 
 #------------------------- unfetched-projects --------------------------
 method unfetched-projects() {
-    return self.regular-projects.grep: { "$cache-dir/$_" !~~ :d };
+    return self.regular-projects.grep: { "$cache-dir/$_".IO !~~ :d };
 }
 
 #-------------------------- load-project-list --------------------------

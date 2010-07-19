@@ -229,3 +229,11 @@ file-spec:
 MiniDBI:
     home: github
     owner: mberends
+
+Math-RungeKutta:
+    home: github
+    owner: moritz
+
+Math-Model:
+    home: github
+    owner: moritz
