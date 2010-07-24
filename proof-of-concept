@@ -103,14 +103,20 @@ class POC::Fetcher does App::Pls::Fetcher {
             die "Cannot proceed, cache inexplicably isn't a directory";
         }
         my $target-dir = "cache/$project<name>";
-        if $target-dir.IO ~~ :e {
+        if $target-dir.IO ~~ :e && !%*ENV<PLS_NO_FETCH> {
             run-logged "rm -rf $target-dir", :step('fetch'), :$project;
         }
         my $command
             = sprintf 'git clone git://github.com/%s/%s.git %s',
                       $project.<auth>, $project.<name>, $target-dir;
-        my $result = run-logged( $command, :step('fetch'), :$project )
-                     ?? success !! failure;
+        my $result;
+
+        if %*ENV<PLS_NO_FETCH> {
+            $result = $target-dir.IO ~~ :d ?? success !! failure;
+        } else {
+            $result = run-logged( $command, :step('fetch'), :$project )
+                        ?? success !! failure;
+        }
 
         return $result;
     }
