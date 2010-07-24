@@ -71,5 +71,27 @@ There are many things which proto does not do. Even so, it is the hope
 of its authors that it might be of some use, and make Perl 6 poets bold
 in splitting up their work into logical independent units.
 
+How to add your project to projects.list and poc-projects.list:
+
+ 1.) Fork the proto repository into your github account (press Fork button.)
+ 2.) Clone your new repository to your local hard drive:
+   $ git clone git@github.com:yourusername/proto.git
+   ( don't forget to change yourusername to your own username.)
+ 3.) Edit the projects.list file and add your project in YAML format.
+ 4.) Commit your changes.
+   $ git commit -a -m 'added my project'
+   $ git push
+ 5.) Checkout the pls branch:
+   $ git fetch origin pls
+   $ git checkout pls
+ 6.) Edit the poc-projects.list file and add your project in JSON format.
+ 7.) Commit your changes.
+   $ git commit -a -m 'added my project'
+   $ git push
+ 8.) On your github page, click "Pull Request", and submit your request.
+
+After sending the Pull Request, the Proto/pls developers will review your
+changes and merge them with the primary repo.
+
 Proto is (C) Copyright 2010 by the Proto contributors (as listed in
 AUTHORS). The license is Artistic 2.0; see LICENCE.
