@@ -59,5 +59,7 @@
   "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" },
   "svg" : { "home" : "github", "auth" : "moritz" },
   "bennu" : { "home" : "github", "auth" : "ekiru" },
-  "yaml-pm6" : { "home" : "github", "auth" : "ingydotnet" }
+  "yaml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
+  "SCGI" : { "home" : "github", "auth" : "supernovus" },
+  "temporal-utils" : { "home" : "github", "auth" : "supernovus" }
 }
