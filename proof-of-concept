@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl6
+#!/usr/bin/env perl6
 use v6;
 
 use App::Pls;
@@ -27,7 +27,7 @@ role FileBackend {
     }
 
     method load-from-file() {
-        %.projects = $.filename ~~ :e ?? _from-json(_slurp($.filename))
+        %.projects = $.filename.IO ~~ :e ?? _from-json(_slurp($.filename))
                                       !! ();
         $!dirty = False;
     }
@@ -96,14 +96,14 @@ class POC::Fetcher does App::Pls::Fetcher {
     method fetch($project) {
         die "Not able to fetch non-github projects yet, sorry :/"
             unless $project<home> eq 'github';
-        if "cache" !~~ :e {
+        if "cache".IO !~~ :e {
             mkdir('cache');
         }
-        if "cache" !~~ :d {
+        if "cache".IO !~~ :d {
             die "Cannot proceed, cache inexplicably isn't a directory";
         }
         my $target-dir = "cache/$project<name>";
-        if $target-dir ~~ :e {
+        if $target-dir.IO ~~ :e {
             run-logged "rm -rf $target-dir", :step('fetch'), :$project;
         }
         my $command
@@ -122,7 +122,7 @@ class POC::Builder does App::Pls::Builder {
         my @found;
         for @files -> $f {
             next if $f eq '.' | '..';
-            if "$in-dir/$f" ~~ :d {
+            if "$in-dir/$f".IO ~~ :d {
                 @found.push(find-files("$in-dir/$f", $pattern));
             }
             elsif $f ~~ $pattern {
@@ -134,13 +134,13 @@ class POC::Builder does App::Pls::Builder {
     
     method build($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile" !~~ :e {
+        if "$target-dir/Makefile".IO !~~ :e {
             my $binary = 'perl6';
 
-            if "$target-dir/lib" !~~ :e {
+            if "$target-dir/lib".IO !~~ :e {
                 return success;
             }
-            elsif "$target-dir/lib" !~~ :d {
+            elsif "$target-dir/lib".IO !~~ :d {
                 return failure;
             }
 
@@ -164,7 +164,7 @@ class POC::Builder does App::Pls::Builder {
                 my $fh;
                 my $succeeded = False;
                 try {
-                    $fh = open($target-dir ~ '/' ~ $module-file, :r);
+                    $fh = open($target-dir ~ '/' ~ $module-file.IO, :r);
                     $succeeded = True;
                 }
                 unless $succeeded {
@@ -299,7 +299,7 @@ test: all
 class POC::Tester does App::Pls::Tester {
     method test($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile" !~~ :e {
+        if "$target-dir/Makefile".IO !~~ :e {
             return failure;
         }
         unless run-logged( relative-to($target-dir, "$*make-program test"),
@@ -314,7 +314,7 @@ class POC::Tester does App::Pls::Tester {
 class POC::Installer does App::Pls::Installer {
     method install($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile" !~~ :e {
+        if "$target-dir/Makefile".IO !~~ :e {
             return failure;
         }
         unless run-logged( relative-to($target-dir, "$*make-program install"),
@@ -363,7 +363,7 @@ role POC::InstallAnnouncer {
 
 sub determine-make-program() {
     my $result = run 'nmake /? > nmake.tmp 2>&1';
-    unlink('nmake.tmp') if 'nmake.tmp' ~~ :e;
+    unlink('nmake.tmp') if 'nmake.tmp'.IO ~~ :e;
     return $result ?? 'make' !! 'nmake'
 }
 
