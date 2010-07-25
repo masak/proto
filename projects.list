@@ -178,10 +178,6 @@ zavolaj:
     home:  github
     owner: jnthn
 
-fakedbi:
-    home:  github
-    owner: mberends
-
 messagepack-pm6:
     home:  github
     owner: uasi
