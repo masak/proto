@@ -82,7 +82,7 @@ How to add your project to projects.list and poc-projects.list:
    $ git commit -a -m 'added my project'
    $ git push
  5.) Checkout the pls branch:
-   $ git fetch origin pls
+   $ git fetch
    $ git checkout pls
  6.) Edit the poc-projects.list file and add your project in JSON format.
  7.) Commit your changes.
