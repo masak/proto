@@ -43,7 +43,7 @@
   "yapsi" : { "home" : "github", "auth" : "masak" },
   "mandelbrot" : { "home" : "github", "auth" : "colomon" },
   "zavolaj" : { "home" : "github", "auth" : "jnthn" },
-  "minidbi" : { "home" : "github", "auth" : "mberends" },
+  "MiniDBI" : { "home" : "github", "auth" : "mberends" },
   "messagepack-pm6" : { "home" : "github", "auth" : "uasi" },
   "gge" : { "home" : "github", "auth" : "masak" },
   "ufo" : { "home" : "github", "auth" : "masak" },
