@@ -62,4 +62,5 @@
   "yaml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
   "SCGI" : { "home" : "github", "auth" : "supernovus" },
   "temporal-utils" : { "home" : "github", "auth" : "supernovus" }
+  "Math-Vector" : { "home" : "github", "auth" : "colomon" },
 }
