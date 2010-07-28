@@ -9,7 +9,7 @@
   "xml-writer" : { "home" : "github", "auth" : "masak" },
   "svg-plot" : { "home" : "github", "auth" : "moritz" },
   "maya" : { "home" : "github", "auth" : "ihrd" },
-  "form" : { "home" : "github", "auth" : "mattw" },
+  "form" : { "home" : "github", "auth" : "mathw" },
   "pun" : { "home" : "github", "auth" : "masak" },
   "io-prompt" : { "home" : "github", "auth" : "pnu" },
   "xml" : { "home" : "github", "auth" : "krunen" },
@@ -43,7 +43,7 @@
   "yapsi" : { "home" : "github", "auth" : "masak" },
   "mandelbrot" : { "home" : "github", "auth" : "colomon" },
   "zavolaj" : { "home" : "github", "auth" : "jnthn" },
-  "fakedbi" : { "home" : "github", "auth" : "mberends" },
+  "MiniDBI" : { "home" : "github", "auth" : "mberends" },
   "messagepack-pm6" : { "home" : "github", "auth" : "uasi" },
   "gge" : { "home" : "github", "auth" : "masak" },
   "ufo" : { "home" : "github", "auth" : "masak" },
@@ -61,5 +61,8 @@
   "bennu" : { "home" : "github", "auth" : "ekiru" },
   "yaml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
   "SCGI" : { "home" : "github", "auth" : "supernovus" },
-  "temporal-utils" : { "home" : "github", "auth" : "supernovus" }
+  "temporal-utils" : { "home" : "github", "auth" : "supernovus" },
+  "Math-Vector" : { "home" : "github", "auth" : "colomon" },
+  "Math-Polynomial" : { "home" : "github", "auth" : "colomon" },
+  "DBDI" : { "home" : "github", "auth" : "timbunce" }
 }
