@@ -132,7 +132,7 @@ is( \$greeter.greet, 'hello', 'greet' );
 is( \$greeter.place, 'world', 'place' );
 EOF
 
-# Create a Makefile.in like this example from mattw's form project.
+# Create a Makefile.in like this example from mathw's form project.
 # note the \$ escaping to play nicely with bash.
 cat >$PROJECTBASE/Makefile.in <<EOF
 PERL6=<PERL6>
