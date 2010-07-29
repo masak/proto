@@ -64,5 +64,6 @@
   "temporal-utils" : { "home" : "github", "auth" : "supernovus" },
   "Math-Vector" : { "home" : "github", "auth" : "colomon" },
   "Math-Polynomial" : { "home" : "github", "auth" : "colomon" },
-  "DBDI" : { "home" : "github", "auth" : "timbunce" }
+  "DBDI" : { "home" : "github", "auth" : "timbunce" },
+  "DateTime-Parse" : { "home" : "github", "auth" : "KodiB" }
 }
