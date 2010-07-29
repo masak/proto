@@ -261,3 +261,7 @@ perl6-Term-ANSIColor:
 perl6-Acme-Meow:
     home: github
     owner: tadzik
+
+DateTime-Parse:
+    home: github
+    owner: KodiB
