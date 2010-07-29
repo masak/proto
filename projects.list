@@ -245,3 +245,19 @@ Math-Vector:
 DBDI:
     home: github
     owner: timbunce
+
+perl6-Config-INI:
+    home: github
+    owner: tadzik
+
+perl6-File-Find:
+    home: github
+    owner: tadzik
+
+perl6-Term-ANSIColor:
+    home: github
+    owner: tadzik
+
+perl6-Acme-Meow:
+    home: github
+    owner: tadzik
