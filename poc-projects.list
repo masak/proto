@@ -65,6 +65,7 @@
   "Math-Vector" : { "home" : "github", "auth" : "colomon" },
   "Math-Polynomial" : { "home" : "github", "auth" : "colomon" },
   "DBDI" : { "home" : "github", "auth" : "timbunce" },
+  "DateTime-Parse" : { "home" : "github", "auth" : "KodiB" },
   "perl6-Config-INI" : { "home" : "github", "auth" : "tadzik" },
   "perl6-File-Find" : { "home" : "github", "auth" : "tadzik" },
   "perl6-Term-ANSIColor" : { "home" : "github", "auth" : "tadzik" },
