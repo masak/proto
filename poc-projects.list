@@ -64,5 +64,9 @@
   "temporal-utils" : { "home" : "github", "auth" : "supernovus" },
   "Math-Vector" : { "home" : "github", "auth" : "colomon" },
   "Math-Polynomial" : { "home" : "github", "auth" : "colomon" },
-  "DBDI" : { "home" : "github", "auth" : "timbunce" }
+  "DBDI" : { "home" : "github", "auth" : "timbunce" },
+  "perl6-Config-INI" : { "home" : "github", "auth" : "tadzik" },
+  "perl6-File-Find" : { "home" : "github", "auth" : "tadzik" },
+  "perl6-Term-ANSIColor" : { "home" : "github", "auth" : "tadzik" },
+  "perl6-Acme-Meow" : { "home" : "github", "auth" : "tadzik" }
 }
