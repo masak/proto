@@ -266,6 +266,6 @@ DateTime-Parse:
     home: github
     owner: KodiB
 
-Digest--djb2
+Digest--djb2:
     home: github
     owner: xenu
