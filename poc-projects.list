@@ -69,5 +69,6 @@
   "perl6-Config-INI" : { "home" : "github", "auth" : "tadzik" },
   "perl6-File-Find" : { "home" : "github", "auth" : "tadzik" },
   "perl6-Term-ANSIColor" : { "home" : "github", "auth" : "tadzik" },
-  "perl6-Acme-Meow" : { "home" : "github", "auth" : "tadzik" }
+  "perl6-Acme-Meow" : { "home" : "github", "auth" : "tadzik" },
+  "perl6-string-crc32" : { "home" : "github", "auth" : "cosimo" }
 }
