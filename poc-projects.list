@@ -70,5 +70,6 @@
   "perl6-File-Find" : { "home" : "github", "auth" : "tadzik" },
   "perl6-Term-ANSIColor" : { "home" : "github", "auth" : "tadzik" },
   "perl6-Acme-Meow" : { "home" : "github", "auth" : "tadzik" },
-  "perl6-string-crc32" : { "home" : "github", "auth" : "cosimo" }
+  "perl6-string-crc32" : { "home" : "github", "auth" : "cosimo" },
+  "Digest--djb2" : { "home" : "github", "auth" : "xenu" }
 }
