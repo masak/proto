@@ -265,7 +265,3 @@ perl6-Acme-Meow:
 DateTime-Parse:
     home: github
     owner: KodiB
-
-Digest--djb2:
-    home: github
-    owner: xenu
