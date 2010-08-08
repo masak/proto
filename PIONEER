@@ -52,6 +52,14 @@ proto will try to run 'prove' recursively on your project's t/ directory,
 using perl6 as the executable. If prove is missing, or the t/ directory is
 missing, the testing will be considered successful.
 
+== Installing
+
+If the Makefile is present, 'make install' would be run to install the
+module. Otherwise, all the modules from lib/ will be compiled to PIR and
+installed to a proper location, so they will be available to use in Perl 6
+programs. Furthermore, the files from the bin/ directory (if available) will
+be installed too, so one will be able to run them as a standalone application.
+
 == Joining the Perl 6 Ecosystem
 
 Proto assumes that if your project has a top level lib/ directory, you
