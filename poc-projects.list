@@ -54,7 +54,7 @@
   "perl6-puppet-parser" : { "home" : "github", "auth" : "cosimo" },
   "Algorithm-Viterbi" : { "home" : "github", "auth" : "arnsholt" },
   "perl6-digest-md5" : { "home" : "github", "auth" : "cosimo" },
-  "xml-opml" : { "home" : "github", "auth" : "radus" },
+  "XML-OPML" : { "home" : "github", "auth" : "radus" },
   "test-mock" : { "home" : "github", "auth" : "jnthn" },
   "testml-pm6" : { "home" : "github", "auth" : "ingydotnet" },
   "Perl6-MIME-Base64" : { "home" : "github", "auth" : "snarkyboojum" },
