@@ -257,7 +257,7 @@ clean:
 
 test: all
 \tmkdir -p t
-\tenv PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r --nocolor t/
+\tenv PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r t/
 
 install:: all \$(INSTALL_SCRIPTS)
 
