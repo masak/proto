@@ -118,7 +118,8 @@ class POC::Fetcher does App::Pls::Fetcher {
 
 class POC::Builder does App::Pls::Builder {
     sub find-files($in-dir, $pattern) {
-        my @files = dir($in-dir);
+        my @files;
+        try { @files = dir($in-dir) }
         my @found;
         for @files -> $f {
             next if $f eq '.' | '..';
@@ -137,19 +138,9 @@ class POC::Builder does App::Pls::Builder {
         if "$target-dir/Makefile".IO !~~ :e {
             my $binary = 'perl6';
 
-            if "$target-dir/lib".IO !~~ :e {
-                return success;
-            }
-            elsif "$target-dir/lib".IO !~~ :d {
-                return failure;
-            }
-
             # Locate Perl 6 module files.
 
             my @module-files = find-files("$target-dir/lib", /\.pm6?$/);
-            if !@module-files {
-                return success;
-            }
             @module-files>>.=subst("$target-dir/", "");
 
             # To know the best order of compilation, we build a dependency
@@ -233,16 +224,23 @@ class POC::Builder does App::Pls::Builder {
                 $sources ~= $source ~ ' ';
             }
             $sources.=trim-trailing;
+            my $scripts = 'SCRIPTS=';
+            if "$target-dir/bin".IO ~~ :d {
+                $scripts ~= qqx[cd $target-dir; echo bin/*].chomp;
+            }
 
             my $makefile = open "$target-dir/Makefile", :w;
             $makefile.say(qq[PERL6=$binary]);
+            $makefile.say(qq[PREFIX = ~/.perl6]);
             $makefile.say(qq[PERL6LIB='lib']);
             $makefile.say(q[]);
 
             $makefile.say($sources);
+            $makefile.say($scripts);
 
             $makefile.say(qq[
 PIRS=\$(patsubst %.pm6,%.pir,\$(SOURCES:.pm=.pir))
+INSTALL_SCRIPTS = \$(SCRIPTS:%=\$(PREFIX)/%)
 
 .PHONY: test clean
 
@@ -258,32 +256,18 @@ clean:
 \trm -f \$(PIRS)
 
 test: all
-\tenv PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r --nocolor t/]);
+\tmkdir -p t
+\tenv PERL6LIB=\$(PERL6LIB) prove -e '\$(PERL6)' -r --nocolor t/
+
+install:: all \$(INSTALL_SCRIPTS)
+
+\$(PREFIX)/bin/%:: bin/%
+\tmkdir -p `dirname '\$@'`
+\tinstall \$< \$@]);
 
             sub directory-of($file) {
                 $file.subst(/ '/' <-[/]>*? $ /, '');
             }
-
-            sub write-install($extension?) {
-                for @sources -> $s {
-                    my $file = defined $extension
-                                ?? $s.subst(rx{\.pm6?$}, '.' ~ $extension)
-                                !! $s;
-                    # Can't use 'install -D' like we originally did,
-                    # because Mac OS X has that flag as '-d'.
-                    my $directory = directory-of($file);
-                    $makefile.say("\tmkdir -p ~/.perl6/$directory");
-                    $makefile.say("\tinstall $file ~/.perl6/$file");
-                }
-            }
-
-            $makefile.say(q[]);
-            $makefile.say(q[install: all]);
-            write-install('pir');
-
-            $makefile.say(q[]);
-            $makefile.say(q[install-src:]);
-            write-install();
 
             $makefile.close;
         }
@@ -396,6 +380,7 @@ sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
             when 'absent' { "fetch" }
             when 'fetched' { "build" }
             when 'built' { $skip-test ?? "install" !! "test" }
+            when 'tested' { "install" }
         };
         say "Couldn't install $project: the $step step failed.";
         if $step eq "fetch" {
