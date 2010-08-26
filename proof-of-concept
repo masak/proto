@@ -110,35 +110,114 @@ class POC::Fetcher does App::Pls::Fetcher {
     }
 }
 
-class POC::Builder does App::Pls::Builder {
-    sub find-files($in-dir, $pattern) {
-        my @files;
-        try { @files = dir($in-dir) }
-        my @found;
-        for @files -> $f {
-            next if $f eq '.' | '..';
-            if "$in-dir/$f".IO ~~ :d {
-                @found.push(find-files("$in-dir/$f", $pattern));
-            }
-            elsif $f ~~ $pattern {
-                @found.push("$in-dir/$f");
-            }
+sub find-files($in-dir, $pattern) {
+    my @files;
+    try { @files = dir($in-dir) }
+    my @found;
+    for @files -> $f {
+        next if $f eq '.' | '..';
+        if "$in-dir/$f".IO ~~ :d {
+            @found.push(find-files("$in-dir/$f", $pattern));
         }
-        return @found;
+        elsif $f ~~ $pattern {
+            @found.push("$in-dir/$f");
+        }
     }
-    
+    return @found;
+}
+
+class POC::Builder does App::Pls::Builder {
     method build($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile".IO !~~ :e {
-			# Creating the makefile the ugly way. I'm sorry masak
-			my $where = cwd;
-			chdir $target-dir;
-			return failure unless run-logged('ufo', :step<build>, :$project);
-			chdir $where;
-		}
-        unless run-logged( relative-to($target-dir, $*make-program),
-                           :step('build'), :$project ) {
-            return failure;
+        if $*VM<config><osname> ne 'MSWin32'
+           && "$target-dir/Makefile".IO ~~ :e {
+            # Already has Makefile and not running Windows -- use the Makefile
+            unless run-logged( relative-to($target-dir, 'make'),
+                               :step('build'), :$project ) {
+                return failure;
+            }
+        }
+        else {
+            # No Makefile or on Windows -- roll our own `make` process
+            my $binary = 'perl6';
+
+            # Locate Perl 6 module files.
+
+            my @module-files = find-files("$target-dir/lib", /\.pm6?$/);
+            @module-files>>.=subst("$target-dir/", "");
+
+            # To know the best order of compilation, we build a dependency
+            # graph of all the modules in lib/. %usages_of ends up containing
+            # a graph, with the keys (containing names modules) being nodes,
+            # and the values (containing arrays of names) denoting directed
+            # edges.
+
+            my @modules = map { path-to-module-name($_) }, @module-files;
+            my %usages_of;
+            for @module-files -> $module-file {
+                my $fh;
+                my $succeeded = False;
+                try {
+                    $fh = open($target-dir ~ '/' ~ $module-file, :r);
+                    $succeeded = True;
+                }
+                unless $succeeded {
+                    return failure;
+                }
+                my $module = path-to-module-name($module-file);
+                %usages_of{$module} = [];
+                for $fh.lines() {
+                    if /^\s* 'use' \s+ (\w+ ['::' \w+]*)/ && $0 -> $used {
+                        next if $used eq 'v6';
+                        next if $used eq 'MONKEY_TYPING';
+
+                        %usages_of{$module}.push(~$used);
+                    }
+                }
+            }
+
+            sub path-to-module-name($path) {
+                $path.subst(/^'lib/'/, '').subst(/\.pm6?$/, '')\
+                     .subst('/', '::', :g);
+            }
+
+            sub module-name-to-path($module-name) {
+                my $pm = 'lib/' ~ $module-name.subst('::', '/', :g) ~ '.pm';
+                $pm.IO ~~ :e ?? $pm !! $pm ~ '6';
+            }
+
+            my @order;
+
+            # According to "Introduction to Algorithms" by Cormen et al.,
+            # topological sort is just a depth-first search of a graph where
+            # you pay attention to the order in which you get done with the
+            # dfs-visit() for each node.
+
+            my %color_of = @modules X=> 'not yet visited';
+            for @modules -> $module {
+                if %color_of{$module} eq 'not yet visited' {
+                    dfs-visit($module);
+                }
+            }
+
+            sub dfs-visit($module) {
+                %color_of{$module} = 'visited';
+                for %usages_of{$module}.list -> $used {
+                    if %color_of{$used} eq 'not yet visited' {
+                        dfs-visit($used);
+                    }
+                }
+                push @order, $module;
+            }
+
+            for @order>>.&module-name-to-path -> $module {
+                my $command = "$binary --target=PIR --output={
+                               $module.subst(/\.pm6?/, ".pir")} $module";
+                unless run-logged( relative-to($target-dir, $command),
+                                   :step('build'), :$project ) {
+                    return failure;
+                }
+            }
         }
 
         return success;
@@ -148,15 +227,22 @@ class POC::Builder does App::Pls::Builder {
 class POC::Tester does App::Pls::Tester {
     method test($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile".IO !~~ :e {
-            return failure;
+        if $*VM<config><osname> ne 'MSWin32'
+           && "$target-dir/Makefile".IO ~~ :e {
+            unless run-logged( relative-to($target-dir, "make test"),
+                               :step('test'), :$project ) {
+                return failure;
+            }
         }
-        if "$target-dir/t".IO !~~ :e {
-            return success;
-        }
-        unless run-logged( relative-to($target-dir, "$*make-program test"),
-                           :step('test'), :$project ) {
-            return failure;
+        else {
+            if "$target-dir/t".IO !~~ :e {
+                return success;
+            }
+            my $command = "env PERL6LIB=`pwd`/lib prove -e 'perl6' -r t/";
+            unless run-logged( relative-to($target-dir, $command),
+                               :step('build'), :$project ) {
+                return failure;
+            }
         }
 
         return success;
@@ -166,12 +252,30 @@ class POC::Tester does App::Pls::Tester {
 class POC::Installer does App::Pls::Installer {
     method install($project --> Result) {
         my $target-dir = "cache/$project<name>";
-        if "$target-dir/Makefile".IO !~~ :e {
-            return failure;
+        if $*VM<config><osname> ne 'MSWin32'
+           && "$target-dir/Makefile".IO ~~ :e {
+            unless run-logged( relative-to($target-dir, "make install"),
+                               :step('install'), :$project ) {
+                return failure;
+            }
         }
-        unless run-logged( relative-to($target-dir, "$*make-program install"),
-                           :step('install'), :$project ) {
-            return failure;
+        else {
+            sub mkdir-p($dir) {
+                if $dir ~~ / (.*) '/' / {
+                    mkdir-p(~$0)
+                }
+                mkdir($dir)
+            }
+
+            for find-files("$target-dir/lib", /\.pm6?$/) -> $pmfile {
+                my $pirfile = $pmfile.subst(/\.pm6$/, '.pir');
+                my $just-dir = $pirfile.subst(/[<-[/]>+ '/'] ** 3/, '')\
+                                       .subst(/'/' <-[/]>+ $/, '');
+                my $target-dir = "%*ENV<HOME>/.perl6/lib/$just-dir";
+                mkdir-p( $target-dir );
+                run( "cp $pmfile $target-dir" );
+                run( "cp $pirfile $target-dir" );
+            }
         }
         return success;
     }
@@ -213,17 +317,9 @@ role POC::InstallAnnouncer {
     }
 }
 
-sub determine-make-program() {
-    my $result = run 'nmake /? > nmake.tmp 2>&1';
-    unlink('nmake.tmp') if 'nmake.tmp'.IO ~~ :e;
-    return $result ?? 'make' !! 'nmake'
-}
-
 sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
     $projstate.load-from-file;
-
-    my $*make-program = determine-make-program();
 
     my $core = App::Pls::Core.new(
         :projects($projstate),
