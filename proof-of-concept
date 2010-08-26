@@ -394,9 +394,12 @@ sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
                      "the failing tests, you can re-invoke $*PROGRAM_NAME",
                      "with the option '--skip-test'.";
         }
-        .say for "",
-                 "You'll find a log file `$step-$project.log` in the current",
-                 "directory, with output from the failing step."
+        if "$step-$project.log".IO ~~ :e {
+            .say for
+                "",
+                "You'll find a log file `$step-$project.log` in the current",
+                "directory, with output from the failing step."
+        }
     }
     say "";
     $projstate.save-to-file();
