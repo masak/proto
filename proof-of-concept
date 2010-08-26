@@ -151,6 +151,9 @@ class POC::Tester does App::Pls::Tester {
         if "$target-dir/Makefile".IO !~~ :e {
             return failure;
         }
+        if "$target-dir/t".IO !~~ :e {
+            return success;
+        }
         unless run-logged( relative-to($target-dir, "$*make-program test"),
                            :step('test'), :$project ) {
             return failure;
