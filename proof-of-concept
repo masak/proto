@@ -30,7 +30,19 @@ role FileBackend {
 class POC::ProjectsState is App::Pls::ProjectsState::Hash does FileBackend {
 }
 
-class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
+role WebBackend {
+    has $.url;
+
+    method load-from-url() {
+        my $projects = qqx[wget -q -O- $.url];
+        if !$projects {
+            die "Couldn't fetch ecosystem from the web";
+        }
+        %.projects = from-json($projects);
+    }
+}
+
+class POC::Ecosystem does App::Pls::Ecosystem does WebBackend {
     has %.projects is rw;
     has $!loaded-projects-file = False;
 
@@ -38,7 +50,7 @@ class POC::Ecosystem does App::Pls::Ecosystem does FileBackend {
         # This is *so* nice!
         unless $!loaded-projects-file++ {
             announce-start-of('load', 'ecosystem');
-            self.load-from-file;
+            self.load-from-url;
             announce-end-of('load', success);
         }
         die "No such project: $project"
@@ -322,9 +334,11 @@ sub MAIN(Str $project, Bool :$force, Bool :$skip-test) {
     my $projstate = POC::ProjectsState.new(:filename("poc-projects.state"));
     $projstate.load-from-file;
 
+    my $ecosystem-url
+        = "http://github.com/perl6/ecosystem/raw/master/projects.list";
     my $core = App::Pls::Core.new(
         :projects($projstate),
-        :ecosystem( POC::Ecosystem.new(:filename("poc-projects.list")) ),
+        :ecosystem( POC::Ecosystem.new(:url($ecosystem-url)) ),
         :fetcher(   POC::Fetcher.new()   does POC::FetchAnnouncer   ),
         :builder(   POC::Builder.new()   does POC::BuildAnnouncer   ),
         :tester(    POC::Tester.new()    does POC::TestAnnouncer    ),
