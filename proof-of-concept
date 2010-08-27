@@ -181,9 +181,10 @@ class POC::Builder does App::Pls::Builder {
                      .subst('/', '::', :g);
             }
 
-            sub module-name-to-path($module-name) {
+            sub module-name-to-path($module-name, $base-path = '') {
                 my $pm = 'lib/' ~ $module-name.subst('::', '/', :g) ~ '.pm';
-                $pm.IO ~~ :e ?? $pm !! $pm ~ '6';
+                ($base-path ~ ($base-path ?? '/' !! '') ~ $pm).IO ~~ :e
+                    ?? $pm !! $pm ~ '6';
             }
 
             my @order;
@@ -210,7 +211,7 @@ class POC::Builder does App::Pls::Builder {
                 push @order, $module;
             }
 
-            for @order>>.&module-name-to-path -> $module {
+            for @order>>.&module-name-to-path($target-dir) -> $module {
                 my $command = "$binary --target=PIR --output={
                                $module.subst(/\.pm6?/, ".pir")} $module";
                 unless run-logged( relative-to($target-dir, $command),
