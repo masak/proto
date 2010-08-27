@@ -16,7 +16,7 @@ binmode STDOUT, ':encoding(UTF-8)';
 local $| = 1;
 my $stats = { success => 0, failed => 0, errors => [] };
 
-my $list_url = 'http://github.com/masak/proto/raw/pls/poc-projects.list';
+my $list_url = 'http://github.com/perl6/ecosystem/raw/master/projects.list';
 
 my $site_info = {
     'github' => {
