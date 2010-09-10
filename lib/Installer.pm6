@@ -494,7 +494,7 @@ class Installer:auth<masak>:ver<0.2.0> {
                     next if $filepart eq any(@.ecosystem.protected-files);
                     if @names.elems {
                         my $dir = $perl6lib ~ '/' ~ join('/',@names);
-                        if $dir !~~ :d {
+                        if $dir.IO !~~ :d {
                             run( "perl -MExtUtils::Command -e mkpath $dir" );
                         }
                     }
