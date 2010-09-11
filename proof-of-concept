@@ -281,7 +281,7 @@ class POC::Installer does App::Pls::Installer {
             }
 
             for find-files("$target-dir/lib", /\.pm6?$/) -> $pmfile {
-                my $pirfile = $pmfile.subst(/\.pm6$/, '.pir');
+                my $pirfile = $pmfile.subst(/\.pm6?$/, '.pir');
                 my $just-dir = $pirfile.subst(/[<-[/]>+ '/'] ** 3/, '')\
                                        .subst(/'/' <-[/]>+ $/, '');
                 my $target-dir = "%*ENV<HOME>/.perl6/lib/$just-dir";
