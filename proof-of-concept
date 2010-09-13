@@ -224,7 +224,8 @@ class POC::Builder does App::Pls::Builder {
             }
 
             for @order>>.&module-name-to-path($target-dir) -> $module {
-                my $command = "$binary --target=PIR --output={
+                my $command = "PERL6LIB=$target-dir/lib $binary "
+                               ~ "--target=PIR --output={
                                $module.subst(/\.pm6?/, ".pir")} $module";
                 unless run-logged( relative-to($target-dir, $command),
                                    :step('build'), :$project ) {
