@@ -8,6 +8,7 @@ use JSON;
 use YAML qw (Load LoadFile);
 use HTML::Template;
 use File::Slurp;
+use Encode qw(encode_utf8);
 
 my $output_dir = shift(@ARGV) || './';
 my @MEDALS = qw<fresh medal readme tests unachieved>;
@@ -101,14 +102,21 @@ unless ($output_dir eq './') {
     system("cp $_.png $output_dir") for @MEDALS;
     system("cp fame-and-profit.html $output_dir");
 }
-write_file( $output_dir . 'index.html',{binmode => ':encoding(UTF-8)'}, get_html_list($projects) );
+write_file( $output_dir . 'index.html',{binmode => ':encoding(UTF-8)'}, encode_utf8(get_html_list($projects)) );
 write_file( $output_dir . 'proto.json',{binmode => ':encoding(UTF-8)'}, get_json($projects) );
 
 print "index.html and proto.json files generated\n";
 
 sub get_projects {
     my ($list_url) = @_;
-    my $projects = eval { from_json('projects.list.local') } || from_json( get($list_url) );
+    my $projects;
+    my $contents = eval { slurp('projects.list.local') } || get($list_url);
+    for my $line (split "\n", $contents) {
+        my ($name, $url) = split ' ', $line;
+        my ($auth) = $url =~ m[git://github.com/([^/]+)/];
+        $projects->{$name}->{'home'} = "github";
+        $projects->{$name}->{'auth'} = $auth;
+    }
     my $cached_projects = eval { decode_json read_file( $output_dir . 'proto.json' , binmode => ':encoding(UTF-8)' )  };
 
     foreach my $project_name ( keys %$projects ) {
@@ -120,20 +128,20 @@ sub get_projects {
             delete $projects->{$project_name};
             next;
         }
-	my $error;
+    	my $error;
         my $home = $site_info->{ $project->{home} };
         if ( !$home ) {
-		$error = "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
+	    	$error = "Don't know how to get info for $project->{name} from $project->{home} (new repository?) \n";
         }
 
         $error ||= $home->{set_project_info}->($project , $cached_projects->{$project_name} );
         if ($error) {
-		$stats->{failed}++;
-		push @{ $stats->{errors} }, $error ;
-		delete $projects->{$project_name};
+	    	$stats->{failed}++;
+	    	push @{ $stats->{errors} }, $error ;
+	    	delete $projects->{$project_name};
         } else {
-		$stats->{success}++;
-	}
+	    	$stats->{success}++;
+    	}
         print $project->{description}||$error,"\n\n";
     }
     return $projects;
