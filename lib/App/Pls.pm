@@ -94,9 +94,17 @@ class App::Pls::Core {
         return $!projects.state-of($project);
     }
 
+    method !assert-no-cycle($project --> Result) {
+        return failure
+            if %*seen-projects{$project}++;
+        return failure
+            if self!assert-no-cycle(any $!projects.deps-of($project))
+               == failure;
+        return success;
+    }
+
     method fetch(*@projects --> Result) {
         for @projects -> $project {
-            my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
         }
@@ -104,13 +112,6 @@ class App::Pls::Core {
     }
 
     method !fetch-helper($project --> Result) {
-        %*seen-projects{$project}++;
-        for $!projects.deps-of($project) -> $dep {
-            return failure
-                if %*seen-projects{$dep};
-            return failure
-                if self!fetch-helper($dep) == failure;
-        }
         if $!projects.reached-state($project, 'fetched') {
             return success;
         }
@@ -123,11 +124,25 @@ class App::Pls::Core {
         }
     }
 
+    method !fetch-all-dependencies($project --> Result) {
+        return failure
+            if self!fetch-helper($project) == failure;
+        for $!projects.deps-of($project) -> $dep {
+            return failure
+                if self!fetch-all-dependencies($dep) == failure;
+        }
+        return success;
+    }
+
     method build(*@projects) {
         for @projects -> $project {
-            my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
+            my %*seen-projects;
+            return failure
+                if self!assert-no-cycle($project) == failure;
+            return failure
+                if self!fetch-all-dependencies($project) == failure;
             return failure
                 if self!build-helper($project) == failure;
         }
@@ -162,9 +177,13 @@ class App::Pls::Core {
 
     method test(*@projects) {
         for @projects -> $project {
-            my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
+            my %*seen-projects;
+            return failure
+                if self!assert-no-cycle($project) == failure;
+            return failure
+                if self!fetch-all-dependencies($project) == failure;
             return failure
                 if self!build-helper($project) != success;
             return failure
@@ -189,9 +208,11 @@ class App::Pls::Core {
     method install(*@projects, Bool :$force, Bool :$skip-test) {
         my $needed-force = False;
         for @projects -> $project {
-            my %*seen-projects;
             return failure
                 if self!fetch-helper($project) == failure;
+            my %*seen-projects;
+            return failure
+                if self!assert-no-cycle($project) == failure;
             # RAKUDO: an unspecified $force should be False, is Any
             my $build-result = self!build-helper($project, :force(?$force),
                                                  :skip-test(?$skip-test));

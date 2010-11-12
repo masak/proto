@@ -30,7 +30,7 @@ my $core = App::Pls::Core.new(
     :fetcher(Mock::Fetcher.new()),
 );
 
-plan 24;
+plan 14;
 
 given $core {
     # [T] Fetch a project: Succeed.
@@ -42,31 +42,12 @@ given $core {
     is .fetch(<will-fail>), failure, "Fetch a project: Fail";
     is .state-of('will-fail'), 'absent', "State after: 'absent'";
 
-    # [T] Fetch a project with dependencies: Fetch dependencies too.
+    # [T] Fetch a project with dependencies: don't fetch dependencies too.
     for <A B C D> -> $dep {
         is .state-of($dep), 'absent', "State before of $dep: 'absent'";
     }
     is .fetch(<has-deps>), success, "Fetch project's dependencies, too";
     for <A B C D> -> $dep {
-        is .state-of($dep), 'fetched', "State after of $dep: 'fetched'";
+        is .state-of($dep), 'absent', "State after of $dep: 'fetched'";
     }
-
-    # [T] Fetch a project with circular dependencies: Fail.
-    is .fetch(<circ-deps>), failure, "Fetch a project with circ deps: fail";
-    is .state-of('circ-deps'), 'absent', "State after of circ-deps: 'absent'";
-    is .state-of('E'), 'absent', "State after of E: 'absent'";
-
-    # [T] Fetch a project whose direct dependency fails: Fail.
-    is .fetch(<dirdep-fails>), failure, "Fail on direct dependency failure";
-    is .state-of('dirdep-fails'), 'absent',
-        "State after of dirdep-fails: 'absent'";
-    is .state-of('will-fail'), 'absent', "State after of will-fail: 'absent'";
-
-    # [T] Fetch a project whose indirect dependency fails: Fail.
-    is .fetch(<indir-fails>), failure, "Fail on indirect dependency failure";
-    is .state-of('indir-fails'), 'absent',
-        "State after of indir-fails: 'absent'";
-    is .state-of('dirdep-fails'), 'absent',
-        "State after of dirdep-fails: 'absent'";
-    is .state-of('will-fail'), 'absent', "State after of will-fail: 'absent'";
 }
