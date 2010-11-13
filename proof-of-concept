@@ -34,7 +34,7 @@ role WebBackend {
     has $.url;
 
     method load-from-url() {
-        my $projects = qqx[wget -q -O- $.url];
+        my $projects = qqx[wget -q --no-check-certificate -O- $.url];
         if !$projects {
             die "Couldn't fetch ecosystem from the web";
         }
