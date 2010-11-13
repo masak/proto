@@ -38,7 +38,9 @@ role WebBackend {
         if !$projects {
             die "Couldn't fetch ecosystem from the web";
         }
-        %.projects = from-json($projects);
+        %.projects = $projects.lines.map(
+                        { .[0] => { url => .[1] } given .words }
+                     );
     }
 }
 
@@ -97,11 +99,7 @@ sub announce-end-of(Str $action, $result) {
 
 class POC::Fetcher does App::Pls::Fetcher {
     # RAKUDO: Can't use '--> Result' after a 'where' block
-    # RAKUDO: Havn't tracked down why, but can't use a multi here to
-    #         dispatch on $project<home>
     method fetch($project) {
-        die "Not able to fetch non-github projects yet, sorry :/"
-            unless $project<home> eq 'github';
         if "cache".IO !~~ :e {
             mkdir('cache');
         }
@@ -113,8 +111,8 @@ class POC::Fetcher does App::Pls::Fetcher {
             run-logged "rm -rf $target-dir", :step('fetch'), :$project;
         }
         my $command
-            = sprintf 'git clone git://github.com/%s/%s.git %s',
-                      $project.<auth>, $project.<name>, $target-dir;
+            = sprintf 'git clone %s.git %s',
+                      $project<url>, $target-dir;
         my $result = run-logged( $command, :step('fetch'), :$project )
                      ?? success !! failure;
 
