@@ -110,7 +110,7 @@ print "index.html and proto.json files generated\n";
 sub get_projects {
     my ($list_url) = @_;
     my $projects;
-    my $contents = eval { slurp('projects.list.local') } || get($list_url);
+    my $contents = eval { read_file('projects.list.local') } || get($list_url);
     for my $line (split "\n", $contents) {
         my ($name, $url) = split ' ', $line;
         my ($auth) = $url =~ m[git://github.com/([^/]+)/];
