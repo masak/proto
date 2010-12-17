@@ -62,8 +62,15 @@ my $site_info = {
 		
 		$project ->{badge_has_tests} = $files{t} || $files{test} || $files{tests} ;
 
-        my @readmes = @files{ qw/README README.pod README.md README.mkdn README.markdown/ };
-		$project ->{badge_has_readme} = scalar(@readmes) ? "http://github.com/$project->{auth}/$project->{name}/blob/master/README" : undef;
+        my $has_readme = grep exists $files{$_}, qw/
+                                                    README
+                                                    README.pod
+                                                    README.md
+                                                    README.mkdn
+                                                    README.markdown
+                                                 /;
+
+		$project ->{badge_has_readme} = $has_readme ? "http://github.com/$project->{auth}/$project->{name}/blob/master/README" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
 		sleep(3) ; #We are allowed 60 calls/min = 1 api call per second, and we are wasting 3 per request so we sleep for 3 secs to make up
 		return;
