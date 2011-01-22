@@ -11,7 +11,7 @@ use File::Slurp;
 use Encode qw(encode_utf8);
 
 my $output_dir = shift(@ARGV) || './';
-my @MEDALS = qw<fresh medal readme tests unachieved>;
+my @MEDALS = qw<fresh medal readme tests unachieved proto camelia>;
 binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
