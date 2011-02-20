@@ -23,12 +23,12 @@ my $site_info = {
     'github' => {
         set_project_info => sub {
 		my ($project , $previous )= @_;
-		$project ->{url}= "http://github.com/$project->{auth}/$project->{name}/";
+        $project->{url} = "http://github.com/$project->{auth}/$project->{repo_name}/";
 		if ( ! head( $project ->{url} ) ) {
 			return "Error for project $project->{name} : could not get $project->{url} (project probably dead)\n";
 		}
 
-		my $commits = decode_json get("http://github.com/api/v2/json/commits/list/$project->{auth}/$project->{name}/master");
+		my $commits = decode_json get("http://github.com/api/v2/json/commits/list/$project->{auth}/$project->{repo_name}/master");
 		my $latest = $commits->{commits}->[0];
 		$project ->{last_updated}= $latest->{committed_date};
 		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
@@ -43,15 +43,15 @@ my $site_info = {
 		}
 		print "Updated since last check\n";
 		
-		my $repository = decode_json get ("http://github.com/api/v2/json/repos/show/$project->{auth}/$project->{name}");
+		my $repository = decode_json get ("http://github.com/api/v2/json/repos/show/$project->{auth}/$project->{repo_name}");
 		$project ->{description}= $repository->{repository}->{description};
 		
-		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{auth}/$project->{name}/$latest->{id}");
+		my $tree = decode_json get("http://github.com/api/v2/json/tree/show/$project->{auth}/$project->{repo_name}/$latest->{id}");
 		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
 		
 		#try to get the logo if any
 		if ( -e "$output_dir/logos" && $files{logotype} ) {
-			my $logo_url = "http://github.com/$project->{auth}/$project->{name}/raw/master/logotype/logo_32x32.png";
+			my $logo_url = "http://github.com/$project->{auth}/$project->{repo_name}/raw/master/logotype/logo_32x32.png";
 			if ( head($logo_url) ) { 
 				my $logo_name = $project->{name};
 				$logo_name =~ s/\W+/_/;
@@ -70,7 +70,7 @@ my $site_info = {
                                                     README.markdown
                                                  /;
 
-		$project ->{badge_has_readme} = scalar(@readmes) ? "http://github.com/$project->{auth}/$project->{name}/blob/master/$readmes[0]" : undef;
+		$project ->{badge_has_readme} = scalar(@readmes) ? "http://github.com/$project->{auth}/$project->{repo_name}/blob/master/$readmes[0]" : undef;
 		$project ->{badge_is_popular} = $repository->{repository}->{watchers} && $repository->{repository}->{watchers} > 50;
 		sleep(3) ; #We are allowed 60 calls/min = 1 api call per second, and we are wasting 3 per request so we sleep for 3 secs to make up
 		return;
@@ -122,9 +122,12 @@ sub get_projects {
     my $contents = eval { read_file('projects.list.local') } || get($list_url);
     for my $line (split "\n", $contents) {
         my ($name, $url) = split ' ', $line;
-        my ($auth) = $url =~ m[git://github.com/([^/]+)/];
-        $projects->{$name}->{'home'} = "github";
-        $projects->{$name}->{'auth'} = $auth;
+        my ($auth, $repo_name)
+            = $url =~ m[git://github.com/([^/]+)/([^.]+).git];
+        $projects->{$name}->{'home'}      = "github";
+        $projects->{$name}->{'auth'}      = $auth;
+        $projects->{$name}->{'repo_name'} = $repo_name;
+        $projects->{$name}->{'url'}  = $url;
     }
     my $cached_projects = eval { decode_json read_file( $output_dir . 'proto.json' , binmode => ':encoding(UTF-8)' )  };
 
