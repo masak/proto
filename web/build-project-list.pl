@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use 5.010;
 
 use Data::Dumper;
 use LWP::Simple;
@@ -17,7 +18,7 @@ binmode STDOUT, ':encoding(UTF-8)';
 local $| = 1;
 my $stats = { success => 0, failed => 0, errors => [] };
 
-my $list_url = 'http://github.com/perl6/ecosystem/raw/master/projects.list';
+my $list_url = 'http://github.com/perl6/ecosystem/raw/master/META.list';
 
 my $site_info = {
     'github' => {
@@ -119,9 +120,11 @@ print "index.html and proto.json files generated\n";
 sub get_projects {
     my ($list_url) = @_;
     my $projects;
-    my $contents = eval { read_file('projects.list.local') } || get($list_url);
-    for my $line (split "\n", $contents) {
-        my ($name, $url) = split ' ', $line;
+    my $contents = eval { read_file('META.list.local') } || get($list_url);
+    for my $proj (split "\n", $contents) {
+        my $json = decode_json encode_utf8 get $proj;
+        my $name = $json->{'name'};
+        my $url = $json->{'source-url'} // $json->{'repo-url'};
         my ($auth, $repo_name)
             = $url =~ m[git://github.com/([^/]+)/([^.]+).git];
         $projects->{$name}->{'home'}      = "github";
