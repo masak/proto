@@ -12,7 +12,7 @@ use File::Slurp;
 use Encode qw(encode_utf8);
 
 my $output_dir = shift(@ARGV) || './';
-my @MEDALS = qw<fresh medal readme tests unachieved proto camelia>;
+my @MEDALS = qw<fresh medal readme tests unachieved proto camelia panda>;
 binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
@@ -37,6 +37,7 @@ my $site_info = {
 		
 		if ( $previous && $previous->{last_updated} eq $latest->{committed_date} ) {
 			$previous->{badge_is_fresh} = $project->{badge_is_fresh} ; #Even if the project was not modified we need to update this
+            $previous->{badge_panda} = $project->{badge_panda};
 			%$project = %$previous;
 			print "Not updated since last check, loading from cache\n";
 			sleep(1); #We only did one api call
@@ -131,6 +132,7 @@ sub get_projects {
         $projects->{$name}->{'auth'}      = $auth;
         $projects->{$name}->{'repo_name'} = $repo_name;
         $projects->{$name}->{'url'}  = $url;
+        $projects->{$name}->{'badge_panda'} = defined $json->{'source-url'};
     }
     my $cached_projects = eval { decode_json read_file( $output_dir . 'proto.json' , binmode => ':encoding(UTF-8)' )  };
 
