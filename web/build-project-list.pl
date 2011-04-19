@@ -69,6 +69,7 @@ my $site_info = {
                                                     README.pod
                                                     README.md
                                                     README.mkdn
+                                                    README.mkd
                                                     README.markdown
                                                  /;
 
