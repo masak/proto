@@ -3,3 +3,5 @@ config.proto
 *.pir
 cache/*
 *~
+_build
+Build
