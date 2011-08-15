@@ -18,7 +18,7 @@ binmode STDOUT, ':encoding(UTF-8)';
 local $| = 1;
 my $stats = { success => 0, failed => 0, errors => [] };
 
-my $list_url = 'http://github.com/perl6/ecosystem/raw/master/META.list';
+my $list_url = 'https://github.com/perl6/ecosystem/raw/master/META.list';
 
 my $site_info = {
     'github' => {
