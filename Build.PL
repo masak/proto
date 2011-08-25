@@ -12,6 +12,8 @@ my $build = Module::Build->new(
     # and now the list of perl module dependencies
     requires => {
         'HTML::Template' => 0,
+        'Mojolicious'    => 0,
+        'YAML'           => 0,
     }
 );
 $build->create_build_script;
