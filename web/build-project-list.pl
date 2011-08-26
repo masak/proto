@@ -67,7 +67,7 @@ my $site_info = {
 		print "Updated since last check\n";
 		
 		my $repository = json_get ("https://github.com/api/v2/json/repos/show/$project->{auth}/$project->{repo_name}");
-		$project ->{description}= $repository->{repository}->{description};
+		$project->{description} //= $repository->{repository}->{description};
 		
 		my $tree = json_get("https://github.com/api/v2/json/tree/show/$project->{auth}/$project->{repo_name}/$latest->{id}");
 		my %files =  map { $_->{name} , $_->{type} } @{ $tree->{tree} };
@@ -157,6 +157,7 @@ sub get_projects {
             $projects->{$name}->{'repo_name'} = $repo_name;
             $projects->{$name}->{'url'}  = $url;
             $projects->{$name}->{'badge_panda'} = defined $json->{'source-url'};
+            $projects->{$name}->{'description'} = $json->{'description'};
         };
         warn $@ if $@;
     }
