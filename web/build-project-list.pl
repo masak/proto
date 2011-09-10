@@ -11,6 +11,8 @@ use YAML qw (Load LoadFile);
 use HTML::Template;
 use File::Slurp;
 use Encode qw(encode_utf8);
+use Time::Piece;
+use Time::Seconds;
 
 # LWP::Simple doesn't seem to like https, even when IO::Socket::INET
 # and Crypt::SSLeay are installed. So replace its functions with
@@ -53,8 +55,8 @@ my $site_info = {
 		my $commits = json_get("https://github.com/api/v2/json/commits/list/$project->{auth}/$project->{repo_name}/master");
 		my $latest = $commits->{commits}->[0];
 		$project ->{last_updated}= $latest->{committed_date};
-		my ($yyy,$mm,$dd)= (localtime (time - (90*3600*24) ))[5,4,3,] ;  $yyy+=1900;$mm++; #There must be a better way to get yymmdd for 90 days ago
-		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge sprintf ("%04d-%02d-%02d" ,$yyy,$mm,$dd); #fresh is newer than 30 days ago
+		my $ninety_days_ago = localtime( ) - 90 * ONE_DAY;
+		$project ->{badge_is_fresh} = $project ->{last_updated} && $project->{last_updated} ge $ninety_days_ago->ymd(); #fresh is newer than 30 days ago
 		
 		if ( $previous && $previous->{last_updated} eq $latest->{committed_date} ) {
 			$previous->{badge_is_fresh} = $project->{badge_is_fresh} ; #Even if the project was not modified we need to update this
@@ -203,8 +205,11 @@ sub get_html_list {
     my @projects = keys %$projects;
     @projects = sort projects_list_order @projects;
     @projects = map { $projects->{$_} } @projects;
-
     $template->param( projects => \@projects );
+    
+    my $last_update = gmtime( )->strftime('%Y-%m-%d %H:%M:%S GMT');
+    $template->param( last_update => $last_update );
+    
     return $template->output;
 }
 
