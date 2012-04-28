@@ -17,7 +17,9 @@ use Time::Seconds;
 # LWP::Simple doesn't seem to like https, even when IO::Socket::INET
 # and Crypt::SSLeay are installed. So replace its functions with
 # Mojolicious
-my $ua = Mojo::UserAgent->new->ioloop(Mojo::IOLoop->new->connect_timeout(10));
+my $ua = Mojo::UserAgent->new;
+$ua->connect_timeout(10);
+$ua->request_timeout(10);
 sub get {
     $ua->get($_[0])->res->body
 }
