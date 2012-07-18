@@ -79,6 +79,9 @@ sub set_project_info {
     print "Not updated since last check, loading from cache\n";
     return 1;
   }
+  else {
+    $project->{badge_is_fresh} = $is_fresh;
+  }
   print "Updated since last check\n";
 
   my $repo = $self->get_api($project);
