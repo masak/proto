@@ -5,3 +5,6 @@ cache/*
 *~
 _build
 Build
+web/logos
+web/index.html
+web/proto.json
