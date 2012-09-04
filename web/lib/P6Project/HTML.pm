@@ -32,7 +32,7 @@ sub get_html {
   @projects = sort projects_list_order @projects;
   @projects = map { $projects->{$_} } @projects;
   $template->param(projects => \@projects);
-  my $last_update = gmtime()->strftime('%Y-%m-%d %H:%M:%S GTM');
+  my $last_update = gmtime()->strftime('%Y-%m-%d %H:%M:%S GMT');
   $template->param(last_update => $last_update);
 
   return $template->output;
