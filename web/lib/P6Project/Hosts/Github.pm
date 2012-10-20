@@ -8,122 +8,124 @@ use Time::Piece;
 use Time::Seconds;
 
 sub new {
-  my ($class, %opts) = @_;
-  my $self = \%opts;
-  return bless $self, $class;
+    my ($class, %opts) = @_;
+    my $self = \%opts;
+    return bless $self, $class;
 }
 
 sub p6p {
-  my ($self) = @_;
-  return $self->{p6p};
+    my ($self) = @_;
+    return $self->{p6p};
 }
 
 sub raw_url {
-  'https://raw.github.com/';
+    'https://raw.github.com/';
 }
 
 sub api_url {
-  'https://api.github.com/';
+    'https://api.github.com/';
 }
 
 sub web_url {
-  'https://github.com/';
+    'https://github.com/';
 }
 
 sub get_api {
-  my ($self, $project, $call) = @_;
-  my $url = $self->api_url . "repos/$project->{auth}/$project->{repo_name}";
-  if ($call) {
-    $url .= $call;
-  }
-  return $self->p6p->ua->get($url)->res->json;
+    my ($self, $project, $call) = @_;
+    my $url = $self->api_url . "repos/$project->{auth}/$project->{repo_name}";
+    if ($call) {
+        $url .= $call;
+    }
+    return $self->p6p->ua->get($url)->res->json;
 }
 
 sub file_url {
-  my ($self, $project, $revision, $file) = @_;
-  my $url = $self->raw_url . $project->{auth} . '/' . $project->{repo_name} . '/' . $revision;
-  $url .= $file;
-  return $url;
+    my ($self, $project, $revision, $file) = @_;
+    my $url = $self->raw_url . $project->{auth} . '/' . $project->{repo_name} . '/' . $revision;
+    $url .= $file;
+    return $url;
 }
 
 sub blob_url {
-  my ($self, $project, $revision, $file) = @_;
-  my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/blob/' . $revision;
-  $url .= $file;
-  return $url;
+    my ($self, $project, $revision, $file) = @_;
+    my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/blob/' . $revision;
+    $url .= $file;
+    return $url;
 }
 
 sub set_project_info {
-  my ($self, $project, $previous) = @_;
-  my $ua = $self->p6p->ua;
-  my $stats = $self->p6p->stats;
+    my ($self, $project, $previous) = @_;
+    my $ua = $self->p6p->ua;
+    my $stats = $self->p6p->stats;
 
-  my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/';
-  if (! $ua->get($url)->success ) {
-    $stats->error("Error for project $project->{name} : could not get $url (project probably dead)");
-    return 0;
-  }
-  $project->{url} = $url;
-  
-  my $commits = $self->get_api($project, "/commits");
-  my $latest = $commits->[0];
-  my $updated = $latest->{commit}->{committer}->{date};
-  $project->{last_updated} = $updated;
-
-  my $ninety_days_ago = localtime() - 90 * ONE_DAY;
-  my $is_fresh = $updated && $updated ge $ninety_days_ago->ymd();
-  if ($previous && $previous->{last_updated} eq $updated) {
-    $previous->{badge_is_fresh} = $is_fresh;
-    $previous->{badge_panda} = $project->{badge_panda};
-    %$project = %$previous;
-    print "Not updated since last check, loading from cache\n";
-    return 1;
-  }
-  else {
-    $project->{badge_is_fresh} = $is_fresh;
-  }
-  print "Updated since last check\n";
-
-  my $repo = $self->get_api($project);
-  $project->{description} //= $repo->{description};
-
-  my $tree = $self->get_api($project, "/git/trees/$latest->{sha}?recursive=1");
-  my %files = map { $_->{path}, $_->{type} } @{$tree->{tree}};
-  
-  ## Get the logo if one exists.
-  my $logo_file = 'logotype/logo_32x32.png';
-  if ($files{logotype} && $files{$logo_file}) {
-    my $logo_name = $project->{name};
-    $logo_name =~ s/\W+/_/;
-    my $logo_store = "/logos/$logo_name.png";
-    ## TODO: check filesize, and skip download if filesize is the same.
-    my $logo_url = $self->file_url($project, $latest->{sha}, '/'.$logo_file);
-    if ($self->p6p->getstore($logo_url, $logo_store)) {
-      $project->{logo} = './'.$logo_store;
-      $project->{logo} =~ s{//}{/}g;
+    my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/';
+    if (! $ua->get($url)->success ) {
+        $stats->error("Error for project $project->{name} : could not get $url (project probably dead)");
+        return 0;
     }
-  }
+    $project->{url} = $url;
 
-  ## And now for some badges.
+    my $commits = $self->get_api($project, "/commits");
+    my $latest = $commits->[0];
+    my $updated = $latest->{commit}->{committer}->{date};
+    $project->{last_updated} = $updated;
 
-  $project->{badge_has_tests} = $files{t} || $files{test} || $files{tests};
+    my $ninety_days_ago = localtime() - 90 * ONE_DAY;
+    my $is_fresh = $updated && $updated ge $ninety_days_ago->ymd();
+    if ($previous && $previous->{last_updated} eq $updated) {
+        $previous->{badge_is_fresh} = $is_fresh;
+        $previous->{badge_panda} = $project->{badge_panda};
+        %$project = %$previous;
+        print "Not updated since last check, loading from cache\n";
+        return 1;
+    }
+    else {
+        $project->{badge_is_fresh} = $is_fresh;
+    }
+    print "Updated since last check\n";
 
-  my @readmes = grep exists $files{$_}, qw/
-                                            README
-                                            README.pod
-                                            README.md
-                                            README.mkdn
-                                            README.mkd
-                                            README.markdown
-                                          /;
-  
-  $project->{badge_has_readme} = scalar(@readmes) 
+    my $repo = $self->get_api($project);
+    $project->{description} //= $repo->{description};
+
+    my $tree = $self->get_api($project, "/git/trees/$latest->{sha}?recursive=1");
+    my %files = map { $_->{path}, $_->{type} } @{$tree->{tree}};
+
+    ## Get the logo if one exists.
+    my $logo_file = 'logotype/logo_32x32.png';
+    if ($files{logotype} && $files{$logo_file}) {
+        my $logo_name = $project->{name};
+        $logo_name =~ s/\W+/_/;
+        my $logo_store = "/logos/$logo_name.png";
+        ## TODO: check filesize, and skip download if filesize is the same.
+        my $logo_url = $self->file_url($project, $latest->{sha}, '/'.$logo_file);
+        if ($self->p6p->getstore($logo_url, $logo_store)) {
+            $project->{logo} = './'.$logo_store;
+            $project->{logo} =~ s{//}{/}g;
+        }
+    }
+
+    ## And now for some badges.
+
+    $project->{badge_has_tests} = $files{t} || $files{test} || $files{tests};
+
+    my @readmes = grep exists $files{$_}, qw/
+    README
+    README.pod
+    README.md
+    README.mkdn
+    README.mkd
+    README.markdown
+    /;
+
+    $project->{badge_has_readme} = scalar(@readmes) 
     ? $self->blob_url($project, $latest->{sha}, "/$readmes[0]") 
     : undef;
 
-  $project->{badge_is_popular} = $repo->{watchers} && $repo->{watchers} >= $self->p6p->min_popular;
+    $project->{badge_is_popular} = $repo->{watchers} && $repo->{watchers} >= $self->p6p->min_popular;
 
-  return 1;
+    return 1;
 }
 
 1;
+
+# vim: set ts=4 sw=4 expantab
