@@ -7,6 +7,15 @@ use 5.010;
 use Time::Piece;
 use Time::Seconds;
 
+my $github_token = do {
+    open my $IN, '<', 'github-token'
+        or die "Cannot open file 'github-token' for reading: $!";
+    my $token = <$IN>;
+    chomp $token;
+    close $IN;
+    $token;
+};
+
 sub new {
     my ($class, %opts) = @_;
     my $self = \%opts;
@@ -36,7 +45,7 @@ sub get_api {
     if ($call) {
         $url .= $call;
     }
-    return $self->p6p->ua->get($url)->res->json;
+    return $self->p6p->ua->get($url, {Authorization => "token $github_token"})->res->json;
 }
 
 sub file_url {
@@ -59,8 +68,10 @@ sub set_project_info {
     my $stats = $self->p6p->stats;
 
     my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/';
-    if (! $ua->get($url)->success ) {
-        $stats->error("Error for project $project->{name} : could not get $url (project probably dead)");
+    my $tx = $ua->get($url);
+    if (! $tx->success ) {
+        my $error = $tx->error;
+        $stats->error("Error for project $project->{name} : could not get $url: $error (project probably dead)");
         return 0;
     }
     $project->{url} = $url;
