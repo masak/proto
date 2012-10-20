@@ -47,7 +47,8 @@ sub getstore {
     my ($self, $url, $filename) = @_;
     my $file = $self->ua->get($url);
     if (!$file->success) { return 0; }
-    open my $f, '>', $self->output_dir . $filename or die "Cannot open '$filename' for writing: $!";
+    my $path = $self->output_dir . $filename;
+    open my $f, '>', $path or die "Cannot open '$path' for writing: $!";
     print { $f } $file->res->body;
     close $f or warn "Error while closing file '$filename': $!";
     return 1;

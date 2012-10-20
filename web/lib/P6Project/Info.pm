@@ -37,8 +37,13 @@ sub get_projects {
             next;
         }
         my $name = $json->{'name'};
+        unless (defined $name) {
+            warn "$proj has no name, skipping!\n";
+            next;
+        }
         my $url  = $json->{'source-url'} // $json->{'repo-url'};
         $projects->{$name}->{'url'} = $url;
+        $projects->{$name}{success} = 0;
         my ($home) = $url =~ m[git://([\w\.]+)/];
         if ($home) {
             given ($home) {
