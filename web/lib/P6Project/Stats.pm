@@ -7,7 +7,7 @@ use 5.010;
 sub new {
   my ($class) = @_;
   my $self = {
-    'sucess' => 0,
+    'success' => 0,
     'failed' => 0,
     'errors' => [],
   };
