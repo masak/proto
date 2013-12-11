@@ -110,7 +110,7 @@ dl.table-display {
             <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
             <TMPL_IF badge_has_tests><img src='tests.png' title='Has tests' alt="Tests badge" /><TMPL_ELSE><img src='unachieved.png' title="Doesn't have tests" alt="Unachieved badge" /></TMPL_IF>
             <TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' alt="Fresh badge" /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' alt="Unachieved badge" /></TMPL_IF>
-            <TMPL_IF badge_panda_nos11><img src='panda_nos11.png' title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Panda badge" /><TMPL_ELSE><TMPL_IF badge_panda><img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.' /><TMPL_ELSE><img src='unachieved.png' title='Not quite up-to-date with the specs' alt="Unachieved badge" /></TMPL_IF></TMPL_IF>
+            <TMPL_IF badge_panda_nos11><img src='panda_nos11.png' title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /><TMPL_ELSE><TMPL_IF badge_panda><img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.' alt="Golden Panda badge" /><TMPL_ELSE><img src='unachieved.png' title='Not quite up-to-date with the specs' alt="Unachieved badge" /></TMPL_IF></TMPL_IF>
         </div>
 	    <TMPL_VAR description></dd>
             </TMPL_IF>
