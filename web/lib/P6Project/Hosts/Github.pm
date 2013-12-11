@@ -86,6 +86,7 @@ sub set_project_info {
     if ($previous && $previous->{last_updated} eq $updated) {
         $previous->{badge_is_fresh} = $is_fresh;
         $previous->{badge_panda} = $project->{badge_panda};
+        $previous->{badge_panda_nos11} = $project->{badge_panda_nos11};
         %$project = %$previous;
         print "Not updated since last check, loading from cache\n";
         return 1;

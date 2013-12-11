@@ -63,8 +63,8 @@ sub get_projects {
             $stats->error("Invalid source-url found: $url");
             next;
         }
-        $projects->{$name}->{'badge_panda'} = defined $json->{'source-url'} && defined $json->{'provides'};
-        $projects->{$name}->{'badge_panda_nos11'} = defined $json->{'source-url'};
+        $projects->{$name}->{'badge_panda'} = defined $json->{'source-url'};
+        $projects->{$name}->{'badge_panda_nos11'} = defined $json->{'source-url'} && !defined $json->{'provides'};
         $projects->{$name}->{'description'} = $json->{'description'};
     }
 
