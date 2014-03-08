@@ -123,6 +123,7 @@ sub set_project_info {
     my @readmes = grep exists $files{$_}, qw/
     README
     README.pod
+    README.pod6
     README.md
     README.mkdn
     README.mkd
