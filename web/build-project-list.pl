@@ -17,7 +17,7 @@ local $| = 1;
 
 my $min_popular = 10;
 
-my $list_url = 'https://raw.githubusercontent.com/perl6/ecosystem/master/META.list';
+my $list_url = 'https://raw2.github.com/perl6/ecosystem/master/META.list';
 
 my $template = './index.tmpl';
 
