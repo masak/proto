@@ -28,7 +28,7 @@ sub p6p {
 }
 
 sub raw_url {
-    'https://raw.github.com/';
+    'https://raw.githubusercontent.com/';
 }
 
 sub api_url {
