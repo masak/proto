@@ -45,7 +45,13 @@ sub get_api {
     if ($call) {
         $url .= $call;
     }
-    return $self->p6p->ua->get($url, {Authorization => "token $github_token"})->res->json;
+    my $tx = $self->p6p->ua->get($url, {Authorization => "token $github_token"});
+    if (! $tx->success ) {
+        my $error = $tx->error;
+        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error");
+        return;
+    }
+    return $tx->res->json;
 }
 
 sub file_url {
@@ -76,7 +82,7 @@ sub set_project_info {
     }
     $project->{url} = $url;
 
-    my $commits = $self->get_api($project, "/commits");
+    my $commits = $self->get_api($project, "/commits") or return 0;
     my $latest = $commits->[0];
     my $updated = $latest->{commit}->{committer}->{date};
     $project->{last_updated} = $updated;
@@ -96,10 +102,10 @@ sub set_project_info {
     }
     print "Updated since last check\n";
 
-    my $repo = $self->get_api($project);
+    my $repo = $self->get_api($project) or return 0;
     $project->{description} //= $repo->{description};
 
-    my $tree = $self->get_api($project, "/git/trees/$latest->{sha}?recursive=1");
+    my $tree = $self->get_api($project, "/git/trees/$latest->{sha}?recursive=1") or return 0;
     my %files = map { $_->{path}, $_->{type} } @{$tree->{tree}};
 
     ## Get the logo if one exists.
