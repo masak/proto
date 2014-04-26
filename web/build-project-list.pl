@@ -32,7 +32,7 @@ my $failed  = $p6p->stats->failed;
 print "ok - $success\nnok - $failed\n";
 
 my @errors = $p6p->stats->errors;
-print STDERR join "\n", @errors if scalar(@errors);
+print STDERR join '', map {"$_\n"} @errors if scalar(@errors);
 
 die "Too many errors no output generated"
   if $failed > $success;
