@@ -16,7 +16,7 @@ sub new {
     my ($class, %opts) = @_;
     my $self = \%opts;
     $self->{output_dir} //= './';
-    my $ua = Mojo::UserAgent->new(max_redirects => 10);
+    my $ua = Mojo::UserAgent->new;
     $ua->connect_timeout(10);
     $ua->request_timeout(10);
     $self->{ua} = $ua;
