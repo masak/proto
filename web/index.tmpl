@@ -15,7 +15,7 @@ body {
 }
 a {color:#000;}
 a img {border:none;}
-.project-logo {width:32px;margin-right:5px;float:left;}
+.project-logo {width:32px;margin-left:-37px;margin-right:5px;float:left;}
 .badges { float: right }
 #header {
 	margin:0 0 3em;min-height:200px;
