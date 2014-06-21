@@ -6,7 +6,7 @@ use 5.010;
 
 use Mojo::UserAgent;
 use P6Project::Stats;
-use Encode qw(encode_utf8);
+use Encode qw(decode_utf8);
 use P6Project::Info;
 use P6Project::HTML;
 use JSON;
@@ -55,11 +55,10 @@ sub getstore {
 }
 
 sub writeout {
-    my ($self, $content, $filename, $encode) = @_;
-    if ($encode) {
-        $content = encode_utf8($content);
-    }
-    write_file($self->output_dir . $filename, {binmode => ':encoding(UTF-8)'}, $content);
+    my ($self, $content, $filename) = @_;
+    write_file($self->output_dir . $filename,
+               {binmode => ':encoding(UTF-8)'},
+               decode_utf8($content));
 }
 
 sub info {
@@ -95,7 +94,7 @@ sub template {
 sub write_html {
     my ($self, $filename) = @_;
     my $content = $self->html->get_html($self->projects);
-    return $self->writeout($content, $filename, 1);
+    return $self->writeout($content, $filename);
 }
 
 sub write_json {
