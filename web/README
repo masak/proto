@@ -3,3 +3,12 @@ Intial version contributed by patrickas++.
 
 This directory now lives in the root directory of the gh-pages branch, and will
 probably be removed soon.
+
+To run the scripts you need a GitHub token with rights to query Perl6 module GitHub repository information.
+Please find more information about GitHub tokens here:
+https://github.com/blog/1509-personal-api-tokens
+
+HowTo:
+* Create a token with access to public repositories
+* Save the token in file named 'github-token'
+* Place the github-token in the same directory as the Perl scripts
