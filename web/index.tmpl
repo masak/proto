@@ -71,7 +71,12 @@ dl.table-display {
 }
 
 .badges { margin-left: 1ex; }
+img.valign {
+	vertical-align: middle;
+}
 </style>
+
+	
 
     </head>
     <body>
@@ -103,10 +108,13 @@ dl.table-display {
         </div>
         <h2>Project list</h2>
         <p id="json_link"><a href="proto.json">JSON version of this list</a>.</p>
-        <dl class="table-display">
+		<div id="module_list">
+			<input class="search" placeholder="Search" />
+			
+        <dl class="list table-display">
         <TMPL_LOOP projects>
             <TMPL_IF description>
-            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ><a href="<TMPL_VAR URL>"><TMPL_VAR NAME></a></dt>
+            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ><a href="<TMPL_VAR URL>" class="name"><TMPL_VAR NAME></a></dt>
 	    <dd>
         <div class='badges'>
             <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
@@ -118,7 +126,23 @@ dl.table-display {
             </TMPL_IF>
         </TMPL_LOOP>
         </dl>
-        <p style="clear:both; padding-top: 2em">
+			</div>
+		<script src="js/list.min.js"></script>
+		<script>
+			var options = {
+				valueNames: [ 'name' ]
+			};
+
+			var userList = new List('module_list', options);
+		</script>
+		<p style="clear:both; padding-top: 2em">
+			Legend:<br />
+			<img src='readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
+			<img src='tests.png' class="valign" title='Has tests' alt="Tests badge" /> has tests |
+			<img src='fresh.png' class="valign" title='Commits in the past 90 days' alt="Fresh badge" /> recently updated |
+			<img src='panda_nos11.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /> conforms to Perl 6 modules specs
+		</p>
+        <p>
         This page is generated from the files in the <a
         href="http://github.com/perl6/modules.perl6.org/">modules.perl6.org
         repository</a>.<br/><i>Last update: <TMPL_VAR last_update></i></p>
