@@ -10,7 +10,7 @@ BEGIN { unshift @INC, './lib'; }
 use P6Project;
 
 my $output_dir = shift(@ARGV) || './';
-my @MEDALS = qw<fresh medal readme tests unachieved proto camelia panda panda_nos11>;
+my @MEDALS = qw<fresh readme tests unachieved camelia panda panda_nos11>;
 binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
