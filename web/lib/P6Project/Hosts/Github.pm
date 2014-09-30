@@ -48,7 +48,7 @@ sub get_api {
     my $tx = $self->p6p->ua->get($url, {Authorization => "token $github_token"});
     if (! $tx->success ) {
         my $error = $tx->error;
-        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error");
+        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error->{code} $error->{message}");
         return;
     }
     return $tx->res->json;
@@ -77,7 +77,7 @@ sub set_project_info {
     my $tx = $ua->get($url);
     if (! $tx->success ) {
         my $error = $tx->error;
-        $stats->error("Error for project $project->{name} : could not get $url: $error (project probably dead)");
+        $stats->error("Error for project $project->{name} : could not get $url: $error->{code} $error->{message} (project probably dead)");
         return 0;
     }
     $project->{url} = $url;
