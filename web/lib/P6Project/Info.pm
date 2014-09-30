@@ -44,12 +44,12 @@ sub get_projects {
         my $url  = $json->{'source-url'} // $json->{'repo-url'};
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;
-        my ($home) = $url =~ m[git://([\w\.]+)/];
+        my ($home) = $url =~ m[(?:git|https?)://([\w\.]+)/];
         if ($home) {
             given ($home) {
                 when (/github/) {
                     $projects->{$name}->{'home'} = 'github';
-                    my ($auth, $repo_name) = $url =~ m[git://$home/([^/]+)/([^/]+)\.git];
+                    my ($auth, $repo_name) = $url =~ m[(?:git|https?)://$home/([^/]+)/([^/]+)\.git];
                     $projects->{$name}->{'auth'} = $auth;
                     $projects->{$name}->{'repo_name'} = $repo_name;
                 }
