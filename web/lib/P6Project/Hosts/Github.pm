@@ -39,6 +39,18 @@ sub web_url {
     'https://github.com/';
 }
 
+sub _format_error {
+    my ($self, $error) = @_;
+    # depending on the version of Mojolicious, $error might either be a hash
+    # ref or a string
+    if (ref $error) {
+        return join ' ', $error->{code}, $error->{message};
+    }
+    else {
+        return $error;
+    }
+}
+
 sub get_api {
     my ($self, $project, $call) = @_;
     my $url = $self->api_url . "repos/$project->{auth}/$project->{repo_name}";
@@ -47,8 +59,8 @@ sub get_api {
     }
     my $tx = $self->p6p->ua->get($url, {Authorization => "token $github_token"});
     if (! $tx->success ) {
-        my $error = $tx->error;
-        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error->{code} $error->{message}");
+        my $error = $self->_format_error($tx->error);
+        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error");
         return;
     }
     return $tx->res->json;
@@ -76,8 +88,8 @@ sub set_project_info {
     my $url = $self->web_url . $project->{auth} . '/' . $project->{repo_name} . '/';
     my $tx = $ua->get($url);
     if (! $tx->success ) {
-        my $error = $tx->error;
-        $stats->error("Error for project $project->{name} : could not get $url: $error->{code} $error->{message} (project probably dead)");
+        my $error = $self->_format_error($tx->error);
+        $stats->error("Error for project $project->{name} : could not get $url: $error (project probably dead)");
         return 0;
     }
     $project->{url} = $url;
