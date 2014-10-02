@@ -2,10 +2,10 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-US">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	    <link rel="icon" href="/favicon.ico" type="favicon.ico" />
-        <title>Perl 6 Modules Directory</title>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="icon" href="/favicon.ico" type="favicon.ico" />
+	<title>Perl 6 Modules Directory</title>
 <style type="text/css">
 body {
 	font-family:helvetica,arial,sans-serif;
@@ -74,68 +74,94 @@ dl.table-display {
 img.valign {
 	vertical-align: middle;
 }
+#module_list > table {
+	width: 100%;
+}
+
+input.search {
+	width: 70%;
+}
+#my_search_box {
+	text-align: center;
+	margin: 3px auto;
+}
 </style>
 
 	
 
-    </head>
-    <body>
-		<div id="header">
-			<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt"><img alt="camelia perl bug logo" src="http://perl6.org/camelia-logo.png" /></a>
-			<h1><a href="/">Perl 6 Modules</a></h1>
-		</div>
-        <div id="content">
-        <div id="about">
-        <p>
-            Below you can find a list of known Perl 6 modules. All of them
-            have been working on <a href="http://rakudo.org/">Rakudo</a> at
-            some point.
-        </p>
+</head>
+<body>
+	<div id="header">
+		<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt"><img alt="camelia perl bug logo" src="http://perl6.org/camelia-logo.png" /></a>
+		<h1><a href="/">Perl 6 Modules</a></h1>
+	</div>
+	<div id="content">
+	<div id="about">
+	<p>
+		Below you can find a list of known Perl 6 modules. All of them
+		have been working on <a href="http://rakudo.org/">Rakudo</a> at
+		some point.
+	</p>
 
-        <p>These modules can be installed with <a
-            href="https://github.com/tadzik/panda/">panda</a>, a module management tool
-          which comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo Star</a>.
-        </p>
-        <p>
-            If you want to contribute your own module, please read
-            <a href="http://doc.perl6.org/language/modules">this guide</a>.
-        </p>
-        <p>
-            Missing a module you can't live without? Consider adding it
-            to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
-            file in the Most Wanted repository.
-        </p>
-        </div>
-        <h2>Project list</h2>
-        <p id="json_link"><a href="proto.json">JSON version of this list</a>.</p>
-		<div id="module_list">
+	<p>These modules can be installed with <a
+		href="https://github.com/tadzik/panda/">panda</a>, a module management tool
+	  which comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo Star</a>.
+	</p>
+	<p>
+		If you want to contribute your own module, please read
+		<a href="http://doc.perl6.org/language/modules">this guide</a>.
+	</p>
+	<p>
+		Missing a module you can't live without? Consider adding it
+		to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
+		file in the Most Wanted repository.
+	</p>
+	</div>
+	<h2>Project list</h2>
+	<p id="json_link"><a href="proto.json">JSON version of this list</a>.</p>
+	
+	<div id="module_list">
+		<div id="my_search_box">
 			<input class="search" placeholder="Search" />
-			
-        <dl class="list table-display">
-        <TMPL_LOOP projects>
-            <TMPL_IF description>
-            <dt><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ><a href="<TMPL_VAR URL>" class="name"><TMPL_VAR NAME></a></dt>
-	    <dd>
-        <div class='badges'>
-            <TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
-            <TMPL_IF badge_has_tests><img src='tests.png' title='Has tests' alt="Tests badge" /><TMPL_ELSE><img src='unachieved.png' title="Doesn't have tests" alt="Unachieved badge" /></TMPL_IF>
-            <TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' alt="Fresh badge" /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' alt="Unachieved badge" /></TMPL_IF>
-            <TMPL_IF badge_panda_nos11><img src='panda_nos11.png' title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /><TMPL_ELSE><TMPL_IF badge_panda><img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.' alt="Golden Panda badge" /><TMPL_ELSE><img src='unachieved.png' title='Not quite up-to-date with the specs' alt="Unachieved badge" /></TMPL_IF></TMPL_IF>
-        </div>
-	    <TMPL_VAR description></dd>
-            </TMPL_IF>
-        </TMPL_LOOP>
-        </dl>
-			</div>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th>Module Name</th>
+					<th>Description</th>
+					<th>Badges</th>
+				</tr>
+			</thead>
+			<tbody class="list">
+				<TMPL_LOOP projects>
+				<TMPL_IF description>
+				<tr>
+					<td><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ></td>
+					<td class="name"><a href="<TMPL_VAR URL>" class="name"><TMPL_VAR NAME></a></td>
+					<td class="description"><TMPL_VAR description></td>
+					<td class="badges">
+						<TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
+						<TMPL_IF badge_has_tests><img src='tests.png' title='Has tests' alt="Tests badge" /><TMPL_ELSE><img src='unachieved.png' title="Doesn't have tests" alt="Unachieved badge" /></TMPL_IF>
+						<TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' alt="Fresh badge" /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' alt="Unachieved badge" /></TMPL_IF>
+						<TMPL_IF badge_panda_nos11><img src='panda_nos11.png' title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /><TMPL_ELSE><TMPL_IF badge_panda><img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.' alt="Golden Panda badge" /><TMPL_ELSE><img src='unachieved.png' title='Not quite up-to-date with the specs' alt="Unachieved badge" /></TMPL_IF></TMPL_IF>
+					</td>
+				</tr>
+				</TMPL_IF>
+				</TMPL_LOOP>
+			</tbody>
+		</table>
+		
 		<script src="js/list.min.js"></script>
 		<script>
 			var options = {
-				valueNames: [ 'name' ],
+				valueNames: [ 'name', 'description' ],
 				page: 9e9
 			};
 
 			var userList = new List('module_list', options);
 		</script>
+		
 		<p style="clear:both; padding-top: 2em">
 			Legend:<br />
 			<img src='readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
@@ -143,22 +169,20 @@ img.valign {
 			<img src='fresh.png' class="valign" title='Commits in the past 90 days' alt="Fresh badge" /> recently updated |
 			<img src='panda_nos11.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /> conforms to Perl 6 modules specs
 		</p>
-        <p>
-        This page is generated from the files in the <a
-        href="http://github.com/perl6/modules.perl6.org/">modules.perl6.org
-        repository</a>.<br/><i>Last update: <TMPL_VAR last_update></i></p>
-        <p>For feedback and patches, please contact us
-        through the <a href="http://perl6.org/community/irc">#perl6 IRC
-        channel</a>, or send an email to the perl6-compiler@perl.org mailing
-        list.
-        </p>
-        <p>Want to know how to score badges? Read up on
-           <a href="fame-and-profit">how to achieve fame and profit</a>!</p>
-        <p>Badge images from
-        <a href="http://www.heydonworks.com/article/a-free-icon-web-font"
-            >Heydings Icons</a> and
-        <a href="http://openclipart.org/detail/139285/golf-panda-by-shu"
-            >openclipart</a>.</p>
-     </div>
-    </body>
+		<p>
+		This page is generated from the files in the <a
+		href="http://github.com/perl6/modules.perl6.org/">modules.perl6.org
+		repository</a>.<br/><i>Last update: <TMPL_VAR last_update></i></p>
+		<p>For feedback and patches, please contact us
+		through the <a href="http://perl6.org/community/irc">#perl6 IRC
+		channel</a>, or send an email to the perl6-compiler@perl.org mailing
+		list.
+		</p>
+		<p>Want to know how to score badges? Read up on
+			<a href="fame-and-profit">how to achieve fame and profit</a>!</p>
+		<p>Badge images from
+			<a href="http://www.heydonworks.com/article/a-free-icon-web-font">Heydings Icons</a> and
+			<a href="http://openclipart.org/detail/139285/golf-panda-by-shu">openclipart</a>.</p>
+	</div>
+</body>
 </html>
