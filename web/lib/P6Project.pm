@@ -56,9 +56,14 @@ sub getstore {
 
 sub writeout {
     my ($self, $content, $filename) = @_;
+    my $decoded_content = eval { decode_utf8($content) };
+    if ($@) {
+        warn "Error decoding content: $@";
+        $decoded_content = $content;
+    }
     write_file($self->output_dir . $filename,
                {binmode => ':encoding(UTF-8)'},
-               decode_utf8($content));
+               $decoded_content);
 }
 
 sub info {
