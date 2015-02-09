@@ -146,6 +146,13 @@ sub set_project_info {
     README.mkdn
     README.mkd
     README.markdown
+    README.mkdown
+    README.ron
+    README.rst
+    README.rest
+    README.asciidoc
+    README.adoc
+    README.asc
     /;
 
     $project->{badge_has_readme} = scalar(@readmes) 
