@@ -153,6 +153,7 @@ sub set_project_info {
     README.asciidoc
     README.adoc
     README.asc
+    README.txt
     /;
 
     $project->{badge_has_readme} = scalar(@readmes) 
