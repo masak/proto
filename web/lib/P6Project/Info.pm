@@ -41,7 +41,7 @@ sub get_projects {
             warn "$proj has no name, skipping!\n";
             next;
         }
-        my $url  = $json->{'source-url'} // $json->{'repo-url'};
+        my $url  = $json->{support}->{source} // $json->{'source-url'} // $json->{'repo-url'};
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;
         my ($home) = $url =~ m[(?:git|https?)://([\w\.]+)/];
@@ -60,7 +60,7 @@ sub get_projects {
             }
         }
         else {
-            $stats->error("Invalid source-url found: $url");
+            $stats->error("Invalid source-url found: $url ($proj)");
             next;
         }
         $projects->{$name}->{'badge_panda'} = defined $json->{'source-url'};
