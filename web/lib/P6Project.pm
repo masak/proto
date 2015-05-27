@@ -104,8 +104,18 @@ sub write_html {
 
 sub write_json {
     my ($self, $filename) = @_;
-    my $content = encode_json($self->projects);
-    return $self->writeout($content, $filename);
+
+    my $projects = $self->projects;
+    for my $mod ( values %$projects ) { # use JSON's true/false values
+        $mod = +{ %$mod };
+        $mod->{$_} = $mod->{$_} ? JSON::true : JSON::false
+            for qw/
+                badge_has_tests  badge_is_fresh  badge_panda_nos11
+                badge_panda      badge_is_popular
+            /;
+        $mod->{badge_has_readme} //= JSON::false;
+    }
+    return $self->writeout(encode_json($projects), $filename);
 }
 
 1;
