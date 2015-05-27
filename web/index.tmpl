@@ -86,7 +86,7 @@ input.search {
 }
 </style>
 
-	
+
 
 </head>
 <body>
@@ -118,7 +118,7 @@ input.search {
 	</div>
 	<h2>Project list</h2>
 	<p id="json_link"><a href="proto.json">JSON version of this list</a>.</p>
-	
+
 	<div id="module_list">
 		<div id="my_search_box">
 			<input class="search" placeholder="Search" autofocus/>
@@ -137,7 +137,7 @@ input.search {
 				<TMPL_IF description>
 				<tr>
 					<td><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ></td>
-					<td class="name"><a href="<TMPL_VAR URL>" class="name"><TMPL_VAR NAME></a></td>
+					<td class="name"><a href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a></td>
 					<td class="description"><TMPL_VAR description></td>
 					<td class="badges">
 						<TMPL_IF badge_has_readme><a href="<TMPL_VAR badge_has_readme>"><img src='readme.png' title='Has a README' alt="Readme badge" /></a><TMPL_ELSE><img src='unachieved.png' title="Doesn't have a README" alt="Unachieved badge" /></TMPL_IF>
@@ -150,7 +150,7 @@ input.search {
 				</TMPL_LOOP>
 			</tbody>
 		</table>
-		
+
 		<script src="js/list.min.js"></script>
 		<script>
 			var options = {
@@ -160,7 +160,7 @@ input.search {
 
 			var userList = new List('module_list', options);
 		</script>
-		
+
 		<p style="clear:both; padding-top: 2em">
 			Legend:<br />
 			<img src='readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
