@@ -41,6 +41,7 @@ unless ($output_dir eq './') {
     system("cp $_.png $output_dir") for @MEDALS;
     system("cp fame-and-profit.html $output_dir");
     system("cp -r js $output_dir");
+    system("cp style.css $output_dir");
 }
 
 $p6p->write_json('proto.json');
