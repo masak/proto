@@ -62,7 +62,7 @@ sub writeout {
         $decoded_content = $content;
     }
     write_file($self->output_dir . $filename,
-               {binmode => ':encoding(UTF-8)'},
+               {binmode => ':encoding(UTF-8)', atomic => 1},
                $decoded_content);
 }
 
