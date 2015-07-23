@@ -95,7 +95,7 @@ sub set_project_info {
     $project->{url} = $url;
 
     my $commits = $self->get_api($project, "/commits") or return 0;
-    my $latest = $commits->[0];
+    my $latest = ref $commits eq 'ARRAY' ? $commits->[0] : $commits; # if it's a single commit, we get the hashref directly
     my $updated = $latest->{commit}->{committer}->{date};
     $project->{last_updated} = $updated;
 
