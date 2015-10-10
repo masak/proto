@@ -162,6 +162,8 @@ sub set_project_info {
 
     $project->{badge_is_popular} = $repo->{watchers} && $repo->{watchers} >= $self->p6p->min_popular;
 
+    $project->{travis} = $files{'.travis.yml'};
+
     return 1;
 }
 

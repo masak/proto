@@ -47,6 +47,7 @@
 					<th>Module Name</th>
 					<th>Description</th>
 					<th>Badges</th>
+                    <th>Travis</th>
 				</tr>
 			</thead>
 			<tbody class="list">
@@ -62,6 +63,14 @@
 						<TMPL_IF badge_is_fresh><img src='fresh.png' title='Commits in the past 90 days' alt="Fresh badge" /><TMPL_ELSE><img src='unachieved.png' title='No commits in the past 90 days' alt="Unachieved badge" /></TMPL_IF>
 						<TMPL_IF badge_panda_nos11><img src='panda_nos11.png' title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /><TMPL_ELSE><TMPL_IF badge_panda><img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.' alt="Golden Panda badge" /><TMPL_ELSE><img src='unachieved.png' title='Not quite up-to-date with the specs' alt="Unachieved badge" /></TMPL_IF></TMPL_IF>
 					</td>
+                    <td>
+                       <TMPL_IF travis>
+                          <a href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><img src="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>.png" style="max-width:100%;"></a>
+                       <TMPL_ELSE>
+                          <a href="http://docs.travis-ci.com/user/languages/perl6/">Add Travis</a>
+                       </TMPL_IF>
+
+                    </td>
 				</tr>
 				</TMPL_IF>
 				</TMPL_LOOP>
