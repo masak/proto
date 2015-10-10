@@ -45,6 +45,7 @@ sub get_projects {
             warn "$proj has no name, skipping!\n";
             next;
         }
+
         my $url  = $json->{support}->{source} // $json->{'source-url'} // $json->{'repo-url'};
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;

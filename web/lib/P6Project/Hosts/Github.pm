@@ -156,8 +156,8 @@ sub set_project_info {
     README.txt
     /;
 
-    $project->{badge_has_readme} = scalar(@readmes) 
-    ? $self->blob_url($project, $latest->{sha}, "/$readmes[0]") 
+    $project->{badge_has_readme} = scalar(@readmes)
+    ? $self->blob_url($project, $latest->{sha}, "/$readmes[0]")
     : undef;
 
     $project->{badge_is_popular} = $repo->{watchers} && $repo->{watchers} >= $self->p6p->min_popular;

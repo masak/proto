@@ -1,14 +1,14 @@
 body {
-    font-family: sans-serif;
+    font: .9em "Trebuchet MS", Arial, Helvetica, sans-serif;
     line-height: 1.2;
     margin: 0;
-    padding: 1.5em 0;
+    padding: 1.5em 20px;
 }
 
 a {color:inherit;}
 a img {border:none;}
 .project-logo {width:32px;margin-left:-37px;margin-right:5px;float:left;}
-.badges { float: right; width: 160px; }
+
 #header {
     margin:0 0 3em;min-height:200px;
     border-radius: 1em;
@@ -32,10 +32,9 @@ h2 {margin:30px 0 0 0;}
 #header, #content {
     box-sizing: border-box;
     margin: auto;
-    max-width: 100vw;
-    width: 800px;
+    max-width: 1200px;
 }
-#about, p {margin: 40px auto 0 auto;text-align: justify}
+#about, p {margin: 20px auto 0 auto;text-align: justify}
 #json_link {float:right;margin-top:-22px;font-size:smaller;}
 
 h1 a { text-decoration: none; }
@@ -67,19 +66,62 @@ dl.table-display {
     border-top: 1px solid #999;
 }
 
-.badges { margin-left: 1ex; }
+.badges img {
+    height: 20px;
+    vertical-align: middle;
+}
+
 img.valign {
     vertical-align: middle;
 }
 #module_list > table {
     width: 100%;
+    margin-top: 20px;
 }
 
-input.search {
-    width: 70%;
+table, tr, th, td {
+    border-collapse: collapse;
 }
+
+td {
+    border: 1px solid #eaeaea;
+    border-left: 0;
+    border-right: 0;
+}
+
 #my_search_box {
     text-align: center;
     margin: 3px auto;
+    background: #fafafa;
+    border: 1px solid #ccc;
+    padding: 10px;
 }
 
+#my_search_box input {
+    width: 90%;
+    font-size: 120%;
+}
+
+.list .description {
+    min-width: 16em;
+}
+
+.travis,
+.last_updated,
+.badges {
+    text-align: center;
+}
+
+.add_travis {
+    font-size: 90%;
+    color: #999;
+}
+
+@media (max-width: 867px) {
+    .name {
+        display: block;
+        width: 12em;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+}

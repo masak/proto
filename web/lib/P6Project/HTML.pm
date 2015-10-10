@@ -31,7 +31,10 @@ sub get_html {
   my @projects = keys %{$projects};
   @projects = sort projects_list_order @projects;
   @projects = map { $projects->{$_} } @projects;
-  $_->{description} ||= 'N/A' for @projects;
+  for ( @projects ) {
+    $_->{description} ||= 'N/A';
+    $_->{last_updated} =~ s/T.+//;
+  }
   $template->param(projects => \@projects);
   my $last_update = gmtime()->strftime('%Y-%m-%d %H:%M:%S GMT');
   $template->param(last_update => $last_update);
