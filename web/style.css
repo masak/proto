@@ -121,6 +121,10 @@ tr:nth-child(odd) td {
     white-space: nowrap;
 }
 
+.travis * {
+    vertical-align: middle;
+}
+
 .add_travis {
     font-size: 80%;
     color: #999;
