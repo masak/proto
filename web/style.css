@@ -123,6 +123,7 @@ tr:nth-child(odd) td {
     text-align: center;
 }
 
+.last_updated,
 .badges {
     white-space: nowrap;
 }
