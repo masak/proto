@@ -22,7 +22,7 @@ sub new {
     $self->{ua} = $ua;
     $self->{stats} = P6Project::Stats->new;
     bless $self, $class;
-    $self->{info} = P6Project::Info->new(p6p=>$self);
+    $self->{info} = P6Project::Info->new(p6p=>$self, limit=>$self->{limit});
     $self->{html} = P6Project::HTML->new(p6p=>$self);
     $self->{projects} = {};
     return $self;

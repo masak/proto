@@ -4,10 +4,12 @@ use warnings;
 use 5.010;
 
 use File::Path qw(make_path);
+use Getopt::Long qw(GetOptions);
 
 BEGIN { unshift @INC, './lib'; }
 
 use P6Project;
+GetOptions('limit=s' => \my $limit);
 
 my $output_dir = shift(@ARGV) || './';
 my @MEDALS = qw<fresh readme tests unachieved camelia panda panda_nos11>;
@@ -23,7 +25,7 @@ my $template = './index.tmpl';
 
 make_path("$output_dir/logos", { mode => 0755 }) unless -e "$output_dir/logos";
 
-my $p6p = P6Project->new(output_dir=>$output_dir, min_popular=>$min_popular, template=>$template);
+my $p6p = P6Project->new(output_dir=>$output_dir, min_popular=>$min_popular, template=>$template, limit=>$limit);
 
 $p6p->load_projects($list_url);
 

@@ -34,6 +34,7 @@ sub get_projects {
     my $cnt = 0;
     for my $proj (split "\n", $contents) {
         $cnt++;
+        last if $self->{limit} and $self->{limit} < $cnt;
         print "$cnt/$total $proj\n";
         my $json = $ua->get($proj)->res->json;
         if (!$json) {
