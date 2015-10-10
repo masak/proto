@@ -108,6 +108,18 @@ sub write_html {
     return $self->writeout($content, $filename);
 }
 
+sub write_recent {
+    my ($self, $filename) = @_;
+
+    my $projects = $self->projects;
+    my @projects = keys %{$projects};
+    @projects = reverse sort { $projects->{$a}{last_updated} cmp $projects->{$b}{last_updated} }  @projects;
+    @projects = map { $projects->{$_} } @projects;
+    $_->{description} ||= 'N/A' for @projects;
+    my $content = $self->html->get_html(\@projects);
+    return $self->writeout($content, $filename);
+}
+
 sub write_json {
     my ($self, $filename) = @_;
 
