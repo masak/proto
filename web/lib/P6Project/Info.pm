@@ -29,8 +29,12 @@ sub get_projects {
     my $hosts = {
         'github' => P6Project::Hosts::Github->new(p6p=>$self->p6p)
     };
+    my $total = scalar (split "\n", $contents);
+    print "Total: $total\n";
+    my $cnt = 0;
     for my $proj (split "\n", $contents) {
-        print "$proj\n";
+        $cnt++;
+        print "$cnt/$total $proj\n";
         my $json = $ua->get($proj)->res->json;
         if (!$json) {
             $stats->error("Invalid json found at: $proj");
@@ -75,7 +79,7 @@ sub get_projects {
     foreach my $project_name (keys %$projects) {
         my $project = $projects->{$project_name};
         $project->{name} = $project_name;
-        print $stats->{success} . " $project_name\n";
+        print "$stats->{success}/$total $project_name\n";
         if (!$project->{home}) {
             delete $projects->{$project_name};
             next;
