@@ -48,6 +48,7 @@
 					<th>Description</th>
 					<th>Badges</th>
                     <th>Travis</th>
+                    <th>Updated</th>
 				</tr>
 			</thead>
 			<tbody class="list">
@@ -69,8 +70,8 @@
                        <TMPL_ELSE>
                           <a href="http://docs.travis-ci.com/user/languages/perl6/">Add Travis</a>
                        </TMPL_IF>
-
                     </td>
+                   <td><TMPL_VAR last_updated></td>
 				</tr>
 				</TMPL_IF>
 				</TMPL_LOOP>
