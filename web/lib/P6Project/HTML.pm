@@ -28,29 +28,13 @@ sub get_html {
     default_escape     => 'html',
   );
 
-  my @projects = keys %{$projects};
-  @projects = sort projects_list_order @projects;
-  @projects = map { $projects->{$_} } @projects;
-  for ( @projects ) {
-    $_->{description} ||= 'N/A';
-    $_->{last_updated} =~ s/T.+//;
-  }
-  $template->param(projects => \@projects);
+  $template->param(projects => $projects);
   my $last_update = gmtime()->strftime('%Y-%m-%d %H:%M:%S GMT');
   $template->param(last_update => $last_update);
-  $template->param(total => scalar @projects);
+  $template->param(total => scalar @$projects);
 
   return $template->output;
 }
 
-sub projects_list_order {
-  my $prj1 = $a;
-  my $prj2 = $b;
-
-  $prj1 =~ s{^perl6-}{}i;
-  $prj2 =~ s{^perl6-}{}i;
-
-  return lc($prj1) cmp lc($prj2);
-}
 
 1;

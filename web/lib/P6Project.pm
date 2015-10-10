@@ -98,7 +98,28 @@ sub template {
 
 sub write_html {
     my ($self, $filename) = @_;
-    my $content = $self->html->get_html($self->projects);
+
+    my $projects = $self->projects;
+    my @projects = keys %{$projects};
+    @projects = sort projects_list_order @projects;
+    @projects = map { $projects->{$_} } @projects;
+    for ( @projects ) {
+        $_->{description} ||= 'N/A';
+        $_->{last_updated} =~ s/T.+//;
+    }
+    my $content = $self->html->get_html(\@projects);
+    return $self->writeout($content, $filename);
+}
+
+sub write_recent {
+    my ($self, $filename) = @_;
+
+    my $projects = $self->projects;
+    my @projects = keys %{$projects};
+    @projects = reverse sort { $projects->{$a}{last_updated} cmp $projects->{$b}{last_updated} }  @projects;
+    @projects = map { $projects->{$_} } @projects;
+    $_->{description} ||= 'N/A' for @projects;
+    my $content = $self->html->get_html(\@projects);
     return $self->writeout($content, $filename);
 }
 
@@ -117,5 +138,16 @@ sub write_json {
     }
     return $self->writeout(encode_json($projects), $filename);
 }
+
+sub projects_list_order {
+  my $prj1 = $a;
+  my $prj2 = $b;
+
+  $prj1 =~ s{^perl6-}{}i;
+  $prj2 =~ s{^perl6-}{}i;
+
+  return lc($prj1) cmp lc($prj2);
+}
+
 
 1;
