@@ -7,7 +7,13 @@ body {
 
 a {color:inherit;}
 a img {border:none;}
-.project-logo {width:32px;margin-left:-37px;margin-right:5px;float:left;}
+
+.project-logo {
+    text-align: right;
+}
+.project-logo img {
+    width: 32px;
+}
 
 #header {
     margin:0 0 3em;min-height:200px;
