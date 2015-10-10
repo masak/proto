@@ -53,7 +53,6 @@
 			</thead>
 			<tbody class="list">
 				<TMPL_LOOP projects>
-				<TMPL_IF description>
 				<tr>
 					<td><TMPL_IF logo><img class="project-logo" src="<TMPL_VAR logo>" alt="<TMPL_VAR NAME> logo" /></TMPL_IF ></td>
 					<td><a href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a></td>
@@ -75,7 +74,6 @@
                     </td>
                    <td><TMPL_VAR last_updated></td>
 				</tr>
-				</TMPL_IF>
 				</TMPL_LOOP>
 			</tbody>
 		</table>
