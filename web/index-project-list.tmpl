@@ -46,14 +46,12 @@
     </TMPL_IF>
   </td>
   <td class="travis">
-
      <TMPL_IF travis>
-        <a href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><img src="<TMPL_VAR travis_status>" style="max-width:100%;" alt=""></a>
+        <a href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><img src="<TMPL_VAR travis_status>" alt=""></a>
      <TMPL_ELSE>
         <a href="http://docs.travis-ci.com/user/languages/perl6/"
           class="add_travis">Add Travis</a>
      </TMPL_IF>
-
   </td>
   <td class="last_updated">
     <TMPL_VAR last_updated>

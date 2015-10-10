@@ -90,6 +90,10 @@ td {
     padding: 3px 5px;
 }
 
+tr:nth-child(odd) td {
+    background: #fafafa;
+}
+
 #my_search_box {
     text-align: center;
     margin: 3px auto;
@@ -118,8 +122,18 @@ td {
 }
 
 .add_travis {
-    font-size: 90%;
+    font-size: 80%;
     color: #999;
+    text-decoration: none;
+    border: 1px solid #cacaca;
+    padding: 3px;
+    border-radius: 3px;
+    background: #ddd;
+    color: #333;
+}
+
+.add_travis:hover {
+    background: #ccc;
 }
 
 @media (max-width: 867px) {
