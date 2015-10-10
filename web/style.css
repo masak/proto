@@ -130,6 +130,7 @@ tr:nth-child(odd) td {
     border-radius: 3px;
     background: #ddd;
     color: #333;
+    display: inline-block;
 }
 
 .add_travis:hover {
