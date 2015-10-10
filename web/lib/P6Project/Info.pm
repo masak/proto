@@ -52,7 +52,14 @@ sub get_projects {
         if ($home) {
             if ($home =~ /github/) {
                 $projects->{$name}->{'home'} = 'github';
-                my ($auth, $repo_name) = $url =~ m[(?:git|https?)://$home/([^/]+)/([^/]+)\.git];
+                my ($auth, $repo_name) = $url  =~ m[
+                    (?:git|https?)://
+                        \Q$home\E/
+                        ([^/]+)/        # auth
+                        ([^/]+)         # repo name
+                        (?:\.git|/)     # handle .git or https ending
+                ]x;
+
                 $projects->{$name}->{'auth'} = $auth;
                 $projects->{$name}->{'repo_name'} = $repo_name;
             } else {
@@ -69,7 +76,7 @@ sub get_projects {
         $projects->{$name}->{'description'} = $json->{'description'};
     }
 
-    my $cached_projects = eval { 
+    my $cached_projects = eval {
         decode_json(read_file($self->p6p->output_dir . 'proto.json', binmode => ':encoding(UTF-8)'))
     };
 
