@@ -105,8 +105,6 @@ sub get_projects {
 print $travis_url;
             my $json = $ua->get($travis_url)->res->json;
             # [ {"id":84701337,"repository_id":2837743,"number":"76","state":"finished","result":0,"started_at":"2015-10-10T20:02:07Z","finished_at":"2015-10-10T20:07:28Z","duration":321,"commit":"922c3ed50f0222cf917fc5b7b097d33a69243059","branch":"main","message":"Correct some typos.","event_type":"pull_request"} ]
-use Data::Dumper;
-print Dumper $json;
             if (defined $json->[0]{result}) {
                 $project->{travis_status} = $json->[0]{result} ? 'build-failing.png' : 'build-passing.png';
             } else {
