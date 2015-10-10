@@ -87,6 +87,7 @@ td {
     border: 1px solid #eaeaea;
     border-left: 0;
     border-right: 0;
+    padding: 3px 5px;
 }
 
 #my_search_box {
@@ -110,6 +111,10 @@ td {
 .last_updated,
 .badges {
     text-align: center;
+}
+
+.badges {
+    white-space: nowrap;
 }
 
 .add_travis {
