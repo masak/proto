@@ -34,6 +34,7 @@ sub get_html {
   $template->param(projects => \@projects);
   my $last_update = gmtime()->strftime('%Y-%m-%d %H:%M:%S GMT');
   $template->param(last_update => $last_update);
+  $template->param(total => scalar @projects);
 
   return $template->output;
 }
