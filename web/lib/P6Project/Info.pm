@@ -50,17 +50,14 @@ sub get_projects {
         $projects->{$name}{success} = 0;
         my ($home) = $url =~ m[(?:git|https?)://([\w\.]+)/];
         if ($home) {
-            given ($home) {
-                when (/github/) {
-                    $projects->{$name}->{'home'} = 'github';
-                    my ($auth, $repo_name) = $url =~ m[(?:git|https?)://$home/([^/]+)/([^/]+)\.git];
-                    $projects->{$name}->{'auth'} = $auth;
-                    $projects->{$name}->{'repo_name'} = $repo_name;
-                }
-                default {
-                    $stats->error("Unsupported repo host: $home");
-                    next;
-                }
+            if ($home =~ /github/) {
+                $projects->{$name}->{'home'} = 'github';
+                my ($auth, $repo_name) = $url =~ m[(?:git|https?)://$home/([^/]+)/([^/]+)\.git];
+                $projects->{$name}->{'auth'} = $auth;
+                $projects->{$name}->{'repo_name'} = $repo_name;
+            } else {
+                $stats->error("Unsupported repo host: $home");
+                next;
             }
         }
         else {
