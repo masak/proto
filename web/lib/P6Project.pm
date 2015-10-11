@@ -116,7 +116,11 @@ sub write_recent {
 
     my $projects = $self->projects;
     my @projects = keys %{$projects};
-    @projects = reverse sort { $projects->{$a}{last_updated} cmp $projects->{$b}{last_updated} }  @projects;
+    @projects = reverse sort {
+        ($projects->{$a}{last_updated}||'')
+            cmp
+        ($projects->{$b}{last_updated}||'')
+    } @projects;
     @projects = map { $projects->{$_} } @projects;
     $_->{description} ||= 'N/A' for @projects;
     my $content = $self->html->get_html(\@projects);
