@@ -40,8 +40,10 @@ die "Too many errors no output generated"
   if $failed > $success;
 
 unless ($output_dir eq './') {
-    system("cp $_.png $output_dir") for @MEDALS;
-    system("cp $_ $output_dir") for qw(build-error.png build-failing.png build-passing.png);
+    system("cp $_.png $output_dir")
+        for @MEDALS, map "build-$_",
+            qw(unknown  failing  passing  canceled  error  pending);
+
     system("cp fame-and-profit.html $output_dir");
     system("cp -r js $output_dir");
     system("cp style.css $output_dir");

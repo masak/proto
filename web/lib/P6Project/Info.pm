@@ -7,6 +7,7 @@ use 5.010;
 use JSON;
 use File::Slurp;
 use P6Project::Hosts::Github;
+use Mojo::UserAgent;
 ## TODO: add Gitorious support.
 
 sub new {
@@ -102,18 +103,35 @@ sub get_projects {
 
 
         if ($project->{travis}) {
-            my $travis_url = "https://api.travis-ci.org/repos/$project->{auth}/$project->{repo_name}/builds";
-print $travis_url;
-            my $json = $ua->get($travis_url)->res->json;
-            # [ {"id":84701337,"repository_id":2837743,"number":"76","state":"finished","result":0,"started_at":"2015-10-10T20:02:07Z","finished_at":"2015-10-10T20:07:28Z","duration":321,"commit":"922c3ed50f0222cf917fc5b7b097d33a69243059","branch":"main","message":"Correct some typos.","event_type":"pull_request"} ]
-            if (defined $json->[0]{result}) {
-                $project->{travis_status} = $json->[0]{result} ? 'build-failing.png' : 'build-passing.png';
-            } else {
-                $project->{travis_status} = 'build-error.png'
-            }
+            my $travis_url = 'https://api.travis-ci.org/repos/'
+                . "$project->{auth}/$project->{repo_name}/builds";
+
+            my @builds = eval {
+                my $res = $ua->get(
+                    $travis_url
+                    => { Accept => 'application/vnd.travis-ci.2+json' }
+                )->res->json->{builds};
+
+                @$res;
+            }; $@ and warn "Error fetching travis status: $@\n";
+
+            $project->{travis_status}
+            = 'build-' . __get_travis_status( @builds ) . '.png';
          }
     }
     return $projects;
+}
+
+sub __get_travis_status {
+    my @builds = @_;
+
+    return 'unknown' unless @builds;
+    my $state = $builds[0]->{state};
+
+    return $state    if $state =~ /cancel|error|pend/;
+    return 'failing' if $state =~ /fail/;
+    return 'passing' if $state =~ /pass/;
+    return 'unknown';
 }
 
 1;
