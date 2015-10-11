@@ -47,7 +47,9 @@ sub get_projects {
             next;
         }
 
-        my $url  = $json->{support}->{source} // $json->{'source-url'} // $json->{'repo-url'};
+        my $url = $json->{'source-url'} // $json->{'repo-url'}
+            // $json->{support}->{source};
+
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;
         my ($home) = $url =~ m[(?:git|https?)://([\w\.]+)/];
