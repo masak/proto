@@ -4,10 +4,9 @@ use strict;
 use warnings;
 use 5.010;
 
-use JSON;
+use Mojo::JSON qw/decode_json/;
 use File::Slurp;
 use P6Project::Hosts::Github;
-use Mojo::UserAgent;
 ## TODO: add Gitorious support.
 
 sub new {
