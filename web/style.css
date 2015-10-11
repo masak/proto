@@ -33,14 +33,56 @@ a img {border:none;}
     right:-2em;
     top:-1.5em;
     z-index:1;
+    margin-bottom: -1.5em;
 }
 h2 {margin:30px 0 0 0;}
-#header, #content {
+
+#my_search_box input,
+#content, #about p {
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
+}
+
+#header, #content {
     margin: auto;
     max-width: 1200px;
 }
-#about, p {margin: 20px auto 0 auto;text-align: justify}
+
+footer,
+#about {
+    background: #ebf3ff;
+    border: 1px solid #c2dbff;
+    border-radius: 1em;
+    padding: 40px 10px 10px;
+    margin-top: -20px;
+}
+
+#about p {
+    width: 50%;
+    padding: 3px 20px;
+    float: left;
+    font-size: 110%;
+    line-height: 1.5em;
+}
+
+@media (max-width: 665px) {
+    #about p {
+        width: auto;
+        float: none;
+    }
+}
+
+#about:after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+footer {
+    margin: 20px 0 0;
+    padding: 0 30px;
+}
+
 #json_link {float:right;margin-top:-22px;font-size:smaller;}
 
 h1 a { text-decoration: none; }
@@ -90,10 +132,11 @@ table, tr, th, td {
 }
 
 td {
-    border: 1px solid #eaeaea;
-    border-left: 0;
-    border-right: 0;
     padding: 3px 5px;
+}
+
+tbody tr {
+    border: 1px solid #eaeaea;
 }
 
 tr:nth-child(odd) td {
@@ -105,12 +148,16 @@ tr:nth-child(odd) td {
     margin: 3px auto;
     background: #fafafa;
     border: 1px solid #ccc;
+    border-radius: .5em;
     padding: 10px;
 }
 
 #my_search_box input {
-    width: 90%;
+    width: 100%;
     font-size: 120%;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
 }
 
 .list .description {

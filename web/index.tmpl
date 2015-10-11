@@ -14,16 +14,15 @@
 	</div>
 	<div id="content">
 		<div id="about">
-			<p>
-				Below you can find a list of the <TMPL_VAR total> known Perl 6 modules. All of them
+			<p>Below you can find a list of the <TMPL_VAR total> known Perl 6 modules. All of them
 				have been working on <a href="http://rakudo.org/">Rakudo</a> at
 				some point.
 				These modules can be installed with <a
 				href="https://github.com/tadzik/panda/">panda</a>, a module management tool
-			  which comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo Star</a>.
+			  that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
+			  	Star</a>.
 			</p>
-			<p>
-				If you want to contribute your own module, please read
+			<p>If you want to contribute your own module, please read
 				<a href="http://doc.perl6.org/language/modules">this guide</a>.
 				Missing a module you can't live without? Consider adding it
 				to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
@@ -62,28 +61,34 @@
 				var userList = new List('module_list', options);
 			</script>
 
-			<p style="clear:both; padding-top: 2em">
-				Legend:<br />
-				<img src='readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
-				<img src='tests.png' class="valign" title='Has tests' alt="Tests badge" /> has tests |
-				<img src='fresh.png' class="valign" title='Commits in the past 90 days' alt="Fresh badge" /> recently updated |
-				<img src='panda_nos11.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /> conforms to Perl 6 modules specs
-			</p>
-			<p>
-			This page is generated from the files in the <a
-			href="http://github.com/perl6/modules.perl6.org/">modules.perl6.org
-			repository</a>.<br/><i>Last update: <TMPL_VAR last_update></i></p>
-			<p>For feedback and patches, please contact us
-			through the <a href="http://perl6.org/community/irc">#perl6 IRC
-			channel</a>, or send an email to the perl6-compiler@perl.org mailing
-			list.
-			</p>
-			<p>Want to know how to score badges? Read up on
-				<a href="fame-and-profit">how to achieve fame and profit</a>!</p>
-			<p>Badge images from
-				<a href="http://www.heydonworks.com/article/a-free-icon-web-font">Heydings Icons</a> and
-				<a href="http://openclipart.org/detail/139285/golf-panda-by-shu">openclipart</a>.
-			</p>
+			<footer>
+				<p class="legend">
+					Legend:
+					<img src='readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
+					<img src='tests.png' class="valign" title='Has tests' alt="Tests badge" /> has tests |
+					<img src='fresh.png' class="valign" title='Commits in the past 90 days' alt="Fresh badge" /> recently updated |
+					<img src='panda_nos11.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /> conforms to Perl 6 modules specs
+				</p>
+				<p>Want to know how to score badges? Read up on
+					<a href="fame-and-profit">how to achieve fame and profit</a>!</p>
+				<p>For feedback and patches, please contact us
+				through the <a href="http://perl6.org/community/irc">#perl6 IRC
+				channel</a>, or send an email to the perl6-compiler@perl.org mailing
+				list.
+				</p>
+				<p>
+					<small>
+						Badge images from
+						<a href="http://www.heydonworks.com/article/a-free-icon-web-font">Heydings Icons</a> and
+						<a href="http://openclipart.org/detail/139285/golf-panda-by-shu">openclipart</a>.
+
+						This page is generated from the files in the
+						<a href="http://github.com/perl6/modules.perl6.org/"
+							>modules.perl6.org repository</a>.
+							<i>Last update: <TMPL_VAR last_update></i>
+					</small>
+				</p>
+			</footer>
 		</div>
 	</div>
 </body>
