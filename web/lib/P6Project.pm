@@ -104,8 +104,9 @@ sub write_html {
     @projects = sort projects_list_order @projects;
     @projects = map { $projects->{$_} } @projects;
     for ( @projects ) {
-        $_->{description} ||= 'N/A';
-        $_->{last_updated} =~ s/T.+//;
+        $_->{description}  ||= 'N/A';
+        $_->{last_updated} ||= '';
+        $_->{last_updated}  =~ s/T.+//;
     }
     my $content = $self->html->get_html(\@projects);
     return $self->writeout($content, $filename);
@@ -117,9 +118,7 @@ sub write_recent {
     my $projects = $self->projects;
     my @projects = keys %{$projects};
     @projects = reverse sort {
-        ($projects->{$a}{last_updated}||'')
-            cmp
-        ($projects->{$b}{last_updated}||'')
+        $projects->{$a}{last_updated} cmp $projects->{$b}{last_updated}
     } @projects;
     @projects = map { $projects->{$_} } @projects;
     $_->{description} ||= 'N/A' for @projects;
