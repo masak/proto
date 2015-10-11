@@ -59,7 +59,7 @@ sub get_projects {
                         \Q$home\E/
                         ([^/]+)/        # auth
                         ([^/]+)         # repo name
-                        (?:\.git|/?)    # handle .git or https ending
+                        (?:\.git|/)     # handle .git or https ending
                 ]x;
 
                 $projects->{$name}->{'auth'} = $auth;
