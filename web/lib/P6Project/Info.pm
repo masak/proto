@@ -129,7 +129,8 @@ sub __get_travis_status {
     return 'unknown' unless @builds;
     my $state = $builds[0]->{state};
 
-    return $state    if $state =~ /cancel|error|pend/;
+    return $state    if $state =~ /cancel|pend/;
+    return 'error'   if $state =~ /error/;
     return 'failing' if $state =~ /fail/;
     return 'passing' if $state =~ /pass/;
     return 'unknown';
