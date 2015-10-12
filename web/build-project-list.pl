@@ -42,7 +42,8 @@ die "Too many errors no output generated"
 unless ($output_dir eq './') {
     system("cp $_.png $output_dir")
         for @MEDALS, map "build-$_",
-            qw(unknown  failing  passing  canceled  error  pending);
+            qw(unknown  failing  passing  canceled
+                error  pending  camelia-logo);
 
     system("cp fame-and-profit.html $output_dir");
     system("cp -r js $output_dir");
