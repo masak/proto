@@ -51,7 +51,6 @@ unless ($output_dir eq './') {
 
 $p6p->write_json('proto.json');
 $p6p->write_html('index.html');
-$p6p->write_recent('recent.html');
 
 print "index.html and proto.json files generated\n";
 

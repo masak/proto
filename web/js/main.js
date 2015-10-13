@@ -1,5 +1,6 @@
 jQuery(function ($) {
     setup_search_box();
+    $('.tablesorter').tablesorter({sortList: [[1,0]]});
 });
 
 function setup_search_box() {
