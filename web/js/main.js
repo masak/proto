@@ -1,6 +1,11 @@
 jQuery(function ($) {
     setup_search_box();
-    $('.tablesorter').tablesorter({sortList: [[1,0]]});
+    $('.tablesorter').tablesorter({
+        sortList: [[1,0]],
+        headers: {
+            1: { sorter: 'text'}
+        }
+    });
 });
 
 function setup_search_box() {
