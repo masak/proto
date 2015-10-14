@@ -219,5 +219,3 @@ table.tablesorter thead tr .headerSortDown,
 table.tablesorter thead tr .headerSortUp {
     background-color: #8dbdd8;
 }
-
-table thead th:first-child, .badges, .travis { background: none!important; }

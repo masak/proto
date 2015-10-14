@@ -3,7 +3,10 @@ jQuery(function ($) {
     $('.tablesorter').tablesorter({
         sortList: [[1,0]],
         headers: {
-            1: { sorter: 'text'}
+            0: { sorter: false },
+            1: { sorter: 'text'},
+            3: { sorter: false },
+            4: { sorter: false }
         }
     });
 });
