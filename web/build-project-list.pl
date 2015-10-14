@@ -44,6 +44,9 @@ unless ($output_dir eq './') {
         for @MEDALS, 'camelia-logo', map "build-$_",
             qw(unknown  failing  passing  canceled  error  pending);
 
+    system("cp $_.gif $output_dir")
+        for qw(asc  desc  bg);
+
     system("cp fame-and-profit.html $output_dir");
     system("cp -r js $output_dir");
     system("cp style.css $output_dir");
