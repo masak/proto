@@ -223,15 +223,15 @@ tr:nth-child(odd) td {
 }
 
 table.tablesorter thead tr .header {
-    background: url(bg.gif) no-repeat center right;
+    background: url(assets/images/bg.gif) no-repeat center right;
     cursor: pointer;
 }
 
 table.tablesorter thead tr .headerSortUp {
-    background-image: url(asc.gif);
+    background-image: url(assets/images/asc.gif);
 }
 table.tablesorter thead tr .headerSortDown {
-    background-image: url(desc.gif);
+    background-image: url(assets/images/desc.gif);
 }
 table.tablesorter thead tr .headerSortDown,
 table.tablesorter thead tr .headerSortUp {
