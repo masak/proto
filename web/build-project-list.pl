@@ -23,7 +23,7 @@ my $list_url = 'https://raw.githubusercontent.com/perl6/ecosystem/master/META.li
 
 my $template = './index.tmpl';
 
-make_path("$output_dir/logos", { mode => 0755 }) unless -e "$output_dir/logos";
+make_path("$output_dir/assets/images/logos", { mode => 0755 }) unless -e "$output_dir/assets/images/logos";
 
 my $p6p = P6Project->new(output_dir=>$output_dir, min_popular=>$min_popular, template=>$template, limit=>$limit);
 

@@ -6,6 +6,6 @@ cache/*
 _build
 Build
 web/github-token
-web/logos
+web/assets/images/logos
 web/index.html
 web/proto.json
