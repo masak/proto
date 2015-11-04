@@ -2,8 +2,6 @@
 
 These are the scripts to generate the website on http://modules.perl6.org/.
 
-This directory now lives in the root directory of the gh-pages branch, and will probably be removed soon.
-
 ## Development
 
 Please use the following steps to aid you in your development:
