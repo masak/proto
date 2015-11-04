@@ -3,9 +3,8 @@ jQuery(function ($) {
     $('.tablesorter').tablesorter({
         sortList: [[1,0]],
         headers: {
-            0: { sorter: false },
             1: { sorter: 'text'},
-            3: { sorter: false }
+            2: { sorter: false }
         }
     });
 });
