@@ -18,7 +18,7 @@ $ ./Build installdeps
 ```
 
 - Run build script
-```
+  ```
 $ cd web
 $ perl build-project-list.pl --limit=<number-of-modules>
 ```
