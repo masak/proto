@@ -1,7 +1,7 @@
 jQuery(function ($) {
     setup_search_box();
     $('.tablesorter').tablesorter({
-        sortList: [[1,0]],
+        sortList: [[0,0]],
         headers: {
             1: { sorter: 'text'},
             2: { sorter: false }
