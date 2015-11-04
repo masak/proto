@@ -164,8 +164,22 @@ tr:nth-child(odd) td {
     min-width: 16em;
 }
 
+.list .stargazers {
+    min-width: 5em;
+}
+
+.list .open_issues {
+    min-width: 8em;
+}
+
+.list .last_updated {
+  min-width: 6em;
+}
+
 .travis,
 .last_updated,
+.stargazers,
+.open_issues,
 .badges {
     text-align: center;
 }

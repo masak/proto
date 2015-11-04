@@ -164,6 +164,9 @@ sub set_project_info {
 
     $project->{travis} = $files{'.travis.yml'};
 
+    $project->{stargazers}     //= $repo->{stargazers_count};
+    $project->{open_issues}    //= $repo->{open_issues_count};
+
     return 1;
 }
 
