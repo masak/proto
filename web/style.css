@@ -9,7 +9,7 @@ a {color:inherit;}
 a img {border:none;}
 
 .project-logo {
-    text-align: right;
+    float: right;
 }
 .project-logo img {
     width: 32px;
@@ -158,6 +158,10 @@ tr:nth-child(odd) td {
     border: 1px solid #ccc;
     border-radius: 3px;
     padding: 5px;
+}
+
+.module_name {
+  line-height: 2em;
 }
 
 .list .description {
