@@ -12,26 +12,26 @@
   <td class="badges">
     <TMPL_IF badge_has_readme>
       <a href="<TMPL_VAR badge_has_readme>"
-          ><img src='readme.png' title='Has a README' alt="Has README"
+          ><img src='assets/images/readme.png' title='Has a README' alt="Has README"
       ></a>
     <TMPL_ELSE>
-      <img src='unachieved.png' title="Doesn't have a README" alt="No readme">
+      <img src='assets/images/unachieved.png' title="Doesn't have a README" alt="No readme">
     </TMPL_IF>
     <TMPL_IF badge_has_tests>
-      <img src='tests.png' title='Has tests' alt="Has tests">
+      <img src='assets/images/tests.png' title='Has tests' alt="Has tests">
     <TMPL_ELSE>
-      <img src='unachieved.png' title="Doesn't have tests" alt="No tests">
+      <img src='assets/images/unachieved.png' title="Doesn't have tests" alt="No tests">
     </TMPL_IF>
     <TMPL_IF badge_panda_nos11>
-      <img src='panda_nos11.png'
+      <img src='assets/images/panda_nos11.png'
         title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)'
           alt="Bronze Panda">
     <TMPL_ELSE>
       <TMPL_IF badge_panda>
-        <img src="panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.'
+        <img src="assets/images/panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.'
           alt="Golden Panda">
       <TMPL_ELSE>
-        <img src='unachieved.png' title='Not quite up-to-date with the specs'
+        <img src='assets/images/unachieved.png' title='Not quite up-to-date with the specs'
           alt="Not up-to-date with spects">
       </TMPL_IF>
     </TMPL_IF>
