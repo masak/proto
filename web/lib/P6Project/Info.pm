@@ -116,8 +116,7 @@ sub get_projects {
                 @$res;
             }; $@ and warn "Error fetching travis status: $@\n";
 
-            $project->{travis_status}
-            = 'build-' . __get_travis_status( @builds ) . '.png';
+            $project->{travis_status} = __get_travis_status( @builds );
          }
     }
     return $projects;

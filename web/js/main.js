@@ -5,8 +5,7 @@ jQuery(function ($) {
         headers: {
             0: { sorter: false },
             1: { sorter: 'text'},
-            3: { sorter: false },
-            4: { sorter: false }
+            3: { sorter: false }
         }
     });
 });

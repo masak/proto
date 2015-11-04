@@ -6,7 +6,7 @@
     </TMPL_IF >
   </td>
   <td>
-    <a href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a>
+    <a target="_blank" href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a>
   </td>
   <td class="description">
     <TMPL_VAR description>
@@ -47,17 +47,14 @@
   </td>
   <td class="travis">
      <TMPL_IF travis>
-        <a href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><img src="<TMPL_VAR travis_status>" alt=""></a>
-     <TMPL_ELSE>
-        <a href="http://docs.travis-ci.com/user/languages/perl6/"
-          class="add_travis">&#x1f527; Add Travis</a>
+        <a target="_blank" href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><TMPL_VAR travis_status></a>
      </TMPL_IF>
   </td>
   <td class="stargazers">
-    <TMPL_VAR stargazers>
+    <a target="_blank" href="<TMPL_VAR URL>/stargazers"><TMPL_VAR stargazers></a>
   </td>
   <td class="open_issues">
-    <TMPL_VAR open_issues>
+    <a target="_blank" href="<TMPL_VAR URL>/issues"><TMPL_VAR open_issues></a>
   </td>
   <td class="last_updated">
     <TMPL_VAR last_updated>
