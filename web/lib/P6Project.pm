@@ -120,7 +120,7 @@ sub write_json {
         $mod = +{ %$mod };
         $mod->{$_} = $mod->{$_} ? JSON::true : JSON::false
             for qw/
-                badge_has_tests  badge_is_fresh  badge_panda_nos11
+                badge_has_tests  badge_panda_nos11
                 badge_panda      badge_is_popular
             /;
         $mod->{badge_has_readme} //= JSON::false;

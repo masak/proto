@@ -24,13 +24,6 @@
     <TMPL_ELSE>
       <img src='unachieved.png' title="Doesn't have tests" alt="No tests">
     </TMPL_IF>
-    <TMPL_IF badge_is_fresh>
-      <img src='fresh.png' title='Commits in the past 90 days'
-        alt="Recent">
-    <TMPL_ELSE>
-      <img src='unachieved.png' title='No commits in past 90 days'
-        alt="Not recent">
-    </TMPL_IF>
     <TMPL_IF badge_panda_nos11>
       <img src='panda_nos11.png'
         title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)'

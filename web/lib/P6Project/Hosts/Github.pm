@@ -99,18 +99,12 @@ sub set_project_info {
     my $updated = $latest->{commit}->{committer}->{date};
     $project->{last_updated} = $updated;
 
-    my $ninety_days_ago = localtime() - 90 * ONE_DAY;
-    my $is_fresh = $updated && $updated ge $ninety_days_ago->ymd();
     if ($previous && $previous->{last_updated} eq $updated) {
-        $previous->{badge_is_fresh} = $is_fresh;
         $previous->{badge_panda} = $project->{badge_panda};
         $previous->{badge_panda_nos11} = $project->{badge_panda_nos11};
         %$project = %$previous;
         print "Not updated since last check, loading from cache\n";
         return 1;
-    }
-    else {
-        $project->{badge_is_fresh} = $is_fresh;
     }
     print "Updated since last check\n";
 
