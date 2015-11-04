@@ -39,6 +39,9 @@
   <td class="travis">
      <TMPL_IF travis>
         <a target="_blank" href="https://travis-ci.org/<TMPL_VAR auth>/<TMPL_VAR repo_name>"><img src="assets/images/build-<TMPL_VAR travis_status>.png"></a>
+        <span style="display: none"><TMPL_VAR travis_status></span>
+      <TMPL_ELSE>
+        <span style="display: none">ZZZ</span>
      </TMPL_IF>
   </td>
   <td class="stargazers">

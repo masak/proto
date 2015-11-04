@@ -4,7 +4,8 @@ jQuery(function ($) {
         sortList: [[0,0]],
         headers: {
             1: { sorter: 'text'},
-            2: { sorter: false }
+            2: { sorter: false },
+            3: { sorter: 'text' }
         }
     });
 });
