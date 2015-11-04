@@ -23,9 +23,15 @@ $ cd web
 $ perl build-project-list.pl --limit=<number-of-modules>
 ```
 
-## Cron job
+## Seeing your changes
 
-Once committed, the cron job will pick up your changes on the 20th and 50th minutes of every hour. The script can take up to 10 minutes to complete.
+Once committed, the production cron job will pick up your changes on the 20th and 50th minutes of every hour. The script can take up to 10 minutes to complete.
+
+```
+20,50   *       *       *       *       sh update-modules.perl6.org > log/update.log 2>&1; cp log/update.log /var/www/modules.perl6.org/log
+```
+
+The cron job results can be found [here](http://modules.perl6.org/log/update.log).
 
 ## Author
 
