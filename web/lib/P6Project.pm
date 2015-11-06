@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use 5.010;
 
+#We need ::SSL for Mojo::UserAgent, which is too shy about reporting it missing
+use IO::Socket::SSL 1.94;
 use Mojo::UserAgent;
 use P6Project::Stats;
 use Encode qw(decode_utf8);
