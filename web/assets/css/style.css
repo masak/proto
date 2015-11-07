@@ -186,9 +186,14 @@ tr:nth-child(odd) td {
 }
 
 #module_list tbody .travis {
+    padding: 0;
     background: #a2a2a2;
     background: -ms-linear-gradient(top,  #a2a2a2 0%,#909090 100%);
     background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
+}
+
+#module_list tbody .travis:hover {
+    background: #a2a2a2;
 }
 
 #module_list tbody .travis-passing {
@@ -197,10 +202,18 @@ tr:nth-child(odd) td {
     background: linear-gradient(to bottom,  #50ca22 0%,#3eb810 100%);
 }
 
+#module_list tbody .travis-passing:hover {
+    background: #50ca22;
+}
+
 #module_list tbody .travis-pending {
     background: #dbb428;
     background: -ms-linear-gradient(top,  #dbb428 0%,#c9a216 100%);
     background: linear-gradient(to bottom,  #dbb428 0%,#c9a216 100%);
+}
+
+#module_list tbody .travis-pending:hover {
+    background: #dbb428;
 }
 
 #module_list tbody .travis-failing {
@@ -209,10 +222,17 @@ tr:nth-child(odd) td {
     background: linear-gradient(to bottom,  #dc6750 0%,#ca553e 100%);
 }
 
+#module_list tbody .travis-failing:hover {
+    background: #dc6750;
+}
+
 #module_list tbody .travis a {
     text-decoration: none;
     color: #fff;
     text-shadow: 1px 1px #333;
+    display: block;
+    height: 32px;
+    line-height: 32px;
 }
 
 #module_list tbody .travis- {
