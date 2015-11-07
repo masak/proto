@@ -14,7 +14,9 @@ my $build = Module::Build->new(
         'HTML::Template'  => 0,
         'Mojolicious'     => 0,
         'YAML'            => 0,
-        'IO::Socket::SSL' => '1.94',
+        'IO::Socket::SSL'                => '1.94',
+        'Mojolicious::Plugin::AssetPack' => '0.68',
+        'Imager::File::PNG'              => '0.92',
     }
 );
 $build->create_build_script;
