@@ -7,6 +7,7 @@ use lib 'lib';
 use File::Path qw(make_path);
 use Getopt::Long qw(GetOptions);
 use P6Project;
+use P6Project::SpriteMaker;
 
 GetOptions('limit=s' => \my $limit);
 
