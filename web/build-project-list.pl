@@ -38,8 +38,8 @@ die "Too many errors no output generated"
   if $failed > $success;
 
 unless ($output_dir eq './') {
-    system("cp fame-and-profit.html $output_dir");
-    system("cp -r assets $output_dir");
+    system qw/cp fame-and-profit.html/, $output_dir;
+    system qw/cp -r assets           /, $output_dir;
 }
 
 $p6p->write_json('proto.json');
