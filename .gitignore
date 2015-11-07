@@ -7,5 +7,7 @@ _build
 Build
 web/github-token
 web/assets/images/logos
+web/assets/css/sprite.css
+web/assets/js/jquery.tablesorter.min.js	
 web/index.html
 web/proto.json

@@ -7,10 +7,13 @@ use 5.010;
 #We need ::SSL for Mojo::UserAgent, which is too shy about reporting it missing
 use IO::Socket::SSL 1.94;
 use Mojo::UserAgent;
+use Mojo::Util qw(spurt);
+use File::Spec::Functions qw(catdir  catfile);
 use P6Project::Stats;
 use Encode qw(decode_utf8);
 use P6Project::Info;
 use P6Project::HTML;
+use P6Project::SpriteMaker;
 use JSON;
 use File::Slurp;
 
@@ -106,9 +109,10 @@ sub write_html {
     @projects = sort projects_list_order @projects;
     @projects = map { $projects->{$_} } @projects;
     for ( @projects ) {
-        $_->{description}  ||= 'N/A';
-        $_->{last_updated} ||= '';
-        $_->{last_updated}  =~ s/T.+//;
+        $_->{description}   ||= 'N/A';
+        $_->{last_updated}  ||= '';
+        $_->{last_updated}    =~ s/T.+//;
+        ( $_->{logo_sprite} ) = ($_->{logo}//'') =~ m{([^/]+)\.png$};
     }
     my $content = $self->html->get_html(\@projects);
     return $self->writeout($content, $filename);
@@ -128,6 +132,19 @@ sub write_json {
         $mod->{badge_has_readme} //= JSON::false;
     }
     return $self->writeout(encode_json($projects), $filename);
+}
+
+sub write_sprite {
+    my $self = shift;
+
+    my $sprite = P6Project::SpriteMaker->new->spritify(
+        catdir($self->{output_dir}, qw/assets  images/),
+        [qw/camelia.png/],
+    )->css;
+
+    spurt $sprite => catfile $self->{output_dir}, qw/assets  css  sprite.css/;
+
+    $self;
 }
 
 sub projects_list_order {

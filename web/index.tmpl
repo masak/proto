@@ -6,12 +6,14 @@
   <link href="http://perl6.org/favicon.ico" rel="shortcut icon"
   	type="image/x-icon">
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/sprite.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 
 <body>
 	<div id="header">
-		<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt"><img alt="camelia perl bug logo" src="assets/images/camelia-logo.png" /></a>
+		<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt"
+			class="sprite s-camelia-logo"></a>
 		<h1><a href="/">Perl 6 Modules</a></h1>
 	</div>
 	<div id="content">
@@ -67,12 +69,11 @@
 			<footer>
 				<p class="legend">
 					Legend:
-					<img src='assets/images/readme.png' class="valign" title='Has a README' alt="Readme badge" /> has a README |
-					<img src='assets/images/tests.png' class="valign" title='Has tests' alt="Tests badge" /> has tests |
-					<img src='assets/images/panda.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (latest stable and experimental)'
-						alt="Bronze Panda badge" />
+					<i class="sprite s-readme"></i> has a README |
+					<i class="sprite s-tests"></i> has tests |
+					<i class="sprite s-panda" title='Conforms to the latest stable Perl 6 modules specs (latest stable and experimental)'></i>
 						/
-					<img src='assets/images/panda_nos11.png' class="valign" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)' alt="Bronze Panda badge" /> Perl 6 modules specs conformity level
+					<i class="sprite s-panda_nos11" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)'></i> Perl 6 modules specs conformity level
 					(with / without experimental S11)
 				</p>
 				<p>Want to know how to score badges? Read up on
@@ -101,7 +102,7 @@
 		</div>
 	</div>
 	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="assets/js/jquery.tablesorter.min.js"></script>
+	<script src="assets/js/jquery.tablesorter.js"></script>
 	<script src="assets/js/main.js"></script>
 </body>
 </html>

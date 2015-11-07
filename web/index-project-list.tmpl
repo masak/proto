@@ -3,7 +3,7 @@
   <td class="module_name">
     <a target="_blank" href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a>
     <TMPL_IF logo>
-      <img class="project-logo" src="<TMPL_VAR logo>" alt="">
+      <i class="sprite s-<TMPL_VAR logo_sprite>"></i>
     </TMPL_IF >
   </td>
   <td class="description">
@@ -12,27 +12,23 @@
   <td class="badges">
     <TMPL_IF badge_has_readme>
       <a href="<TMPL_VAR badge_has_readme>"
-          ><img src='assets/images/readme.png' title='Has a README' alt="Has README"
+          ><i class="sprite s-readme" title="Has a README"></i
       ></a>
     <TMPL_ELSE>
-      <img src='assets/images/unachieved.png' title="Doesn't have a README" alt="No readme">
+      <i class="sprite s-unachieved" title="Doesn't have a README"></i>
     </TMPL_IF>
     <TMPL_IF badge_has_tests>
-      <img src='assets/images/tests.png' title='Has tests' alt="Has tests">
+      <i class="sprite s-tests" title="Has tests"></i>
     <TMPL_ELSE>
-      <img src='assets/images/unachieved.png' title="Doesn't have tests" alt="No tests">
+      <i class="sprite s-unachieved" title="Doesn't have tests"></i>
     </TMPL_IF>
     <TMPL_IF badge_panda_nos11>
-      <img src='assets/images/panda_nos11.png'
-        title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)'
-          alt="Bronze Panda">
+      <i class="sprite s-panda_nos11" title='Conforms to the latest stable Perl 6 modules specs (without the experimental S11)'></i>
     <TMPL_ELSE>
       <TMPL_IF badge_panda>
-        <img src="assets/images/panda.png" title='Conforms to the latest stable and experimental Perl 6 modules specs.'
-          alt="Golden Panda">
+        <i class="sprite s-panda" title='Conforms to the latest stable and experimental Perl 6 modules specs.'></i>
       <TMPL_ELSE>
-        <img src='assets/images/unachieved.png' title='Not quite up-to-date with the specs'
-          alt="Not up-to-date with spects">
+        <i class="sprite s-unachieved" title="Not quite up-to-date with the specs"></i>
       </TMPL_IF>
     </TMPL_IF>
   </td>

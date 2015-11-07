@@ -8,11 +8,8 @@ body {
 a {color:inherit;}
 a img {border:none;}
 
-.project-logo {
+.module_name .sprite {
     float: right;
-}
-.project-logo img {
-    width: 32px;
 }
 
 #header {
@@ -26,8 +23,7 @@ a img {border:none;}
     padding:0 1em;
     position:relative;
 }
-#header img{
-    border:0 none;
+#header .s-camelia-logo{
     float:right;
     position:relative;
     right:-2em;
@@ -114,14 +110,10 @@ dl.table-display {
     border-top: 1px solid #999;
 }
 
-.badges img {
-    height: 20px;
+.badges i {
     vertical-align: middle;
 }
 
-img.valign {
-    vertical-align: middle;
-}
 #module_list > table {
     width: 100%;
     margin-top: 20px;
@@ -223,17 +215,20 @@ tr:nth-child(odd) td {
 }
 
 table.tablesorter thead tr .header {
-    background: url(../images/bg.gif) no-repeat center right;
     cursor: pointer;
 }
 
-table.tablesorter thead tr .headerSortUp {
-    background-image: url(../images/asc.gif);
+table.tablesorter thead tr .header i {
+    float: right;
+    margin-top: 3px;
+    margin-left: -21px;
 }
-table.tablesorter thead tr .headerSortDown {
-    background-image: url(../images/desc.gif);
-}
+
 table.tablesorter thead tr .headerSortDown,
 table.tablesorter thead tr .headerSortUp {
     background-color: #8dbdd8;
+}
+
+.legend .sprite {
+    vertical-align: middle;
 }

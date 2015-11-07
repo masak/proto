@@ -1,5 +1,6 @@
 jQuery(function ($) {
     setup_search_box();
+    $('.tablesorter').find('th').append('<i/>');
     $('.tablesorter').tablesorter({
         sortList: [[0,0]],
         headers: {

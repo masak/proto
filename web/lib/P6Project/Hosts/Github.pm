@@ -125,6 +125,7 @@ sub set_project_info {
         if ($self->p6p->getstore($logo_url, $logo_store)) {
             $project->{logo} = './'.$logo_store;
             $project->{logo} =~ s{//}{/}g;
+            $project->{logo} =~ s{//}{/}g;
         }
     }
 

@@ -52,6 +52,7 @@ sub get_projects {
 
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;
+
         my ($home) = $url =~ m[(?:git|https?)://([\w\.]+)/];
         if ($home) {
             if ($home =~ /github/) {
@@ -101,7 +102,6 @@ sub get_projects {
             $stats->succeed;
         }
         print $project->{description}, "\n\n";
-
 
         if ($project->{travis}) {
             my $travis_url = 'https://api.travis-ci.org/repos/'
