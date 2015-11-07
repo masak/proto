@@ -3,16 +3,14 @@ use strict;
 use warnings;
 use 5.010;
 
+use lib 'lib';
 use File::Path qw(make_path);
 use Getopt::Long qw(GetOptions);
-
-BEGIN { unshift @INC, './lib'; }
-
 use P6Project;
+
 GetOptions('limit=s' => \my $limit);
 
 my $output_dir = shift(@ARGV) || './';
-my @MEDALS = qw<readme tests unachieved camelia panda panda_nos11>;
 binmode STDOUT, ':encoding(UTF-8)';
 
 local $| = 1;
@@ -34,7 +32,7 @@ my $failed  = $p6p->stats->failed;
 print "ok - $success\nnok - $failed\n";
 
 my @errors = $p6p->stats->errors;
-print STDERR join '', map {"$_\n"} @errors if scalar(@errors);
+warn join "\n", @errors, '' if @errors;
 
 die "Too many errors no output generated"
   if $failed > $success;
