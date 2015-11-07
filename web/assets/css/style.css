@@ -185,23 +185,47 @@ tr:nth-child(odd) td {
     white-space: nowrap;
 }
 
-.travis * {
-    vertical-align: middle;
+#module_list tbody .travis {
+    background: #a2a2a2;
+    background: -ms-linear-gradient(top,  #a2a2a2 0%,#909090 100%);
+    background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
 }
 
-.add_travis {
-    font-size: 80%;
-    color: #999;
+#module_list tbody .travis-passing {
+    background: #50ca22;
+    background: -ms-linear-gradient(top,  #50ca22 0%,#3eb810 100%);
+    background: linear-gradient(to bottom,  #50ca22 0%,#3eb810 100%);
+}
+
+#module_list tbody .travis-pending {
+    background: #dbb428;
+    background: -ms-linear-gradient(top,  #dbb428 0%,#c9a216 100%);
+    background: linear-gradient(to bottom,  #dbb428 0%,#c9a216 100%);
+}
+
+#module_list tbody .travis-failing {
+    background: #dc6750;
+    background: -ms-linear-gradient(top,  #dc6750 0%,#ca553e 100%);
+    background: linear-gradient(to bottom,  #dc6750 0%,#ca553e 100%);
+}
+
+#module_list tbody .travis a {
     text-decoration: none;
-    border: 1px solid #cacaca;
-    padding: 3px;
-    border-radius: 3px;
-    background: #ddd;
-    color: #333;
-    display: inline-block;
+    color: #fff;
+    text-shadow: 1px 1px #333;
 }
 
-.add_travis:hover {
+#module_list tbody .travis- {
+    font-size: 80%;
+    background: #ddd;
+}
+
+#module_list tbody .travis- a {
+    text-shadow: none;
+    color: #333;
+}
+
+#module_list tbody .travis-:hover {
     background: #ccc;
 }
 
