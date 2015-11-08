@@ -16,8 +16,10 @@ my $build = Module::Build->new(
         'Mojolicious'     => 0,
         'YAML'            => 0,
         'File::Slurp'     => 0,
+        'File::Path'      => 0,
         'JSON'            => 0,
         'IO::Socket::SSL'                => '1.94',
+        'File::Spec::Functions'          => 0,
         'Mojolicious::Plugin::AssetPack' => '0.68',
         'Imager::File::PNG'              => '0.92',
     }
