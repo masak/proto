@@ -63,10 +63,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 {
     diag 'Misc elements';
     $t->dive_reset->get_ok('/')->status_is(200)
-        ->text_is('.count' => 2, 'total distro count is displayed'          )
-        ->element_exists('#search [action="/search"]', 'search form'        )
-        ->element_exists('#search [name="q"]',         'search box is there')
-        ->element_exists('#search [type="submit"]',    'with submit button' )
+        ->text_is('.count' => 2, 'total distro count is displayed')
     ;
 }
 
