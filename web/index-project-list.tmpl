@@ -1,10 +1,12 @@
 <TMPL_LOOP projects>
 <tr>
   <td class="module_name">
-    <a target="_blank" href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME></span></a>
-    <TMPL_IF logo>
-      <i class="sprite s-<TMPL_VAR logo_sprite>"></i>
-    </TMPL_IF >
+    <a target="_blank" href="<TMPL_VAR URL>"><span class="name"><TMPL_VAR NAME>
+      <TMPL_IF logo>
+        <i class="sprite s-<TMPL_VAR logo_sprite>"></i>
+      </TMPL_IF>
+    </span>
+    </a>
   </td>
   <td class="description">
     <TMPL_VAR description>
