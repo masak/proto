@@ -4,8 +4,7 @@ use warnings;
 use 5.010;
 
 use lib 'lib';
-use File::Path qw(make_path  remove_tree);
-use File::Spec::Functions qw(catdir);
+use File::Path qw(make_path);
 use Getopt::Long qw(GetOptions);
 use P6Project;
 
@@ -38,7 +37,6 @@ warn join "\n", @errors, '' if @errors;
 die "Too many errors no output generated"
   if $failed > $success;
 
-remove_tree catdir $output_dir, qw/assets images/;
 unless ($output_dir eq './') {
     system qw/cp fame-and-profit.html/, $output_dir;
     system qw/cp -r assets           /, $output_dir;
