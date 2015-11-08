@@ -4,7 +4,7 @@ jQuery(function ($) {
     $('.tablesorter').tablesorter({
         sortList: [[0,0]],
         headers: {
-            1: { sorter: 'text'},
+            0: { sorter: 'text'},
             2: { sorter: false },
             3: { sorter: 'text' }
         }
