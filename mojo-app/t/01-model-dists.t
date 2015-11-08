@@ -6,8 +6,12 @@ use Test::Most;
 use Mojo::SQLite;
 use t::Helper;
 
-use constant TEST_DB_FILE => 'test-01-model.db'; END { unlink TEST_DB_FILE; }
+use constant TEST_DB_FILE => 't/test.db';
 use constant MODEL        => 'ModulesPerl6::Model::Dists';
+
+-r TEST_DB_FILE
+    or die 'Could not find test database ' . TEST_DB_FILE
+    . '. Perhaps, you are running this test in a wrong directory?';
 
 use_ok       MODEL;
 my $m     =  MODEL->new( db_file => TEST_DB_FILE );
