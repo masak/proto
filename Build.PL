@@ -11,6 +11,7 @@ my $build = Module::Build->new(
 
     # and now the list of perl module dependencies
     requires => {
+        'CGI'             => 0,
         'HTML::Template'  => 0,
         'Mojolicious'     => 0,
         'YAML'            => 0,
