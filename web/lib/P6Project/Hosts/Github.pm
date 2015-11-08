@@ -57,13 +57,24 @@ sub get_api {
     if ($call) {
         $url .= $call;
     }
-    my $tx = $self->p6p->ua->get($url, {Authorization => "token $github_token"});
-    if (! $tx->success ) {
-        my $error = $self->_format_error($tx->error);
-        $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error");
-        return;
+
+    FETCH_URL: {
+        my $tx = $self->p6p->ua->get($url, {Authorization => "token $github_token"});
+        if (! $tx->success ) {
+            my $error = $self->_format_error($tx->error);
+            $self->p6p->stats->error("Error for project $project->{name} : could not get $url: $error");
+            return;
+        }
+
+        my $res = $tx->res->json;
+        do { $url = $res->{url}; redo FETCH_URL; }
+            if  ref $res eq 'HASH'
+                and $res->{message}
+                and $res->{message} eq 'Moved Permanently'
+                and $url ne $res->{url};
+
+        return $res;
     }
-    return $tx->res->json;
 }
 
 sub file_url {
