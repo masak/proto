@@ -139,7 +139,7 @@ sub write_sprite {
 
     my $sprite = P6Project::SpriteMaker->new->spritify(
         catdir($self->{output_dir}, qw/assets  images/),
-        [qw/camelia.png/],
+        [qw/camelia.png  camelia-logo.png/],
     )->css;
 
     spurt $sprite => catfile $self->{output_dir}, qw/assets  css  sprite.css/;
