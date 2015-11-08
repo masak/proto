@@ -186,7 +186,9 @@ tr:nth-child(odd) td {
 }
 
 #module_list tbody .travis {
-    padding: 0;
+    padding: 0 5px;
+    white-space: nowrap;
+    font-size: 95%;
     background: #a2a2a2;
     background: -ms-linear-gradient(top,  #a2a2a2 0%,#909090 100%);
     background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
