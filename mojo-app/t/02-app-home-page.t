@@ -7,12 +7,7 @@ use Mojo::URL;
 use Test::Mojo::WithRoles 'SubmitForm ElementCounter';
 use t::Helper;
 
-use constant TEST_DB_FILE => 't/test.db';
-$ENV{MODULESPERL6_DB_FILE} = TEST_DB_FILE;
-
--r TEST_DB_FILE
-    or die 'Could not find test database ' . TEST_DB_FILE
-    . '. Perhaps, you are running this test in a wrong directory?';
+t::Helper::set_db_env;
 
 my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
 my ( $dist1, $dist2 ) = t::Helper::dist_data;

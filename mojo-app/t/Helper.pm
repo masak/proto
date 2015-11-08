@@ -3,6 +3,17 @@ package t::Helper;
 use strict;
 use warnings;
 
+sub set_db_env {
+    my $db_file = 't/test.db';
+    $ENV{MODULESPERL6_DB_FILE} = $db_file;
+
+    -r $db_file
+        or die 'Could not find test database ' . $db_file
+        . '. Perhaps, you are running this test in a wrong directory?';
+
+    return $db_file;
+}
+
 sub dist_data {
     return (
         {
