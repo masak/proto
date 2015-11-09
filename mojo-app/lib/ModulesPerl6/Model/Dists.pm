@@ -2,98 +2,82 @@ package ModulesPerl6::Model::Dists;
 
 use Mojo::Base -base;
 
-use Carp          qw/croak/;
-use Mojo::SQLite;
-use Mojo::Util    qw/trim/;
+use Carp             qw/croak/;
+use Mojo::Collection qw/c/;
+use Mojo::Util       qw/trim/;
+use Package::Alias Schema   => 'ModulesPerl6::Model::Dists::Schema';
+use Package::Alias Kwalitee => 'ModulesPerl6::Metrics::Kwalitee';
 
-has db_file => $ENV{ALLAROUND_DB} // 'modulesperl6.db';
-has _sqlite => \&_set_up_sqlite;
+has db_file => $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db';
+has db      => sub { Schema->connect('dbi:SQLite:' . shift->db_file) };
+
+sub _find {
+    my $self   = shift;
+    my $is_hri = shift;
+    my $what   = shift // {};
+    ref $what eq 'HASH' or croak 'find only accepts a hashref';
+
+    %$what = map {
+        ref $what->{$_} eq 'SCALAR'
+            ? ( $_ => { -like => "%${ $what->{$_} }%" } )
+            : $what->{$_}
+                ? ( $_ => $what->{$_} ) : ()
+    } qw/name  author_id  travis_status  description/;
+
+    my $res = $self->db->resultset('Dist')->search($what,
+        $is_hri ? {
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator'
+        } : ()
+    );
+
+    return $is_hri ? c $res->all : $res;
+}
 
 sub add {
     my ( $self, @data ) = @_;
     @data or return $self;
 
-    my $db = $self->_sqlite->db;
-    my $tx = $db->begin;
+    my $db = $self->db;
     for my $dist ( @data ) {
         $_ = trim $_//'' for values %$dist;
-        $dist->{travis}       ||= 'not setup';
-        $dist->{date_updated} ||= 0;
-        $dist->{date_added}   ||= 0;
+        $dist->{travis_status} ||= 'not setup';
+        $dist->{date_updated}  ||= 0;
+        $dist->{date_added}    ||= 0;
+        $dist->{kwalitee} = Kwalitee->new->kwalitee({
+            map +( $_ => $dist->{$_} ),
+                qw/has_readme  panda  has_tests  travis/,
+        });
 
-        $db->query(
-            'INSERT OR IGNORE INTO authors (name, github) VALUES (?, ?)',
-            @$dist{qw/author author/}, # eventually we'll have name/github...
-            # ...but we'll use same field for both for now
-        );
-
-        $db->query(
-            'INSERT OR IGNORE INTO travis_statuses (status) VALUES (?)',
-            $dist->{travis},
-        );
-
-        $db->query(
-            'INSERT INTO dists (
-                name,         url,         description,
-                logo,         stars,       issues,
-                date_updated, date_added,  travis_status_id,
-                author_id
-            ) VALUES(?, ?, ?,  ?, ?, ?,  ?, ?,
-                (SELECT travis_status_id
-                    FROM travis_statuses WHERE status = ? ),
-                (SELECT author_id FROM authors WHERE name = ? AND github = ?)
-            )',
-            @$dist{qw/
-                name         url         description
-                logo         stars       issues
-                date_updated date_added  travis
-                author       author
-            /},
-        );
+        $db->resultset('Dist')->create({
+            travis => { status => $dist->{travis_status} },
+            author => { # use same field for both, for now. TODO:fetch realname
+                author_id => $dist->{author_id}, name => $dist->{author_id},
+            },
+            map +( $_ => $dist->{$_} ),
+                qw/name  url  description  logo  stars  issues  kwalitee
+                    date_updated  date_added/,
+        });
     }
-    $tx->commit;
 
     $self;
 }
 
-sub _set_up_sqlite {
-    my $sqlite = Mojo::SQLite->new('file:' . shift->db_file);
+sub deploy {
+    my $self = shift;
+    $self->db->deploy;
 
-    $sqlite->db->query(q{
-        CREATE TABLE IF NOT EXISTS authors (
-            author_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-            name         TEXT NOT NULL,
-            github       TEXT NOT NULL,
-            UNIQUE(name, github)
-        );
-    });
+    $self;
+}
 
-    $sqlite->db->query(q{
-        CREATE TABLE IF NOT EXISTS travis_statuses (
-            travis_status_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            status           TEXT UNIQUE NOT NULL
-        );
-    });
+sub find {
+    my $self = shift;
+    return $self->_find(1, @_);
+}
+sub remove {
+    my $self = shift;
+    $self->_find(0, @_)->delete_all;
 
-    $sqlite->db->query(q{
-        CREATE TABLE IF NOT EXISTS dists (
-            dist_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-            name         TEXT NOT NULL,
-            url          TEXT NOT NULL,
-            description  TEXT NOT NULL,
-            logo         TEXT NOT NULL,
-            stars        INTEGER NOT NULL,
-            issues       INTEGER NOT NULL,
-            date_updated INTEGER NOT NULL,
-            date_added   INTEGER NOT NULL,
-            FOREIGN KEY(travis_status_id)
-                REFERENCES travis_statuses(travis_status_id),
-            FOREIGN KEY(author_id)
-                REFERENCES authors(author_id)
-        );
-    });
-
-    return $sqlite;
-};
+    $self;
+}
 
 1;
