@@ -4,10 +4,15 @@ use strict;
 use warnings;
 use 5.010;
 
+use lib '../mojo-app/lib';
+use ModulesPerl6::Model::Dists;
+use constant DB_FILE => 'modulesperl6.db';
+
 #We need ::SSL for Mojo::UserAgent, which is too shy about reporting it missing
 use IO::Socket::SSL 1.94;
 use Mojo::UserAgent;
 use Mojo::Util qw(spurt);
+use List::UtilsBy qw(sort_by);
 use File::Spec::Functions qw(catdir  catfile);
 use P6Project::Stats;
 use Encode qw(decode_utf8);
@@ -16,6 +21,8 @@ use P6Project::HTML;
 use P6Project::SpriteMaker;
 use JSON;
 use File::Slurp;
+use File::Copy qw/copy/;
+use Time::Moment;
 
 sub new {
     my ($class, %opts) = @_;
@@ -111,6 +118,7 @@ sub write_html {
     for ( @projects ) {
         $_->{description}   ||= 'N/A';
         $_->{last_updated}  ||= '';
+        $_->{last_updated_full} = $_->{last_updated};
         $_->{last_updated}    =~ s/T.+//;
         ( $_->{logo_sprite} ) = ($_->{logo}//'') =~ m{([^/]+)\.png$};
     }
@@ -143,6 +151,41 @@ sub write_sprite {
     )->css;
 
     spurt $sprite => catfile $self->{output_dir}, qw/assets  css  sprite.css/;
+
+    $self;
+}
+
+sub write_dist_db {
+    my $self = shift;
+
+    { # let model go out of scope, so the db file gets finished off
+        unlink DB_FILE;
+        my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE );
+        $m->add(
+            map +{
+                name         => $_->{name},
+                url          => $_->{url},
+                description  => $_->{description},
+                author       => $_->{auth},
+                logo         => $_->{logo_sprite},
+                has_readme   => $_->{badge_has_readme} ? 1 : 0,
+                panda        => $_->{badge_panda}
+                                    ? 2 : $_->{badge_panda_nos11} : 1 : 0,
+                has_tests    => $_->{badge_has_tests},
+                travis       => $_->{travis_status},
+                stars        => $_->{stargazers},
+                issues       => $_->{open_issues},
+                date_updated => eval {
+                        Time::Moment->from_string($_->{last_updated_full})
+                            ->epoch
+                    } // 0,
+                date_added   => Time::Moment->now->epoch,
+                # to be fixed to proper date_added date
+            }, sort_by { $_->{name} } values %{ $self->projects }
+        );
+    }
+
+    move DB_FILE, catfile $self->{output_dir}, DB_FILE;
 
     $self;
 }
