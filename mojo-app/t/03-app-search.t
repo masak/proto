@@ -4,10 +4,11 @@ use strict;
 use warnings FATAL => 'all';
 use Test::Most;
 use Mojo::URL;
-use Test::Mojo::WithRoles 'SubmitForm ElementCounter';
+use Test::Mojo::WithRoles qw/SubmitForm ElementCounter/;
 use t::Helper;
 
-t::Helper::set_db_env;
+my $db_file = t::Helper::setup_db_file;
+END { unlink $db_file }
 
 my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
 

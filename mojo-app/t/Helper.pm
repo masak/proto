@@ -1,15 +1,16 @@
 package t::Helper;
 
 use strict;
-use warnings;
+use warnings FATAL => 'all';
+use ModulesPerl6::Model::Dists;
+use File::Temp;
 
-sub set_db_env {
-    my $db_file = 't/test.db';
+sub setup_db_file {
+    my $db_file = File::Temp->new( UNLINK => 0, SUFFIX => '.db' );
     $ENV{MODULESPERL6_DB_FILE} = $db_file;
 
-    -r $db_file
-        or die 'Could not find test database ' . $db_file
-        . '. Perhaps, you are running this test in a wrong directory?';
+    ModulesPerl6::Model::Dists->new( db_file => $db_file )
+        ->deploy->add( dist_in_data() );
 
     return $db_file;
 }

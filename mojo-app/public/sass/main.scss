@@ -30,6 +30,18 @@ header {
     font-size: 200%;
 }
 
+#dists {
+    .name a {
+        vertical-align: middle;
+    }
+    .github {
+        background: url(/pics/github-icon.png);
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+    }
+}
+
 /* Bootstrap amendments */
 
 .btn .glyphicon {
@@ -39,4 +51,3 @@ header {
 .suckin-btm {
     padding-bottom: 5px;
 }
-

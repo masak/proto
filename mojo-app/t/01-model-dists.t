@@ -2,12 +2,14 @@
 
 use strict;
 use warnings FATAL => 'all';
+
+use File::Temp;
 use Test::Most;
 use Mojo::SQLite;
 use t::Helper;
 
 use constant MODEL        => 'ModulesPerl6::Model::Dists';
-use constant TEST_DB_FILE => 't/01-model-dists-test.db';
+use constant TEST_DB_FILE => File::Temp->new( UNLINK => 0, SUFFIX => '.db' );
 END { unlink TEST_DB_FILE }
 
 use_ok       MODEL;

@@ -4,13 +4,14 @@ use strict;
 use warnings FATAL => 'all';
 use Test::Most;
 use Mojo::URL;
-use Test::Mojo::WithRoles 'SubmitForm ElementCounter';
+use Test::Mojo::WithRoles qw/SubmitForm ElementCounter/;
 use t::Helper;
 
-t::Helper::set_db_env;
+my $db_file = t::Helper::setup_db_file;
+END { unlink $db_file }
 
 my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
-my ( $dist1, $dist2 ) = t::Helper::dist_data;
+my ( $dist1, $dist2 ) = t::Helper::dist_out_data;
 
 $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     for $dist1, $dist2;
@@ -27,31 +28,32 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->dived_text_is('.stars a'           => '42'        )
         ->dived_text_is('.issues a'          => '12'        )
         ->dived_text_is('.updated'           => '2015-11-08')
-        ->dived_text_is('.added'             => '2015-11-04')
+        # ->dived_text_is('.added'             => '2015-11-04')
         ->element_count_is(".name   a[href='$dist1->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist1"]'             => 1)
         ->element_count_is('.name   a i.sprite.s-dist1'                => 1)
         ->element_count_is(".travis a[href='$dist1->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist1->{url}stargazers']" => 1)
-        ->element_count_is(".issues a[href='$dist1->{url}issues']}"    => 1)
+        ->element_count_is(".issues a[href='$dist1->{url}issues']"     => 1)
     ;
 
     $t->dive_reset
         ->dive_in('#dists tbody tr:first-child + tr ')
         ->dived_text_is('.name a[href^="/"]' => 'Dist2'     )
         ->dived_text_is('.desc'              => 'Test Dist2')
-        ->dived_text_is('.kwalitee a'        => '0'         )
+        # ->dived_text_is('.kwalitee a'        => '0%'        )
         ->dived_text_is('.travis a'          => 'failing'   )
         ->dived_text_is('.stars a'           => '14'        )
         ->dived_text_is('.issues a'          => '6'         )
         ->dived_text_is('.updated'           => '2015-11-02')
-        ->dived_text_is('.added'             => '2015-10-26')
+        # ->dived_text_is('.added'             => '2015-10-26')
         ->element_count_is(".name   a[href='$dist2->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist2"]'             => 1)
         ->element_count_is('.name   a i.sprite.s-dist2'                => 1)
+        ->element_count_is('.kwalitee a[href="/kwalitee/Dist2"]'       => 1)
         ->element_count_is(".travis a[href='$dist2->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist2->{url}stargazers']" => 1)
-        ->element_count_is(".issues a[href='$dist2->{url}issues']}"    => 1)
+        ->element_count_is(".issues a[href='$dist2->{url}issues']"     => 1)
     ;
 }
 

@@ -28,29 +28,46 @@
     <h2 class="panel-title">Project List</h2>
   </div>
   <div class="panel-body table-responsive">
-    <table class="table table-condensed">
+    <table class="table table-condensed" id="dists">
       <thead>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Author</th>
-        <th>Kwalitee</th>
-        <th>Travis</th>
-        <th>Stars</th>
-        <th>Issues</th>
-        <th>Updated</th>
+        <tr>
+          <th class="name">Name</th>
+          <th class="description">Description</th>
+          <th class="kwalitee">Kwalitee</th>
+          <th class="travis">Travis</th>
+          <th class="stars">Stars</th>
+          <th class="issues">Issues</th>
+          <th class="updated">Updated</th>
+        </tr>
       </thead>
       <tbody>
         % for my $dist ( items_in 'dists' ) {
           <tr>
-            <td><a href="<%= $dist->{url} %>"><%= $dist->{name} %></a></td>
-            <td><%= $dist->{description} %></td>
-            <td><%= $dist->{author_id} %></td>
-            <td><%= $dist->{kwalitee} %>%</td>
-            <td class="travis travis-<%= $dist->{travis_status} %>"
-                ><%= $dist->{travis_status} %></td>
-            <td><%= $dist->{stars} %></td>
-            <td><%= $dist->{issues} %></td>
-            <td><%= $dist->{date_updated} %></td>
+            <td class="name">
+              <a href="<%= $dist->{url} %>" class="github"></a>
+              <a href="<%= url_for('dist', dist => $dist->{name} ) %>"
+                ><%= $dist->{name} %>
+                <i class="sprite s-<%= $dist->{logo} %>"></i>
+              </a>
+            </td>
+            <td class="desc"><%= $dist->{description} %></td>
+            <td class="kwalitee">
+              <a href="<%= url_for('kwalitee', dist => $dist->{name} ) %>"
+                ><%= $dist->{kwalitee} %>%</a>
+            </td>
+            <td class="travis travis-<%= $dist->{travis_status} %>">
+              <a href="<%= $dist->{travis_url} %>"
+                ><%= $dist->{travis_status} %></a>
+            </td>
+            <td class="stars">
+              <a href="<%= $dist->{url} . 'stargazers' %>"
+                ><%= $dist->{stars} %></a>
+            </td>
+            <td class="issues">
+              <a href="<%= $dist->{url} . 'issues' %>"
+                ><%= $dist->{issues} %></a>
+            </td>
+            <td class="updated"><%= $dist->{date_updated} %></td>
           </tr>
         % }
       </tbody>

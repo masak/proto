@@ -40,7 +40,10 @@ sub startup {
     my $r = $self->routes;
     $r->get('/'          )->to('root#index');
     $r->get('/q/:term'   )->to('root#index');
-    $r->any('/dist/:dist')->to('root#dist');
+    $r->get('/dist/:dist')->to('root#dist')->name('dist');
+    $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+
+    $r->any('/NIY')->to('root#NIY')->name('NIY');
 }
 
 1;
