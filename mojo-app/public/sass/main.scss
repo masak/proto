@@ -1,0 +1,42 @@
+
+body {
+    /* Original vector bg pic is at:
+        http://zoffix.com/new/modules.perl6.org.bg.eps
+    */
+    background: url(/pics/bg.jpg) no-repeat center top fixed;
+    background-size: 100% auto;
+}
+
+header {
+    margin-top: 20px;
+
+    .panel-body {
+        /*background: #80B5FF;*/
+    }
+
+    #logo {
+        margin-top: -60px;
+        margin-right: -40px;
+    }
+}
+
+@media (max-width: 665px) {
+    header #logo {
+        margin: 0;
+    }
+}
+
+.panel h1 {
+    font-size: 200%;
+}
+
+/* Bootstrap amendments */
+
+.btn .glyphicon {
+    padding-right: .5em;
+}
+
+.suckin-btm {
+    padding-bottom: 5px;
+}
+

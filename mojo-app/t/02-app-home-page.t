@@ -60,6 +60,11 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     $t->dive_reset->get_ok('/')->status_is(200)
         ->text_is('.count' => 2, 'total distro count is displayed')
     ;
+
+    $t->dive_reset->get_ok('/dist/Dist1')
+        ->status_is(302)
+        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+    ;
 }
 
 done_testing;

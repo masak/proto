@@ -1,0 +1,2 @@
+#!/bin/sh
+morbo -w lib -w bin -w templates -w public -l http://*:3333 bin/ModulesPerl6.pl

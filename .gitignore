@@ -8,6 +8,11 @@ Build
 web/github-token
 web/assets/images/logos
 web/assets/css/sprite.css
-web/assets/js/jquery.tablesorter.min.js	
+web/assets/js/jquery.tablesorter.min.js
 web/index.html
 web/proto.json
+mojo-app/public/sass/.sass-cache/
+mojo-app/public/sass/cerulean.scss
+mojo-app/public/sass/cerulean/
+mojo-app/public/packed/
+mojo-app/modulesperl6.db
