@@ -22,9 +22,16 @@
         </p>
         <p class="text-muted">
           <small>
-            This page is generated from the files in the
+            This page was generated from the files in the
             <a href="http://github.com/perl6/modules.perl6.org/"
-              >modules.perl6.org repository</a>.
+              >modules.perl6.org repository</a>
+              on <i class="build_last_updated"><%=
+                localtime(
+                  stash('last_updated')
+                    ? stash('last_updated')
+                    : build_stats->stats('last_updated')->{last_updated}
+                )
+                %></i>.
               <a href="http://modules.perl6.org/log/update.log"
                 class="btn btn-primary btn-sm">
                 <i class="glyphicon glyphicon-log-in"></i>

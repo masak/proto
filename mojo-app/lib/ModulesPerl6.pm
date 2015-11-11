@@ -7,6 +7,7 @@ use Mojo::Base 'Mojolicious';
 
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::Dists;
+use ModulesPerl6::Model::BuildStats;
 
 sub startup {
     my $self = shift;
@@ -28,6 +29,9 @@ sub startup {
     # HELPERS
     $self->helper( dists => sub {
         state $dists = ModulesPerl6::Model::Dists->new;
+    });
+    $self->helper( build_stats => sub {
+        state $stats = ModulesPerl6::Model::BuildStats->new;
     });
     $self->helper( items_in => sub {
         my ( $c, $what ) = @_;

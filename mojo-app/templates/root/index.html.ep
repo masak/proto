@@ -7,7 +7,9 @@
   <div class="panel-body suckin-btm">
     <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
         class="pull-right">
-    <p>Below you can find a list of the 443 known Perl 6 modules. All of them
+    <p>Below you can find a list of the <span class="total_dist_count"
+        ><%= stash 'dists_num' %></span>
+        known Perl 6 modules. All of them
         have been working on <a href="http://rakudo.org/">Rakudo</a> at
         some point.
         These modules can be installed with <a href="https://github.com/tadzik/panda/">panda</a>, a module management tool
@@ -27,6 +29,12 @@
   <div class="panel-heading">
     <h2 class="panel-title">Project List</h2>
   </div>
+
+  <form action="<%= url_for '/' %>" id="search">
+    <input type="text" id="q" name="q" value="<%= param 'q' %>">
+    <input type="submit" value="Search">
+  </form>
+
   <div class="panel-body table-responsive">
     <table class="table table-condensed" id="dists">
       <thead>
@@ -42,7 +50,7 @@
       </thead>
       <tbody>
         % for my $dist ( items_in 'dists' ) {
-          <tr>
+          <tr <%== $dist->{is_hidden} ? 'class="hidden"' : '' %>>
             <td class="name">
               <a href="<%= $dist->{url} %>" class="github"></a>
               <a href="<%= url_for('dist', dist => $dist->{name} ) %>"
@@ -68,6 +76,13 @@
                 ><%= $dist->{issues} %></a>
             </td>
             <td class="updated"><%= $dist->{date_updated} %></td>
+          </tr>
+        % }
+        % unless ( grep ! $_->{is_hidden}, items_in 'dists' ) {
+          <tr>
+            <td colspan="7">
+              <p class="alert alert-danger error">No results were found</p>
+            </td>
           </tr>
         % }
       </tbody>

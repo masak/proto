@@ -5,8 +5,9 @@ use Mojo::Base -base;
 use Carp             qw/croak/;
 use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
+use ModulesPerl6::Model::BuildStats::Schema;
 
-has db_file => $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db';
+has db_file => sub { $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db' };
 has db      => sub {
     ModulesPerl6::Model::BuildStats::Schema
         ->connect('dbi:SQLite:' . shift->db_file)

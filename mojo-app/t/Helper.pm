@@ -3,6 +3,7 @@ package t::Helper;
 use strict;
 use warnings FATAL => 'all';
 use ModulesPerl6::Model::Dists;
+use ModulesPerl6::Model::BuildStats;
 use File::Temp;
 
 sub setup_db_file {
@@ -11,6 +12,12 @@ sub setup_db_file {
 
     ModulesPerl6::Model::Dists->new( db_file => $db_file )
         ->deploy->add( dist_in_data() );
+
+    ModulesPerl6::Model::BuildStats->new( db_file => $db_file )
+        ->deploy->update(
+            dists_num    => scalar( @{[ dist_in_data() ]}),
+            last_updated => time - 1000,
+        );
 
     return $db_file;
 }

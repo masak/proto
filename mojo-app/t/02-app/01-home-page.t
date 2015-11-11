@@ -60,7 +60,10 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 {
     diag 'Misc elements';
     $t->dive_reset->get_ok('/')->status_is(200)
-        ->text_is('.count' => 2, 'total distro count is displayed')
+        ->text_is('.total_dist_count' => 2, 'total distro count is displayed')
+        ->text_like('.build_last_updated'
+            => qr/\w{3}\s \w{3}\s \d\d?\s \d{2}:\d{2}:\d{2}\s \d{4}/x,
+            'db build date is displayed (e.g. Wed Dec 31 19:00:00 1969)')
     ;
 
     $t->dive_reset->get_ok('/dist/Dist1')
