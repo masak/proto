@@ -1,5 +1,5 @@
 package ModulesPerl6::Model::Dists::Schema::Result::TravisStatus;
-use     ModulesPerl6::Model::Dists::Schema::ResultClass;
+use     ModulesPerl6::Model::ResultClass;
 
 primary_column status => { data_type => 'text' };
 

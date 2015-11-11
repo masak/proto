@@ -1,5 +1,5 @@
 package ModulesPerl6::Model::Dists::Schema::Result::Dist;
-use     ModulesPerl6::Model::Dists::Schema::ResultClass;
+use     ModulesPerl6::Model::ResultClass;
 
 primary_column name          => { data_type => 'text'                      };
 primary_column author_id     => { data_type => 'text', is_foreign_key => 1 };

@@ -1,4 +1,4 @@
-package ModulesPerl6::Model::Dists::Schema::ResultClass;
+package ModulesPerl6::Model::ResultClass;
 
 use Import::Into;
 sub import {
