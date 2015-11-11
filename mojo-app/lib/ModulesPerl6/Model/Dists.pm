@@ -5,11 +5,12 @@ use Mojo::Base -base;
 use Carp             qw/croak/;
 use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
-use Package::Alias Schema   => 'ModulesPerl6::Model::Dists::Schema';
-use Package::Alias Kwalitee => 'ModulesPerl6::Metrics::Kwalitee';
+use ModulesPerl6::Metrics::Kwalitee;
 
 has db_file => $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db';
-has db      => sub { Schema->connect('dbi:SQLite:' . shift->db_file) };
+has db      => sub {
+    ModulesPerl6::Model::Dists::Schema->connect('dbi:SQLite:' . shift->db_file)
+};
 
 sub _find {
     my $self   = shift;
@@ -43,7 +44,7 @@ sub add {
         $dist->{travis_status} ||= 'not setup';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
-        $dist->{kwalitee} = Kwalitee->new->kwalitee({
+        $dist->{kwalitee} = ModulesPerl6::Metrics::Kwalitee->new->kwalitee({
             map +( $_ => $dist->{$_} ),
                 qw/has_readme  panda  has_tests  travis/,
         });

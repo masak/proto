@@ -11,7 +11,8 @@ use t::Helper;
 use constant MODEL        => 'ModulesPerl6::Model::BuildStats';
 use constant TEST_DB_FILE => File::Temp->new( UNLINK => 0, SUFFIX => '.db' );
 END { unlink TEST_DB_FILE }
-
+use Acme::Dump::And::Dumper;
+die DnD [ sort keys %INC ];
 use_ok       MODEL;
 my $m     =  MODEL->new( db_file => TEST_DB_FILE );
 isa_ok $m => MODEL;
