@@ -50,6 +50,12 @@ sub get_projects {
         my $url = $json->{'source-url'} // $json->{'repo-url'}
             // $json->{support}->{source};
 
+        for ( $url ) {
+            s/^\s+|\s+$//g;
+            $_ .= '.git' if m{^git://}    and not m{\.git$};
+            $_ .= '/'    if m{^https?://} and not m{/$}    ;
+        }
+
         $projects->{$name}->{'url'} = $url;
         $projects->{$name}{success} = 0;
 
