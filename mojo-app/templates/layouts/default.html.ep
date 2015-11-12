@@ -44,5 +44,6 @@
 
   %= asset "bootstrap.js"
   %= asset "app.js";
+  <link rel="stylesheet" href="/sass/sprite.css" property="stylesheet">
 </body>
 </html>

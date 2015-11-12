@@ -30,13 +30,18 @@
     <h2 class="panel-title">Project List</h2>
   </div>
 
-  <form action="<%= url_for '/' %>" id="search">
-    <input type="text" id="q" name="q" value="<%= param 'q' %>">
-    <input type="submit" value="Search">
+  <form action="<%= url_for '/' %>" id="search" class="row">
+    <div class="form-group col-sm-8 col-xs-12">
+      <input type="text" id="q" name="q" value="<%= param 'q' %>"
+      class="form-control">
+    </div>
+    <div class="form-group col-sm-4 col-xs-12">
+      <input type="submit" value="Search" class="btn btn-primary btn-block">
+    </div>
   </form>
 
-  <div class="panel-body table-responsive">
-    <table class="table table-condensed" id="dists">
+  <div class="table-responsive">
+    <table class="table table-condensed table-striped panel-body" id="dists">
       <thead>
         <tr>
           <th class="name">Name</th>
@@ -65,7 +70,12 @@
             </td>
             <td class="travis travis-<%= $dist->{travis_status} %>">
               <a href="<%= $dist->{travis_url} %>"
-                ><%= $dist->{travis_status} %></a>
+                >
+                % if ( $dist->{travis_status} eq 'not set up' ) {
+                  <i class="glyphicon glyphicon-question-sign"></i>
+                % }
+                <%= $dist->{travis_status} %>
+              </a>
             </td>
             <td class="stars">
               <a href="<%= $dist->{url} . 'stargazers' %>"

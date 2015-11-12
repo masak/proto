@@ -151,7 +151,8 @@ sub write_sprite {
         [qw/camelia.png/],
     )->css;
 
-    spurt $sprite => catfile $self->{output_dir}, qw/assets  css  sprite.css/;
+    spurt $sprite => catfile $self->{output_dir},
+        qw/.. mojo-app public sass sprite.css/;
 
     $self;
 }
@@ -192,8 +193,8 @@ sub write_dist_db {
     );
 
     move DB_FILE, catfile $self->{output_dir}, '..', 'mojo-app', DB_FILE;
-    system hypnotoad => catfile $self->{output_dir},
-                                        qw/.. mojo-app bin ModulesPerl6.pl/;
+    # system hypnotoad => catfile $self->{output_dir},
+                                        # qw/.. mojo-app bin ModulesPerl6.pl/;
 
     $self;
 }

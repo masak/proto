@@ -12,6 +12,7 @@ db-builder/assets/js/jquery.tablesorter.min.js
 db-builder/index.html
 db-builder/proto.json
 mojo-app/public/sass/.sass-cache/
+mojo-app/public/sass/sprite.css
 mojo-app/public/sass/cerulean.scss
 mojo-app/public/sass/cerulean/
 mojo-app/public/packed/

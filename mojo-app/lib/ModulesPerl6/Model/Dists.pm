@@ -42,7 +42,7 @@ sub add {
     my $db = $self->db;
     for my $dist ( @data ) {
         $_ = trim $_//'' for values %$dist;
-        $dist->{travis_status} ||= 'not setup';
+        $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
         $dist->{kwalitee} //= ModulesPerl6::Metrics::Kwalitee->new->kwalitee({

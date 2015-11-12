@@ -47,8 +47,9 @@ sub startup {
 
     # ROUTES
     my $r = $self->routes;
-    $r->get('/'          )->to('root#index');
-    $r->get('/q/:term'   )->to('root#index');
+
+    # multiple search aliases, because why not?
+    $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
     $r->get('/dist/:dist')->to('root#dist')->name('dist');
     $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
 
