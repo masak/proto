@@ -18,7 +18,7 @@ sub startup {
     $self->moniker('ModulesPerl6');
 
     my $secrets_file = -r SECRETS_FILE
-        ? SECRETS_FILE : catfile qw/.. web github-token/;
+        ? SECRETS_FILE : catfile qw/.. db-builder github-token/;
 
     $self->secrets([
         -r $secrets_file ? slurp $secrets_file : 'Perl 6 is awesome!'
