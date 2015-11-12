@@ -1,10 +1,11 @@
 package ModulesPerl6;
 
 # TODO: figure out where to secretly store secrets file on the final server
-use constant SECRETS_FILE => '/tmp/secrets';
+use constant SECRETS_FILE => 'secrets';
 
 use Mojo::Base 'Mojolicious';
 
+use File::Spec::Functions qw/catfile/;
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::BuildStats;
@@ -15,13 +16,17 @@ sub startup {
     # SETUP
     $self->config(hypnotoad => {listen => ['http://*:3333']});
     $self->moniker('ModulesPerl6');
+
+    my $secrets_file = -r SECRETS_FILE
+        ? SECRETS_FILE : catfile qw/.. web github-token/;
+
     $self->secrets([
-        -r SECRETS_FILE ? slurp SECRETS_FILE : 'Perl 6 is awesome!'
+        -r $secrets_file ? slurp $secrets_file : 'Perl 6 is awesome!'
     ]);
 
     # ASSETS
-    $self->plugin(bootstrap3 =>
-        theme => { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' }
+    $self->plugin(bootstrap3 => theme =>
+            { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' }
     );
     $self->asset('app.css' => '/sass/main.scss');
     $self->asset('app.js'  => '/js/main.js'    );
@@ -47,7 +52,9 @@ sub startup {
     $r->get('/dist/:dist')->to('root#dist')->name('dist');
     $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
 
-    $r->any('/NIY')->to('root#NIY')->name('NIY');
+    $r->any('/not_implemented_yet')
+        ->to('root#not_implemented_yet')
+        ->name('not_implemented_yet');
 }
 
 1;

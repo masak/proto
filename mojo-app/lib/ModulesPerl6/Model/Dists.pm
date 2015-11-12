@@ -45,7 +45,7 @@ sub add {
         $dist->{travis_status} ||= 'not setup';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
-        $dist->{kwalitee} = ModulesPerl6::Metrics::Kwalitee->new->kwalitee({
+        $dist->{kwalitee} //= ModulesPerl6::Metrics::Kwalitee->new->kwalitee({
             map +( $_ => $dist->{$_} ),
                 qw/has_readme  panda  has_tests  travis/,
         });

@@ -16,3 +16,5 @@ mojo-app/public/sass/cerulean.scss
 mojo-app/public/sass/cerulean/
 mojo-app/public/packed/
 mojo-app/modulesperl6.db
+mojo-app/bin/hypnotoad.pid
+mojo-app/secrets

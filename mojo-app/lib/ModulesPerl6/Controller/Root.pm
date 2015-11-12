@@ -16,7 +16,7 @@ sub index {
         # TODO: fix the model so we don't need to make 2 calls to ->find
         %found_dists = map +( "$_->{name}\0$_->{author_id}" => 1 ),
             $self->dists->find({ name        => \$q })->each,
-            $self->dists->find({ description => \$q })->each;;
+            $self->dists->find({ description => \$q })->each;
     }
 
     for ( @$dists ) {
@@ -28,7 +28,7 @@ sub index {
 
     $self->stash(
         dists => $dists,
-        $self->build_stats->stats(qw/dists_num  last_updated/)->%*
+        $self->build_stats->stats(qw/dists_num  last_updated/)->%*,
     );
 }
 
@@ -44,10 +44,10 @@ sub dist {
 }
 
 sub kwalitee {
-    shift->redirect_to('NIY');
+    shift->redirect_to('not_implemented_yet');
 }
 
-sub NIY {
+sub not_implemented_yet {
     shift->render( text => 'Not Implemented Yet' );
 }
 1;

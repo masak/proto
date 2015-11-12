@@ -6,6 +6,7 @@ use 5.010;
 
 use lib '../mojo-app/lib';
 use ModulesPerl6::Model::Dists;
+use ModulesPerl6::Model::BuildStats;
 use constant DB_FILE => 'modulesperl6.db';
 
 #We need ::SSL for Mojo::UserAgent, which is too shy about reporting it missing
@@ -21,7 +22,7 @@ use P6Project::HTML;
 use P6Project::SpriteMaker;
 use JSON;
 use File::Slurp;
-use File::Copy qw/copy/;
+use File::Copy qw/move/;
 use Time::Moment;
 
 sub new {
@@ -160,19 +161,19 @@ sub write_dist_db {
 
     { # let model go out of scope, so the db file gets finished off
         unlink DB_FILE;
-        my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE );
+        my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE )->deploy;
         $m->add(
             map +{
                 name         => $_->{name},
                 url          => $_->{url},
                 description  => $_->{description},
-                author       => $_->{auth},
+                author_id    => $_->{auth},
                 logo         => $_->{logo_sprite},
                 has_readme   => $_->{badge_has_readme} ? 1 : 0,
                 panda        => $_->{badge_panda}
-                                    ? 2 : $_->{badge_panda_nos11} : 1 : 0,
+                                    ? 2 : $_->{badge_panda_nos11} ? 1 : 0,
                 has_tests    => $_->{badge_has_tests},
-                travis       => $_->{travis_status},
+                travis_status=> $_->{travis_status},
                 stars        => $_->{stargazers},
                 issues       => $_->{open_issues},
                 date_updated => eval {
@@ -180,12 +181,19 @@ sub write_dist_db {
                             ->epoch
                     } // 0,
                 date_added   => Time::Moment->now->epoch,
-                # to be fixed to proper date_added date
+                # TODO: fix to proper date_added date
             }, sort_by { $_->{name} } values %{ $self->projects }
         );
     }
 
-    move DB_FILE, catfile $self->{output_dir}, DB_FILE;
+    ModulesPerl6::Model::BuildStats->new( db_file => DB_FILE )->deploy->update(
+        dists_num    => scalar(keys %{ $self->projects }),
+        last_updated => time(),
+    );
+
+    move DB_FILE, catfile $self->{output_dir}, '..', 'mojo-app', DB_FILE;
+    system hypnotoad => catfile $self->{output_dir},
+                                        qw/.. mojo-app bin ModulesPerl6.pl/;
 
     $self;
 }
