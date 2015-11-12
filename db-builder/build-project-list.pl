@@ -8,7 +8,10 @@ use File::Path qw(make_path);
 use Getopt::Long qw(GetOptions);
 use P6Project;
 
-GetOptions('limit=s' => \my $limit);
+GetOptions(
+    'limit=s'      => \my $limit,
+    'no-app-start' => \my $no_app_start,
+);
 
 my $output_dir = shift(@ARGV) || './';
 binmode STDOUT, ':encoding(UTF-8)';
@@ -23,7 +26,13 @@ my $template = './index.tmpl';
 
 make_path("$output_dir/assets/images/logos", { mode => 0755 }) unless -e "$output_dir/assets/images/logos";
 
-my $p6p = P6Project->new(output_dir=>$output_dir, min_popular=>$min_popular, template=>$template, limit=>$limit);
+my $p6p = P6Project->new(
+    output_dir   => $output_dir,
+    min_popular  => $min_popular,
+    template     => $template,
+    limit        => $limit,
+    no_app_start => $no_app_start,
+);
 
 $p6p->load_projects($list_url);
 
