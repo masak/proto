@@ -52,8 +52,9 @@ sub get_projects {
 
         for ( $url ) {
             s/^\s+|\s+$//g;
-            $_ .= '.git' if m{^git://}    and not m{\.git$};
-            $_ .= '/'    if m{^https?://} and not m{/$}    ;
+            $_ .= '.git'      if m{^git://}    and not m{\.git$};
+            $_  =~ s/\.git$// if m{^https?://};
+            $_ .= '/'         if m{^https?://} and not m{/$}    ;
         }
 
         $projects->{$name}->{'url'} = $url;
