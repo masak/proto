@@ -24,15 +24,15 @@ function setup_table() {
 
     // This lets us restore correct sort order if the user uses "Back"
     // button in their browser
-    sort_order = window.location.hash.match(/sort-([^-]+)-([^-])+/);
-    if ( sort_order ) {
+    if ( hash_store('sort-col') ) {
         table_plugin.order([
-            sort_order[1], sort_order[2] == 'a' ? 'asc' : 'desc'
+            hash_store('sort-col'),
+            hash_store('sort-dir') == 'a' ? 'asc' : 'desc'
         ]).draw();
     }
     el.find('th').click(function(){
-        window.location.hash = 'sort-' + $(this).index() + '-'
-            + $(this).attr('aria-sort').substr(0,1);
+        hash_store('sort-col', $(this).index()                      );
+        hash_store('sort-dir', $(this).attr('aria-sort').substr(0,1));
     });
 
     // Mess around with markup to accomodate the table plugin and marry
@@ -45,4 +45,18 @@ function setup_table() {
     filter_container.append(filter);
     filter_container.find('label').remove();
     filter.focus();
+}
+
+function hash_store (key, value){
+    var obj;
+
+    try       { obj = jQuery.deparam(window.location.hash.replace(/^#/,'')) }
+    catch (e) { obj = {} }
+
+    if ( value ) {
+        obj[key] = value;
+        window.location.hash = jQuery.param( obj, true );
+    }
+
+    return obj[key];
 }

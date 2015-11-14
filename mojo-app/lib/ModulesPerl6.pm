@@ -34,6 +34,7 @@ sub startup {
     });
     $self->asset('app.js'  => qw{
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
+        /js/jquery-deparam.js
         /js/main.js
     });
 
