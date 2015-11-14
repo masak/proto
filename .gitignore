@@ -19,3 +19,4 @@ mojo-app/public/packed/
 mojo-app/modulesperl6.db
 mojo-app/bin/hypnotoad.pid
 mojo-app/secrets
+mojo-app/dist.ini
