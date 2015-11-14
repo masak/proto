@@ -50,4 +50,76 @@ sub kwalitee {
 sub not_implemented_yet {
     shift->render( text => 'Not Implemented Yet' );
 }
+
 1;
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+ModulesPerl6::Controller::Root - controller handling a few root-space pages
+
+=head1 SYNOPSIS
+
+    my $r = $self->routes;
+    $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
+    $r->get('/dist/:dist')->to('root#dist')->name('dist');
+    $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+
+    $r->any('/not_implemented_yet')
+        ->to('root#not_implemented_yet')
+        ->name('not_implemented_yet');
+
+=head1 DESCRIPTION
+
+This controller should be used for "root-space" pages, such as the home page,
+about page (if any), and stuff that is too demand its own controller.
+
+It is recommended that any feature with a set of pages specifically related to
+it gets its own controller.
+
+=head1 ACTIONS
+
+=head2 C<index>
+
+    $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
+
+Render the home page, optionally providing search results. This action
+is aliased under several routes (see example above), and handles C<q> query
+parameter that is the term to perform the search for.
+
+=head2 C<dist>
+
+    $r->get('/dist/:dist')->to('root#dist')->name('dist');
+
+Render dist page (B<NIY>; currently just a redirect to GitHub repo).
+Expects the name of the dist in C<dist>
+L<Mojolicious::Controller/"stash"> parameter.
+
+=head2 C<kwalitee>
+
+    $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+
+Render page displaying Kwalitee metrics of a dist (B<NIY>).
+Expects the name of the dist in C<dist>
+L<Mojolicious::Controller/"stash"> parameter.
+
+=head2 C<not_implemented_yet>
+
+    $r->any('/not_implemented_yet')
+        ->to('root#not_implemented_yet')
+        ->name('not_implemented_yet');
+
+A page that displays text 'Not Implemented Yet'. Actions that are not
+yet implemented can redirect to this action to inform the user.
+
+=head1 CONTACT INFORMATION
+
+Original version of this module was written by Zoffix Znet
+(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
+
+=head1 LICENSE
+
+You can use and distribute this module under the same terms as Perl itself.
