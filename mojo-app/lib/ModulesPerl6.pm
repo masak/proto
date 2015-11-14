@@ -20,6 +20,9 @@ sub startup {
     my $secrets_file = -r SECRETS_FILE
         ? SECRETS_FILE : catfile qw/.. db-builder github-token/;
 
+    $self->app->log->info('Did not find suitable file to get secrets from')
+        unless -r $secrets_file;
+
     $self->secrets([
         -r $secrets_file ? slurp $secrets_file : 'Perl 6 is awesome!'
     ]);
