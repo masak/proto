@@ -1,9 +1,12 @@
+var table_plugin;
+
 $(function(){
     setup_table();
+    setup_search_query_save();
 });
 
 function setup_table() {
-    var el = $('#dists'), filter_container, filter, table_plugin, sort_order;
+    var el = $('#dists'), filter_container, filter, sort_order;
 
     table_plugin = el.DataTable({
         paging: false,
@@ -47,13 +50,26 @@ function setup_table() {
     filter.focus();
 }
 
+function setup_search_query_save() {
+    var el = $('#dists_filter').find('[type=search]'),
+        q  = hash_store('q');
+
+    if ( typeof(q) !== 'undefined' ) {
+        el.val( q );
+        table_plugin.search( q ).draw();
+    }
+    el.change(function(){
+        hash_store('q', $(this).val())
+    });
+}
+
 function hash_store (key, value){
     var obj;
 
     try       { obj = jQuery.deparam(window.location.hash.replace(/^#/,'')) }
     catch (e) { obj = {} }
 
-    if ( value ) {
+    if ( typeof(value) !== 'undefined' ) {
         obj[key] = value;
         window.location.hash = jQuery.param( obj, true );
     }
