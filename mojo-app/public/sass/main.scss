@@ -26,14 +26,58 @@ header {
     font-size: 200%;
 }
 
+table.dataTable, table.dataTable th, table.dataTable td {
+    box-sizing: border-box;
+}
+
+table.dataTable.no-footer,
+table.dataTable thead th, table.dataTable thead td {
+    border-bottom: none;
+}
+
+table.dataTable {
+    border-collapse: collapse;
+}
+
+table.dataTable thead .sorting {
+    background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIUnC2nKLnT4or00PvyrQwrPzUZshQAOw==);
+}
+
+table.dataTable thead .sorting_asc{
+    background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIRnC2nKLnT4or00Puy3rx7VQAAOw==);
+}
+
+table.dataTable thead .sorting_desc{
+    background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIPnI+py+0/hJzz0IruwjsVADs=);
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: none;
+    text-align: left;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin: 0;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    padding: 20px 20px 0;
+}
+
 #dists {
     th:first-child,
     td:first-child {
         padding-left: 20px;
     }
 
-    td {
+    th:last-child {
+        padding-right: 10px;
+        background-position: right 10px center;
+    }
+
+    td, th {
         vertical-align: middle;
+        padding: 5px;
     }
     a {
         color: darken(#2FA4E7, 10%);

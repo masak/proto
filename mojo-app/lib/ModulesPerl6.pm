@@ -28,8 +28,14 @@ sub startup {
     $self->plugin(bootstrap3 => theme =>
             { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' }
     );
-    $self->asset('app.css' => '/sass/main.scss');
-    $self->asset('app.js'  => '/js/main.js'    );
+    $self->asset('app.css' => qw{
+        https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
+        /sass/main.scss
+    });
+    $self->asset('app.js'  => qw{
+        https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
+        /js/main.js
+    });
 
     # HELPERS
     $self->helper( dists => sub {
