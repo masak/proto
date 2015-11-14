@@ -67,4 +67,40 @@ sub startup {
 
 1;
 
-# ABSTRACT: make dzil happy
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+ModulesPerl6 - Web app powering modules.perl6.org
+
+=head1 SYNOPSIS
+
+    #!/usr/bin/env perl
+
+    use FindBin;
+    BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+
+    require Mojolicious::Commands;
+    Mojolicious::Commands->start_app('ModulesPerl6');
+
+=head1 DESCRIPTION
+
+You would not use this module directly, but instead start your app
+with a script.
+
+See DEPLOYMENT.md file included with this distribution.
+
+Also, you may wish to consult
+L<http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT>
+for more details.
+
+=head1 CONTACT INFORMATION
+
+Original version of this module was written by Zoffix Znet
+(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
+
+=head1 LICENSE
+
+You can use and distribute this module under the same terms as Perl itself.
