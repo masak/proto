@@ -11,6 +11,7 @@ Please use the following steps to aid you in your development:
 
 - Install prerequisites for build script:
   ```
+$ sudo apt-get install libpng12-dev
 $ perl Build.PL
 $ ./Build installdeps
 ```
