@@ -28,7 +28,7 @@ ModulesPerl6::Model::ResultClass - import base for ::Result classes
 =head1 DESCRIPTION
 
 Simply C<use> this module in your L<DBIx::Class>
-L<https://metacpan.org/pod/DBIx::Class::ResultSource|Result classes>
+L<Result classes|https://metacpan.org/pod/DBIx::Class::ResultSource>
 to import L<strictures> and L<DBIx::Class::Candy>. i.e. it's the same
 as doing this in your class, except should that boilerplate change, you'd
 only have to change it in class and not each Result class:

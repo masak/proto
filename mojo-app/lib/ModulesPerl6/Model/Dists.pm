@@ -156,7 +156,7 @@ URL of the dist's GitHub repo.
 
 =head3 C<description>
 
-Short descripton of the dist.
+Short description of the dist.
 
 =head3 C<author_id>
 
@@ -173,7 +173,7 @@ Boolean: does the dist have README file?
 
 =head3 C<panda>
 
-Takes values C<0> (dist not conformant to latest specs),
+Takes values C<0> (dist is not conforming to latest specs),
 C<1> (dist conforms to specs, except for S11), or C<2> (dist fully conforms
 to current spec).
 

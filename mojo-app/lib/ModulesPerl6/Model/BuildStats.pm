@@ -79,7 +79,7 @@ ModulesPerl6::Model::BuildStats - model representing database build statistics
 =head1 DESCRIPTION
 
 This module is used to access and manipulate the build statistics gathered
-during the dabase build process by the build script.
+during the database build process by the build script.
 
 =head2 C<db_file>
 
