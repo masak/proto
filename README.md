@@ -18,7 +18,7 @@ $ ./Build installdeps
 
 - Run build script
   ```
-$ cd web
+$ cd db-builder
 $ perl build-project-list.pl --limit=<number-of-modules>
 ```
 The build script automatically starts the Mojolicious app that powers the
