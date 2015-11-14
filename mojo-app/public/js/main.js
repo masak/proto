@@ -3,6 +3,8 @@ $(function(){
 });
 
 function setup_table() {
+    var filter_container, filter;
+
     $('#dists').DataTable({
         paging: false,
         autoWidth: false,
@@ -20,14 +22,14 @@ function setup_table() {
         ]
     });
 
+    // Mess around with markup to accomodate the table plugin and marry
+    // it nicely with both our JS-less version of the site and Bootstrap
     $('#dists_wrapper').addClass('table-responsive').unwrap();
     $('#search').remove();
-
-    var filter_container = $('#dists_filter');
-    var filter = filter_container.addClass('form-group').find('[type=search]')
+    filter_container = $('#dists_filter');
+    filter = filter_container.addClass('form-group').find('[type=search]')
         .addClass('form-control').attr('placeholder', 'Search');
     filter_container.append(filter);
     filter_container.find('label').remove();
-
     filter.focus();
 }
