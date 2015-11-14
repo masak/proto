@@ -8,14 +8,14 @@ use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::BuildStats::Schema;
 
 has db_file => sub { $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db' };
-has db      => sub {
+has _db     => sub {
     ModulesPerl6::Model::BuildStats::Schema
         ->connect('dbi:SQLite:' . shift->db_file)
 };
 
 sub deploy {
     my $self = shift;
-    $self->db->deploy;
+    $self->_db->deploy;
 
     $self;
 }
@@ -25,14 +25,14 @@ sub update {
     my @to_delete = grep ! defined $stats{$_}, keys %stats;
     if ( @to_delete ) {
         delete @stats{ @to_delete };
-        $self->db->resultset('BuildStats')->search({
+        $self->_db->resultset('BuildStats')->search({
             stat => { -in => \@to_delete }
         })->delete;
     }
 
     keys %stats or return $self;
 
-    $self->db->resultset('BuildStats')->update_or_create({
+    $self->_db->resultset('BuildStats')->update_or_create({
         stat  => $_,
         value => $stats{$_},
     }) for sort keys %stats;
@@ -45,7 +45,7 @@ sub stats {
     @stats or return {};
 
     my %res = map +( $_->{stat} => $_->{value} ),
-        $self->db->resultset('BuildStats')->search(
+        $self->_db->resultset('BuildStats')->search(
             { stat => { -in => \@stats } },
             { result_class => 'DBIx::Class::ResultClass::HashRefInflator' },
         );
