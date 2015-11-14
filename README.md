@@ -20,6 +20,12 @@ $ ./Build installdeps
 $ cd web
 $ perl build-project-list.pl --limit=<number-of-modules>
 ```
+The build script automatically starts the Mojolicious app that powers the
+front end. To disable that behaviour, specify the `--no-app-start` flag:
+
+```bash
+    $ perl build-project-list.pl --no-app-start>
+```
 
 ## Seeing your changes
 
