@@ -14,7 +14,7 @@ sub startup {
     my $self = shift;
 
     # SETUP
-    $self->config(hypnotoad => {listen => ['http://*:3333']});
+    $self->plugin('Config');
     $self->moniker('ModulesPerl6');
 
     my $secrets_file = -r SECRETS_FILE
