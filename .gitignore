@@ -20,3 +20,5 @@ mojo-app/modulesperl6.db
 mojo-app/bin/hypnotoad.pid
 mojo-app/secrets
 mojo-app/dist.ini
+mojo-app/ModulesPerl6-*
+mojo-app/.build
