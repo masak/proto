@@ -9,7 +9,7 @@ use ModulesPerl6::Model::Dists::Schema;
 use ModulesPerl6::Metrics::Kwalitee;
 
 has db_file => sub { $ENV{MODULESPERL6_DB_FILE} // 'modulesperl6.db' };
-has db      => sub {
+has _db     => sub {
     ModulesPerl6::Model::Dists::Schema->connect('dbi:SQLite:' . shift->db_file)
 };
 
@@ -26,7 +26,7 @@ sub _find {
                 ? ( $_ => $what->{$_} ) : ()
     } qw/name  author_id  travis_status  description/;
 
-    my $res = $self->db->resultset('Dist')->search($what,
+    my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
             result_class => 'DBIx::Class::ResultClass::HashRefInflator'
         } : ()
@@ -39,7 +39,7 @@ sub add {
     my ( $self, @data ) = @_;
     @data or return $self;
 
-    my $db = $self->db;
+    my $db = $self->_db;
     for my $dist ( @data ) {
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
@@ -66,7 +66,7 @@ sub add {
 
 sub deploy {
     my $self = shift;
-    $self->db->deploy;
+    $self->_db->deploy;
 
     $self;
 }
@@ -257,6 +257,16 @@ Search by the Travis CI status
 
 B<Takes> the same argument as L</find> and any matching dists will be deleted
 from the database. B<Returns> its invocant.
+
+=head1 PRIVATE ATTRIBUTES
+
+B<These attributes are documented for developers working on this module.
+Do NOT use these attributes outside of this package.>
+
+=head2 C<_db>
+
+Contains C<ModulesPerl6::Model::Dists::Schema> L<DBIx::Class::Schema>
+object.
 
 =head1 PRIVATE METHODS
 
