@@ -22,3 +22,24 @@ belongs_to travis
     => { status => 'travis_status' };
 
 1;
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+ModulesPerl6::Model::Dists::Schema::Result::Dist - Distribution info table
+
+=head1 DESCRIPTION
+
+This table stores distro information.
+
+=head1 CONTACT INFORMATION
+
+Original version of this module was written by Zoffix Znet
+(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
+
+=head1 LICENSE
+
+You can use and distribute this module under the same terms as Perl itself.
