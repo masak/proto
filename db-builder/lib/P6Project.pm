@@ -124,7 +124,9 @@ sub write_html {
         ( $_->{logo_sprite} ) = ($_->{logo}//'') =~ m{([^/]+)\.png$};
     }
     my $content = $self->html->get_html(\@projects);
-    return $self->writeout($content, $filename);
+
+    # NOOP, since we have the app; clean up code later
+    return 1; # $self->writeout($content, $filename);
 }
 
 sub write_json {
@@ -140,7 +142,13 @@ sub write_json {
             /;
         $mod->{badge_has_readme} //= JSON::false;
     }
-    return $self->writeout(encode_json($projects), $filename);
+
+    # For now just have the file remain in the app dir. We'll eventually
+    # Have the app handle this stuff.
+    spurt encode_json($projects)
+        => catfile $self->{output_dir}, qw/..  mojo-app  public/, $filename;
+
+    return 1; #$self->writeout(encode_json($projects), $filename);
 }
 
 sub write_sprite {

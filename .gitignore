@@ -22,3 +22,4 @@ mojo-app/secrets
 mojo-app/dist.ini
 mojo-app/ModulesPerl6-*
 mojo-app/.build
+mojo-app/public/proto.json
