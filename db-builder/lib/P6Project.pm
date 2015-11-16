@@ -56,6 +56,11 @@ sub output_dir {
     return $self->{output_dir};
 }
 
+sub no_app_start {
+    my ($self) = @_;
+    return $self->{no_app_start};
+}
+
 sub getstore {
     my ($self, $url, $filename) = @_;
     my $file = $self->ua->get($url);
@@ -146,7 +151,7 @@ sub write_json {
     # For now just have the file remain in the app dir. We'll eventually
     # Have the app handle this stuff.
     spurt encode_json($projects)
-        => catfile $self->{output_dir}, qw/..  mojo-app  public/, $filename;
+        => catfile $self->output_dir, qw/..  mojo-app  public/, $filename;
 
     return 1; #$self->writeout(encode_json($projects), $filename);
 }
@@ -155,11 +160,11 @@ sub write_sprite {
     my $self = shift;
 
     my $sprite = P6Project::SpriteMaker->new->spritify(
-        catdir($self->{output_dir}, qw/assets  images/),
+        catdir($self->output_dir, qw/assets  images/),
         [qw/camelia.png  camelia-logo.png/],
     )->css;
 
-    spurt $sprite => catfile $self->{output_dir},
+    spurt $sprite => catfile $self->output_dir,
         qw/.. mojo-app public sass sprite.css/;
 
     $self;
@@ -200,9 +205,9 @@ sub write_dist_db {
         last_updated => time(),
     );
 
-    move DB_FILE, catfile $self->{output_dir}, '..', 'mojo-app', DB_FILE;
-    unless ( $self->{no_app_start} ) {
-        system hypnotoad => catfile $self->{output_dir},
+    move DB_FILE, catfile $self->output_dir, '..', 'mojo-app', DB_FILE;
+    unless ( $self->no_app_start ) {
+        system hypnotoad => catfile $self->output_dir,
             qw/.. mojo-app bin ModulesPerl6.pl/;
     }
 
