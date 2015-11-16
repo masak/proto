@@ -23,7 +23,9 @@ a img {border:none;}
     padding:0 1em;
     position:relative;
 }
-#header .s-camelia-logo{
+
+#header img{
+    border:0 none;
     float:right;
     position:relative;
     right:-2em;
@@ -31,6 +33,7 @@ a img {border:none;}
     z-index:1;
     margin-bottom: -3.5em;
 }
+
 h2 {margin:20px 0 0 0;}
 
 #my_search_box input,
@@ -57,7 +60,6 @@ footer,
     padding: 3px 20px;
     font-size: 110%;
     line-height: 1.5em;
-    margin-bottom: -5px;
     text-align: justify;
 }
 

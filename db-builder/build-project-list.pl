@@ -4,7 +4,8 @@ use warnings;
 use 5.010;
 
 use lib 'lib';
-use File::Path qw(make_path);
+use File::Path qw(make_path  remove_tree);
+use File::Spec::Functions qw(catdir);
 use Getopt::Long qw(GetOptions);
 use P6Project;
 
@@ -48,6 +49,7 @@ die "Too many errors no output generated"
 
 unless ($output_dir eq './') {
     system qw/cp fame-and-profit.html/, $output_dir;
+    remove_tree catdir $output_dir, qw/assets images/; # clean up for sprite
     system qw/cp -r assets           /, $output_dir;
 }
 

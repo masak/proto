@@ -1,5 +1,9 @@
 jQuery(function ($) {
-    setup_search_box();
+    var module_list = new List('module_list', {
+        valueNames: [ 'name', 'description' ],
+        page: 9e9
+    });
+    setup_search_box(module_list);
     $('.tablesorter').find('th').append('<i/>');
     $('.tablesorter').tablesorter({
         sortList: [[0,0]],
@@ -11,7 +15,7 @@ jQuery(function ($) {
     });
 });
 
-function setup_search_box() {
+function setup_search_box(module_list) {
     var el = $('#my_search_box .search');
     if ( ! el.length ) { return; }
 
@@ -26,6 +30,6 @@ function setup_search_box() {
     }
 
     if ( el.val().length ) {
-        userList.search(el.val());
+        module_list.search(el.val());
     }
 }

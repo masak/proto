@@ -11,10 +11,15 @@ my $build = Module::Build->new(
 
     # and now the list of perl module dependencies
     requires => {
+        'CGI'             => 0,
         'HTML::Template'  => 0,
         'Mojolicious'     => 0,
         'YAML'            => 0,
+        'File::Slurp'     => 0,
+        'File::Path'      => 0,
+        'JSON'            => 0,
         'IO::Socket::SSL'                => '1.94',
+        'File::Spec::Functions'          => 0,
         'Mojolicious::Plugin::AssetPack' => '0.68',
         'Imager::File::PNG'              => '0.92',
     }

@@ -8,12 +8,12 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
-
 <body>
 	<div id="header">
-		<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt"
-			class="sprite s-camelia-logo"></a>
-		<h1><a href="/">Perl 6 Modules</a></h1>
+		<a href="https://github.com/perl6/mu/blob/master/misc/camelia.txt">
+			<img alt="»ö«" width="291px" height="273px" src="assets/images/camelia-logo.png">
+		</a>
+		<h1><a href="/">Perl&nbsp;6 Modules</a></h1>
 	</div>
 	<div id="content">
 		<div id="about">
@@ -54,17 +54,6 @@
 					<TMPL_INCLUDE name='index-project-list.tmpl'>
 				</tbody>
 			</table>
-
-			<script src="assets/js/list.min.js"></script>
-			<script>
-				var options = {
-					valueNames: [ 'name', 'description' ],
-					page: 9e9
-				};
-
-				var userList = new List('module_list', options);
-			</script>
-
 			<footer>
 				<p class="legend">
 					Legend:
@@ -100,9 +89,12 @@
 			</footer>
 		</div>
 	</div>
-	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="assets/js/jquery.tablesorter.js"></script>
-	<script src="assets/js/main.js"></script>
-	<link rel="stylesheet" href="assets/css/sprite.css" property="stylesheet">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"
+    integrity="sha256-8WqyJLuWKRBVhxXIL1jBDD7SDxU936oZkCnxQbWwJVw"
+    crossorigin="anonymous"></script>
+  <script src="assets/js/jquery.tablesorter.js"></script>
+  <script src="assets/js/list.min.js"></script>
+  <script src="assets/js/main.js"></script>
+  <link rel="stylesheet" href="assets/css/sprite.css" property="stylesheet">
 </body>
 </html>
