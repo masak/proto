@@ -2,6 +2,11 @@
 
 These are the scripts to generate the website on http://modules.perl6.org/.
 
+## TODOs
+
+Want to help out? Check if any [open Issues](https://github.com/perl6/modules.perl6.org/issues) exists that you might be able to solve. We also have
+[a list of TODO ideas](TODO-IDEAS.md) you might be interested in.
+
 ## Development
 
 Please use the following steps to aid you in your development:
