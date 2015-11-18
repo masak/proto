@@ -151,7 +151,7 @@ sub write_json {
     # For now just have the file remain in the app dir. We'll eventually
     # Have the app handle this stuff.
     spurt encode_json($projects)
-        => catfile $self->output_dir, qw/..  mojo-app  public/, $filename;
+        => catfile $self->output_dir, 'public', $filename;
 
     return 1; #$self->writeout(encode_json($projects), $filename);
 }
@@ -160,12 +160,12 @@ sub write_sprite {
     my $self = shift;
 
     my $sprite = P6Project::SpriteMaker->new->spritify(
-        catdir($self->output_dir, qw/assets  images/),
-        [qw/camelia.png  camelia-logo.png/],
+        catdir($self->output_dir, qw/public content-pics spritable logos/),
+        [qw/camelia-logo.png/],
     )->css;
 
     spurt $sprite => catfile $self->output_dir,
-        qw/.. mojo-app public sass sprite.css/;
+        qw/public sass sprite.css/;
 
     $self;
 }

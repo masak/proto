@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use lib 'lib';
+use lib 'lib-db-builder';
 use File::Path qw(make_path  remove_tree);
 use File::Spec::Functions qw(catdir);
 use Getopt::Long qw(GetOptions);
@@ -25,7 +25,8 @@ my $list_url = 'https://raw.githubusercontent.com/perl6/ecosystem/master/META.li
 
 my $template = './index.tmpl';
 
-make_path("$output_dir/assets/images/logos", { mode => 0755 }) unless -e "$output_dir/assets/images/logos";
+make_path catdir($output_dir, qw/public content-pics spritable logos/),
+    => { mode => 0755 };
 
 my $p6p = P6Project->new(
     output_dir   => $output_dir,
@@ -54,7 +55,7 @@ unless ($output_dir eq './') {
 }
 
 $p6p->write_json('proto.json');
-$p6p->write_html('index.html');
+# $p6p->write_html('index.html');
 $p6p->write_sprite;
 $p6p->write_dist_db;
 
