@@ -2,12 +2,55 @@
 
 *Note: these instructions are for Debian Linux*
 
+## The Basics
+
+Assuming a virginal Debian install, you first need to setup a recent Perl 5
+version. The best approach is to use Perlbrew so as not to mess with your
+system Perl 5. We'll need build tools and we'll also need `git` afterwards:
+
+```bash
+sudo apt-get install build-essential git curl;
+\curl -L http://install.perlbrew.pl | bash;
+```
+
+Follow the instructions from Perlbrew's installation. Likely, you'll be asked
+to add `source ~/perl5/perlbrew/etc/bashrc` to one of your bash files. Adding
+it to the end of `~/.bashrc` is totally fine.
+
+Now, install modern Perl 5:
+```bash
+$ perlbrew available
+perl-5.22.0
+...
+...
+```
+Pick the latest available `perl` and run (substituting `perl-5.22.0` for
+the latest version you see available):
+
+```bash
+perlbrew install perl-5.22.0`
+```
+
+Now, run `perlbrew switch perl-5.22.0` to switch to that version of Perl 5.
+
+We'll also need [cpanm](metacpan.org/pod/App::cpanminus) and a
+module, so run this next:
+
+```bash
+perlbrew install-cpanm;
+cpanm Module::Build;
+```
+
+You're all set!.
+
+
+## Clone The Repo
+
 These instructions assume you are in the `mojo-app` directory of the [repository](https://github.com/perl6/modules.perl6.org/):
 ```bash
 git clone https://github.com/perl6/modules.perl6.org/
 cd modules.perl6.org/mojo-app;
 ```
-
 
 ## Installing Required Software
 
@@ -16,6 +59,8 @@ Install Perl 5 module dependencies:
 $ perl Build.PL
 $ ./Build installdeps
 ```
+
+If asked whether to configure stuff automatically, just respond with `yes`.
 
 ### Production Deployment
 
