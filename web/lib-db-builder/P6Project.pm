@@ -19,7 +19,6 @@ use P6Project::Stats;
 use Encode qw(decode_utf8);
 use P6Project::Info;
 use P6Project::HTML;
-use P6Project::SpriteMaker;
 use JSON;
 use File::Slurp;
 use File::Copy qw/move/;
@@ -154,20 +153,6 @@ sub write_json {
         => catfile $self->output_dir, 'public', $filename;
 
     return 1; #$self->writeout(encode_json($projects), $filename);
-}
-
-sub write_sprite {
-    my $self = shift;
-
-    my $sprite = P6Project::SpriteMaker->new->spritify(
-        catdir($self->output_dir, qw/public content-pics spritable logos/),
-        [qw/camelia-logo.png/],
-    )->css;
-
-    spurt $sprite => catfile $self->output_dir,
-        qw/public sass sprite.css/;
-
-    $self;
 }
 
 sub write_dist_db {
