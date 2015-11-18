@@ -62,20 +62,25 @@ table.dataTable {
 }
 
 #dists {
+    td, th {
+        vertical-align: middle;
+        padding: 5px;
+    }
+
+    th {
+        padding-right: 13px;
+    }
+
     th:first-child,
     td:first-child {
         padding-left: 20px;
     }
 
     th:last-child {
-        padding-right: 10px;
+        padding-right: 18px;
         background-position: right 10px center;
     }
 
-    td, th {
-        vertical-align: middle;
-        padding: 5px;
-    }
     a {
         color: darken(#2FA4E7, 10%);
     }
