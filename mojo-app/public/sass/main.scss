@@ -81,13 +81,15 @@ table.dataTable {
     }
 
     .name {
+        white-space: nowrap;
+
         a, i {
             vertical-align: middle;
             line-height: 32px;
         }
 
         .sprite {
-            float: right;
+            margin-left: 5px;
         }
     }
     .github {
