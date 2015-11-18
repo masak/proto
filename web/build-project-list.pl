@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use lib 'lib-db-builder';
+use lib qw{lib  lib-db-builder};
 use File::Path qw(make_path  remove_tree);
 use File::Spec::Functions qw(catdir);
 use Getopt::Long qw(GetOptions);
@@ -25,8 +25,9 @@ my $list_url = 'https://raw.githubusercontent.com/perl6/ecosystem/master/META.li
 
 my $template = './index.tmpl';
 
-make_path catdir($output_dir, qw/public content-pics spritable logos/),
-    => { mode => 0755 };
+my $logos_dir = catdir $output_dir, qw/public content-pics dist-logos/;
+remove_tree $logos_dir;
+make_path $logos_dir, => { mode => 0755 };
 
 my $p6p = P6Project->new(
     output_dir   => $output_dir,
@@ -48,15 +49,9 @@ warn join "\n", @errors, '' if @errors;
 die "Too many errors no output generated"
   if $failed > $success;
 
-unless ($output_dir eq './') {
-    system qw/cp fame-and-profit.html/, $output_dir;
-    remove_tree catdir $output_dir, qw/assets images/; # clean up for sprite
-    system qw/cp -r assets           /, $output_dir;
-}
-
 $p6p->write_json('proto.json');
-# $p6p->write_html('index.html');
-$p6p->write_sprite;
+$p6p->write_html('index.html'); # this doesn't actually write anything ATM
+# $p6p->write_sprite;
 $p6p->write_dist_db;
 
 print "index.html and proto.json files generated\n";

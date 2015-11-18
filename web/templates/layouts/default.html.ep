@@ -44,6 +44,11 @@
 
   %= asset "bootstrap.js"
   %= asset "app.js";
-  <link rel="stylesheet" href="/sass/sprite.css" property="stylesheet">
+
+  <!-- % use Data::Dumper; -->
+  <!-- % die Dumper asset->get('sprite.css'); -->
+
+  <link rel="stylesheet" property="stylesheet"
+    href="<%= (asset->get('sprite.css'))[0] %>">
 </body>
 </html>

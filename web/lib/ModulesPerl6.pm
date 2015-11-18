@@ -35,6 +35,7 @@ sub startup {
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
+    $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos');
     $self->asset('app.js'  => qw{
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
         /js/jquery-deparam.js

@@ -44,6 +44,8 @@ sub _format_error {
     # depending on the version of Mojolicious, $error might either be a hash
     # ref or a string
     if (ref $error) {
+        use Acme::Dump::And::Dumper;
+        die DnD [ $error ];
         return join ' ', $error->{code}, $error->{message};
     }
     else {
@@ -130,7 +132,9 @@ sub set_project_info {
     if ($files{logotype} && $files{$logo_file}) {
         my $logo_name = $project->{name};
         $logo_name =~ s/\W+/_/;
-        my $logo_store = "/assets/images/logos/$logo_name.png";
+
+        # the "s-" bit on logo filename needs to be there for our sprites
+        my $logo_store = "/public/content-pics/dist-logos/s-$logo_name.png";
         ## TODO: check filesize, and skip download if filesize is the same.
         my $logo_url = $self->file_url($project, $latest->{sha}, '/'.$logo_file);
         if ($self->p6p->getstore($logo_url, $logo_store)) {

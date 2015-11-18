@@ -11,8 +11,9 @@ web/public/sass/sprite.css
 web/public/sass/cerulean.scss
 web/public/sass/cerulean/
 web/public/packed/
-web/dist-logos
+web/public/content-pics/dist-logos/
 web/modulesperl6.db
+web/building-modulesperl6.db
 web/bin/hypnotoad.pid
 web/secrets
 web/dist.ini

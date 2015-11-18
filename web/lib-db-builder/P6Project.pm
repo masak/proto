@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use 5.010;
 
-use lib '../mojo-app/lib';
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::BuildStats;
-use constant DB_FILE => 'modulesperl6.db';
+use constant DB_FILE_TEMP => 'building-modulesperl6.db';
+use constant DB_FILE      => 'modulesperl6.db';
 
 #We need ::SSL for Mojo::UserAgent, which is too shy about reporting it missing
 use IO::Socket::SSL 1.94;
@@ -128,7 +128,7 @@ sub write_html {
         $_->{last_updated}    =~ s/T.+//;
         ( $_->{logo_sprite} ) = ($_->{logo}//'') =~ m{([^/]+)\.png$};
     }
-    my $content = $self->html->get_html(\@projects);
+    # my $content = $self->html->get_html(\@projects);
 
     # NOOP, since we have the app; clean up code later
     return 1; # $self->writeout($content, $filename);
@@ -174,9 +174,9 @@ sub write_dist_db {
     my $self = shift;
 
     { # let model go out of scope, so the db file gets finished off
-        unlink DB_FILE;
-        my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE )->deploy;
-        $m->add(
+        unlink DB_FILE_TEMP;
+        my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE_TEMP );
+        $m->deploy->add(
             map +{
                 name         => $_->{name},
                 url          => $_->{url},
@@ -200,15 +200,15 @@ sub write_dist_db {
         );
     }
 
-    ModulesPerl6::Model::BuildStats->new( db_file => DB_FILE )->deploy->update(
+    ModulesPerl6::Model::BuildStats->new( db_file => DB_FILE_TEMP )
+    ->deploy->update(
         dists_num    => scalar(keys %{ $self->projects }),
         last_updated => time(),
     );
 
-    move DB_FILE, catfile $self->output_dir, '..', 'mojo-app', DB_FILE;
+    move DB_FILE_TEMP, catfile $self->output_dir, DB_FILE;
     unless ( $self->no_app_start ) {
-        system hypnotoad => catfile $self->output_dir,
-            qw/.. mojo-app bin ModulesPerl6.pl/;
+        system hypnotoad => catfile $self->output_dir, qw/bin ModulesPerl6.pl/;
     }
 
     $self;
