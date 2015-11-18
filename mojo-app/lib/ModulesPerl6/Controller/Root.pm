@@ -32,7 +32,7 @@ sub index {
     );
 }
 
-sub dist {
+sub repo {
     my $self = shift;
 
     my $dist = $self->stash('dist');

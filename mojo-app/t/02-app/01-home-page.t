@@ -66,6 +66,12 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
             'db build date is displayed (e.g. Wed Dec 31 19:00:00 1969)')
     ;
 
+    $t->dive_reset->get_ok('/repo/Dist1')
+        ->status_is(302)
+        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+    ;
+
+    # This should eventually be a proper page with info and not a redirect
     $t->dive_reset->get_ok('/dist/Dist1')
         ->status_is(302)
         ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')

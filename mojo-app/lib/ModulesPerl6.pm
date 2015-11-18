@@ -60,7 +60,11 @@ sub startup {
 
     # multiple search aliases, because why not?
     $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
-    $r->get('/dist/:dist')->to('root#dist')->name('dist');
+
+    # TODO: the /dist/ route currently redirects to rep, because we don't have
+    # a proper dist page yet
+    $r->get('/dist/:dist')->to('root#repo')->name('dist');
+    $r->get('/repo/:dist')->to('root#repo')->name('repo');
     $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
 
     $r->any('/not_implemented_yet')
