@@ -55,10 +55,6 @@ $p6p->write_html('index.html'); # this doesn't actually write anything ATM
 $p6p->write_dist_db;
 
 unless ( $output_dir eq './' )  {
-    # toss out old logos, so the sprite maker doesn't keep spriting them
-    # in all the time
-    remove_tree catdir $output_dir, qw{public  content-pics  dist-logos};
-
     system qw/
         cp -r
             bin
