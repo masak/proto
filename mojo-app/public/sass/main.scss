@@ -93,6 +93,13 @@ table.dataTable {
             line-height: 32px;
         }
 
+        a[href^="/dist"] {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: 14em;
+        }
+
         .sprite {
             margin-left: 5px;
         }
