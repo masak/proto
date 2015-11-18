@@ -22,6 +22,7 @@ my $build = Module::Build->new(
         'File::Spec::Functions'          => 0,
         'Mojolicious::Plugin::AssetPack' => '0.68',
         'Imager::File::PNG'              => '0.92',
+        'Time::Moment'                   => '0.36',
     }
 );
 $build->create_build_script;
