@@ -54,5 +54,21 @@ $p6p->write_html('index.html'); # this doesn't actually write anything ATM
 # $p6p->write_sprite;
 $p6p->write_dist_db;
 
-print "index.html and proto.json files generated\n";
+unless ( $output_dir eq './' )  {
+    # toss out old logos, so the sprite maker doesn't keep spriting them
+    # in all the time
+    remove_tree catdir $output_dir, qw{public  content-pics  dist-logos};
+
+    system qw/
+        cp -r
+            bin
+            lib
+            modules_perl6.conf
+            public
+            templates
+    /, $output_dir;
+}
+
+$p6p->restart_app;
+say '[' . localtime . '] database generated; app restarted';
 

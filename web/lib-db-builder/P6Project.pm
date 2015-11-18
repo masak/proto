@@ -192,9 +192,14 @@ sub write_dist_db {
     );
 
     move DB_FILE_TEMP, catfile $self->output_dir, DB_FILE;
-    unless ( $self->no_app_start ) {
-        system hypnotoad => catfile $self->output_dir, qw/bin ModulesPerl6.pl/;
-    }
+    $self;
+}
+
+sub restart_app {
+    my $self = shift;
+    return $self if $self->no_app_start;
+
+    system hypnotoad => catfile $self->output_dir, qw/bin ModulesPerl6.pl/;
 
     $self;
 }
