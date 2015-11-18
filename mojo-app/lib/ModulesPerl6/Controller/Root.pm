@@ -92,7 +92,7 @@ parameter that is the term to perform the search for.
 
 =head2 C<dist>
 
-    $r->get('/dist/:dist')->to('root#dist')->name('dist');
+    $r->get('/dist/:dist')->to('root#repo')->name('dist');
 
 Render dist page (B<NIY>; currently just a redirect to GitHub repo).
 Expects the name of the dist in C<dist>
@@ -114,6 +114,13 @@ L<Mojolicious::Controller/"stash"> parameter.
 
 A page that displays text 'Not Implemented Yet'. Actions that are not
 yet implemented can redirect to this action to inform the user.
+
+=head2 C<repo>
+
+    $r->get('/repo/:dist')->to('root#repo')->name('repo');
+
+Redirect to dist's GitHub repo. Expects the name of the dist in C<dist>
+L<Mojolicious::Controller/"stash"> parameter.
 
 =head1 CONTACT INFORMATION
 
