@@ -32,8 +32,7 @@
                     : build_stats->stats('last_updated')->{last_updated}
                 )
                 %></i>.
-              <a href="http://modules.perl6.org/log/update.log"
-                class="btn btn-primary btn-sm">
+              <a href="/update.log" class="btn btn-primary btn-sm">
                 <i class="glyphicon glyphicon-log-in"></i>
                 view build log</a>
           </small>
