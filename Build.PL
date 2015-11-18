@@ -33,6 +33,7 @@ my $build = Module::Build->new(
           'File::Temp' => 0,
           'FindBin' => 0,
           'IO::Handle' => 0,
+          'IO::Socket::IP' => '0.37',
           'IPC::Open3' => 0,
           'Import::Into' => 0,
           'Mojo::Base' => 0,
