@@ -46,10 +46,11 @@ You're all set!.
 
 ## Clone The Repo
 
-These instructions assume you are in the `mojo-app` directory of the [repository](https://github.com/perl6/modules.perl6.org/):
+These instructions assume you are in the `mojo-app` directory of the
+[repository](https://github.com/perl6/modules.perl6.org/):
 ```bash
 git clone https://github.com/perl6/modules.perl6.org/
-cd modules.perl6.org/mojo-app;
+cd modules.perl6.org;
 ```
 
 ## Installing Required Software
@@ -64,19 +65,18 @@ If asked whether to configure stuff automatically, just respond with `yes`.
 
 ### Production Deployment
 
-If you're looking to deploy the app, you may wish to install *nginx*, *Apache*, or other web server capable of reverse-proxying (if you don't want to use [Mojolicious](http://mojolicio.us/)'s server).
+If you're looking to deploy the app, you may wish to install *nginx*,
+*Apache*, or other web server capable of reverse-proxying (if you don't want
+to use [Mojolicious](http://mojolicio.us/)'s server).
 
 
 ## Generating The Database
 
-Run the `../db-builder/build-project-list.pl` build script that will generate the SQLite database file and launch the app in production mode. If you
+Run the `build-project-list.pl` build script that will generate the SQLite database file and launch the app in production mode. If you
 want to launch the app yourself, specify `--no-app-start` flag (you may also use the `--limit=` parameter so you don't build info for all the dists):
 ```bash
-cd ../db-builder/;
 perl build-project-list.pl --no-app-start --limit=10;
-cd ../mojo-app/;
 ```
-
 
 ## Launching Development Server
 
@@ -94,7 +94,7 @@ secret string into it. If file doesn't exist, string `Perl 6 is awesome!` will
 be used, which is known to the world and thus is not secure.
 
 ## Production Deployment Setup
-The `../db-builder/build-project-list.pl` build script launches the app automatically on port `3333`. You can also launch it yourself:
+The `build-project-list.pl` build script launches the app automatically on port `3333`. You can also launch it yourself:
 ```
 hypnotoad bin/ModulesPerl6.pl
 ```
