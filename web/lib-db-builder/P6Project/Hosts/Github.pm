@@ -44,8 +44,6 @@ sub _format_error {
     # depending on the version of Mojolicious, $error might either be a hash
     # ref or a string
     if (ref $error) {
-        use Acme::Dump::And::Dumper;
-        die DnD [ $error ];
         return join ' ', $error->{code}, $error->{message};
     }
     else {
