@@ -3,7 +3,22 @@ var table_plugin;
 $(function(){
     setup_table();
     setup_search_query_save();
+    setup_search_box_defocus();
 });
+
+function setup_search_box_defocus() {
+    /* Focus search box on page load, but remove focus if the user appears
+        to be trying to scroll the page with keyboard, rather than typing
+        a search query
+    */
+    $('#dists_filter input').focus().keydown( function(e){
+        var el = $(this);
+        if ( e.which == 32 && el.val().length                ) { return true; }
+        if ( e.which == 32 || e.which == 34 || e.which == 40 ) { el.blur()  ; }
+        // key codes: 32: space; 34: pagedown; 40: down arrow
+    });
+}
+
 
 function setup_table() {
     var el = $('#dists'), filter_container, filter, sort_order;
