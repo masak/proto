@@ -4,7 +4,7 @@ use Mojo::Base -base;
 
 use Carp             qw/croak/;
 use File::Spec::Functions qw/catfile/;
-use FindBin;
+use FindBin; FindBin->again;
 use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::BuildStats::Schema;

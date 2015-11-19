@@ -4,7 +4,7 @@ package ModulesPerl6;
 use constant SECRETS_FILE => 'secrets';
 
 use Mojo::Base 'Mojolicious';
-use FindBin;
+use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::Dists;
