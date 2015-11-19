@@ -1,0 +1,202 @@
+
+body {
+    background: lighten(#2FA4E7, 45%);
+}
+
+header {
+    margin-top: 20px;
+
+    #logo {
+        margin-top: -60px;
+        margin-right: -40px;
+    }
+}
+
+.table > thead > tr > th {
+    border-bottom-width: 1px;
+}
+
+@media (max-width: 665px) {
+    header #logo {
+        margin: 0;
+    }
+}
+
+.panel h1 {
+    font-size: 200%;
+}
+
+table.dataTable, table.dataTable th, table.dataTable td {
+    box-sizing: border-box;
+}
+
+table.dataTable.no-footer,
+table.dataTable thead th, table.dataTable thead td {
+    border-bottom: none;
+}
+
+table.dataTable {
+    border-collapse: collapse;
+
+    thead {
+        .sorting {
+            background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIUnC2nKLnT4or00PvyrQwrPzUZshQAOw==);
+        }
+
+        .sorting_asc{
+            background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIRnC2nKLnT4or00Puy3rx7VQAAOw==);
+        }
+
+        .sorting_desc{
+            background-image:url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIPnI+py+0/hJzz0IruwjsVADs=);
+        }
+    }
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: none;
+    text-align: left;
+    padding: 20px 20px 0;
+
+    input { margin: 0; }
+}
+
+#dists {
+    td, th {
+        vertical-align: middle;
+        padding: 5px;
+    }
+
+    th {
+        padding-right: 13px;
+    }
+
+    th:first-child,
+    td:first-child {
+        padding-left: 20px;
+    }
+
+    th:last-child {
+        padding-right: 18px;
+        background-position: right 10px center;
+    }
+
+    a {
+        color: darken(#2FA4E7, 10%);
+    }
+
+    .name {
+        white-space: nowrap;
+
+        a, i {
+            vertical-align: middle;
+            line-height: 32px;
+        }
+
+        a[href^="/dist"] {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            max-width: 14em;
+        }
+
+        .dist-logos {
+            margin-left: 5px;
+        }
+    }
+    .github {
+        background: url(/pics/github-icon.png);
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+    }
+
+    .kwalitee, .travis, .stars, .issues, .updated {
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    tbody {
+        .travis {
+            padding: 0;
+            white-space: nowrap;
+            font-size: 95%;
+            background: #a2a2a2;
+            background: -ms-linear-gradient(top,  #a2a2a2 0%,#909090 100%);
+            background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
+        }
+
+        .travis:hover {
+            background: #a2a2a2;
+        }
+
+        .travis-passing {
+            background: #50ca22;
+            background: -ms-linear-gradient(top,  #50ca22 0%,#3eb810 100%);
+            background: linear-gradient(to bottom,  #50ca22 0%,#3eb810 100%);
+        }
+
+        .travis-passing:hover {
+            background: #50ca22;
+        }
+
+        .travis-pending {
+            background: #dbb428;
+            background: -ms-linear-gradient(top,  #dbb428 0%,#c9a216 100%);
+            background: linear-gradient(to bottom,  #dbb428 0%,#c9a216 100%);
+        }
+
+        .travis-pending:hover {
+            background: #dbb428;
+        }
+
+        .travis-failing {
+            background: #dc6750;
+            background: -ms-linear-gradient(top,  #dc6750 0%,#ca553e 100%);
+            background: linear-gradient(to bottom,  #dc6750 0%,#ca553e 100%);
+        }
+
+        .travis-failing:hover {
+            background: #dc6750;
+        }
+
+        .travis a {
+            padding: 0 5px;
+            text-decoration: none;
+            color: #fff;
+            text-shadow: 1px 1px #333;
+            display: block;
+            height: 32px + 5px + 5px;
+            line-height: 32px + 5px + 5px;
+        }
+
+        .travis-not {
+            font-size: 80%;
+            background: #ddd;
+        }
+
+        .travis-not a {
+            text-shadow: none;
+            color: #333;
+        }
+
+        .travis-not:hover {
+            background: #ccc;
+        }
+    }
+}
+
+#search {
+    margin: 20px 5px 0;
+}
+
+
+/* Bootstrap amendments */
+
+.btn .glyphicon {
+    padding-right: .5em;
+}
+
+.suckin-btm {
+    padding-bottom: 5px;
+}

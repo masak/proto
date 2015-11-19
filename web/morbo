@@ -1,0 +1,13 @@
+#!/bin/sh
+morbo \
+    -w lib                             \
+    -w lib-db-builder                  \
+    -w bin                             \
+    -w templates                       \
+    -w public/content-pics             \
+    -w public/js                       \
+    -w public/pics                     \
+    -w public/sass                     \
+    -w modules_perl6.conf              \
+    -w modulesperl6.db                 \
+-l http://*:3333 bin/ModulesPerl6.pl
