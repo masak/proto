@@ -4,7 +4,7 @@ package ModulesPerl6;
 use constant SECRETS_FILE => 'secrets';
 
 use Mojo::Base 'Mojolicious';
-
+use FindBin;
 use File::Spec::Functions qw/catfile/;
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::Dists;
@@ -17,10 +17,9 @@ sub startup {
     $self->plugin('Config');
     $self->moniker('ModulesPerl6');
 
-    my $secrets_file = -r SECRETS_FILE
-        ? SECRETS_FILE : catfile qw/.. db-builder github-token/;
+    my $secrets_file = catfile $FindBin::Bin, '..', SECRETS_FILE;
 
-    $self->app->log->info('Did not find suitable file to get secrets from')
+    $self->app->log->info("Did not find secrets file at $secrets_file")
         unless -r $secrets_file;
 
     $self->secrets([
