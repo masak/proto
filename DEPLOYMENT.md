@@ -88,9 +88,10 @@ Server available at http://127.0.0.1:3333
 
 ## Secrets
 
-You don't really need to worry about this in ***development*** setup. Mojolicious [uses this string to sign the session cookie with](https://metacpan.org/pod/Mojolicious#secrets). Create a file named `secrets` and write a secret string into it. If that file doesn't exist, the app will attempt to use the `github-token`
-file in the `../db-builder/` directory. If that fails as well, string `Perl 6 is awesome!` will be used, which is known to the world and thus is not secure.
-
+You don't really need to worry about this in ***development*** setup.
+Mojolicious [uses this string to sign the session cookie with](https://metacpan.org/pod/Mojolicious#secrets). Create a file named `secrets` and write a
+secret string into it. If file doesn't exist, string `Perl 6 is awesome!` will
+be used, which is known to the world and thus is not secure.
 
 ## Production Deployment Setup
 The `../db-builder/build-project-list.pl` build script launches the app automatically on port `3333`. You can also launch it yourself:
