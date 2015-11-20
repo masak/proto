@@ -16,14 +16,14 @@ Please use the following steps to aid you in your development:
 
 - Install prerequisites for build script:
 ```
-$ perl Build.PL
-$ ./Build installdeps
+    $ perl Build.PL
+    $ ./Build installdeps
 ```
 
 - Run build script
-  ```
-$ cd db-builder
-$ perl build-project-list.pl --limit=<number-of-modules>
+```
+    $ cd db-builder
+    $ perl build-project-list.pl --limit=<number-of-modules>
 ```
 The build script automatically starts the Mojolicious app that powers the
 front end. To disable that behaviour, specify the `--no-app-start` flag:
