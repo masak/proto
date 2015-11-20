@@ -59,7 +59,9 @@ A couple of Perl 5 modules need additional software to function:
 
 #### SASS
 
+```bash
   sudo apt-get install ruby-sass
+```
 
 The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
 converts [SASS](http://sass-lang.com/) into plain CSS. There are several
@@ -69,14 +71,18 @@ but might offer an older `sass`, which might be missing new features.
 instead, but it similarly might lag behind the newest `sass`. Lastly,
 You can use Ruby's package manager to install most recent sass:
 
+```bash
   sudo apt-get install rubygems
   sudo gem install sass
+```
 
 At the time of this writing, `ruby-sass` package works fine.
 
 #### Sprites
 
+```bash
   sudo apt-get install libpng12-dev
+```
 
 The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
 merges some of the images into a
