@@ -15,8 +15,7 @@ Please use the following steps to aid you in your development:
 - Save the token in file named 'github-token' in `web` folder
 
 - Install prerequisites for build script:
-  ```
-$ sudo apt-get install libpng12-dev
+```
 $ perl Build.PL
 $ ./Build installdeps
 ```

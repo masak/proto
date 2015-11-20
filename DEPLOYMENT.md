@@ -55,7 +55,37 @@ cd modules.perl6.org;
 
 ## Installing Required Software
 
-Install Perl 5 module dependencies:
+A couple of Perl 5 modules need additional software to function:
+
+#### SASS
+
+  sudo apt-get install ruby-sass
+
+The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
+converts [SASS](http://sass-lang.com/) into plain CSS. There are several
+options to make it function properly. The `ruby-sass` package should work,
+but might offer an older `sass`, which might be missing new features.
+[CSS::Sass](https://metacpan.org/pod/CSS::Sass) Perl 5 module can be installed
+instead, but it similarly might lag behind the newest `sass`. Lastly,
+You can use Ruby's package manager to install most recent sass:
+
+  sudo apt-get install rubygems
+  sudo gem install sass
+
+At the time of this writing, `ruby-sass` package works fine.
+
+#### Sprites
+
+  sudo apt-get install libpng12-dev
+
+The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
+merges some of the images into a
+[CSS Sprite](https://en.wikipedia.org/wiki/Sprite_%28computer_graphics%29#Sprites_by_CSS) using its
+[sprite handler](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack::Handler::Sprites). It needs
+`libpng12-dev` library to function
+
+#### Install Perl 5 module dependencies:
+
 ```bash
 $ perl Build.PL
 $ ./Build installdeps
