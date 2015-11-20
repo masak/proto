@@ -4,7 +4,7 @@ These are the scripts to generate the website on http://modules.perl6.org/.
 
 ## TODOs
 
-Want to help out? Check if any [open Issues](https://github.com/perl6/modules.perl6.org/issues) exists that you might be able to solve. We also have
+Want to help out? Check if any [open Issues](https://github.com/perl6/modules.perl6.org/issues) exist that you might be able to solve. We also have
 [a list of TODO ideas](TODO-IDEAS.md) you might be interested in.
 
 ## Development
@@ -12,7 +12,7 @@ Want to help out? Check if any [open Issues](https://github.com/perl6/modules.pe
 Please use the following steps to aid you in your development:
 - Create a token with access to public repositories. To run the scripts, you need a [GitHub token](https://github.com/blog/1509-personal-api-tokens) with rights to query Perl 6 module GitHub repository information.
 
-- Save the token in file named 'github-token' in `web` folder
+- Save the token in file named `github-token` in `web` folder
 
 - Install prerequisites for build script:
 ```
@@ -22,14 +22,14 @@ Please use the following steps to aid you in your development:
 
 - Run build script
 ```
-    $ cd db-builder
+    $ cd web
     $ perl build-project-list.pl --limit=<number-of-modules>
 ```
-The build script automatically starts the Mojolicious app that powers the
-front end. To disable that behaviour, specify the `--no-app-start` flag:
 
+- The build script automatically starts the Mojolicious app that powers the
+front end. To disable that behaviour, specify the `--no-app-start` flag:
 ```bash
-    $ perl build-project-list.pl --no-app-start>
+    $ perl build-project-list.pl --no-app-start
 ```
 
 #### Browser Support
@@ -48,10 +48,10 @@ See [DEPLOYMENT.md file in the mojo-app directory](mojo-app/DEPLOYMENT.md)
 Once committed, the production cron job will pick up your changes on the 20th and 50th minutes of every hour. The script can take up to 10 minutes to complete.
 
 ```
-20,50   *       *       *       *       sh update-modules.perl6.org > log/update.log 2>&1; cp log/update.log /var/www/modules.perl6.org/log
+20,50   *       *       *       *       sh update-modules.perl6.org > log/update.log 2>&1; cp log/update.log /var/www/modules.perl6.org/public/update.log
 ```
 
-The cron job results can be found [here](http://modules.perl6.org/log/update.log).
+The cron job results can be found [here](http://modules.perl6.org/update.log).
 
 ## Author
 

@@ -9,8 +9,8 @@ version. The best approach is to use Perlbrew so as not to mess with your
 system Perl 5. We'll need build tools and we'll also need `git` afterwards:
 
 ```bash
-sudo apt-get install build-essential git curl;
-\curl -L http://install.perlbrew.pl | bash;
+$ sudo apt-get install build-essential git curl;
+$ \curl -L http://install.perlbrew.pl | bash;
 ```
 
 Follow the instructions from Perlbrew's installation. Likely, you'll be asked
@@ -28,7 +28,7 @@ Pick the latest available `perl` and run (substituting `perl-5.22.0` for
 the latest version you see available):
 
 ```bash
-perlbrew install perl-5.22.0`
+$ perlbrew install perl-5.22.0`
 ```
 
 Now, run `perlbrew switch perl-5.22.0` to switch to that version of Perl 5.
@@ -37,21 +37,11 @@ We'll also need [cpanm](metacpan.org/pod/App::cpanminus) and a
 module, so run this next:
 
 ```bash
-perlbrew install-cpanm;
-cpanm Module::Build;
+$ perlbrew install-cpanm;
+$ cpanm Module::Build;
 ```
 
-You're all set!.
-
-
-## Clone The Repo
-
-These instructions assume you are in the `mojo-app` directory of the
-[repository](https://github.com/perl6/modules.perl6.org/):
-```bash
-git clone https://github.com/perl6/modules.perl6.org/
-cd modules.perl6.org;
-```
+You now have Perl 5!
 
 ## Installing Required Software
 
@@ -60,7 +50,7 @@ A couple of Perl 5 modules need additional software to function:
 #### SASS
 
 ```bash
-  sudo apt-get install ruby-sass
+$ sudo apt-get install ruby-sass
 ```
 
 The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
@@ -72,8 +62,8 @@ instead, but it similarly might lag behind the newest `sass`. Lastly,
 You can use Ruby's package manager to install most recent sass:
 
 ```bash
-  sudo apt-get install rubygems
-  sudo gem install sass
+$ sudo apt-get install rubygems
+$ sudo gem install sass
 ```
 
 At the time of this writing, `ruby-sass` package works fine.
@@ -81,7 +71,7 @@ At the time of this writing, `ruby-sass` package works fine.
 #### Sprites
 
 ```bash
-  sudo apt-get install libpng12-dev
+$ sudo apt-get install libpng12-dev
 ```
 
 The [AssetPack plugin](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack)
@@ -89,6 +79,13 @@ merges some of the images into a
 [CSS Sprite](https://en.wikipedia.org/wiki/Sprite_%28computer_graphics%29#Sprites_by_CSS) using its
 [sprite handler](https://metacpan.org/pod/Mojolicious::Plugin::AssetPack::Handler::Sprites). It needs
 `libpng12-dev` library to function
+
+## Clone The Repository
+
+```bash
+$ git clone https://github.com/perl6/modules.perl6.org/
+$ cd modules.perl6.org;
+```
 
 #### Install Perl 5 module dependencies:
 
@@ -111,7 +108,7 @@ to use [Mojolicious](http://mojolicio.us/)'s server).
 Run the `build-project-list.pl` build script that will generate the SQLite database file and launch the app in production mode. If you
 want to launch the app yourself, specify `--no-app-start` flag (you may also use the `--limit=` parameter so you don't build info for all the dists):
 ```bash
-perl build-project-list.pl --no-app-start --limit=10;
+$ perl build-project-list.pl --no-app-start --limit=10
 ```
 
 ## Launching Development Server
@@ -132,7 +129,7 @@ be used, which is known to the world and thus is not secure.
 ## Production Deployment Setup
 The `build-project-list.pl` build script launches the app automatically on port `3333`. You can also launch it yourself:
 ```
-hypnotoad bin/ModulesPerl6.pl
+$ hypnotoad bin/ModulesPerl6.pl
 ```
 You can specify a different port to use in the `modules_perl6.conf` configuration file on the `hypnotoad => {listen => ['http://*:3333']}` line.
 
@@ -167,7 +164,7 @@ $ sudo service apache2 reload
 ## Documentation
 The modules in this distribution contain embedded POD documentation. To read it, you can use the `perldoc` command. E.g.:
 ```bash
-perldoc lib/ModulesPerl6/Model/Dists.pm
+$ perldoc lib/ModulesPerl6/Model/Dists.pm
 ```
 
 ## More

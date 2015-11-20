@@ -3,21 +3,21 @@
 ## Please Note
 These are just brainstorming ideas and the mere inclusion of items on the list does not mean they automatically are cleared for implementation in the specific way described here. It is recommended anything large should be first discussed on [IRC](irc://irc.freenode.net/perl6) or [in a GitHub Issue](https://github.com/perl6/modules.perl6.org/issues/), lest the implementation effort is wasted if the large part of the community has a different point of view.
 
-## Clean Up [db builder script](db-builder/build-project-list.pl)
+## Clean Up [db builder script](web/build-project-list.pl)
 ### Status of the implementation
 Work on this will commence immediately after `mojo-app` branch is merged
 into `master`. Current volunteers willing to work on this: [Zoffix Znet](https://github.com/zoffixznet/). The script and its
-[supporting libs](db-builder/lib) use discouraged modules, such as JSON
+[supporting libs](web/lib-db-builder) use discouraged modules, such as JSON
 and File::Slurp. Those need to be swapped to working alternatives, and
 since we're already using Mojo, we can use Mojo::Util::slurp/spurt and
 Mojo::JSON.
 
 We should also think about whether we could implement the
-[dist sources](db-builder/lib/P6Project/Hosts) as plugins with some standard
-interface, so it would be very easy to add new sources.
+[dist sources](web/lib-db-builder/P6Project/Hosts) as plugins with some
+standard interface, so it would be very easy to add new sources.
 
 ### Description
-The [build script](db-builder/build-project-list.pl) no longer handles web
+The [build script](web/build-project-list.pl) no longer handles web
 stuff, so all that cruft can be tossed. It also generates a JSON file with
 all the dists that can also be removed, if we simply add a JSON "api" to the
 mojo app
