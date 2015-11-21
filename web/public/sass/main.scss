@@ -3,6 +3,19 @@ body {
     background: lighten(#2FA4E7, 45%);
 }
 
+.error-page {
+    margin-top: 100px;
+    overflow: visible;
+
+    #logo {
+        margin-top: -100px;
+    }
+
+    h2 {
+        font-size: 450%;
+    }
+}
+
 header {
     margin-top: 20px;
 
