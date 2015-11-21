@@ -5,7 +5,6 @@ use warnings FATAL => 'all';
 
 use File::Temp;
 use Test::Most;
-use Mojo::SQLite;
 use t::Helper;
 
 use constant MODEL        => 'ModulesPerl6::Model::BuildStats';

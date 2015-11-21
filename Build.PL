@@ -39,7 +39,6 @@ my $build = Module::Build->new(
           'Import::Into' => 0,
           'Mojo::Base' => 0,
           'Mojo::Collection' => 0,
-          'Mojo::SQLite' => 0,
           'Mojo::URL' => 0,
           'Mojo::Util' => 0,
           'Mojolicious' => '6.30',
