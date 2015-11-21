@@ -5,7 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Perl 6 Modules Directory</title>
+  <title><%= length(title) ? title() . ' - ' : '' %>Perl 6 Modules
+      Directory</title>
   <link href="http://perl6.org/favicon.ico" rel="shortcut icon">
   %= asset "cerulean.css";
   %= asset "app.css";
