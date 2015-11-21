@@ -6,7 +6,7 @@
   </div>
   <div class="panel-body suckin-btm">
     <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
-        class="pull-right">
+        class="pull-right" width=291 height=273>
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
         known Perl 6 modules. All of them
