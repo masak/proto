@@ -26,6 +26,9 @@ Please use the following steps to aid you in your development:
     $ perl build-project-list.pl --limit=<number-of-modules>
 ```
 
+You can also create file `META.list.local` that contains specific URLs
+you may wish to fetch for debug purposes.
+
 - The build script automatically starts the Mojolicious app that powers the
 front end. To disable that behaviour, specify the `--no-app-start` flag:
 ```bash

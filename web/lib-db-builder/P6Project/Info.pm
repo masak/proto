@@ -25,7 +25,13 @@ sub get_projects {
     my $ua = $self->p6p->ua;
     my $stats = $self->p6p->stats;
     my $projects = {};
-    my $contents = eval { read_file('META.list.local') } || $ua->get($list_url)->res->body;
+    my $contents = eval {
+        my $c = read_file('META.list.local')
+            and warn '## Foregoing fetching META.list and '
+                . 'using META.list.local instead';
+        $c;
+    } || $ua->get($list_url)->res->body;
+
     my $hosts = {
         'github' => P6Project::Hosts::Github->new(p6p=>$self->p6p)
     };

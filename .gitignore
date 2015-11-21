@@ -17,6 +17,7 @@ web/building-modulesperl6.db
 web/bin/hypnotoad.pid
 web/secrets
 web/dist.ini
+web/META.list.local
 web/ModulesPerl6-*
 web/.build
 web/public/proto.json
