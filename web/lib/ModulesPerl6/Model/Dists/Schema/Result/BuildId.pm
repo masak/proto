@@ -15,11 +15,12 @@ __END__
 
 =head1 NAME
 
-ModulesPerl6::Model::Dists::Schema::Result::TravisStatus - Travis-CI statuses
+ModulesPerl6::Model::Dists::Schema::Result::BuildId - build IDs
 
 =head1 DESCRIPTION
 
-This table stores L<https://travis-ci.org/> statuses for the dists.
+This table stores build IDs for the dists. These identify unique database
+builder script runs.
 
 =head1 CONTACT INFORMATION
 
