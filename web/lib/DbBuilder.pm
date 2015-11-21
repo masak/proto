@@ -88,7 +88,7 @@ sub _meta_list {
     my $self = shift;
     my $meta_list = $self->_meta_list;
 
-    log info => "Fetching META.list from $meta_list";
+    log info => "Loading META.list from $meta_list";
     my $url = Mojo::URL->new( $meta_list );
     my $raw_data;
     if ( $url->scheme =~ /(ht|f)tps?/i ) {
@@ -108,7 +108,8 @@ sub _meta_list {
         $raw_data = slurp $meta_list;
     }
     else {
-        log fatal => 'Could not figure out how to read';
+        log fatal => 'Could not figure out how to load META.list. It does '
+            . 'not seem to be a URL, but is not a [readable] file either';
     }
 
     my @metas = grep /\S/, map trim($_), split m{\Q$/\E}, $raw_data;
