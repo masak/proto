@@ -58,7 +58,7 @@ sub add {
                 qw/has_readme  panda  has_tests  travis/,
         });
 
-        $db->resultset('Dist')->create({
+        $db->resultset('Dist')->update_or_create({
             travis => { status => $dist->{travis_status} },
             author => { # use same field for both, for now. TODO:fetch realname
                 author_id => $dist->{author_id}, name => $dist->{author_id},

@@ -19,7 +19,18 @@ can_ok $m => qw/add   deploy  find  remove  remove_old/;
 my ( $dist1, $dist2 ) = t::Helper::dist_out_data;
 
 isa_ok $m->deploy,                         MODEL, '->deploy returns invocant';
-isa_ok $m->add( t::Helper::dist_in_data ), MODEL, '->add    returns invocant';
+
+{
+    # Modify input data; second ->add should update it back to original
+    # returned from ::dist_in_data
+    my @d = t::Helper::dist_in_data;
+    $d[1]{build_id} = 'rvOZAHmQ5RGKE79B+wjaYA==';
+    isa_ok $m->add( @d ), MODEL, '->add    returns invocant';
+
+    diag 'Adding same data to database again. '
+        . 'It must not be duplicated and must instead only be updated';
+    $m->add( t::Helper::dist_in_data );
+}
 
 isa_ok $m->find, 'Mojo::Collection', '->find returns Mojo::Collection object';
 is_deeply $m->find, [$dist1, $dist2],
