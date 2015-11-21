@@ -4,7 +4,7 @@ use strict;
 use warnings FATAL => 'all';
 use Test::Most;
 use Mojo::URL;
-use Test::Mojo::WithRoles qw/SubmitForm ElementCounter/;
+use Test::Mojo::WithRoles qw/SubmitForm  ElementCounter/;
 use t::Helper;
 
 my $db_file = t::Helper::setup_db_file;
@@ -75,6 +75,10 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     $t->dive_reset->get_ok('/dist/Dist1')
         ->status_is(302)
         ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+    ;
+
+    $t->dive_reset->get_ok('/')->status_is(200)
+        ->text_like('#site_tip' => qr/^Tip \d\z/, 'Site tip has correct text');
     ;
 }
 

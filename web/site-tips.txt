@@ -1,0 +1,10 @@
+# This is a comment and wil be ignored, as are blank lines
+# Each line represents a single tip
+# ********************************
+# ********************************
+# IMPORTANT: You MUST escape HTML...
+# ...that also means you can use HTML code in your tips
+# ********************************
+# ********************************
+You can link to a search query, like so: <a href="http://modules.perl6.org/#q=Test">http://modules.perl6.org/#q=Test</a>
+Go directly to a module's repository using <kbd>/repo/</kbd>: <a href="http://modules.perl6.org/repo/Pastebin::Gist">http://modules.perl6.org/repo/Pastebin::Gist</a>

@@ -7,8 +7,9 @@ use Mojo::Base 'Mojolicious';
 use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
 use Mojo::Util qw/slurp/;
-use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::BuildStats;
+use ModulesPerl6::Model::Dists;
+use ModulesPerl6::Model::SiteTips;
 
 sub startup {
     my $self = shift;
@@ -47,6 +48,9 @@ sub startup {
     });
     $self->helper( build_stats => sub {
         state $stats = ModulesPerl6::Model::BuildStats->new;
+    });
+    $self->helper( site_tips => sub {
+        state $tips = ModulesPerl6::Model::SiteTips->new;
     });
     $self->helper( items_in => sub {
         my ( $c, $what ) = @_;

@@ -9,23 +9,26 @@ use Mojo::Util               qw/trim/;
 use Moo;
 use namespace::clean;
 
-has _tips => ( is => 'rw' );
+has _tips => (
+    is      => 'lazy',
+    default => sub { shift->_load_tip_file },
+);
 
 has _tip_file => (
-    is       => 'ro',
+    is       => 'lazy',
     init_arg => 'tip_file',
     default  =>  sub {
         $ENV{MODULESPERL6_TIP_FILE}
             // catfile $FindBin::Bin, qw/.. site-tips.txt/;
     },
-    trigger => 1,
 );
 
-sub _trigger__tip_file {
-    my ( $self, $file ) = @_;
+sub _load_tip_file {
+    my $self = shift;
+    my $file = $self->_tip_file;
 
     open my $fh, '<', $file
-        or croak "Could not open site tips file for reading: $!";
+        or croak "Could not open site tips file [$file] for reading: $!";
 
     my @tips;
     while ( <$fh> ) {
@@ -34,7 +37,7 @@ sub _trigger__tip_file {
         push @tips, $_;
     }
 
-    $self->_tips( \@tips );
+    return \@tips;
 }
 
 sub tip {
@@ -65,7 +68,7 @@ This module is used to access site usage tips that are shown to users.
 
 =head1 TIP FILE FORMAT
 
-    # This is a comment and should be ignored, as are blank lines
+    # This is a comment and will be ignored, as are blank lines
 
     Tip 1
     Tip 2

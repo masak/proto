@@ -7,6 +7,8 @@ use ModulesPerl6::Model::BuildStats;
 use File::Temp;
 
 sub setup_db_file {
+    $ENV{MODULESPERL6_TIP_FILE} = 't/01-models/03-site-tips-TEST-TIPS.txt';
+
     my $db_file = File::Temp->new( UNLINK => 0, SUFFIX => '.db' );
     $ENV{MODULESPERL6_DB_FILE} = $db_file;
 

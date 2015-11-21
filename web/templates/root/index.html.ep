@@ -25,6 +25,10 @@
   </div>
 </header>
 
+<p id="site_tip" class="text-center">
+  <i class="glyphicon glyphicon-info-sign"></i> <%== site_tips->tip %>
+</p>
+
 <div class="panel panel-default">
   <div class="panel-heading">
     <h2 class="panel-title">Project List</h2>
