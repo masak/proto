@@ -1,0 +1,8 @@
+# This is a comment and should be ignored, as are blank lines
+
+Tip 1
+Tip 2
+
+
+
+
