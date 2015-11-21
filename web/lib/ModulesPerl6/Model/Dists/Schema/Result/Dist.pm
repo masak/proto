@@ -3,6 +3,7 @@ use     ModulesPerl6::Model::ResultClass;
 
 primary_column name          => { data_type => 'text'                      };
 primary_column author_id     => { data_type => 'text', is_foreign_key => 1 };
+column         build_id      => { data_type => 'text', is_foreign_key => 1 };
 column         travis_status => { data_type => 'text', is_foreign_key => 1 };
 column         url           => { data_type => 'text'                      };
 column         description   => { data_type => 'text'                      };
@@ -20,6 +21,10 @@ belongs_to author
 belongs_to travis
     => 'ModulesPerl6::Model::Dists::Schema::Result::TravisStatus'
     => { status => 'travis_status' };
+
+belongs_to build_id
+    => 'ModulesPerl6::Model::Dists::Schema::Result::BuildId'
+    => { id => 'build_id' };
 
 1;
 

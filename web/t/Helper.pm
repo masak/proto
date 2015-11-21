@@ -40,6 +40,7 @@ sub dist_in_data {
             issues       => 12,
             date_updated => 1446999664,
             date_added   => 1446694664,
+            build_id     => 'rvOZAHmQ5RGKE79B+wjaYA==',
         },
         {
             name         => 'Dist2',
@@ -55,6 +56,7 @@ sub dist_in_data {
             issues       => 6,
             date_updated => 1446490664,
             date_added   => 1445904664,
+            build_id     => '+IIcE3mQ5RGZYQhR+wjaYA==',
         },
     );
 }
@@ -73,6 +75,7 @@ sub dist_out_data {
             issues       => 12,
             date_updated => 1446999664,
             date_added   => 1446694664,
+            build_id     => 'rvOZAHmQ5RGKE79B+wjaYA==',
         },
         {
             name         => 'Dist2',
@@ -86,6 +89,7 @@ sub dist_out_data {
             issues       => 6,
             date_updated => 1446490664,
             date_added   => 1445904664,
+            build_id     => '+IIcE3mQ5RGZYQhR+wjaYA==',
         },
     );
 }

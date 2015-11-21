@@ -65,7 +65,7 @@ sub add {
             },
             map +( $_ => $dist->{$_} ),
                 qw/name  url  description  logo  stars  issues  kwalitee
-                    date_updated  date_added/,
+                    date_updated  date_added  build_id/,
         });
     }
 
@@ -83,9 +83,19 @@ sub find {
     my $self = shift;
     return $self->_find(1, @_);
 }
+
 sub remove {
     my $self = shift;
     $self->_find(0, @_)->delete_all;
+
+    $self;
+}
+
+sub remove_old {
+    my ( $self, $build_id ) = @_;
+    length $build_id or croak 'Missing Build ID to keep';
+
+    $self->_find(0, { build_id => { '!=', $build_id } })->delete_all;
 
     $self;
 }
@@ -106,6 +116,7 @@ ModulesPerl6::Model::Dists - model representing Perl 6 distributions
     $m->add( $dist );
     say $_->{url} for $m->find({ name => 'Dist1' })->each;
     $m->remove({ name => 'Dist1' });
+    $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA==')
 
 =head1 DESCRIPTION
 
@@ -147,6 +158,7 @@ if set, or C<modulesperl6.db>.
         issues       => 12,
         date_updated => 1446999664,
         date_added   => 1446694664,
+        build_id     => 'rvOZAHmQ5RGKE79B+wjaYA==',
     });
 
     $m->add( $dist1, $dist2 );
@@ -213,6 +225,12 @@ commit on GitHUb)
 Unix epoch of when the dist was added to the Perl 6 Ecosystem (this is NOT
 the same as when the repo was first created on GitHub).
 
+=head3 C<build_id>
+
+A string of text indentifying the build ID: a random string used
+by the database updater script to identify each run. You'll likely want
+to use something like L<Data::GUID/"to_base64"> as the ID.
+
 =head2 C<deploy>
 
     $m->deploy
@@ -265,6 +283,15 @@ Search by the Travis CI status
 
 B<Takes> the same argument as L</find> and any matching dists will be deleted
 from the database. B<Returns> its invocant.
+
+=head2 c<remove_old>
+
+    $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA==');
+
+B<Takes> a mandatory argument, which is the build ID of the dists to
+KEEP in the database. Any build IDs that do not match this will be deleted.
+A likely usage of this would be to call this method after rebuilding
+the database to remove any dists that were not in the new build list.
 
 =head1 PRIVATE ATTRIBUTES
 

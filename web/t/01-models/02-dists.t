@@ -14,7 +14,7 @@ END { unlink TEST_DB_FILE }
 use_ok       MODEL;
 my $m     =  MODEL->new( db_file => TEST_DB_FILE );
 isa_ok $m => MODEL;
-can_ok $m => qw/add   deploy  remove   find/;
+can_ok $m => qw/add   deploy  find  remove  remove_old/;
 
 my ( $dist1, $dist2 ) = t::Helper::dist_out_data;
 
@@ -57,5 +57,10 @@ subtest 'Testing find by...' => sub {
 isa_ok   $m->remove({ name => 'Dist1'}), MODEL,   '->remove returns invocant';
 is_deeply $m->find,                      [$dist2], 'removed a dist';
 is_deeply $m->find({ name => 'Dist1'}),  [],       'and it is no longer found';
+
+isa_ok $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA=='), MODEL,
+    '->remove_old returns invocant';
+is_deeply $m->find, [],
+    'remove_old tossed dists that did not have correct build ID';
 
 done_testing;
