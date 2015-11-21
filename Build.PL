@@ -11,6 +11,10 @@ my $build = Module::Build->new(
 
     # and now the list of perl module dependencies
     requires => {
+      ## Optional deps used by some modules
+      'Module::Runtime' => '0.014', # Module::Pluggable
+      'Module::Require' => '0.05',  # Module::Pluggable
+      'IO::Socket::SSL' => '2.020', # Mojo::UserAgent
 
         ## Required by the Mojo app:
           'Carp' => 0,

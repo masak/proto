@@ -68,12 +68,23 @@ sub run {
     my $build_id = Data::GUID->new->as_base64;
     log info => "Starting build $build_id";
 
-    my $m = ModulesPerl6::Model::Dists->new( db_file => $self->db_file );
-    $m->add(
-        DbBuilder::Dist->new( meta_url => $_, build_id => $build_id )->as_hash
-    ) for $self->_meta_list;
+    my $dists_m
+    = ModulesPerl6::Model::Dists->new( db_file => $self->db_file )->deploy;
+
+    my @metas = $self->_meta_list;
+    for ( 0 .. $#metas ) {
+        log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
+        $dists_m->add(
+            DbBuilder::Dist->new(
+                meta_url  => $metas[$_],
+                build_id  => $build_id,
+                logos_dir => $self->_logos_dir,
+            )->info
+        );
+    );
 
     if ( $self->_restart_app ) {
+        log info => 'Restarting app ' . $self->_app;
         system $^O eq 'MSWin32'
             ? $self->_app => 'daemon' # hypnotoad is not supported on Win32
             : hypnotoad   => $self->_app;
