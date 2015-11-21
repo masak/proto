@@ -158,6 +158,7 @@ sub write_json {
 sub write_dist_db {
     my $self = shift;
 
+    say '[' . localtime . '] starting database generation';
     { # let model go out of scope, so the db file gets finished off
         unlink DB_FILE_TEMP;
         my $m = ModulesPerl6::Model::Dists->new( db_file => DB_FILE_TEMP );
@@ -192,6 +193,9 @@ sub write_dist_db {
     );
 
     move DB_FILE_TEMP, catfile $self->output_dir, DB_FILE;
+
+    say '[' . localtime . '] database generation completed';
+
     $self;
 }
 
@@ -199,6 +203,7 @@ sub restart_app {
     my $self = shift;
     return $self if $self->no_app_start;
 
+    say '[' . localtime . '] Restarting app';
     system hypnotoad => catfile $self->output_dir, qw/bin ModulesPerl6.pl/;
 
     $self;

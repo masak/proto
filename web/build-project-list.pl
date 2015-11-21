@@ -66,5 +66,4 @@ unless ( $output_dir eq './' )  {
 }
 
 $p6p->restart_app;
-say '[' . localtime . '] database generated; app restarted';
 
