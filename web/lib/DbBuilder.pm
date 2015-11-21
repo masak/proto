@@ -112,7 +112,7 @@ sub _meta_list {
             . 'not seem to be a URL, but is not a [readable] file either';
     }
 
-    my @metas = grep /\S/, map trim($_), split m{\Q$/\E}, $raw_data;
+    my @metas = grep /\S/, map trim($_), split /\n/, $raw_data;
     log info => 'Found ' . @metas . ' dists';
 
     return @metas;
