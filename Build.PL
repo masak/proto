@@ -45,6 +45,7 @@ my $build = Module::Build->new(
           'Mojolicious::Commands' => 0,
           'Mojolicious::Plugin::AssetPack' => '0.68',
           'Mojolicious::Plugin::Bootstrap3' => '3.3505',
+          'Moo' => '2.000002',
           'POSIX' => 0,
           'Test::Mojo::Role::Debug' => '1.003003',
           'Test::Mojo::Role::ElementCounter' => '1.001005',
