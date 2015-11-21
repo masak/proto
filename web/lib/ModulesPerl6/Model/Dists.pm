@@ -15,7 +15,10 @@ has db_file => sub {
 };
 
 has _db     => sub {
-    ModulesPerl6::Model::Dists::Schema->connect('dbi:SQLite:' . shift->db_file)
+    ModulesPerl6::Model::Dists::Schema->connect(
+        'dbi:SQLite:' . shift->db_file,
+        '', '', { sqlite_unicode => 1 },
+    );
 };
 
 sub _find {

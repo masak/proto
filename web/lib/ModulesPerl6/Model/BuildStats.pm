@@ -14,8 +14,10 @@ has db_file => sub {
 };
 
 has _db     => sub {
-    ModulesPerl6::Model::BuildStats::Schema
-        ->connect('dbi:SQLite:' . shift->db_file)
+    ModulesPerl6::Model::BuildStats::Schema->connect(
+        'dbi:SQLite:' . shift->db_file,
+        '', '', { sqlite_unicode => 1 },
+    );
 };
 
 sub deploy {
