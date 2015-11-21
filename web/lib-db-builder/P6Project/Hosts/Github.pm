@@ -39,18 +39,6 @@ sub web_url {
     'https://github.com/';
 }
 
-sub _format_error {
-    my ($self, $error) = @_;
-    # depending on the version of Mojolicious, $error might either be a hash
-    # ref or a string
-    if (ref $error) {
-        return join ' ', $error->{code}, $error->{message};
-    }
-    else {
-        return $error;
-    }
-}
-
 sub get_api {
     my ($self, $project, $call) = @_;
     my $url = $self->api_url . "repos/$project->{auth}/$project->{repo_name}";

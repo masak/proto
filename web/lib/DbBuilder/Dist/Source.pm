@@ -57,6 +57,27 @@ sub _parse_meta {
     return $json;
 }
 
+sub _fill_missing {
+    my ( $self, $dist ) = @_;
+
+    %$dist = (
+        name          => 'N/A',
+        author_id     => 'N/A',
+        url           => 'N/A',
+        description   => 'N/A',
+        logo          => 'N_A',
+        kwalitee      => 0,
+        stars         => 0,
+        issues        => 0,
+        date_updated  => 0,
+        date_added    => 0,
+
+        %$dist,
+    );
+
+    return $dist;
+}
+
 sub load { ... }
 sub re   { ... }
 

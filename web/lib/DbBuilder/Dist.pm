@@ -1,16 +1,13 @@
 package DbBuilder::Dist;
 
 use strictures 2;
-
+use Types::Standard qw/Ref  Maybe  Str/;
+use DbBuilder::Log;
+use Moo;
+use namespace::clean;
 use Module::Pluggable search_path => ['DbBuilder::Dist::Source'],
                       sub_name    => '_sources',
                       require     => 1;
-use Types::Standard qw/Ref  Maybe  Str/;
-
-use DbBuilder::Log;
-
-use Moo;
-use namespace::clean;
 
 has _build_id => (
     init_arg => 'build_id',
@@ -51,7 +48,10 @@ sub _load_info {
     my $dist = $self->_load_from_source
         or return;
 
-    $dist->{build_id} = $self->_build_id;
+    $dist->{build_id}      = $self->_build_id;
+    $dist->{travis_status} = 'unknown';
+
+    return $dist;
 }
 
 sub _load_from_source {

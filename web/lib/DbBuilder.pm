@@ -63,31 +63,31 @@ has _meta_list => (
 sub run {
     my $self = shift;
 
-    $self->_prep_dirs;
-
     my $build_id = Data::GUID->new->as_base64;
     log info => "Starting build $build_id";
 
-    my $dists_m
-    = ModulesPerl6::Model::Dists->new( db_file => $self->db_file )->deploy;
+    $self->_deploy_db->_prep_dirs;
 
-    my @metas = $self->_meta_list;
+    my $dists_m
+    = ModulesPerl6::Model::Dists->new( db_file => $self->_db_file );
+
+    my @metas = $self->_metas;
     for ( 0 .. $#metas ) {
         log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
         $dists_m->add(
             DbBuilder::Dist->new(
-                meta_url  => $metas[$_],
-                build_id  => $build_id,
-                logos_dir => $self->_logos_dir,
+                meta_url          => $metas[$_],
+                build_id          => $build_id,
+                logos_dir         => $self->_logos_dir,
             )->info
         );
-    );
+    }
 
     if ( $self->_restart_app ) {
         log info => 'Restarting app ' . $self->_app;
         system $^O eq 'MSWin32'
-            ? $self->_app => 'daemon' # hypnotoad is not supported on Win32
-            : hypnotoad   => $self->_app;
+            ? ( $self->_app => 'daemon'    ) # hypnotoad not supported on Win32
+            : ( hypnotoad   => $self->_app );
     }
 
     $self;
@@ -95,14 +95,28 @@ sub run {
 
 #########################
 
-sub _meta_list {
+sub _deploy_db {
+    my $self = shift;
+    my $db = $self->_db_file;
+
+    log info => "Using database file $db";
+    return $self if -e $db;
+
+    log info => "Database file not found... deploying new database";
+    ModulesPerl6::Model::Dists     ->new( db_file => $db )->deploy;
+    ModulesPerl6::Model::BuildStats->new( db_file => $db )->deploy;
+
+    $self;
+}
+
+sub _metas {
     my $self = shift;
     my $meta_list = $self->_meta_list;
 
     log info => "Loading META.list from $meta_list";
     my $url = Mojo::URL->new( $meta_list );
     my $raw_data;
-    if ( $url->scheme =~ /(ht|f)tps?/i ) {
+    if ( $url->scheme and $url->scheme =~ /(ht|f)tps?/i ) {
         log info => '... a URL detected; trying to fetch';
         my $tx = Mojo::UserAgent->new( max_redirects => 10 )->get( $url );
 
@@ -131,11 +145,13 @@ sub _meta_list {
 
 sub _prep_dirs {
     my $self = shift;
-    my $logos_dir = $self->logos_dir;
+    my $logos_dir = $self->_logos_dir;
 
     log info => "Cleaning up dist logos dir [$logos_dir]";
     remove_tree $logos_dir;
     make_path   $logos_dir => { mode => 0755 };
+
+    $self;
 }
 
 1;
