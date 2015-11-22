@@ -5,7 +5,7 @@ use strictures 2;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
 use Try::Tiny;
-use Types::Standard qw/InstanceOf  Str/;
+use Types::Standard qw/InstanceOf  Ref  Str/;
 
 use DbBuilder::Log;
 
@@ -17,6 +17,14 @@ has _logos_dir => (
     is       => 'ro',
     isa      => Str,
     required => 1,
+);
+
+has _dist => (
+    is => 'lazy',
+    isa => Ref['HASH'] | InstanceOf['JSON::Meth'],
+    default => sub {
+        my $self = shift; $self->_parse_meta( $self->_download_meta );
+    },
 );
 
 has _dist_db => (
@@ -103,20 +111,26 @@ sub _fill_missing {
     return $dist;
 }
 
-sub _is_any_readme {
+sub _set_readme {
     my ( $self, @files ) = @_;
     my %readmees = map +( "README$_" => 1 ), '', # just 'README'; no ext.
         qw/.pod  .pod6  .md        .mkdn  .mkd  .markdown  .mkdown  .ron
            .rst  .rest  .asciidoc  .adoc  .asc  .txt/;
 
-    return grep( $readmees{$_}, @files ) ? 1 : 0;
+    my $dist = $self->_dist or return;
+    $dist->{has_readme} = grep( $readmees{$_}, @files ) ? 1 : 0;
+
+    $self;
 }
 
-sub _is_any_tests {
+sub _set_tests {
     my ( $self, @files ) = @_;
     my %tests = map +( $_ => 1 ), qw/t  test  tests/;
 
-    return grep( $tests{$_}, @files ) ? 1 : 0;
+    my $dist = $self->_dist or return;
+    $dist->{has_tests} = grep( $tests{$_}, @files ) ? 1 : 0;
+
+    $self;
 }
 
 sub load { ... }

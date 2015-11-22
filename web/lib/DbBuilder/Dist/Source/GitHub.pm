@@ -45,7 +45,7 @@ sub load {
     log info => 'Fetching distro info and commits';
     my $repo    = $self->_repo('repos->get')           or return;
     my $commits = $self->_repo('repos->commits->list') or return;
-    my $dist    = $self->_parse_meta( $self->_download_meta ) or return;
+    my $dist    = $self->_dist or return;
 
     %$dist      = (
         %$dist,
@@ -73,11 +73,11 @@ sub load {
     # kwalitee of a distro;
     delete $dist->{kwalitee};
 
-    $dist->{has_readme} = $self->_is_any_readme(
+    $self->_set_readme(
         map $_->{path}, grep $_->{type} eq 'blog', $tree->{tree}->@*
     );
 
-    $dist->{has_tests} = $self->_is_any_tests(
+    $self->_set_tests(
         map $_->{path}, grep $_->{type} eq 'tree', $tree->{tree}->@*
     );
 
