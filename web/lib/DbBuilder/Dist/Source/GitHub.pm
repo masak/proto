@@ -30,7 +30,7 @@ has _pithub => (
 has _token => (
     is => 'lazy',
     default => sub {
-        my $file = $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE};
+        my $file = $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} // 'github-token';
         -r $file or log fatal => "GitHub token file [$file] is missing "
                             . 'or has no read permissions';
         return decode 'utf8', slurp $file;
@@ -54,6 +54,8 @@ sub load {
         stars       => $repo->{stargazers_count}  // 0,
         description => $repo->{description}       // 'N/A',
     );
+
+    $dist->{author_id} //= ($self->_meta_url =~ $self->re)[0];
 
     my $date_updated = eval {
         Time::Moment->from_string( $commits->[0]{commit}{committer}{date} )

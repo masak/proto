@@ -5,7 +5,7 @@ use strictures 2;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
 use Try::Tiny;
-use Types::Standard qw/InstanceOf  Ref  Str/;
+use Types::Standard qw/InstanceOf  Maybe  Ref  Str/;
 
 use DbBuilder::Log;
 
@@ -21,7 +21,7 @@ has _logos_dir => (
 
 has _dist => (
     is => 'lazy',
-    isa => Ref['HASH'] | InstanceOf['JSON::Meth'],
+    isa => Maybe[Ref['HASH'] | InstanceOf['JSON::Meth']],
     default => sub {
         my $self = shift; $self->_parse_meta( $self->_download_meta );
     },
@@ -88,7 +88,8 @@ sub _fill_missing {
 
     %$dist = (
         name          => 'N/A',
-        author_id     => 'N/A',
+        author_id     => $dist->{author}
+                            // (@{ $dist->{authors}||[] })[0] // 'N/A',
         url           => 'N/A',
         description   => 'N/A',
         logo          => 'N_A',
