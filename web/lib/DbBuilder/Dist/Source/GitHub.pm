@@ -55,9 +55,10 @@ sub load {
         description => $repo->{description}       // 'N/A',
     );
 
-    my $date_updated = Time::Moment->from_string(
-        $commits->[0]{commit}{committer}{date}
-    )->epoch;
+    my $date_updated = eval {
+        Time::Moment->from_string( $commits->[0]{commit}{committer}{date} )
+            ->epoch
+    } // 0;
 
     # no new commits and we have cached results that will do just fine
     return $dist if $dist->{date_updated} eq $date_updated;
