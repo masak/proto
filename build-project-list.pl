@@ -1,9 +1,11 @@
 #!/usr/bin/perl
 
 use strictures 2;
+use 5.014;
 
 use File::Spec::Functions qw/catdir  catfile/;
 use Getopt::Long;
+use Pod::Usage;
 
 use lib qw/lib/;
 use DbBuilder;
@@ -18,10 +20,15 @@ my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
 GetOptions(
     'github-token-file' => \$github_token_file,
+    'help|?'            => \my $help,
+    'man'               => \my $man,
     'meta-list=s'       => \$meta_list,
     'limit=i'           => \my $limit,
     'restart-app'       => \my $restart_app,
-);
+) or pod2usage 2;
+
+pod2usage 1 if $help;
+pod2usage -exitval => 0, -verbose => 2 if $man;
 
 $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} = $github_token_file;
 
@@ -33,3 +40,66 @@ DbBuilder->new(
     meta_list         => $meta_list,
     restart_app       => $restart_app,
 )->run;
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+build-project-list.pl - update/build database of modules in Perl 6 ecosystem
+
+=head1 SYNOPSIS
+
+./build-project-list.pl [options]
+
+ Options:
+   --github-token-file=FILE
+   --help
+   --limit=N
+   --man
+   --meta-list=FILE
+   --meta-list=URL
+   --restart-app
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--github-token-file=FILE>
+
+A file containing a GitHub token the build script can use to make API requests.
+B<Defaults to:> C<github-token> in the current directory.
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=item B<--limit=N>
+
+Limit build to at most C<N> number of modules. This is useful for debugging
+purposes.
+
+=item B<--man>
+
+View the manual page.
+
+=item B<--meta-list=FILE/URL>
+
+A filename or a URL to the META.list ecosystem file. This file should contain
+URLs to modules' META files, one per line.
+
+=item B<--restart-app>
+
+If specified, the script will restart the Mojolicious front-end app, once
+the database build completes.
+
+=back
+
+=head1 DESCRIPTION
+
+B<build-project-list.pl> will update (or generate new) modules database
+given a META.list ecosystem file. Optionally, the build script can also
+restart the front-end Mojolicious app
+
+=cut
