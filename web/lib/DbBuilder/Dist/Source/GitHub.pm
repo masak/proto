@@ -43,8 +43,8 @@ sub load {
     my $self = shift;
 
     log info => 'Fetching distro info and commits';
-    my $repo    = $self->_repo('repos->get')           or return;
-    my $commits = $self->_repo('repos->commits->list') or return;
+    my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
+    my $commits = $self->_repo($self->_pithub->repos->commits->list) or return;
     my $dist    = $self->_dist or return;
 
     %$dist      = (
@@ -65,9 +65,9 @@ sub load {
 
     log info => 'Dist has new commits. Fetching more info.';
 
-    $commits->[0]{sha} =~ tr/'//d; # just in case
     my $tree = $self->_repo(
-        "git_data->trees->get( sha => '$commits->[0]{sha}', recursive => 1 )"
+        $self->_pithub->git_data->trees
+            ->get( sha => $commits->[0]{sha}, recursive => 1 )
     ) or return;
 
     # ::Dists model will ignore other metrics if we explicitly tell it the
@@ -86,9 +86,7 @@ sub load {
 }
 
 sub _repo {
-    my ( $self, $method_chain ) = @_;
-    my $res = eval "\$self->_pithub->$method_chain"
-        or log fatal => "Failed to evaluate Pithub method: $@";
+    my ( $self, $res ) = @_;
 
     unless ( $res->success ) {
         log error => "Error accessing GitHub API. HTTP Code: " . $res->code;
