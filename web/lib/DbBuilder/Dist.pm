@@ -1,7 +1,7 @@
 package DbBuilder::Dist;
 
 use strictures 2;
-use Types::Standard qw/Ref  Maybe  Str/;
+use Types::Standard qw/InstanceOf  Str/;
 use DbBuilder::Log;
 use Moo;
 use namespace::clean;
@@ -20,6 +20,13 @@ has _logos_dir => (
     init_arg => 'logos_dir',
     is       => 'ro',
     isa      => Str,
+    required => 1,
+);
+
+has _dist_db => (
+    init_arg => 'dist_db',
+    is       => 'ro',
+    isa      => InstanceOf['ModulesPerl6::Model::Dists'],
     required => 1,
 );
 
@@ -48,8 +55,7 @@ sub _load_info {
     my $dist = $self->_load_from_source
         or return;
 
-    $dist->{build_id}      = $self->_build_id;
-    $dist->{travis_status} = 'unknown';
+    $dist->{build_id} = $self->_build_id;
 
     return $dist;
 }
@@ -63,7 +69,8 @@ sub _load_from_source {
         log info => "Using $source to load $url";
         return $source->new(
             meta_url  => $url,
-            logos_dir => $self->_logos_dir
+            logos_dir => $self->_logos_dir,
+            dist_db   => $self->_dist_db,
         )->load;
     }
     log error => "Could not find a source module that could handle dist URL "

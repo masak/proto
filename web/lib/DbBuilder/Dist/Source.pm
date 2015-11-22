@@ -5,7 +5,7 @@ use strictures 2;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
 use Try::Tiny;
-use Types::Standard qw/Str/;
+use Types::Standard qw/InstanceOf  Str/;
 
 use DbBuilder::Log;
 
@@ -16,6 +16,13 @@ has _logos_dir => (
     init_arg => 'logos_dir',
     is       => 'ro',
     isa      => Str,
+    required => 1,
+);
+
+has _dist_db => (
+    init_arg => 'dist_db',
+    is       => 'ro',
+    isa      => InstanceOf['ModulesPerl6::Model::Dists'],
     required => 1,
 );
 
@@ -54,11 +61,22 @@ sub _parse_meta {
     length $json->{ $_ } or log warn => "Required `$_` field is missing"
         for qw/perl  name  version  description  provides/;
 
-    return $json;
+    $json->{normalized_url}
+             = $json->{'source-url'}
+            // $json->{'repo-url'}
+            // $json->{support}{source};
+
+    return return $self->_fill_missing( $json );
 }
 
 sub _fill_missing {
     my ( $self, $dist ) = @_;
+
+    my $old_dist_data;
+    if ( length $dist->{name} ) {
+        $old_dist_data
+        = $self->_dist_db->find({ name => $dist->{name} })->first;
+    }
 
     %$dist = (
         name          => 'N/A',
@@ -66,16 +84,39 @@ sub _fill_missing {
         url           => 'N/A',
         description   => 'N/A',
         logo          => 'N_A',
-        kwalitee      => 0,
         stars         => 0,
         issues        => 0,
         date_updated  => 0,
         date_added    => 0,
 
+        %{ $old_dist_data || {} },
+
+        # Kwalitee metrics
+        has_readme    => 0,
+        has_tests     => 0,
+        panda         => $dist->{'source-url'} && $dist->{provides}
+                            ? 2 : $dist->{'source-url'} ? 1 : 0,
+
         %$dist,
     );
 
     return $dist;
+}
+
+sub _is_any_readme {
+    my ( $self, @files ) = @_;
+    my %readmees = map +( "README$_" => 1 ), '', # just 'README'; no ext.
+        qw/.pod  .pod6  .md        .mkdn  .mkd  .markdown  .mkdown  .ron
+           .rst  .rest  .asciidoc  .adoc  .asc  .txt/;
+
+    return grep( $readmees{$_}, @files ) ? 1 : 0;
+}
+
+sub _is_any_tests {
+    my ( $self, @files ) = @_;
+    my %tests = map +( $_ => 1 ), qw/t  test  tests/;
+
+    return grep( $tests{$_}, @files ) ? 1 : 0;
 }
 
 sub load { ... }

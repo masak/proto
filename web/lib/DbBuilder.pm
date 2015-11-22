@@ -73,12 +73,14 @@ sub run {
 
     my @metas = $self->_metas;
     for ( 0 .. $#metas ) {
+        print "---\n";
         log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
         $dists_m->add(
             DbBuilder::Dist->new(
                 meta_url          => $metas[$_],
                 build_id          => $build_id,
                 logos_dir         => $self->_logos_dir,
+                dist_db           => $dists_m,
             )->info
         );
     }
