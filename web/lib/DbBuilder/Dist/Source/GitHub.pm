@@ -65,6 +65,7 @@ sub load {
 
     log info => 'Dist has new commits. Fetching more info.';
 
+    $commits->[0]{sha} =~ tr/'//d; # just in case
     my $tree = $self->_repo(
         "git_data->trees->get( sha => '$commits->[0]{sha}', recursive => 1 )"
     ) or return;
