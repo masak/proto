@@ -26,8 +26,8 @@ subtest 'Repo without a README, tests, or logotype' => sub {
     );
 
     my $out = combined_from sub{
-        my $dist = DbBuilder::Dist::Source::GitHub->new(@ar)->load;
-        $dist or die "Did not get a dist!";
+        my $dist = eval { DbBuilder::Dist::Source::GitHub->new(@ar)->load }
+            or do { print "Failed to get a dist! $@"; return; };
         $dist->{build_id} = 42;
         $m->add( $dist );
     };
@@ -42,8 +42,8 @@ subtest 'Repo without a README, tests, or logotype' => sub {
     $}x, 'Output from loader matches';
 
     $out = combined_from sub{
-        my $dist = DbBuilder::Dist::Source::GitHub->new(@ar)->load;
-        $dist or die "Did not get a dist!";
+        my $dist = eval { DbBuilder::Dist::Source::GitHub->new(@ar)->load }
+            or do { print "Failed to get a dist! $@"; return; };
         $dist->{build_id} = 42;
         $m->add( $dist );
     };
