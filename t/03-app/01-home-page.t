@@ -69,6 +69,8 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     $t->dive_reset->get_ok('/repo/Dist1')
         ->status_is(302)
         ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+        ->get_ok('/repo/Non-Existant')
+        ->status_is(404)
     ;
 
     # This should eventually be a proper page with info and not a redirect
@@ -79,6 +81,17 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 
     $t->dive_reset->get_ok('/')->status_is(200)
         ->text_like('#site_tip' => qr/^Tip \d\z/, 'Site tip has correct text');
+    ;
+
+    # This will be an actual page soon, instead of NIY
+    $t->dive_reset->get_ok('/kwalitee/Dist1')
+        ->status_is(302)
+        ->header_is(Location => '/not_implemented_yet')
+    ;
+
+    $t->dive_reset->get_ok('/not_implemented_yet')
+        ->status_is(200)
+        ->content_is('Not Implemented Yet')
     ;
 }
 

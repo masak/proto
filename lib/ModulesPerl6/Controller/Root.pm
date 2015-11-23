@@ -37,8 +37,7 @@ sub repo {
 
     my $dist = $self->stash('dist');
     return $self->reply->not_found
-        unless length $dist
-            and $dist = $self->dists->find({name => $dist})->first;
+        unless $dist = $self->dists->find({name => $dist})->first;
 
     return $self->redirect_to( $dist->{url} );
 }
