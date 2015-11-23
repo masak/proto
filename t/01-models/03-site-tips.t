@@ -37,4 +37,13 @@ subtest 'Fetching tips many times...' => sub {
     diag "Seen these tips: " . join ', ', sort keys %seen_tips;
 };
 
+subtest 'Check death when tip file is not found' => sub {
+    my $file = 'Non-Existant-Site-Tips-File';
+    $file .= '_' while -e $file;
+    my $m = MODEL->new( tip_file => $file );
+    throws_ok { $m->tip }
+        qr/Could not open site tips file \Q[$file]\E for reading/,
+        'correct error message';
+};
+
 done_testing;
