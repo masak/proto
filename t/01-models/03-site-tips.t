@@ -20,7 +20,7 @@ can_ok $m => qw/tip/;
 subtest 'Fetching tips many times...' => sub {
     my $is_wrong = 0;
     my %seen_tips;
-    for ( 1 .. 2_000_000 ) {
+    for ( 1 .. 250_000 ) {
         my $tip = $m->tip;
         $tip =~ /^Tip \d\z/ or $is_wrong = 1;
         $seen_tips{ $tip } = 1;
