@@ -32,6 +32,14 @@ sub index {
     );
 }
 
+sub total {
+    my $self = shift;
+
+    $self->render(
+        text => $self->build_stats->stats('dists_num')->{dists_num}
+    );
+}
+
 sub repo {
     my $self = shift;
 

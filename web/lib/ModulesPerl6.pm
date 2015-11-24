@@ -70,6 +70,7 @@ sub startup {
     $r->get('/dist/:dist')->to('root#repo')->name('dist');
     $r->get('/repo/:dist')->to('root#repo')->name('repo');
     $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+    $r->get('/total')->to('root#total')->name('total');
 
     $r->any('/not_implemented_yet')
         ->to('root#not_implemented_yet')
