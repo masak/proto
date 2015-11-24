@@ -93,6 +93,11 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->status_is(200)
         ->content_is('Not Implemented Yet')
     ;
+
+    $t->dive_reset->get_ok('/total')
+        ->status_is(200)
+        ->content_is('2')
+    ;
 }
 
 done_testing;

@@ -74,6 +74,7 @@ ModulesPerl6::Controller::Root - controller handling a few root-space pages
     $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
     $r->get('/dist/:dist')->to('root#dist')->name('dist');
     $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+    $r->get('/total')->to('root#total')->name('total');
 
     $r->any('/not_implemented_yet')
         ->to('root#not_implemented_yet')
@@ -128,6 +129,15 @@ yet implemented can redirect to this action to inform the user.
 
 Redirect to dist's GitHub repo. Expects the name of the dist in C<dist>
 L<Mojolicious::Controller/"stash"> parameter.
+
+=head2 C<total>
+
+    $r->get('/total')->to('root#total')->name('total');
+
+Responds with a plain text that displays total number of dists in the
+database. This route was added to make it easier to encourage stats sites
+like L<www.modulecounts.com> to add Perl 6 ecosystem (they can just fetch
+the totals instead of Parsing HTML).
 
 =head1 CONTACT INFORMATION
 
