@@ -11,12 +11,14 @@ function setup_search_box_defocus() {
         to be trying to scroll the page with keyboard, rather than typing
         a search query
     */
-    $('#dists_filter input').focus().keydown( function(e){
-        var el = $(this);
-        if ( e.which == 32 && el.val().length                ) { return true; }
-        if ( e.which == 32 || e.which == 34 || e.which == 40 ) { el.blur()  ; }
-        // key codes: 32: space; 34: pagedown; 40: down arrow
-    });
+    if( typeof window.orientation === 'undefined' ) {
+        $('#dists_filter input').focus().keydown( function(e){
+            var el = $(this);
+            if ( e.which == 32 && el.val().length ) { return true; }
+            if (e.which == 32 || e.which == 34 || e.which == 40) { el.blur(); }
+            // key codes: 32: space; 34: pagedown; 40: down arrow
+        });
+    }
 }
 
 
@@ -62,7 +64,6 @@ function setup_table() {
         .addClass('form-control').attr('placeholder', 'Search');
     filter_container.append(filter);
     filter_container.find('label').remove();
-    filter.focus();
 }
 
 function setup_search_query_save() {
