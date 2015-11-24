@@ -59,6 +59,20 @@ has _meta_list => (
     required => 1,
 );
 
+has _model_build_stats => (
+    is      => 'lazy',
+    default => sub {
+        ModulesPerl6::Model::BuildStats->new( db_file => shift->_db_file );
+    },
+);
+
+has _model_dists => (
+    is      => 'lazy',
+    default => sub {
+        ModulesPerl6::Model::Dists->new( db_file => shift->_db_file );
+    },
+);
+
 #########################
 
 sub run {
@@ -70,19 +84,16 @@ sub run {
     $self->_deploy_db;
     make_path $self->_logos_dir => { mode => 0755 };
 
-    my $dists_m
-    = ModulesPerl6::Model::Dists->new( db_file => $self->_db_file );
-
     my @metas = $self->_metas;
     for ( 0 .. $#metas ) {
         print "---\n";
         log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
-        $dists_m->add(
+        $self->_model_dists->add(
             DbBuilder::Dist->new(
                 meta_url          => $metas[$_],
                 build_id          => $build_id,
                 logos_dir         => $self->_logos_dir,
-                dist_db           => $dists_m,
+                dist_db           => $self->_model_dists,
             )->info
         );
     }
@@ -103,14 +114,14 @@ sub run {
 
 sub _deploy_db {
     my $self = shift;
-    my $db = $self->_db_file;
 
+    my $db = $self->_db_file;
     log info => "Using database file $db";
     return $self if -e $db;
 
     log info => "Database file not found... deploying new database";
-    ModulesPerl6::Model::Dists     ->new( db_file => $db )->deploy;
-    ModulesPerl6::Model::BuildStats->new( db_file => $db )->deploy;
+    $self->_model_dists      ->deploy;
+    $self->_model_build_stats->deploy;
 
     $self;
 }
@@ -152,12 +163,9 @@ sub _metas {
 sub _save_build_stats {
     my $self = shift;
 
-    ModulesPerl6::Model::BuildStats->new( db_file => $self->_db_file )->update(
+    $self->_model_build_stats->update(
         last_updated => time(),
-        dists_num    => scalar(
-            ModulesPerl6::Model::Dists->new( db_file => $self->_db_file )
-            ->find->@*
-        ),
+        dists_num    => scalar( $self->_model_dists->find->@* ),
     );
 }
 
