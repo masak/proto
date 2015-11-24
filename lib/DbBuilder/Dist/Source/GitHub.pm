@@ -72,18 +72,17 @@ sub load {
         $self->_pithub->git_data->trees
             ->get( sha => $commits->[0]{sha}, recursive => 1 )
     ) or return;
+    $tree = $tree->{tree};
+
+    $self->_save_logo(
+        map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
+    );
 
     # ::Dists model will ignore other metrics if we explicitly tell it the
     # kwalitee of a distro;
     delete $dist->{kwalitee};
-
-    $self->_set_readme(
-        map $_->{path}, grep $_->{type} eq 'blog', $tree->{tree}->@*
-    );
-
-    $self->_set_tests(
-        map $_->{path}, grep $_->{type} eq 'tree', $tree->{tree}->@*
-    );
+    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
+    $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
 
     return $dist;
 }

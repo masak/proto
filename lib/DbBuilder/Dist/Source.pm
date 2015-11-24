@@ -2,8 +2,10 @@ package DbBuilder::Dist::Source;
 
 use strictures 2;
 
+use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
+use Mojo::Util qw/spurt/;
 use Try::Tiny;
 use Types::Standard qw/InstanceOf  Maybe  Ref  Str/;
 
@@ -41,18 +43,23 @@ has _meta_url => (
     required => 1,
 );
 
+has _ua => (
+    is      => 'lazy',
+    isa     => InstanceOf['Mojo::UserAgent'],
+    default => sub { Mojo::UserAgent->new( max_redirects => 10 ) },
+);
+
 sub _download_meta {
     my $self = shift;
     my $url = $self->_meta_url;
 
     log info => "Downloading META file from $url";
-    my $tx = Mojo::UserAgent->new( max_redirects => 10 )->get( $url );
+    my $tx = $self->_ua->get( $url );
 
     if ( $tx->success ) { return $tx->res->body }
     else {
         my $err = $tx->error;
-        log error => "$err->{code} response: $err->{message}"
-            if $err->{code};
+        log error => "$err->{code} response: $err->{message}" if $err->{code};
         log error => "Connection error: $err->{message}";
     }
 
@@ -74,7 +81,7 @@ sub _parse_meta {
             // $json->{'repo-url'}
             // $json->{support}{source};
 
-    return return $self->_fill_missing( $json );
+    return $self->_fill_missing( $json );
 }
 
 sub _fill_missing {
@@ -110,6 +117,31 @@ sub _fill_missing {
     );
 
     return $dist;
+}
+
+sub _save_logo {
+    my ( $self, $size ) = @_;
+    my $dist = $self->_dist;
+    return unless $size and $dist and $dist->{name} ne 'N/A';
+    log info => "Dist has a logotype of size $size bytes.";
+
+    my $logo
+    = catfile $self->_logos_dir, 's-' . $dist->{name} =~ s/\W/_/gr . '.png';
+    return 1 if -e $logo and -s $logo == $size; # 99% we already got that logo
+
+    log info => 'Did not find cached dist logotype. Downloading.';
+    my $repo_root = $self->_meta_url =~ s{[^/]+$}{}r;
+    my $tx = $self->_ua->get("$repo_root/logotype/logo_32x32.png");
+
+    unless ( $tx->success ) {
+        my $err = $tx->error;
+        log error => "$err->{code} response: $err->{message}" if $err->{code};
+        log error => "Connection error: $err->{message}";
+        return;
+    }
+
+    spurt $tx->res->body => $logo;
+    return 1;
 }
 
 sub _set_readme {
