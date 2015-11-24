@@ -66,7 +66,8 @@ sub run {
     my $build_id = Data::GUID->new->as_base64;
     log info => "Starting build $build_id";
 
-    $self->_deploy_db->_prep_dirs;
+    $self->_deploy_db;
+    make_path $self->_logos_dir => { mode => 0755 };
 
     my $dists_m
     = ModulesPerl6::Model::Dists->new( db_file => $self->_db_file );
@@ -143,17 +144,6 @@ sub _metas {
     log info => 'Found ' . @metas . ' dists';
 
     return @metas;
-}
-
-sub _prep_dirs {
-    my $self = shift;
-    my $logos_dir = $self->_logos_dir;
-
-    log info => "Cleaning up dist logos dir [$logos_dir]";
-    remove_tree $logos_dir;
-    make_path   $logos_dir => { mode => 0755 };
-
-    $self;
 }
 
 1;
