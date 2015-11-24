@@ -33,7 +33,8 @@ diag 'Delete stats';
 isa_ok $m->update(map +( $_ => undef ), qw/s1 s2 not-there/),
     MODEL, '->delete returns invocant';
 
-is_deeply $m->stats(qw/s1  s2  s3/), {s3 => 'v3'},
-    'deleted correctly';
+is_deeply $m->stats(qw/s1  s2  s3/), {s3 => 'v3'}, 'deleted correctly';
+is_deeply $m->stats, {},
+    '->stats without args gives empty hashref';
 
 done_testing;
