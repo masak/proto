@@ -107,6 +107,8 @@ sub run {
             : ( hypnotoad   => $self->_app );
     }
 
+    log info => "Finished build $build_id\n\n\n";
+
     $self;
 }
 
