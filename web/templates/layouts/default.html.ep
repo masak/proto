@@ -42,11 +42,7 @@
     </footer>
   </div>
 
-  %= asset "bootstrap.js"
   %= asset "app.js";
-
-  <!-- % use Data::Dumper; -->
-  <!-- % die Dumper asset->get('sprite.css'); -->
 
   <link rel="stylesheet" property="stylesheet"
     href="<%= (asset->get('sprite.css'))[0] %>">
