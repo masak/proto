@@ -284,7 +284,7 @@ Search by the Travis CI status
 B<Takes> the same argument as L</find> and any matching dists will be deleted
 from the database. B<Returns> its invocant.
 
-=head2 c<remove_old>
+=head2 C<remove_old>
 
     $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA==');
 
