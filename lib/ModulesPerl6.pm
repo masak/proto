@@ -19,6 +19,7 @@ sub startup {
     # SETUP
     $self->plugin('Config');
     $self->moniker('ModulesPerl6');
+    $self->plugin('PODRenderer') if $self->mode eq 'development';
 
     my $secrets_file = catfile $FindBin::Bin, '..', SECRETS_FILE;
 
