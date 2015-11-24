@@ -159,6 +159,11 @@ sub _metas {
     my @metas = grep /\S/, map trim($_), split /\n/, $raw_data;
     log info => 'Found ' . @metas . ' dists';
 
+    if ( my $limit = $self->_limit ) {
+        @metas = splice @metas, 0, $limit;
+        log info => "Limiting build to $limit dists due to explicit request";
+    }
+
     return @metas;
 }
 
