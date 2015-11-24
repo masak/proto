@@ -5,11 +5,13 @@ use constant SECRETS_FILE => 'secrets';
 
 use Mojo::Base 'Mojolicious';
 use FindBin; FindBin->again;
+use File::Glob qw/bsd_glob/;
 use File::Spec::Functions qw/catfile/;
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::SiteTips;
+use experimental 'postderef';
 
 sub startup {
     my $self = shift;
@@ -36,7 +38,11 @@ sub startup {
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
-    $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos');
+
+    $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos')
+        if map bsd_glob("$_/content-pics/dist-logos/*"),
+            $self->static->paths->@*;
+
     $self->asset('app.js'  => qw{
         https://code.jquery.com/jquery-1.11.3.min.js
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js

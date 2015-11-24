@@ -44,7 +44,8 @@
 
   %= asset "app.js";
 
-  <link rel="stylesheet" property="stylesheet"
-    href="<%= (asset->get('sprite.css'))[0] %>">
+  % if ( length (my $sprite = (asset->get('sprite.css'))[0]) ) {
+    <link rel="stylesheet" property="stylesheet" href="<%= $sprite %>">
+  % }
 </body>
 </html>
