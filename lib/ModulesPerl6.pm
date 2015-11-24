@@ -29,7 +29,8 @@ sub startup {
 
     # ASSETS
     $self->plugin(bootstrap3 => theme =>
-            { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' }
+            { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' },
+            jquery => 0, js => [],
     );
     $self->asset('app.css' => qw{
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
@@ -37,6 +38,7 @@ sub startup {
     });
     $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos');
     $self->asset('app.js'  => qw{
+        https://code.jquery.com/jquery-1.11.3.min.js
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
         /js/jquery-deparam.js
         /js/main.js
