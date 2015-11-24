@@ -8,3 +8,4 @@
 # ********************************
 You can link to a search query, like so: <a href="http://modules.perl6.org/#q=Test">http://modules.perl6.org/#q=Test</a>
 Go directly to a module's repository using <kbd>/repo/</kbd>: <a href="http://modules.perl6.org/repo/Pastebin::Gist">http://modules.perl6.org/repo/Pastebin::Gist</a>
+View total count of modules in the database without parsing HTML at <a href="http://modules.perl6.org/total">http://modules.perl6.org/total</a>
