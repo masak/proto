@@ -17,6 +17,7 @@ use ModulesPerl6::Model::Dists;
 
 use Moo;
 use namespace::clean;
+use experimental 'postderef';
 
 has _app => (
     init_arg => 'app',
@@ -86,6 +87,8 @@ sub run {
         );
     }
 
+    $self->_save_build_stats;
+
     if ( $self->_restart_app ) {
         log info => 'Restarting app ' . $self->_app;
         system $^O eq 'MSWin32'
@@ -144,6 +147,18 @@ sub _metas {
     log info => 'Found ' . @metas . ' dists';
 
     return @metas;
+}
+
+sub _save_build_stats {
+    my $self = shift;
+
+    ModulesPerl6::Model::BuildStats->new( db_file => $self->_db_file )->update(
+        last_updated => time(),
+        dists_num    => scalar(
+            ModulesPerl6::Model::Dists->new( db_file => $self->_db_file )
+            ->find->@*
+        ),
+    );
 }
 
 1;
