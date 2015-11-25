@@ -59,13 +59,14 @@ sub add {
         });
 
         $db->resultset('Dist')->update_or_create({
-            travis => { status => $dist->{travis_status} },
+            travis   => { status => $dist->{travis_status} },
             author => { # use same field for both, for now. TODO:fetch realname
                 author_id => $dist->{author_id}, name => $dist->{author_id},
             },
+            dist_build_id => { id => $dist->{build_id} },
             map +( $_ => $dist->{$_} ),
                 qw/name  url  description  stars  issues  kwalitee
-                    date_updated  date_added  build_id/,
+                    date_updated  date_added/,
         });
     }
 
@@ -95,7 +96,9 @@ sub remove_old {
     my ( $self, $build_id ) = @_;
     length $build_id or croak 'Missing Build ID to keep';
 
-    $self->_find(0, { build_id => { '!=', $build_id } })->delete_all;
+    $self->_db->resultset('Dist')->search({
+        build_id => { '!=', $build_id }
+    })->delete_all;
 
     $self;
 }

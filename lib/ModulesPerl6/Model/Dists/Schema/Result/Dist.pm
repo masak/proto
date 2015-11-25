@@ -21,7 +21,7 @@ belongs_to travis
     => 'ModulesPerl6::Model::Dists::Schema::Result::TravisStatus'
     => { status => 'travis_status' };
 
-belongs_to build_id
+belongs_to dist_build_id
     => 'ModulesPerl6::Model::Dists::Schema::Result::BuildId'
     => { id => 'build_id' };
 

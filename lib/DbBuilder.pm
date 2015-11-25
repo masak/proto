@@ -98,7 +98,7 @@ sub run {
         );
     }
 
-    $self->_save_build_stats;
+    $self->_remove_old_dists( $build_id )->_save_build_stats;
 
     if ( $self->_restart_app ) {
         log info => 'Restarting app ' . $self->_app;
@@ -167,6 +167,19 @@ sub _metas {
     return @metas;
 }
 
+sub _remove_old_dists {
+    my ( $self, $build_id ) = @_;
+
+    my $before = $self->_model_dists->find->@*;
+    $self->_model_dists->remove_old( $build_id );
+    my $after = $self->_model_dists->find->@*;
+    log info => 'Removed ' . ( $before - $after )
+            . ' dists that are no longer in the ecosystem'
+        if ($before - $after) != 0;
+
+    $self;
+}
+
 sub _save_build_stats {
     my $self = shift;
 
@@ -174,6 +187,8 @@ sub _save_build_stats {
         last_updated => time(),
         dists_num    => scalar( $self->_model_dists->find->@* ),
     );
+
+    $self;
 }
 
 1;

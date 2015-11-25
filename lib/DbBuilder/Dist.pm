@@ -67,11 +67,13 @@ sub _load_from_source {
     for my $source ( $self->_sources ) {
         next unless $url =~ $source->re;
         log info => "Using $source to load $url";
-        return $source->new(
+        my $dist = $source->new(
             meta_url  => $url,
             logos_dir => $self->_logos_dir,
             dist_db   => $self->_dist_db,
         )->load;
+        $dist->{build_id} = $self->_build_id;
+        return $dist;
     }
     log error => "Could not find a source module that could handle dist URL "
         . "[$url]\nHere are all the source modules currently available:\n"
