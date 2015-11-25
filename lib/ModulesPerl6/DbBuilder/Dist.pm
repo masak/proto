@@ -8,6 +8,10 @@ use namespace::clean;
 use Module::Pluggable search_path => ['ModulesPerl6::DbBuilder::Dist::Source'],
                       sub_name    => '_sources',
                       require     => 1;
+use Module::Pluggable search_path
+                        => ['ModulesPerl6::DbBuilder::Dist::PostProcessor'],
+                      sub_name    => '_postprocessors',
+                      require     => 1;
 
 has _build_id => (
     init_arg => 'build_id',
@@ -73,6 +77,14 @@ sub _load_from_source {
             dist_db   => $self->_dist_db,
         )->load;
         $dist->{build_id} = $self->_build_id;
+
+        for my $postprocessor ( $self->_postprocessors ) {
+            $postprocessor->new(
+                meta_url => $url,
+                dist     => $dist,
+            )->process;
+        }
+
         return $dist;
     }
     log error => "Could not find a source module that could handle dist URL "
