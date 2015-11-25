@@ -1,11 +1,11 @@
-package DbBuilder::Dist;
+package ModulesPerl6::DbBuilder::Dist;
 
 use strictures 2;
 use Types::Standard qw/InstanceOf  Str/;
-use DbBuilder::Log;
+use ModulesPerl6::DbBuilder::Log;
 use Moo;
 use namespace::clean;
-use Module::Pluggable search_path => ['DbBuilder::Dist::Source'],
+use Module::Pluggable search_path => ['ModulesPerl6::DbBuilder::Dist::Source'],
                       sub_name    => '_sources',
                       require     => 1;
 

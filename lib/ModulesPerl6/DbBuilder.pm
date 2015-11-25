@@ -1,4 +1,4 @@
-package DbBuilder;
+package ModulesPerl6::DbBuilder;
 
 use strictures 2;
 
@@ -10,8 +10,8 @@ use Mojo::Util             qw/slurp  trim/;
 use Types::Common::Numeric qw/PositiveNum/;
 use Types::Standard        qw/InstanceOf  Str  Bool  Maybe/;
 
-use DbBuilder::Log;
-use DbBuilder::Dist;
+use ModulesPerl6::DbBuilder::Log;
+use ModulesPerl6::DbBuilder::Dist;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 
@@ -89,7 +89,7 @@ sub run {
         print "---\n";
         log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
         $self->_model_dists->add(
-            DbBuilder::Dist->new(
+            ModulesPerl6::DbBuilder::Dist->new(
                 meta_url          => $metas[$_],
                 build_id          => $build_id,
                 logos_dir         => $self->_logos_dir,

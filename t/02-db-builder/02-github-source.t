@@ -8,7 +8,7 @@ use Test::Output qw/combined_from/;
 use t::Helper;
 use File::Temp qw/tempdir/;
 use ModulesPerl6::Model::Dists;
-BEGIN { use_ok 'DbBuilder::Dist::Source::GitHub' };
+BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist::Source::GitHub' };
 
 my $db_file = t::Helper::setup_db_file;
 END { unlink $db_file };
@@ -26,8 +26,9 @@ subtest 'Repo without a README, tests, or logotype' => sub {
     );
 
     my $out = combined_from sub{
-        my $dist = eval { DbBuilder::Dist::Source::GitHub->new(@ar)->load }
-            or do { print "Failed to get a dist! $@"; return; };
+        my $dist = eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
         $dist->{build_id} = 42;
         $m->add( $dist );
     };
@@ -42,8 +43,9 @@ subtest 'Repo without a README, tests, or logotype' => sub {
     $}x, 'Output from loader matches';
 
     $out = combined_from sub{
-        my $dist = eval { DbBuilder::Dist::Source::GitHub->new(@ar)->load }
-            or do { print "Failed to get a dist! $@"; return; };
+        my $dist = eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
         $dist->{build_id} = 42;
         $m->add( $dist );
     };

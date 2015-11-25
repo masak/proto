@@ -1,4 +1,4 @@
-package DbBuilder::Log;
+package ModulesPerl6::DbBuilder::Log;
 
 use Exporter::Easy EXPORT => [ 'log' ];
 use Mojo::Log;
@@ -21,11 +21,11 @@ __END__
 
 =head1 NAME
 
-DbBuilder::Log - convenient logging
+ModulesPerl6::DbBuilder::Log - convenient logging
 
 =head1 SYNOPSIS
 
-    use DbBuilder::Log;
+    use ModulesPerl6::DbBuilder::Log;
 
     log info  => 'Starting stuff';
     log fatal => 'Oh noes!'; # dies after logging

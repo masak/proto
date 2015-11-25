@@ -1,4 +1,4 @@
-package DbBuilder::Dist::Source;
+package ModulesPerl6::DbBuilder::Dist::Source;
 
 use strictures 2;
 
@@ -9,7 +9,7 @@ use Mojo::Util qw/spurt/;
 use Try::Tiny;
 use Types::Standard qw/InstanceOf  Maybe  Ref  Str/;
 
-use DbBuilder::Log;
+use ModulesPerl6::DbBuilder::Log;
 
 use Moo;
 use namespace::clean;

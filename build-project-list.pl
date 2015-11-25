@@ -8,7 +8,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 use lib qw/lib/;
-use DbBuilder;
+use ModulesPerl6::DbBuilder;
 
 use constant DB_FILE           => 'modulesperl6.db';
 use constant GITHUB_TOKEN_FILE => 'github-token';
@@ -32,7 +32,7 @@ pod2usage -exitval => 0, -verbose => 2 if $man;
 
 $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} = $github_token_file;
 
-DbBuilder->new(
+ModulesPerl6::DbBuilder->new(
     app               => APP,
     db_file           => DB_FILE,
     limit             => $limit,

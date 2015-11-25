@@ -6,7 +6,7 @@ use warnings FATAL => 'all';
 use Test::Most;
 use Test::Output qw/combined_from/;
 
-BEGIN { use_ok 'DbBuilder::Log' };
+BEGIN { use_ok 'ModulesPerl6::DbBuilder::Log' };
 
 my ( $out, $ret );
 my $time_stamp_re = qr/\[\w{3} \w{3} \d\d? \d{2}:\d{2}:\d{2} \d{4}\]/;

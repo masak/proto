@@ -1,14 +1,14 @@
-package DbBuilder::Dist::Source::GitHub;
+package ModulesPerl6::DbBuilder::Dist::Source::GitHub;
 
 use strictures 2;
-use base 'DbBuilder::Dist::Source';
+use base 'ModulesPerl6::DbBuilder::Dist::Source';
 
 use Carp       qw/croak/;
 use Mojo::Util qw/slurp  decode/;
 use Pithub;
 use Time::Moment;
 
-use DbBuilder::Log;
+use ModulesPerl6::DbBuilder::Log;
 
 use Moo;
 use namespace::clean;
