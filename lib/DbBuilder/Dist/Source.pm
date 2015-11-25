@@ -91,7 +91,9 @@ sub _fill_missing {
     if ( length $dist->{name} ) {
         $old_dist_data
         = $self->_dist_db->find({ name => $dist->{name} })->first;
+        $old_dist_data and delete $old_dist_data->{logo};
     }
+
 
     %$dist = (
         name          => 'N/A',
@@ -99,7 +101,6 @@ sub _fill_missing {
                             // (@{ $dist->{authors}||[] })[0] // 'N/A',
         url           => 'N/A',
         description   => 'N/A',
-        logo          => 'N_A',
         stars         => 0,
         issues        => 0,
         date_updated  => 0,

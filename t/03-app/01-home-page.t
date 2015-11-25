@@ -2,6 +2,7 @@
 
 use strict;
 use warnings FATAL => 'all';
+use File::Temp;
 use Test::Most;
 use Mojo::URL;
 use Test::Mojo::WithRoles qw/SubmitForm  ElementCounter  Debug/;
@@ -18,6 +19,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 
 {
     diag 'Have dists table with right data';
+
     $t->dive_reset->get_ok('/')->status_is(200)
         ->element_count_is('#dists tbody tr' => 2, 'we have just two dists')
         ->dive_in('#dists tbody tr:first-child ')
@@ -31,7 +33,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         # ->dived_text_is('.added'             => '2015-11-04')
         ->element_count_is(".name   a[href='$dist1->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist1"]'             => 1)
-        ->element_count_is('.name   a i.dist-logos.s-dist1'            => 1)
+        # ->element_count_is('.name   a i.dist-logos.s-Dist1'            => 1)
         ->element_count_is(".travis a[href='$dist1->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist1->{url}stargazers']" => 1)
         ->element_count_is(".issues a[href='$dist1->{url}issues']"     => 1)
@@ -49,7 +51,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         # ->dived_text_is('.added'             => '2015-10-26')
         ->element_count_is(".name   a[href='$dist2->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist2"]'             => 1)
-        ->element_count_is('.name   a i.dist-logos.s-dist2'            => 1)
+        # ->element_count_is('.name   a i.dist-logos.s-Dist2'            => 1)
         ->element_count_is('.kwalitee a[href="/kwalitee/Dist2"]'       => 1)
         ->element_count_is(".travis a[href='$dist2->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist2->{url}stargazers']" => 1)

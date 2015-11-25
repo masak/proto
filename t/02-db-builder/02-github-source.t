@@ -60,7 +60,6 @@ subtest 'Repo without a README, tests, or logotype' => sub {
     is_deeply $m->find({name => 'TestRepo1'})->first, {
         date_added    => 0,
         author_id     => 'Zoffix Znet',
-        logo          => 'N_A',
         name          => 'TestRepo1',
         kwalitee      => 100,
         date_updated  => 1448202981,

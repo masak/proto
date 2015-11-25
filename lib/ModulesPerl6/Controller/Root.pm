@@ -20,6 +20,11 @@ sub index {
     }
 
     for ( @$dists ) {
+        my $logo_base = 's-' . $_->{name} =~ s/\W/_/gr;
+        $_->{logo} = $logo_base if $self->app->static->file(
+            "content-pics/dist-logos/$logo_base.png"
+        );
+
         $_->{date_updated} = strftime "%Y-%m-%d", localtime $_->{date_updated};
         $_->{travis_url}   = Mojo::URL->new($_->{url})->host('travis-ci.org');
         $_->{is_hidden}    = 1
