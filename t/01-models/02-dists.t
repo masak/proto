@@ -69,7 +69,7 @@ isa_ok   $m->remove({ name => 'Dist1'}), MODEL,   '->remove returns invocant';
 is_deeply $m->find,                      [$dist2], 'removed a dist';
 is_deeply $m->find({ name => 'Dist1'}),  [],       'and it is no longer found';
 
-isa_ok $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA=='), MODEL,
+is $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA=='), 1,
     '->remove_old returns invocant';
 is_deeply $m->find, [],
     'remove_old tossed dists that did not have correct build ID';
