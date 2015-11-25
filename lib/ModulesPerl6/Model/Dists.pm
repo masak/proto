@@ -96,11 +96,13 @@ sub remove_old {
     my ( $self, $build_id ) = @_;
     length $build_id or croak 'Missing Build ID to keep';
 
-    $self->_db->resultset('Dist')->search({
+    my $res = $self->_db->resultset('Dist')->search({
         build_id => { '!=', $build_id }
-    })->delete_all;
+    });
+    my $num_deleted = $res->all;
+    $res->delete_all;
 
-    $self;
+    $num_deleted;
 }
 
 1;

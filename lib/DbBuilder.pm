@@ -170,12 +170,9 @@ sub _metas {
 sub _remove_old_dists {
     my ( $self, $build_id ) = @_;
 
-    my $before = $self->_model_dists->find->@*;
-    $self->_model_dists->remove_old( $build_id );
-    my $after = $self->_model_dists->find->@*;
-    log info => 'Removed ' . ( $before - $after )
-            . ' dists that are no longer in the ecosystem'
-        if ($before - $after) != 0;
+    my $delta = $self->_model_dists->remove_old( $build_id );
+    log info => "Removed $delta dists that are no longer in the ecosystem"
+        if $delta;
 
     $self;
 }
