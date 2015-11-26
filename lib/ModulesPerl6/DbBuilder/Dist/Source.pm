@@ -76,7 +76,7 @@ sub _parse_meta {
     length $json->{ $_ } or log warn => "Required `$_` field is missing"
         for qw/perl  name  version  description  provides/;
 
-    $json->{normalized_url}
+    $json->{url}
              = $json->{'source-url'}
             // $json->{'repo-url'}
             // $json->{support}{source};
