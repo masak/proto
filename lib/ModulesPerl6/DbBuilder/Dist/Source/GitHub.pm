@@ -42,8 +42,7 @@ sub re { qr{^https?://\Qraw.githubusercontent.com\E/([^/]+)/([^/]+)}i }
 
 sub load {
     my $self = shift;
-# use Acme::Dump::And::Dumper;
-# die DnD [ 42 ];
+
     log info => 'Fetching distro info and commits';
     my $dist    = $self->_dist or return;
     my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
