@@ -71,7 +71,7 @@ sub _parse_meta {
     length $data or return;
 
     log info => 'Parsing META file';
-    eval { $data or die "No data to parse\n"; $data->$json };
+    eval { $data->$json };
     if ( $@ ) { log error => "Failed to parse: JSON error: $@"; return; }
 
     length $json->{ $_ } or log warn => "Required `$_` field is missing"
