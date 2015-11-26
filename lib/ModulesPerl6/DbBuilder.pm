@@ -118,6 +118,9 @@ sub run {
         };
     }
 
+    print "---\n---\n";
+    log info => 'Finished building all dists. Performing cleanup.';
+
     $self->_remove_old_dists( $build_id )
         ->_remove_old_logotypes->_save_build_stats;
 
