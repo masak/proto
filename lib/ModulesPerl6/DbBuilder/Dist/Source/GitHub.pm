@@ -42,7 +42,8 @@ sub re { qr{^https?://\Qraw.githubusercontent.com\E/([^/]+)/([^/]+)}i }
 
 sub load {
     my $self = shift;
-
+# use Acme::Dump::And::Dumper;
+# die DnD [ 42 ];
     log info => 'Fetching distro info and commits';
     my $dist    = $self->_dist or return;
     my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
@@ -57,6 +58,8 @@ sub load {
 
     $dist->{author_id} = $dist->{_builder}{repo_user}
         if $dist->{author_id} eq 'N/A';
+
+    return if $dist->{name} eq 'N/A';
 
     my $date_updated = eval {
         Time::Moment->from_string( $commits->[0]{commit}{committer}{date} )

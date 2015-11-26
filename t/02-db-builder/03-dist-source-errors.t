@@ -57,4 +57,60 @@ subtest 'Unreachable resource (NOTE: tries connecting to localhost:1)' => sub {
     $}x, 'Output from says we got a 404';
 };
 
+subtest 'JSON Parse errors' => sub {
+    my @ar = (
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                        . 'perl6-modules.perl6.org-test2/master/JSON.error',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    );
+
+    my $out = combined_from sub{
+        eval { ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load };
+        $@ and print "Fatal error occured: $@";
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from \E
+            \Qhttps://raw.githubusercontent.com/zoffixznet/perl6-\E
+            \Qmodules.perl6.org-test2/master/JSON.error\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [error] Failed to parse: JSON error: malformed \E
+            \QJSON string, neither tag, array, object, number, string or \E
+            \Qatom, at character offset 3 (before "bar 42 lulz YOU GOT ...") \E
+            \Qat /home/zoffix/perl5/perlbrew/perls/perl-5.22.0/lib/site_perl\E
+            \Q/5.22.0/JSON/Meth.pm line 34.\E \s
+    $}x, 'Output from says we got a JSON parse error';
+};
+
+subtest 'No dist name in META file' => sub {
+    my @ar = (
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/perl6-'
+                        . 'modules.perl6.org-test2/master/META.no-dist-name',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    );
+
+    my $out = combined_from sub{
+        my $dist = eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from https://raw.\E
+            \Qgithubusercontent.com/zoffixznet/perl6-modules.perl6.org-test2\E
+            \Q/master/META.no-dist-name\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
+        $time_stamp_re\Q [warn] Required `name` field is missing\E \s
+        \QFailed to get a dist!\E \s+
+    $}x, 'Output matches expectations';
+
+    is_deeply $m->find({name => 'N/A'})->to_array, [],
+        'data in db matches expectations';
+};
+
 done_testing;

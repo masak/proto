@@ -58,7 +58,6 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
     $}x, 'Loading same dist again; must not get "has new commits" message';
 
-    diag 'Check data in the db';
     is_deeply $m->find({name => 'TestRepo1'})->first, {
         date_added    => 0,
         author_id     => 'Zoffix Znet',
@@ -71,9 +70,8 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         url           => 'https://api.github.com/repos/zoffixznet/perl6-'
                             . 'modules.perl6.org-test1',
         build_id      => '42',
-        description   => 'Test repo for modules.perl6.org: Single-commit '
-                            . 'repo / lack of README, tests, and logotypes'
-    };
+        description   => 'Test dist for modules.perl6.org build script'
+    }, 'data in db matches expectations';
 };
 
 done_testing;
