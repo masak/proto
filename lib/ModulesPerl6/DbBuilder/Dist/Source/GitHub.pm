@@ -53,7 +53,6 @@ sub load {
         url         => $repo->{url},
         issues      => $repo->{open_issues_count} // 0,
         stars       => $repo->{stargazers_count}  // 0,
-        description => $repo->{description}       // 'N/A',
     );
 
     $dist->{author_id} = $dist->{_builder}{repo_user}
