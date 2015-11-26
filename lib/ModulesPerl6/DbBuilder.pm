@@ -7,6 +7,7 @@ use File::Path             qw/make_path  remove_tree/;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util             qw/slurp  trim/;
+use Try::Tiny;
 use Types::Common::Numeric qw/PositiveNum  PositiveOrZeroNum/;
 use Types::Standard        qw/InstanceOf  Str  Bool  Maybe/;
 
@@ -91,23 +92,28 @@ sub run {
     make_path $self->_logos_dir => { mode => 0755 };
 
     my @metas = $self->_metas;
-    for ( 0 .. $#metas ) {
-        print "---\n";
-        log info => 'Processing dist ' . ($_+1) . ' of ' . @metas;
-        $self->_model_dists->add(
-            ModulesPerl6::DbBuilder::Dist->new(
-                meta_url          => $metas[$_],
-                build_id          => $build_id,
-                logos_dir         => $self->_logos_dir,
-                dist_db           => $self->_model_dists,
-            )->info
-        );
+    for my $idx ( 0 .. $#metas ) {
+        try {
+            print "---\n";
+            log info => 'Processing dist ' . ($idx+1) . ' of ' . @metas;
+            $self->_model_dists->add(
+                ModulesPerl6::DbBuilder::Dist->new(
+                    meta_url          => $metas[$idx],
+                    build_id          => $build_id,
+                    logos_dir         => $self->_logos_dir,
+                    dist_db           => $self->_model_dists,
+                )->info
+            );
 
-        # This interval, when defaulted to at least 5, prevents us from
-        # going over GitHub's rate-limit of 5,000 requests per hour.
-        # This should likely be moved/adjusted when we have more Dist Sources
-        # or if we starting making more/fewer API requests per dist
-        sleep $self->_interval;
+            # This interval, when defaulted to at least 5, prevents us from
+            # going over GitHub's rate-limit of 5,000 requests per hour.
+            # This should likely be moved/adjusted when we have more Dist
+            # Sources or if we starting making more/fewer API requests per dist
+            sleep $self->_interval;
+        }
+        catch {
+            log error=> "Received fatal error while building $metas[$idx]: $_";
+        };
     }
 
     $self->_remove_old_dists( $build_id )->_save_build_stats;
