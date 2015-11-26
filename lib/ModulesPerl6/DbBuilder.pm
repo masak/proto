@@ -112,7 +112,7 @@ sub run {
             sleep $self->_interval;
         }
         catch {
-            log error=> "Received fatal error while building $metas[$idx]: $_";
+            log error=>  "Received fatal error while building $metas[$idx]: $_";
         };
     }
 
@@ -120,9 +120,16 @@ sub run {
 
     if ( $self->_restart_app ) {
         log info => 'Restarting app ' . $self->_app;
-        system $^O eq 'MSWin32'
-            ? ( $self->_app => 'daemon'    ) # hypnotoad not supported on Win32
-            : ( hypnotoad   => $self->_app );
+        if ( $^O eq 'MSWin32' ) {
+            $SIG{CHLD} = 'IGNORE';
+            my $pid = fork;
+            $pid == 0 and exec $self->_app => 'daemon';
+            not defined $pid and log error => "Failed to fork to exec the app";
+        }
+        else {
+            0 == system hypnotoad => $self->_app
+                or log error => "Failed to restart the app: $?";
+        }
     }
 
     log info => "Finished build $build_id\n\n\n";
