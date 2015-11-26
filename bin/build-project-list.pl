@@ -12,7 +12,7 @@ use ModulesPerl6::DbBuilder;
 
 use constant DB_FILE           => 'modulesperl6.db';
 use constant GITHUB_TOKEN_FILE => 'github-token';
-use constant APP               => catfile qw/bin  ModulesPerl6.pl/;
+use constant APP               => 'ModulesPerl6.pl';
 use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
@@ -51,11 +51,11 @@ __END__
 
 =head1 NAME
 
-build-project-list.pl - update/build database of modules in Perl 6 ecosystem
+./bin/build-project-list.pl - update database of modules in Perl 6 ecosystem
 
 =head1 SYNOPSIS
 
-./build-project-list.pl [options]
+./bin/build-project-list.pl [options]
 
  Options:
    --github-token-file=FILE
@@ -108,7 +108,8 @@ View the manual page.
 =item B<--meta-list=FILE/URL>
 
 A filename or a URL to the META.list ecosystem file. This file should contain
-URLs to modules' META files, one per line.
+URLs to modules' META files, one per line.  B<Defaults to:>
+C<https://raw.githubusercontent.com/perl6/ecosystem/master/META.list>
 
 =item B<--restart-app>
 
@@ -119,7 +120,7 @@ the database build completes.
 
 =head1 DESCRIPTION
 
-B<build-project-list.pl> will update (or generate new) modules database
+B<./bin/build-project-list.pl> will update (or generate new) modules database
 given a META.list ecosystem file. Optionally, the build script can also
 restart the front-end Mojolicious app
 
