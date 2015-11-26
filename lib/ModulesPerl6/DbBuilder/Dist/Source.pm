@@ -59,8 +59,8 @@ sub _download_meta {
     if ( $tx->success ) { return $tx->res->body }
     else {
         my $err = $tx->error;
-        log error => "$err->{code} response: $err->{message}" if $err->{code};
-        log error => "Connection error: $err->{message}";
+        log error => $err->{code} ? "$err->{code} response: $err->{message}"
+                                  : "Connection error: $err->{message}";
     }
 
     return;
@@ -68,6 +68,7 @@ sub _download_meta {
 
 sub _parse_meta {
     my ( $self, $data ) = @_;
+    length $data or return;
 
     log info => 'Parsing META file';
     eval { $data or die "No data to parse\n"; $data->$json };
