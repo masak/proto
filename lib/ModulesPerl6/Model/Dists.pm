@@ -111,6 +111,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords dists
+
 =head1 NAME
 
 ModulesPerl6::Model::Dists - model representing Perl 6 distributions
@@ -226,7 +228,7 @@ the same as when the repo was first created on GitHub).
 
 =head3 C<build_id>
 
-A string of text indentifying the build ID: a random string used
+A string of text that indentifies the build ID: a random string used
 by the database updater script to identify each run. You'll likely want
 to use something like L<Data::GUID/"to_base64"> as the ID.
 

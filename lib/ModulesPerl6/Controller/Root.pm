@@ -69,6 +69,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords NIY dists
+
 =head1 NAME
 
 ModulesPerl6::Controller::Root - controller handling a few root-space pages

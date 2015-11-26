@@ -13,6 +13,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords dists
+
 =head1 NAME
 
 ModulesPerl6::Model::Dists::Schema::Result::BuildId - build IDs

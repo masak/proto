@@ -31,6 +31,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords distro
+
 =head1 NAME
 
 ModulesPerl6::Model::Dists::Schema::Result::Dist - Distribution info table

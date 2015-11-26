@@ -92,6 +92,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords md
+
 =head1 NAME
 
 ModulesPerl6 - Web app powering modules.perl6.org

@@ -66,6 +66,8 @@ __END__
 
 =encoding utf8
 
+=for stopwords dists
+
 =head1 NAME
 
 ModulesPerl6::Model::BuildStats - model representing database build statistics
