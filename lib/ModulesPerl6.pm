@@ -73,7 +73,7 @@ sub startup {
     # multiple search aliases, because why not?
     $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
 
-    # TODO: the /dist/ route currently redirects to rep, because we don't have
+    # TODO: the /dist/ route currently redirects to repo, because we don't have
     # a proper dist page yet
     $r->get('/dist/:dist')->to('root#repo')->name('dist');
     $r->get('/repo/:dist')->to('root#repo')->name('repo');

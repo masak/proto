@@ -205,7 +205,7 @@ distribution are hosted, such as a GitHub repository. This base class defines
 interface and provides utility methods for classes that add support for
 an arbitrary dist source.
 
-=head1 CONVENTIONS
+=head1 CONVENTIONS AND CAVEATS
 
 =hea2 logotype filenames
 
@@ -215,7 +215,7 @@ an arbitrary dist source.
 
 When downloading dist logotypes, the subclass must derive the the filename
 by converting each C<\W> character to an underscore, prefixing the result
-with C<s->, and postfixing it with C<.png>
+with C<s->, and postfixing it with C<.png>. See also L</_save_logo>.
 
 =head2 sharing data during build process
 
@@ -226,6 +226,22 @@ can be communicated with using the C<_builder> key in the L</_dist> hashref.
 It will be deleted after all postprocessors are run, before dist is added
 to the database. Check the documentation for the postprocessor you're
 interested in to learn how to activate its run for your dists.
+
+=head2 C<kwalitee> key
+
+B<NOTE:> if the C<kwalitee> L</_dist> key is present when your subclass
+finishes building dist info, B<its value will be used and all other Kwalitee
+metrics will be ignored.> C<delete> it whenever you're recalculating individual
+metrics, since it will be present if the dist is already in the database.
+
+=head2 Logging
+
+    use ModulesPerl6::DbBuilder::Log;
+
+    log error => 'Failed to download logo';
+
+Please use L<ModulesPerl6::DbBuilder::Log> to output debugging and
+informational messages instead of relying on warn/print.
 
 =head1 CONSTRUCTOR ARGUMENTS
 
@@ -261,8 +277,9 @@ See L</_dist_db> private attribute.
 
 This method is a stub and must be overriden by subclasses. No assumption
 shall be made about provided arguments. The method must return a C<Regexp>
-reference that matches the C<META> file URL of dists hosted on this particular
-Dist Source.
+reference that matches the
+L<META file|http://design.perl6.org/S22.html#META6.json> URL of dists hosted
+on this particular Dist Source.
 
 =head2 C<load>
 
@@ -283,6 +300,9 @@ C<undef> (if, say, an error occured) or a hashref describing the dist.
 See L</_fill_missing> private method for details on keys/values.
 
 =head1 PRIVATE ATTRIBUTES
+
+B<Note:> these attributes are private to your subclass. Do not rely on them
+from the ouside of it.
 
 =head2 C<_logos_dir>
 
@@ -335,35 +355,148 @@ The keys and default values in the C</_dist> hashref are as follows:
 
 =head3 Keys From META File
 
-First of all, keys that do not conflict with build
+First of all, all data from
+L<META file|http://design.perl6.org/S22.html#META6.json> will be present
+(this excludes keys we use during build process, like Kwalitee metrics and
+private L</_builder> store).
 
-has _dist => (
-    is => 'lazy',
-    isa => Maybe[Ref['HASH'] | InstanceOf['JSON::Meth']],
-    default => sub {
-        my $self = shift; $self->_parse_meta( $self->_download_meta );
-    },
-);
+=head3 C<_builder>
 
-has _dist_db => (
-    init_arg => 'dist_db',
-    is       => 'ro',
-    isa      => InstanceOf['ModulesPerl6::Model::Dists'],
-    required => 1,
-);
+The hashref containing arbitrary data for communication of Dist Source
+subclasses and postprocessors, see L</sharing data during build process>.
 
-has _meta_url => (
-    init_arg => 'meta_url',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
+=head3 Dist info keys
 
-has _ua => (
-    is      => 'lazy',
-    isa     => InstanceOf['Mojo::UserAgent'],
-    default => sub { Mojo::UserAgent->new( max_redirects => 10 ) },
-);
+    name          => 'N/A',
+    author_id     =>
+        $dist->{author}
+        // (ref $dist->{authors} ? $dist->{authors}[0] : $dist->{authors})
+        // 'N/A',
+    url           => 'N/A',
+    description   => 'N/A',
+    stars         => 0,
+    issues        => 0,
+    date_updated  => 0,
+    date_added    => 0,
+
+The above are the keys and their defaults for dist info. See documentation
+for L<ModulesPerl6::Model::Dists/find> for details.
+
+=head3 Dist info from database
+
+If the dist already exists in the databse, its info will override the defaults
+above. See L<ModulesPerl6::Model::Dists/find> for details on what those keys
+are. B<NOTE:> if the C<kwalitee> key is present when your subclass finishes
+building dist info, B<its value will be used and all other Kwalitee metrics
+will be ignored>
+
+=head3 Kwalitee metrics
+
+    has_readme    => 0,
+    has_tests     => 0,
+    panda         => $dist->{'source-url'} && $dist->{provides}
+                        ? 2 : $dist->{'source-url'} ? 1 : 0,
+
+B<EXPERIMENTAL!> The Kwalitee metrics will be set as above (and if the
+dist is already in the database, cached values will be used). This feature
+is currently experimental, pending implementation of the Kwalitee system.
+
+=head3 C<_dist_db>
+
+    $self->_dist_db->find({ name => $dist->{name} })->first
+
+Provides the L<ModulesPerl6::Model::Dists> object that's used internally
+to fetch cached distro data. B<DO NOT USE this object to insert the dist
+you're parsing into the database>. Simply return all the info via
+L</load> method.
+
+=head3 C<_meta_url>
+
+    my ( $user, $repo ) = $self->_meta_url =~ $self->re;
+
+Returns the URL for dist's
+L<META file|http://design.perl6.org/S22.html#META6.json>.
+
+=head3 C<_ua>
+
+    say $self->_ua->get("http://perl6.org")->res->dom->at('title')->all_text;
+
+Returns a L<Mojo::UserAgent> object instantiated with
+L<Mojo::UserAgent/max_redirects> set to C<10>.
+
+=head1 PRIVATE METHODS
+
+B<Note:> these methods are private to your subclass. Do not rely on them
+from the ouside of it.
+
+=head2 C<_download_meta>
+
+    my $meta_file_data = $self->_download_meta;
+
+I<Your subclass will likely never have to use this method>. It simply
+downloads the dist's L<META file|http://design.perl6.org/S22.html#META6.json>
+and returns its contents. On error, logs it with
+L<ModulesPerl6::DbBuilder::Log> and returns either C<undef> or an empty list,
+depending on context. See also L</_dist>.
+
+=head2 C<_parse_meta>
+
+    my $dist = $self->_parse_meta( $meta_file_data );
+
+I<Your subclass will likely never have to use this method>. It takes
+L<META file|http://design.perl6.org/S22.html#META6.json> data as an argument
+and tries to parse it as JSON, L<logging|ModulesPerl6::DbBuilder::Log> any
+errors. The method then normalizes the dist URL from possible values in
+L<META file|http://design.perl6.org/S22.html#META6.json>, storing it in
+C<url> key, calls L</_fill_missing> with the result and returns the result
+of that call. See also L</_dist>.
+
+=head2 C<_fill_missing>
+
+    my $dist = $self->_fill_missing( $dist_metadata_hashref );
+
+I<Your subclass will likely never have to use this method>. It takes a
+hashref representing dist
+L<META file|http://design.perl6.org/S22.html#META6.json> data as the argument,
+fills missing keys with defaults and loads cached dist data from the database,
+if such exists, and returns the result. See also L</_dist>.
+
+=head2 C<_save_logo>
+
+    $self->_save_logo(
+        map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
+    );
+
+Takes logotype file size, in bytes, as the argument. This value should come
+from the repo (for example through queries to an API). Use size of C<0>, if
+it is not known. The method won't do anything if size is C<undef> or not
+specified.
+
+The method will check whether a logo for the dist of the given size exists
+on disk. If not, it will attempt to download one from the repo, by assuming
+the removing the L<META file|http://design.perl6.org/S22.html#META6.json>
+filename from the end of L</_meta_url> and appending
+C</logotype/logo_32x32.png> to it will result in the correct URL to the
+logotype file.
+
+Returns C<1> on success (or if a cached version of logo was located), otherwise
+returns C<undef> or an empty list, depending on context.
+
+=head2 C<_set_readme>
+
+    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
+
+Takes a list of filenames and checks whether any of them looks like a repo
+README file. If it succeeds, it sets C<has_readme> Kwalitee metric
+in L</_dist> to true. Returns its invocant.
+
+=head2 C<_set_tests>
+
+    $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
+
+Takes a list of directory names and checks whether any of them look like a
+directory containing tests. If it succeeds, it sets C<has_tests> Kwalitee
+metric in L</_dist> to true. Returns its invocant.
 
 =head1 CONTACT INFORMATION
 
