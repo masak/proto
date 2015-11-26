@@ -3,7 +3,9 @@ package ModulesPerl6::DbBuilder;
 use strictures 2;
 
 use Data::GUID;
+use File::Glob             qw/bsd_glob/;
 use File::Path             qw/make_path  remove_tree/;
+use File::Spec::Functions  qw/catfile/;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util             qw/slurp  trim/;
@@ -116,7 +118,8 @@ sub run {
         };
     }
 
-    $self->_remove_old_dists( $build_id )->_save_build_stats;
+    $self->_remove_old_dists( $build_id )
+        ->_remove_old_logotypes->_save_build_stats;
 
     if ( $self->_restart_app ) {
         log info => 'Restarting app ' . $self->_app;
@@ -198,6 +201,24 @@ sub _remove_old_dists {
     my $delta = $self->_model_dists->remove_old( $build_id );
     log info => "Removed $delta dists that are no longer in the ecosystem"
         if $delta;
+
+    $self;
+}
+
+sub _remove_old_logotypes {
+    my $self = shift;
+
+    # TODO: we can probably move this code into the ::Dists model so we don't
+    # have to pull all the dists in DB into a giant list of hashrefs
+    my $dir = $self->_logos_dir;
+    my %logos = map +( $_ => 1 ),
+        grep -e, map catfile($dir, 's-' . $_->{name} =~ s/\W/_/gr . '.png'),
+            $self->_model_dists->find->each;
+
+    for ( grep ! $logos{$_}, bsd_glob catfile $dir, '*' ) {
+        log info => "Removing logotype file without a dist in db: $_";
+        unlink;
+    }
 
     $self;
 }
