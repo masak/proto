@@ -15,6 +15,8 @@ public/content-pics/dist-logos/
 modulesperl6.db
 building-modulesperl6.db
 bin/hypnotoad.pid
+t/03-app/public/packed/
+t/03-app/public/sass/
 secrets
 dist.ini
 META.list.local

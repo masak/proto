@@ -1,12 +1,11 @@
 package ModulesPerl6;
 
-# TODO: figure out where to secretly store secrets file on the final server
-use constant SECRETS_FILE => 'secrets';
-
-use Mojo::Base 'Mojolicious';
-use FindBin; FindBin->again;
-use File::Glob qw/bsd_glob/;
 use File::Spec::Functions qw/catfile/;
+use FindBin; FindBin->again;
+use constant SECRETS_FILE => $ENV{MODULESPERL6_SECRETS}
+                                // catfile $FindBin::Bin, '..', 'secrets';
+use Mojo::Base 'Mojolicious';
+use File::Glob qw/bsd_glob/;
 use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
@@ -20,14 +19,14 @@ sub startup {
     $self->plugin('Config');
     $self->moniker('ModulesPerl6');
     $self->plugin('PODRenderer') if $self->mode eq 'development';
+    unshift $self->static->paths->@*, $ENV{MODULESPERL6_EXTRA_STATIC_PATH}
+        if length $ENV{MODULESPERL6_EXTRA_STATIC_PATH};
 
-    my $secrets_file = catfile $FindBin::Bin, '..', SECRETS_FILE;
-
-    $self->app->log->info("Did not find secrets file at $secrets_file")
-        unless -r $secrets_file;
+    $self->app->log->info("Did not find secrets file at " . SECRETS_FILE)
+        unless -r SECRETS_FILE;
 
     $self->secrets([
-        -r $secrets_file ? slurp $secrets_file : 'Perl 6 is awesome!'
+        -r SECRETS_FILE ? slurp SECRETS_FILE : 'Perl 6 is awesome!'
     ]);
 
     # ASSETS
@@ -118,6 +117,20 @@ See DEPLOYMENT.md file included with this distribution.
 Also, you may wish to consult
 L<http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT>
 for more details.
+
+=head1 ENVIRONMENTAL VARIABLES
+
+There are two environmental variables supported by the app that are used
+by the test scripts.
+
+=head2 C<MODULESPERL6_SECRETS>
+
+Specifies the location of the secrets file.
+
+=head2 C<MODULESPERL6_EXTRA_STATIC_PATH>
+
+Specifies an additional directory to C<unshift> into
+L<Mojolicious::Static/paths>.
 
 =head1 CONTACT INFORMATION
 
