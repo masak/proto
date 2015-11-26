@@ -75,7 +75,7 @@ sub _load_from_source {
             meta_url  => $url,
             logos_dir => $self->_logos_dir,
             dist_db   => $self->_dist_db,
-        )->load;
+        )->load or return;
         $dist->{build_id} = $self->_build_id;
 
         for my $postprocessor ( $self->_postprocessors ) {
