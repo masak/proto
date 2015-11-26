@@ -19,6 +19,7 @@ has _pithub => (
     default => sub {
         my $self = shift;
         my ( $user, $repo ) = $self->_meta_url =~ $self->re;
+        $self->_dist->{_builder}->@{qw/repo_user  repo/} = ( $user, $repo );
         return Pithub->new(
             user  => $user,
             repo  => $repo,
@@ -43,9 +44,9 @@ sub load {
     my $self = shift;
 
     log info => 'Fetching distro info and commits';
+    my $dist    = $self->_dist or return;
     my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
     my $commits = $self->_repo($self->_pithub->repos->commits->list) or return;
-    my $dist    = $self->_dist or return;
 
     %$dist      = (
         %$dist,
@@ -67,6 +68,7 @@ sub load {
     $dist->{date_updated} = $date_updated;
 
     log info => 'Dist has new commits. Fetching more info.';
+    $dist->{_builder}{is_fresh} = 1;
 
     my $tree = $self->_repo(
         $self->_pithub->git_data->trees
@@ -83,6 +85,8 @@ sub load {
     delete $dist->{kwalitee};
     $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
     $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
+
+    $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
 
     return $dist;
 }

@@ -85,6 +85,7 @@ sub _load_from_source {
             )->process;
         }
 
+        delete $dist->{_builder};
         return $dist;
     }
     log error => "Could not find a source module that could handle dist URL "

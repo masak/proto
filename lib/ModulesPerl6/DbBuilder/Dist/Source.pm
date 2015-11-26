@@ -114,6 +114,7 @@ sub _fill_missing {
         panda         => $dist->{'source-url'} && $dist->{provides}
                             ? 2 : $dist->{'source-url'} ? 1 : 0,
 
+        _builder      => {}, # key used only during build process to store data
         %$dist,
     );
 
