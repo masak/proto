@@ -56,7 +56,8 @@ sub load {
         description => $repo->{description}       // 'N/A',
     );
 
-    $dist->{author_id} //= ($self->_meta_url =~ $self->re)[0];
+    $dist->{author_id} = $dist->{_builder}{repo_user}
+        if $dist->{author_id} eq 'N/A';
 
     my $date_updated = eval {
         Time::Moment->from_string( $commits->[0]{commit}{committer}{date} )

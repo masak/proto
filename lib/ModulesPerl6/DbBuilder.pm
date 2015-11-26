@@ -112,7 +112,7 @@ sub run {
             sleep $self->_interval;
         }
         catch {
-            log error=>  "Received fatal error while building $metas[$idx]: $_";
+            log error=> "Received fatal error while building $metas[$idx]: $_";
         };
     }
 
