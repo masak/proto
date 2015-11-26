@@ -143,8 +143,8 @@ L<Mojolicious::Controller/"stash"> parameter.
 
 Responds with a plain text that displays total number of dists in the
 database. This route was added to make it easier to encourage stats sites
-like L<www.modulecounts.com> to add Perl 6 ecosystem (they can just fetch
-the totals instead of Parsing HTML).
+like L<http://www.modulecounts.com> to add Perl 6 ecosystem (they can just
+fetch the totals instead of Parsing HTML).
 
 =head1 CONTACT INFORMATION
 
