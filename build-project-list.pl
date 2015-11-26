@@ -13,6 +13,7 @@ use ModulesPerl6::DbBuilder;
 use constant DB_FILE           => 'modulesperl6.db';
 use constant GITHUB_TOKEN_FILE => 'github-token';
 use constant APP               => catfile qw/bin  ModulesPerl6.pl/;
+use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
 
@@ -39,7 +40,7 @@ ModulesPerl6::DbBuilder->new(
     db_file           => DB_FILE,
     interval          => $interval,
     limit             => $limit,
-    logos_dir         => catdir(qw/public  content-pics  dist-logos/),
+    logos_dir         => LOGOS_DIR,
     meta_list         => $meta_list,
     restart_app       => $restart_app,
 )->run;
