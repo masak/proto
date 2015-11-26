@@ -126,7 +126,7 @@ sub _fill_missing {
 sub _save_logo {
     my ( $self, $size ) = @_;
     my $dist = $self->_dist;
-    return unless $size and $dist and $dist->{name} ne 'N/A';
+    return unless defined $size and $dist and $dist->{name} ne 'N/A';
     log info => "Dist has a logotype of size $size bytes.";
 
     my $logo
