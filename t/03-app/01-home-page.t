@@ -7,11 +7,13 @@ use Test::Most;
 use Mojo::URL;
 use Test::Mojo::WithRoles qw/SubmitForm  ElementCounter  Debug/;
 use t::Helper;
+use experimental 'postderef';
 
 my $db_file = t::Helper::setup_db_file;
 END { unlink $db_file }
 
 my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
+unshift $t->app->static->paths->@*, 't/03-app/public';
 my ( $dist1, $dist2 ) = t::Helper::dist_out_data;
 
 $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
@@ -33,7 +35,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         # ->dived_text_is('.added'             => '2015-11-04')
         ->element_count_is(".name   a[href='$dist1->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist1"]'             => 1)
-        # ->element_count_is('.name   a i.dist-logos.s-Dist1'            => 1)
+        ->element_count_is('.name   a i.dist-logos.s-Dist1'            => 1)
         ->element_count_is(".travis a[href='$dist1->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist1->{url}stargazers']" => 1)
         ->element_count_is(".issues a[href='$dist1->{url}issues']"     => 1)
@@ -51,7 +53,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         # ->dived_text_is('.added'             => '2015-10-26')
         ->element_count_is(".name   a[href='$dist2->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist2"]'             => 1)
-        # ->element_count_is('.name   a i.dist-logos.s-Dist2'            => 1)
+        ->element_count_is('.name   a i.dist-logos.s-Dist2'            => 0)
         ->element_count_is('.kwalitee a[href="/kwalitee/Dist2"]'       => 1)
         ->element_count_is(".travis a[href='$dist2->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist2->{url}stargazers']" => 1)
