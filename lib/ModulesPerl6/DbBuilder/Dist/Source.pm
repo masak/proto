@@ -109,6 +109,7 @@ sub _fill_missing {
         date_added    => 0,
 
         %{ $old_dist_data || {} },
+        %$dist,
 
         # Kwalitee metrics
         has_readme    => 0,
@@ -117,7 +118,6 @@ sub _fill_missing {
                             ? 2 : $dist->{'source-url'} ? 1 : 0,
 
         _builder      => {}, # key used only during build process to store data
-        %$dist,
     );
 
     return $dist;
