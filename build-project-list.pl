@@ -20,13 +20,13 @@ my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
 my $interval          = 5;
 GetOptions(
-    'github-token-file' => \$github_token_file,
-    'help|?'            => \my $help,
-    'interval=i'        => \$interval,
-    'man'               => \my $man,
-    'meta-list=s'       => \$meta_list,
-    'limit=i'           => \my $limit,
-    'restart-app'       => \my $restart_app,
+    'github-token-file=s' => \$github_token_file,
+    'help|?'              => \my $help,
+    'interval=i'          => \$interval,
+    'man'                 => \my $man,
+    'meta-list=s'         => \$meta_list,
+    'limit=i'             => \my $limit,
+    'restart-app'         => \my $restart_app,
 ) or pod2usage 2;
 
 pod2usage 1 if $help;
