@@ -25,7 +25,8 @@ isa_ok $m->deploy,                         MODEL, '->deploy returns invocant';
     # returned from ::dist_in_data
     my @d = t::Helper::dist_in_data;
     $d[1]{build_id} = 'rvOZAHmQ5RGKE79B+wjaYA==';
-    isa_ok $m->add( @d ), MODEL, '->add    returns invocant';
+    isa_ok $m->add( @d ), MODEL, '->add returns invocant';
+    isa_ok $m->add,       MODEL, '->add without arguments returns invocant';
 
     diag 'Adding same data to database again. '
         . 'It must not be duplicated and must instead only be updated';
@@ -69,6 +70,8 @@ isa_ok   $m->remove({ name => 'Dist1'}), MODEL,   '->remove returns invocant';
 is_deeply $m->find,                      [$dist2], 'removed a dist';
 is_deeply $m->find({ name => 'Dist1'}),  [],       'and it is no longer found';
 
+throws_ok { $m->remove_old } qr/Missing Build ID to keep/,
+    '->remove_old has correct error when called without a build ID';
 is $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA=='), 1,
     '->remove_old returns invocant';
 is_deeply $m->find, [],
