@@ -4,7 +4,6 @@ use Exporter::Easy EXPORT => [ 'log' ];
 use Mojo::Log;
 
 my $LOG = Mojo::Log->new;
-use 5.020;
 sub log($$) {
     my ( $level, $message ) = @_;
     $LOG->$level( $message );
