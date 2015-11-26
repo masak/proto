@@ -97,8 +97,10 @@ sub _fill_missing {
 
     %$dist = (
         name          => 'N/A',
-        author_id     => $dist->{author}
-                            // (@{ $dist->{authors}||[] })[0] // 'N/A',
+        author_id     =>
+            $dist->{author}
+            // (ref $dist->{authors} ? $dist->{authors}[0] : $dist->{authors})
+            // 'N/A',
         url           => 'N/A',
         description   => 'N/A',
         stars         => 0,
