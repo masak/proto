@@ -7,7 +7,7 @@ use File::Path             qw/make_path  remove_tree/;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util             qw/slurp  trim/;
-use Types::Common::Numeric qw/PositiveNum/;
+use Types::Common::Numeric qw/PositiveNum  PositiveOrZeroNum/;
 use Types::Standard        qw/InstanceOf  Str  Bool  Maybe/;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -31,6 +31,12 @@ has _db_file => (
     is       => 'ro',
     isa      => Str,
     required => 1,
+);
+
+has _interval => (
+    init_arg => 'interval',
+    is  => 'ro',
+    isa => PositiveOrZeroNum,
 );
 
 has _limit => (
@@ -96,6 +102,12 @@ sub run {
                 dist_db           => $self->_model_dists,
             )->info
         );
+
+        # This interval, when defaulted to at least 5, prevents us from
+        # going over GitHub's rate-limit of 5,000 requests per hour.
+        # This should likely be moved/adjusted when we have more Dist Sources
+        # or if we starting making more/fewer API requests per dist
+        sleep $self->_interval;
     }
 
     $self->_remove_old_dists( $build_id )->_save_build_stats;

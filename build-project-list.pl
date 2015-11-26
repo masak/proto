@@ -18,9 +18,11 @@ use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
 
 my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
+my $interval          = 5;
 GetOptions(
     'github-token-file' => \$github_token_file,
     'help|?'            => \my $help,
+    'interval=i'        => \$interval,
     'man'               => \my $man,
     'meta-list=s'       => \$meta_list,
     'limit=i'           => \my $limit,
@@ -35,6 +37,7 @@ $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} = $github_token_file;
 ModulesPerl6::DbBuilder->new(
     app               => APP,
     db_file           => DB_FILE,
+    interval          => $interval,
     limit             => $limit,
     logos_dir         => catdir(qw/public  content-pics  dist-logos/),
     meta_list         => $meta_list,
@@ -56,11 +59,22 @@ build-project-list.pl - update/build database of modules in Perl 6 ecosystem
  Options:
    --github-token-file=FILE
    --help
+   --interval=N
    --limit=N
    --man
    --meta-list=FILE
    --meta-list=URL
    --restart-app
+
+   Short form (first letter of the option or more when need to disambiguate):
+   -g=FILE
+   -h
+   -i=N
+   -l=N
+   -ma
+   -me=FILE
+   -me=URL
+   -r
 
 =head1 OPTIONS
 
@@ -74,6 +88,12 @@ B<Defaults to:> C<github-token> in the current directory.
 =item B<--help>
 
 Print a brief help message and exits.
+
+=item B<--inteval=N>
+
+Pause for C<N> seconds after building each dist (value of zero is acceptable).
+B<Defaults to> 5 seconds, which is just enough to prevent going over GitHub's
+rate-limit of 5,000 requests per hour, when script is running continuously.
 
 =item B<--limit=N>
 
