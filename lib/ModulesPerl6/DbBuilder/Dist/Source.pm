@@ -207,7 +207,7 @@ an arbitrary dist source.
 
 =head1 CONVENTIONS AND CAVEATS
 
-=hea2 logotype filenames
+=head2 logotype filenames
 
     Some::Awesome::Dist => s-Some__Awesome__Dist.png
     # You can use:
@@ -326,7 +326,7 @@ as the skeleton for your dist info, as well as to check whether dist
 already exists in the database and when it was last updated (e.g. to abort
 extra work if last updated time matches last commit time in repo).
 
-The keys and default values in the C</_dist> hashref are as follows:
+The keys and default values in the C<_dist> hashref are as follows:
 
     %$dist = (
         name          => 'N/A',
@@ -363,7 +363,7 @@ private L</_builder> store).
 =head3 C<_builder>
 
 The hashref containing arbitrary data for communication of Dist Source
-subclasses and postprocessors, see L</sharing data during build process>.
+subclasses and postprocessors, see L</sharing> data during build process>.
 
 =head3 Dist info keys
 
