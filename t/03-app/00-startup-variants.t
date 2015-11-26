@@ -12,22 +12,17 @@ use experimental 'postderef';
 my $db_file = t::Helper::setup_db_file;
 END { unlink $db_file }
 
-{   # exercise conditional branches not covered by other tests
-    # For the secrets file: If tester has "secrets" file setup, other tests
-    # will have tested the branch that tests its existence, so we'll set
-    # the env to use a non-existant file and test that branch. Otherwise, we'll
-    # create a temp file to use as secrets, and delete it when we're done.
+{
+    diag 'To properly run this test, do `rm public/content-pics/dist-logos/*`.'
+            . ' Because otherwise, coverage is not 100%';
+
     BEGIN {
         $ENV{MODULESPERL6_EXTRA_STATIC_PATH} = 't/03-app/public';
-        $ENV{MODULESPERL6_SECRETS}           = -e 'secrets'
-            ? 'non-existant'
-            : File::Temp->new( UNLINK => 0 );
-
+        $ENV{MODULESPERL6_SECRETS}           = File::Temp->new( UNLINK => 0 );
         $ENV{MOJO_MODE} = 'production';
     };
-    END { -e 'secrets' or unlink $ENV{MODULESPERL6_SECRETS} };
-    -e $ENV{MODULESPERL6_SECRETS}
-        and spurt 's3crtz' => $ENV{MODULESPERL6_SECRETS};
+    END { unlink $ENV{MODULESPERL6_SECRETS} };
+    spurt 's3crtz' => $ENV{MODULESPERL6_SECRETS};
 
     my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
     $t->get_ok('/');
