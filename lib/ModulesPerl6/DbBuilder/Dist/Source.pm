@@ -12,7 +12,7 @@ use Mew;
 has _logos_dir => Str;
 has _dist_db   => InstanceOf['ModulesPerl6::Model::Dists'];
 has _meta_url  => Str;
-has _dist      => Maybe[Ref['HASH'] | InstanceOf['JSON::Meth']], (
+has _dist      => Ref['HASH'], (
     is      => 'lazy',
     default => sub {
         my $self = shift; $self->_parse_meta( $self->_download_meta );
@@ -56,7 +56,7 @@ sub _parse_meta {
             // $json->{'repo-url'}
             // $json->{support}{source};
 
-    return $self->_fill_missing( $json );
+    return $self->_fill_missing( {%$json} );
 }
 
 sub _fill_missing {
