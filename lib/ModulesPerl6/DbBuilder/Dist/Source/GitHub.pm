@@ -103,3 +103,48 @@ sub _repo {
 }
 
 1;
+
+__END__
+
+=encoding utf8
+
+=for stopwords md dist dists
+
+=head1 NAME
+
+ModulesPerl6::DbBuilder::Dist::Source::GitHub - GitHub distribution source
+
+=head1 SYNOPSIS
+
+    if ( $url =~ ModulesPerl6::DbBuilder::Dist::Source::GitHub::re ) {
+        my $dist = $source->new(
+            meta_url  => $url,
+            logos_dir => catdir(qw/public  content-pics  dist-logos/),
+            dist_db   => ModulesPerl6::Model::Dists->new,
+        )->load or return;
+    }
+
+=head1 DESCRIPTION
+
+This Dist Source handles repositories hosted on L<GitHub|http://github.com>.
+The URLs matcher expects the META link to point to a raw file, e.g.
+L<https://raw.githubusercontent.com/zoffixznet/perl6-modules.perl6.org-test1/master/META.info>
+
+=head1 USED POSTPROCESSORS
+
+This module requests
+L<Travis postprocessor|ModulesPerl6::DbBuilder::Dist::PostProcessor::TravisCI>
+to be run.
+
+=head1 DOCUMENTATION
+
+See documentation for L<ModulesPerl6::DbBuilder::Dist::Source> for details.
+
+=head1 CONTACT INFORMATION
+
+Original version of this module was written by Zoffix Znet
+(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
+
+=head1 LICENSE
+
+You can use and distribute this module under the same terms as Perl itself.
