@@ -1,7 +1,5 @@
 package ModulesPerl6::DbBuilder;
 
-use strictures 2;
-
 use Data::GUID;
 use File::Glob             qw/bsd_glob/;
 use File::Path             qw/make_path  remove_tree/;
@@ -10,71 +8,26 @@ use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util             qw/slurp  trim/;
 use Try::Tiny;
-use Types::Common::Numeric qw/PositiveNum  PositiveOrZeroNum/;
-use Types::Standard        qw/InstanceOf  Str  Bool  Maybe/;
 
 use ModulesPerl6::DbBuilder::Log;
 use ModulesPerl6::DbBuilder::Dist;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 
-use Moo;
-use namespace::clean;
+use Mew;
 use experimental 'postderef';
 
-has _app => (
-    init_arg => 'app',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _db_file => (
-    init_arg => 'db_file',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _interval => (
-    init_arg => 'interval',
-    is  => 'ro',
-    isa => PositiveOrZeroNum,
-);
-
-has _limit => (
-    init_arg => 'limit',
-    is  => 'ro',
-    isa => Maybe[ PositiveNum ],
-);
-
-has _logos_dir => (
-    init_arg => 'logos_dir',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _restart_app => (
-    init_arg => 'restart_app',
-    is  => 'ro',
-    isa => Maybe[ Bool ],
-);
-
-has _meta_list => (
-    init_arg => 'meta_list',
-    is       => 'ro',
-    isa      => Str | InstanceOf[qw/Mojo::URL  URI/],
-    required => 1,
-);
-
+has [qw/_app  _db_file  _logos_dir/] => Str;
+has -_interval    => PositiveOrZeroNum;
+has -_limit       => Maybe[ PositiveNum ];
+has -_restart_app => Maybe[ Bool ];
+has _meta_list    => Str;
 has _model_build_stats => (
     is      => 'lazy',
     default => sub {
         ModulesPerl6::Model::BuildStats->new( db_file => shift->_db_file );
     },
 );
-
 has _model_dists => (
     is      => 'lazy',
     default => sub {
@@ -111,7 +64,7 @@ sub run {
             # going over GitHub's rate-limit of 5,000 requests per hour.
             # This should likely be moved/adjusted when we have more Dist
             # Sources or if we starting making more/fewer API requests per dist
-            sleep $self->_interval;
+            sleep $self->_interval // 0;
         }
         catch {
             log error=> "Received fatal error while building $metas[$idx]: $_";

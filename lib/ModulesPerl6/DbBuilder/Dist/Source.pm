@@ -1,51 +1,25 @@
 package ModulesPerl6::DbBuilder::Dist::Source;
 
-use strictures 2;
-
 use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
 use Mojo::Util qw/spurt/;
 use Try::Tiny;
-use Types::Standard qw/InstanceOf  Maybe  Ref  Str/;
 
 use ModulesPerl6::DbBuilder::Log;
+use Mew;
 
-use Moo;
-use namespace::clean;
-
-has _logos_dir => (
-    init_arg => 'logos_dir',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _dist => (
-    is => 'lazy',
-    isa => Maybe[Ref['HASH'] | InstanceOf['JSON::Meth']],
+has _logos_dir => Str;
+has _dist_db   => InstanceOf['ModulesPerl6::Model::Dists'];
+has _meta_url  => Str;
+has _dist      => Maybe[Ref['HASH'] | InstanceOf['JSON::Meth']], (
+    is      => 'lazy',
     default => sub {
         my $self = shift; $self->_parse_meta( $self->_download_meta );
     },
 );
-
-has _dist_db => (
-    init_arg => 'dist_db',
-    is       => 'ro',
-    isa      => InstanceOf['ModulesPerl6::Model::Dists'],
-    required => 1,
-);
-
-has _meta_url => (
-    init_arg => 'meta_url',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _ua => (
+has _ua => InstanceOf['Mojo::UserAgent'], (
     is      => 'lazy',
-    isa     => InstanceOf['Mojo::UserAgent'],
     default => sub { Mojo::UserAgent->new( max_redirects => 10 ) },
 );
 

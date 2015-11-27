@@ -1,22 +1,18 @@
 package ModulesPerl6::Model::SiteTips;
 
-use strictures 2;
 use Carp                     qw/croak/;
 use File::Spec::Functions    qw/catfile/;
 use FindBin; FindBin->again;
 use Mojo::Util               qw/trim/;
 
-use Moo;
-use namespace::clean;
-
-has _tips => (
-    is      => 'lazy',
+use Mew;
+has _tips => Ref['ARRAY'], (
+    is => 'lazy',
     default => sub { shift->_load_tip_file },
 );
 
-has _tip_file => (
-    is       => 'lazy',
-    init_arg => 'tip_file',
+has _tip_file => Str, (
+    is => 'lazy',
     default  =>  sub {
         $ENV{MODULESPERL6_TIP_FILE}
             // catfile $FindBin::Bin, qw/.. site-tips.txt/;

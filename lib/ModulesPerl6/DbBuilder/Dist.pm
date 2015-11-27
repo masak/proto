@@ -1,10 +1,7 @@
 package ModulesPerl6::DbBuilder::Dist;
 
-use strictures 2;
-use Types::Standard qw/InstanceOf  Str/;
 use ModulesPerl6::DbBuilder::Log;
-use Moo;
-use namespace::clean;
+use Mew;
 use Module::Pluggable search_path => ['ModulesPerl6::DbBuilder::Dist::Source'],
                       sub_name    => '_sources',
                       require     => 1;
@@ -13,33 +10,8 @@ use Module::Pluggable search_path
                       sub_name    => '_postprocessors',
                       require     => 1;
 
-has _build_id => (
-    init_arg => 'build_id',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _logos_dir => (
-    init_arg => 'logos_dir',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
-
-has _dist_db => (
-    init_arg => 'dist_db',
-    is       => 'ro',
-    isa      => InstanceOf['ModulesPerl6::Model::Dists'],
-    required => 1,
-);
-
-has _meta_url => (
-    init_arg => 'meta_url',
-    is       => 'ro',
-    isa      => Str,
-    required => 1,
-);
+has [qw/_build_id  _logos_dir  _meta_url/] => Str;
+has _dist_db => InstanceOf['ModulesPerl6::Model::Dists'];
 
 #########################
 

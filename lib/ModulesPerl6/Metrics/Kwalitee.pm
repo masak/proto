@@ -1,6 +1,6 @@
 package ModulesPerl6::Metrics::Kwalitee;
 
-use Mojo::Base -base;
+use Mew;
 
 sub kwalitee {
     100; # TODO: add proper calculations

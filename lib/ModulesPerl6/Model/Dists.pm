@@ -1,7 +1,5 @@
 package ModulesPerl6::Model::Dists;
 
-use Mojo::Base -base;
-
 use Carp             qw/croak/;
 use File::Spec::Functions qw/catfile/;
 use FindBin; FindBin->again;
@@ -9,17 +7,25 @@ use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::Dists::Schema;
 use ModulesPerl6::Metrics::Kwalitee;
+use Mew;
 
-has db_file => sub {
-    $ENV{MODULESPERL6_DB_FILE}// catfile $FindBin::Bin, qw/.. modulesperl6.db/;
-};
+has db_file => Str | InstanceOf['File::Temp'], (
+    is      => 'lazy',
+    default => sub {
+        $ENV{MODULESPERL6_DB_FILE}
+            // catfile $FindBin::Bin, qw/.. modulesperl6.db/;
+    }
+);
 
-has _db     => sub {
-    ModulesPerl6::Model::Dists::Schema->connect(
-        'dbi:SQLite:' . shift->db_file,
-        '', '', { sqlite_unicode => 1 },
-    );
-};
+has _db => (
+    is      => 'lazy',
+    default => sub {
+        ModulesPerl6::Model::Dists::Schema->connect(
+            'dbi:SQLite:' . shift->db_file,
+            '', '', { sqlite_unicode => 1 },
+        );
+    }
+);
 
 sub _find {
     my $self   = shift;

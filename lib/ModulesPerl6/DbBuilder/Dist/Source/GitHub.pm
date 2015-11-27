@@ -1,6 +1,5 @@
 package ModulesPerl6::DbBuilder::Dist::Source::GitHub;
 
-use strictures 2;
 use base 'ModulesPerl6::DbBuilder::Dist::Source';
 
 use Carp       qw/croak/;
@@ -10,11 +9,10 @@ use Time::Moment;
 
 use ModulesPerl6::DbBuilder::Log;
 
-use Moo;
-use namespace::clean;
+use Mew;
 use experimental 'postderef';
 
-has _pithub => (
+has _pithub => InstanceOf['Pithub'], (
     is => 'lazy',
     default => sub {
         my $self = shift;
@@ -28,7 +26,7 @@ has _pithub => (
     },
 );
 
-has _token => (
+has _token => Str, (
     is => 'lazy',
     default => sub {
         my $file = $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} // 'github-token';
