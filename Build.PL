@@ -48,6 +48,7 @@ my $build = Module::Build->new(
       'Test::Mojo::WithRoles' => '0.02',
       'Test::More' => 0,
       'Test::Most' => '0.34',
+      'Test::Output' => '1.03',
       'SQL::Translator' => '0.11021',
       'base' => 0,
       'blib' => '1.01',
