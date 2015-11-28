@@ -3,13 +3,14 @@
 use strict;
 use warnings FATAL => 'all';
 
+use t::Helper;
 use Test::Most;
 use Test::Output qw/combined_from/;
 
 BEGIN { use_ok 'ModulesPerl6::DbBuilder::Log' };
 
 my ( $out, $ret );
-my $time_stamp_re = qr/\[\w{3} \w{3} \d\d? \d{2}:\d{2}:\d{2} \d{4}\]/;
+my $time_stamp_re = t::Helper::time_stamp_re;
 
 for ( qw/debug info warn error/ ) {
     $out = combined_from sub { $ret = log $_ => "This is $_ log"; };

@@ -16,7 +16,7 @@ END { unlink $db_file };
 
 my $m = ModulesPerl6::Model::Dists->new( db_file => $db_file );
 my $logos_dir = tempdir CLEANUP => 1;
-my $time_stamp_re = qr/\[\w{3} \w{3} \d\d? \d{2}:\d{2}:\d{2} \d{4}\]/;
+my $time_stamp_re = t::Helper::time_stamp_re;
 
 subtest '404 on META file' => sub {
     my @ar = (

@@ -24,6 +24,8 @@ sub setup_db_file {
     return $db_file;
 }
 
+sub time_stamp_re { qr/\[\w{3} \w{3} \d\d? \d{2}:\d{2}:\d{2} \d{4}\]/ }
+
 sub dist_in_data {
     return (
         {
