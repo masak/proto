@@ -49,7 +49,7 @@ sub run {
     my @metas = $self->_metas;
     for my $idx ( 0 .. $#metas ) {
         try {
-            print "---\n";
+            warn "---\n";
             log info => 'Processing dist ' . ($idx+1) . ' of ' . @metas;
             $self->_model_dists->add(
                 ModulesPerl6::DbBuilder::Dist->new(
@@ -71,7 +71,7 @@ sub run {
         };
     }
 
-    print "---\n---\n";
+    warn "---\n---\n";
     log info => 'Finished building all dists. Performing cleanup.';
 
     $self->_remove_old_dists( $build_id )
