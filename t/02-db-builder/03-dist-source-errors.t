@@ -79,8 +79,7 @@ subtest 'JSON Parse errors' => sub {
         $time_stamp_re\Q [info] Parsing META file\E \s
         $time_stamp_re\Q [error] Failed to parse: JSON error: malformed \E
             \QJSON string,\E .+? \Q"bar 42 lulz YOU GOT ...") \E
-            \Qat /home/zoffix/perl5/perlbrew/perls/perl-5.22.0/lib/site_perl\E
-            \Q/5.22.0/JSON/Meth.pm line 34.\E \s
+            at \s .+? \QJSON/Meth.pm line \E \d+\. \s
     $}x, 'Output from says we got a JSON parse error';
 };
 
