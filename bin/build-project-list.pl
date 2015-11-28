@@ -27,6 +27,8 @@ unless ( flock DATA, LOCK_EX | LOCK_NB ) {
 my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
 my $interval          = 5;
+my $logos_dir         = LOGOS_DIR;
+
 GetOptions(
     'github-token-file=s' => \$github_token_file,
     'help|?'              => \my $help,
@@ -34,6 +36,7 @@ GetOptions(
     'man'                 => \my $man,
     'meta-list=s'         => \$meta_list,
     'limit=i'             => \my $limit,
+    'logos_dir=s'         => \$logos_dir,
     'restart-app'         => \my $restart_app,
 ) or pod2usage 2;
 
@@ -47,7 +50,7 @@ ModulesPerl6::DbBuilder->new(
     db_file           => DB_FILE,
     interval          => $interval,
     limit             => $limit,
-    logos_dir         => LOGOS_DIR,
+    logos_dir         => $logos_dir,
     meta_list         => $meta_list,
     restart_app       => $restart_app,
 )->run;
@@ -75,6 +78,7 @@ __END__
    --help
    --interval=N
    --limit=N
+   --logos_dir=DIR
    --man
    --meta-list=FILE
    --meta-list=URL
@@ -84,7 +88,8 @@ __END__
    -g=FILE
    -h
    -i=N
-   -l=N
+   -li=N
+   -lo=DIR
    -ma
    -me=FILE
    -me=URL
@@ -113,6 +118,11 @@ rate-limit of 5,000 requests per hour, when script is running continuously.
 
 Limit build to at most C<N> number of modules. This is useful for debugging
 purposes.
+
+=item B<--logos_dir=DIR>
+
+Path where to download distribution logotypes to. B<Defaults to:>
+C<public/content-pics/dist-logos>
 
 =item B<--man>
 
