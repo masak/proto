@@ -310,6 +310,15 @@ KEEP in the database. Any build IDs that do not match this will be deleted.
 A likely usage of this would be to call this method after rebuilding
 the database to remove any dists that were not in the new build list.
 
+=head2 C<salvage_build>
+
+    $m->salvage_build( $dist_url, $new_build_id );
+
+B<Takes> a URL to dist's repository along with a build ID string and updates
+the build ID for that distribution. This method is useful during database
+builds where building a distribution fails for whatever reason, but
+you wish to NOT remove it from the database yet.
+
 =head1 PRIVATE ATTRIBUTES
 
 B<These attributes are documented for developers working on this module.

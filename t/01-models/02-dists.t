@@ -77,4 +77,23 @@ is $m->remove_old('rvOZAHmQ5RGKE79B+wjaYA=='), 1,
 is_deeply $m->find, [],
     'remove_old tossed dists that did not have correct build ID';
 
+subtest 'Test salvage_build method' => sub {
+    $m->add( t::Helper::dist_in_data );
+    is_deeply $m->find, [$dist1, $dist2], 're-add dists into database';
+
+    is_deeply [$m->salvage_build], [],
+        '->salvage_build returns empty list without correct args';
+    is_deeply [$m->salvage_build('fake-url')], [],
+        '->salvage_build returns empty list without correct args';
+
+    is $m->salvage_build( $dist1->{url}, 'new-build-id'), 1,
+        '->salvage_build with correct arguments returns 1';
+
+    is $m->remove_old('new-build-id'), 1,
+        'purge all dists with old build ID; that should delete one dist';
+
+    my %mod_dist1 = ( %$dist1, build_id => 'new-build-id' );
+    is_deeply $m->find, [\%mod_dist1], 'correct dists remain in the database';
+};
+
 done_testing;
