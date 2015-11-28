@@ -3,11 +3,13 @@
 use strict;
 use warnings FATAL => 'all';
 
+use File::Spec::Functions qw/catfile/;
 use Test::Most;
 use Test::Output qw/combined_from/;
 use t::Helper;
 use File::Temp qw/tempdir/;
 use ModulesPerl6::Model::Dists;
+BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist::Source'         };
 BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist::Source::GitHub' };
 
 my $db_file = t::Helper::setup_db_file;
@@ -16,6 +18,18 @@ END { unlink $db_file };
 my $m = ModulesPerl6::Model::Dists->new( db_file => $db_file );
 my $logos_dir = tempdir CLEANUP => 1;
 my $time_stamp_re = qr/\[\w{3} \w{3} \d\d? \d{2}:\d{2}:\d{2} \d{4}\]/;
+
+
+subtest 'Not overridden methods from baseclass' => sub {
+    my $s = ModulesPerl6::DbBuilder::Dist::Source->new(
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                  . 'perl6-modules.perl6.org-test1/master/META.info-no-author',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    );
+    throws_ok { $s->load } qr/Unimplemented/, '->load throws';
+    throws_ok { $s->re   } qr/Unimplemented/, '->re throws';
+};
 
 subtest 'Repo without a README, tests, or logotype' => sub {
     my @ar = (
@@ -63,7 +77,7 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         author_id     => 'Zoffix Znet',
         name          => 'TestRepo1',
         kwalitee      => 100,
-        date_updated  => 1448202981,
+        date_updated  => 1448665634,
         issues        => 2,
         travis_status => 'not set up',
         stars         => 1,
@@ -72,6 +86,85 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         build_id      => '42',
         description   => 'Test dist for modules.perl6.org build script'
     }, 'data in db matches expectations';
+    $m->remove({name => 'TestRepo1'});
+};
+
+subtest 'Repo without an author field' => sub {
+    my @ar = (
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                  . 'perl6-modules.perl6.org-test1/master/META.info-no-author',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    );
+
+    my $dist;
+    my $out = combined_from sub{
+        $dist = eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from \E
+        \Qhttps://raw.githubusercontent.com/zoffixznet/perl6-modules.perl6.\E
+        \Qorg-test1/master/META.info-no-author\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
+        $time_stamp_re\Q [info] Dist has new commits. Fetching more info.\E \s
+    $}x, 'Output from loader matches';
+
+    is $dist->{_builder}{repo_user}, 'zoffixznet', 'repo user is correct';
+    is $dist->{author_id},           'zoffixznet', 'author_id is correct';
+};
+
+subtest 'Downloading logotype' => sub {
+    my @ar = (
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                        . 'perl6-modules.perl6.org-test3/master/META.info',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    );
+
+    my $out = combined_from sub{
+        eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from \E
+        \Qhttps://raw.githubusercontent.com/zoffixznet/perl6-modules.perl6.\E
+        \Qorg-test3/master/META.info\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
+        $time_stamp_re\Q [info] Dist has new commits. Fetching more info.\E \s
+        $time_stamp_re\Q [info] Dist has a logotype of size 160 bytes.\E \s
+        $time_stamp_re\Q [info] Did not find cached dist logotype. \E
+            \QDownloading.\E \s
+    $}x, 'Output from loader matches';
+
+    ok -e catfile($logos_dir, 's-TestRepo3.png'), 'logo file was downloaded';
+    is -s catfile($logos_dir, 's-TestRepo3.png'), 160, 'size of logo matches';
+
+    diag 'Try again; we must not re-download logotype';
+    $out = combined_from sub{
+        eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from \E
+        \Qhttps://raw.githubusercontent.com/zoffixznet/perl6-modules.perl6.\E
+        \Qorg-test3/master/META.info\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
+        $time_stamp_re\Q [info] Dist has new commits. Fetching more info.\E \s
+        $time_stamp_re\Q [info] Dist has a logotype of size 160 bytes.\E \s
+    $}x, 'Output from loader matches';
 };
 
 done_testing;

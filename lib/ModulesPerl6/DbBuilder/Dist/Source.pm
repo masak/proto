@@ -12,7 +12,7 @@ use Mew;
 has _logos_dir => Str;
 has _dist_db   => InstanceOf['ModulesPerl6::Model::Dists'];
 has _meta_url  => Str;
-has _dist      => Ref['HASH'], (
+has _dist      => Maybe[Ref['HASH']], (
     is      => 'lazy',
     default => sub {
         my $self = shift; $self->_parse_meta( $self->_download_meta );
@@ -114,8 +114,8 @@ sub _save_logo {
 
     unless ( $tx->success ) {
         my $err = $tx->error;
-        log error => "$err->{code} response: $err->{message}" if $err->{code};
-        log error => "Connection error: $err->{message}";
+        log error => $err->{code} ? "$err->{code} response: $err->{message}"
+                                  : "Connection error: $err->{message}";
         return;
     }
 

@@ -3,6 +3,7 @@
 use strict;
 use warnings FATAL => 'all';
 
+use Pithub;
 use Test::Most;
 use Test::Output qw/combined_from/;
 use t::Helper;
@@ -111,6 +112,38 @@ subtest 'No dist name in META file' => sub {
 
     is_deeply $m->find({name => 'N/A'})->to_array, [],
         'data in db matches expectations';
+};
+
+subtest 'Fail to get repo info through API' => sub {
+    my @ar = (
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                        . 'perl6-modules.perl6.org-test1/master/META.info',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+        pithub => Pithub->new( # meddle with privates to simulate failure
+            user => 'definitely-not-zoffix',
+            repo => 'not valid repo',
+        ),
+    );
+
+    my $dist;
+    my $out = combined_from sub{
+        $dist = eval {
+            ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(@ar)->load
+        } or do { print "Failed to get a dist! $@"; return; };
+    };
+
+    like $out, qr{
+        $time_stamp_re\Q [info] Fetching distro info and commits\E \s
+        $time_stamp_re\Q [info] Downloading META file from https://raw.\E
+            \Qgithubusercontent.com/zoffixznet/perl6-modules.perl6.org-\E
+            \Qtest1/master/META.info\E \s
+        $time_stamp_re\Q [info] Parsing META file\E \s
+        $time_stamp_re\Q [warn] Required `perl` field is missing\E \s
+        $time_stamp_re\Q [error] Error accessing GitHub API. \E
+            \QHTTP Code: 404\E \s
+        \QFailed to get a dist!\E \s
+    $}x, 'Output matches expectations';
 };
 
 done_testing;

@@ -44,6 +44,9 @@ sub load {
     log info => 'Fetching distro info and commits';
     my $dist    = $self->_dist or return;
     my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
+    # uncoverable branch true
+    # uncoverable condition left
+    # uncoverable condition false
     my $commits = $self->_repo($self->_pithub->repos->commits->list) or return;
 
     %$dist      = (
