@@ -72,10 +72,7 @@ sub _fill_missing {
     delete @$dist{qw/author_id  stars  issues  date_updated  date_added/};
     %$dist = (
         name          => 'N/A',
-        author_id     =>
-            $dist->{author}
-            // (ref $dist->{authors} ? $dist->{authors}[0] : $dist->{authors})
-            // 'N/A',
+        author_id     => $self->_get_author( $dist ),
         url           => 'N/A',
         description   => 'N/A',
         stars         => 0,
@@ -143,6 +140,14 @@ sub _set_tests {
     $dist->{has_tests} = grep( $tests{$_}, @files ) ? 1 : 0;
 
     $self;
+}
+
+sub _get_author {
+    my ( $self, $dist ) = @_;
+    my $author = $dist->{author} // $dist->{authors} // 'N/A';
+    $author = $author->[0] if ref $author eq 'ARRAY';
+
+    return $author;
 }
 
 sub load { ... }
@@ -413,6 +418,15 @@ downloads the dist's L<META file|http://design.perl6.org/S22.html#META6.json>
 and returns its contents. On error, logs it with
 L<ModulesPerl6::DbBuilder::Log> and returns either C<undef> or an empty list,
 depending on context. See also L</_dist>.
+
+=head2 C<_get_author>
+
+    my $author_id = $self->_get_author( $dist );
+
+I<Your subclass will likely never have to use this method>. This method
+looks through the keys in the hashref given as the argument, which must
+represent the L<META file|http://design.perl6.org/S22.html#META6.json>,
+and returns the author of the dist or C<N/A> if none were found.
 
 =head2 C<_parse_meta>
 
