@@ -28,6 +28,7 @@ my $build = Module::Build->new(
       'IPC::Open3' => 0,
       'Import::Into' => 0,
       'JSON::Meth' => 1.001006,
+      'LWP::UserAgent' => 0,
       'Mew' => 1.001002,
       'Mojo::Base' => 0,
       'Mojo::Collection' => 0,

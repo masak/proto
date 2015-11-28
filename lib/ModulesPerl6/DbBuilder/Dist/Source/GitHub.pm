@@ -5,6 +5,7 @@ use base 'ModulesPerl6::DbBuilder::Dist::Source';
 use Carp       qw/croak/;
 use Mojo::Util qw/slurp  decode/;
 use Pithub;
+use LWP::UserAgent;
 use Time::Moment;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -22,6 +23,10 @@ has _pithub => InstanceOf['Pithub'], (
             user  => $user,
             repo  => $repo,
             token => $self->_token,
+            ua    => LWP::UserAgent->new(
+                agent   => 'Perl 6 Ecosystem Builder',
+                timeout => 20,
+            ),
         );
     },
 );
