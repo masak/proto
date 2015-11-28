@@ -55,7 +55,7 @@ sub repo {
     return $self->redirect_to( $dist->{url} );
 }
 
-sub kwalitee {
+sub koalitee {
     shift->redirect_to('not_implemented_yet');
 }
 
@@ -80,7 +80,7 @@ ModulesPerl6::Controller::Root - controller handling a few root-space pages
     my $r = $self->routes;
     $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
     $r->get('/dist/:dist')->to('root#dist')->name('dist');
-    $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+    $r->get('/koalitee/:dist')->to('root#koalitee')->name('koalitee');
     $r->get('/total')->to('root#total')->name('total');
 
     $r->any('/not_implemented_yet')
@@ -113,11 +113,11 @@ Render dist page (B<NIY>; currently just a redirect to GitHub repo).
 Expects the name of the dist in C<dist>
 L<Mojolicious::Controller/"stash"> parameter.
 
-=head2 C<kwalitee>
+=head2 C<koalitee>
 
-    $r->get('/kwalitee/:dist')->to('root#kwalitee')->name('kwalitee');
+    $r->get('/koalitee/:dist')->to('root#koalitee')->name('koalitee');
 
-Render page displaying Kwalitee metrics of a dist (B<NIY>).
+Render page displaying Koalitee metrics of a dist (B<NIY>).
 Expects the name of the dist in C<dist>
 L<Mojolicious::Controller/"stash"> parameter.
 

@@ -6,7 +6,7 @@ use FindBin; FindBin->again;
 use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::Dists::Schema;
-use ModulesPerl6::Metrics::Kwalitee;
+use ModulesPerl6::Metrics::Koalitee;
 use Mew;
 
 has db_file => Str | InstanceOf['File::Temp'], (
@@ -59,7 +59,7 @@ sub add {
         $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
-        $dist->{kwalitee} //= ModulesPerl6::Metrics::Kwalitee->new->kwalitee({
+        $dist->{koalitee} //= ModulesPerl6::Metrics::Koalitee->new->koalitee({
             map +( $_ => $dist->{$_} ),
                 qw/has_readme  panda  has_tests  travis/,
         });
@@ -71,7 +71,7 @@ sub add {
             },
             dist_build_id => { id => $dist->{build_id} },
             map +( $_ => $dist->{$_} ),
-                qw/name  url  description  stars  issues  kwalitee
+                qw/name  url  description  stars  issues  koalitee
                     date_updated  date_added/,
         });
     }
@@ -259,7 +259,7 @@ Searches the database for dists that match given criteria. B<Returns>
 a, possibly empty, L<Mojo::Collection> object containing found dists
 as hashrefs. Each hashref will contain the same keys and type of values
 as were given to L</add> method, B<except> the L</has_readme>, L</has_tests>,
-and L</panda> metrics are combined into a Kwalitee metric ranging from
+and L</panda> metrics are combined into a Koalitee metric ranging from
 C<0> to C<100>.
 
 B<Without arguments>, returns all dists in the database.

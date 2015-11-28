@@ -7,7 +7,7 @@ column         build_id      => { data_type => 'text', is_foreign_key => 1 };
 column         travis_status => { data_type => 'text', is_foreign_key => 1 };
 column         url           => { data_type => 'text'                      };
 column         description   => { data_type => 'text'                      };
-column         kwalitee      => { data_type => 'integer'                   };
+column         koalitee      => { data_type => 'integer'                   };
 column         stars         => { data_type => 'integer'                   };
 column         issues        => { data_type => 'integer'                   };
 column         date_updated  => { data_type => 'integer'                   };
