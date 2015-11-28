@@ -83,7 +83,7 @@ sub _fill_missing {
         %{ $old_dist_data || {} },
         %$dist,
 
-        # Koalitee metrics
+        # Koalatee metrics
         has_readme    => 0,
         has_tests     => 0,
         panda         => $dist->{'source-url'} && $dist->{provides}
@@ -207,10 +207,10 @@ It will be deleted after all postprocessors are run, before dist is added
 to the database. Check the documentation for the postprocessor you're
 interested in to learn how to activate its run for your dists.
 
-=head2 C<koalitee> key
+=head2 C<koalatee> key
 
-B<NOTE:> if the C<koalitee> L</_dist> key is present when your subclass
-finishes building dist info, B<its value will be used and all other Koalitee
+B<NOTE:> if the C<koalatee> L</_dist> key is present when your subclass
+finishes building dist info, B<its value will be used and all other Koalatee
 metrics will be ignored.> C<delete> it whenever you're recalculating individual
 metrics, since it will be present if the dist is already in the database.
 
@@ -324,7 +324,7 @@ The keys and default values in the C<_dist> hashref are as follows:
         %{ $old_dist_data || {} },
         %$dist,
 
-        # Koalitee metrics
+        # Koalatee metrics
         has_readme    => 0,
         has_tests     => 0,
         panda         => $dist->{'source-url'} && $dist->{provides}
@@ -337,7 +337,7 @@ The keys and default values in the C<_dist> hashref are as follows:
 
 First of all, all data from
 L<META file|http://design.perl6.org/S22.html#META6.json> will be present
-(this excludes keys we use during build process, like Koalitee metrics and
+(this excludes keys we use during build process, like Koalatee metrics and
 private L</_builder> store).
 
 =head3 C<_builder>
@@ -366,20 +366,20 @@ for L<ModulesPerl6::Model::Dists/find> for details.
 
 If the dist already exists in the databse, its info will override the defaults
 above. See L<ModulesPerl6::Model::Dists/find> for details on what those keys
-are. B<NOTE:> if the C<koalitee> key is present when your subclass finishes
-building dist info, B<its value will be used and all other Koalitee metrics
+are. B<NOTE:> if the C<koalatee> key is present when your subclass finishes
+building dist info, B<its value will be used and all other Koalatee metrics
 will be ignored>
 
-=head3 Koalitee metrics
+=head3 Koalatee metrics
 
     has_readme    => 0,
     has_tests     => 0,
     panda         => $dist->{'source-url'} && $dist->{provides}
                         ? 2 : $dist->{'source-url'} ? 1 : 0,
 
-B<EXPERIMENTAL!> The Koalitee metrics will be set as above (and if the
+B<EXPERIMENTAL!> The Koalatee metrics will be set as above (and if the
 dist is already in the database, cached values will be used). This feature
-is currently experimental, pending implementation of the Koalitee system.
+is currently experimental, pending implementation of the Koalatee system.
 
 =head3 C<_dist_db>
 
@@ -476,7 +476,7 @@ returns C<undef> or an empty list, depending on context.
     $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
 
 Takes a list of filenames and checks whether any of them looks like a repo
-README file. If it succeeds, it sets C<has_readme> Koalitee metric
+README file. If it succeeds, it sets C<has_readme> Koalatee metric
 in L</_dist> to true. Returns its invocant.
 
 =head2 C<_set_tests>
@@ -484,7 +484,7 @@ in L</_dist> to true. Returns its invocant.
     $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
 
 Takes a list of directory names and checks whether any of them look like a
-directory containing tests. If it succeeds, it sets C<has_tests> Koalitee
+directory containing tests. If it succeeds, it sets C<has_tests> Koalatee
 metric in L</_dist> to true. Returns its invocant.
 
 =head1 CONTACT INFORMATION

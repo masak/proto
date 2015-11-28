@@ -50,7 +50,7 @@
         <tr>
           <th class="name">Name</th>
           <th class="description">Description</th>
-          <th class="koalitee">Koalitee</th>
+          <th class="koalatee">Koalatee</th>
           <th class="travis">Travis</th>
           <th class="stars">Stars</th>
           <th class="issues">Issues</th>
@@ -70,9 +70,9 @@
               </a>
             </td>
             <td class="desc"><%= $dist->{description} %></td>
-            <td class="koalitee">
-              <a href="<%= url_for('koalitee', dist => $dist->{name} ) %>"
-                ><%= $dist->{koalitee} %>%</a>
+            <td class="koalatee">
+              <a href="<%= url_for('koalatee', dist => $dist->{name} ) %>"
+                ><%= $dist->{koalatee} %>%</a>
             </td>
             <td class="travis travis-<%= $dist->{travis_status} %>">
               <a href="<%= $dist->{travis_url} %>"

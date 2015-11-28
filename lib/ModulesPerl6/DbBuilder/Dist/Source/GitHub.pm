@@ -89,8 +89,8 @@ sub load {
     );
 
     # ::Dists model will ignore other metrics if we explicitly tell it the
-    # koalitee of a distro;
-    delete $dist->{koalitee};
+    # koalatee of a distro;
+    delete $dist->{koalatee};
     $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
     $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
 

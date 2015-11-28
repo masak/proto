@@ -1,8 +1,8 @@
-package ModulesPerl6::Metrics::Koalitee;
+package ModulesPerl6::Metrics::Koalatee;
 
 use Mew;
 
-sub koalitee {
+sub koalatee {
     100; # TODO: add proper calculations
 }
 
