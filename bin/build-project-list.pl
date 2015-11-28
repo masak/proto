@@ -3,6 +3,7 @@
 use strictures 2;
 use 5.014;
 
+use Fcntl qw/LOCK_EX  LOCK_NB/;
 use File::Spec::Functions qw/catdir  catfile/;
 use Getopt::Long;
 use Pod::Usage;
@@ -16,6 +17,11 @@ use constant APP               => 'ModulesPerl6.pl';
 use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
+
+unless ( flock DATA, LOCK_EX | LOCK_NB ) {
+    print "Found duplicate script run. Stopping\n" if $ENV{MODULESPERL6_DEBUG};
+    exit;
+}
 
 my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
@@ -44,6 +50,11 @@ ModulesPerl6::DbBuilder->new(
     meta_list         => $meta_list,
     restart_app       => $restart_app,
 )->run;
+
+### DO NOT REMOVE THE FOLLOWING LINES from __DATA__ ###
+__DATA__
+This exists to allow the locking code at the beginning of the file to work.
+DO NOT REMOVE THESE LINES!
 
 __END__
 
