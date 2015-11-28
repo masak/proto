@@ -40,10 +40,10 @@ sub _load_from_source {
     my $self = shift;
 
     my $url = $self->_meta_url;
-    for my $source ( $self->_sources ) {
-        next unless $url =~ $source->re;
-        log info => "Using $source to load $url";
-        my $dist_source = $source->new(
+    for my $candidate ( $self->_sources ) {
+        next unless $url =~ $candidate->re;
+        log info => "Using $candidate to load $url";
+        my $dist_source = $candidate->new(
             meta_url  => $url,
             logos_dir => $self->_logos_dir,
             dist_db   => $self->_dist_db,
