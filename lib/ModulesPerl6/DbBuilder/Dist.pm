@@ -43,11 +43,14 @@ sub _load_from_source {
     for my $source ( $self->_sources ) {
         next unless $url =~ $source->re;
         log info => "Using $source to load $url";
-        my $dist = $source->new(
+        my $dist_source = $source->new(
             meta_url  => $url,
             logos_dir => $self->_logos_dir,
             dist_db   => $self->_dist_db,
-        )->load or return;
+        )
+        my $dist = $dist_source->load
+            return $self->_salvage_build( $dist_source );
+
         $dist->{build_id} = $self->_build_id;
 
         for my $postprocessor ( $self->_postprocessors ) {
@@ -63,6 +66,16 @@ sub _load_from_source {
     log error => "Could not find a source module that could handle dist URL "
         . "[$url]\nHere are all the source modules currently available:\n"
         . join "\n", map "$_ looks for " . $_->re, $self->_sources;
+
+    return;
+}
+
+sub _salvage_build {
+    my ( $self, $dist_source ) = @_;
+
+    my $dist = $dist_source->_dist;
+    $self->_dist_db->salvage_build( $dist->{url}, $self->_build_id )
+        if ref $dist and length $dist->{url};
 
     return;
 }

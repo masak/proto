@@ -111,6 +111,16 @@ sub remove_old {
     $num_deleted;
 }
 
+sub salvage_build {
+    my ( $self, $url, $new_build_id ) = @_;
+    return unless length $url and length $new_build_id;
+
+    $self->_db->resultset('Dist')->search({ url => $url })
+        ->update_all({ build_id => $new_build_id });
+
+    return 1;
+}
+
 1;
 
 __END__
