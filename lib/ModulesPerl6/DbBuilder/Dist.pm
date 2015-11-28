@@ -47,9 +47,10 @@ sub _load_from_source {
             meta_url  => $url,
             logos_dir => $self->_logos_dir,
             dist_db   => $self->_dist_db,
-        )
+        );
+
         my $dist = $dist_source->load
-            return $self->_salvage_build( $dist_source );
+            or return $self->_salvage_build( $dist_source );
 
         $dist->{build_id} = $self->_build_id;
 

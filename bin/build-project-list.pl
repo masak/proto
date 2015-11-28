@@ -36,7 +36,7 @@ GetOptions(
     'man'                 => \my $man,
     'meta-list=s'         => \$meta_list,
     'limit=i'             => \my $limit,
-    'logos_dir=s'         => \$logos_dir,
+    'logos-dir=s'         => \$logos_dir,
     'restart-app'         => \my $restart_app,
 ) or pod2usage 2;
 
@@ -119,7 +119,7 @@ rate-limit of 5,000 requests per hour, when script is running continuously.
 Limit build to at most C<N> number of modules. This is useful for debugging
 purposes.
 
-=item B<--logos_dir=DIR>
+=item B<--logos-dir=DIR>
 
 Path where to download distribution logotypes to. B<Defaults to:>
 C<public/content-pics/dist-logos>
