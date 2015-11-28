@@ -18,6 +18,7 @@ use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
 
+### This flock exists to allow only one copy of the script to run at a time
 unless ( flock DATA, LOCK_EX | LOCK_NB ) {
     print "Found duplicate script run. Stopping\n" if $ENV{MODULESPERL6_DEBUG};
     exit;
@@ -52,6 +53,7 @@ ModulesPerl6::DbBuilder->new(
 )->run;
 
 ### DO NOT REMOVE THE FOLLOWING LINES from __DATA__ ###
+### This exists to allow only one copy of the script to run at a time
 __DATA__
 This exists to allow the locking code at the beginning of the file to work.
 DO NOT REMOVE THESE LINES!
