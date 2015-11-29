@@ -49,6 +49,7 @@ sub startup {
         /js/jquery-deparam.js
         /js/main.js
     });
+    $self->asset->purge({always => 1}); # clean up old packed files
 
     # HELPERS
     $self->helper( dists => sub {
