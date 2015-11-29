@@ -44,6 +44,8 @@ sub run {
     log info => "Starting build $build_id";
 
     $self->_deploy_db;
+
+    log info => "Will be saving images to " . $self->_logos_dir;
     make_path $self->_logos_dir => { mode => 0755 };
 
     my @metas = $self->_metas;
