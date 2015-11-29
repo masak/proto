@@ -56,7 +56,7 @@ sub load {
 
     %$dist      = (
         %$dist,
-        url         => $repo->{url},
+        url         => $repo->{html_url},
         issues      => $repo->{open_issues_count} // 0,
         stars       => $repo->{stargazers_count}  // 0,
     );

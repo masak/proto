@@ -81,7 +81,7 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         issues        => 2,
         travis_status => 'not set up',
         stars         => 1,
-        url           => 'https://api.github.com/repos/zoffixznet/perl6-'
+        url           => 'https://github.com/zoffixznet/perl6-'
                             . 'modules.perl6.org-test1',
         build_id      => '42',
         description   => 'Test dist for modules.perl6.org build script'
