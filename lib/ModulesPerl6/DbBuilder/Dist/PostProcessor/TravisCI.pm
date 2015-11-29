@@ -46,3 +46,63 @@ sub _get_travis_status {
 }
 
 1;
+
+__END__
+
+=encoding utf8
+
+=for stopwords md dist dists
+
+=head1 NAME
+
+ModulesPerl6::DbBuilder::Dist::PostProcessor::TravisCI - postprocessor that determines Travis build status
+
+=head1 SYNOPSIS
+
+    # In your Dist Source:
+    $dist->{_builder}{is_fresh}   = 1; # Has new commits
+    $dist->{_builder}{has_travis} = 1; # Dist has .travis.yml file
+
+    # After preprocessor is run:
+    say $dist->{travis_status}; # says 'passing' for passing Travis builds
+
+=head1 DESCRIPTION
+
+This is a subclass of L<ModulesPerl6::DbBuilder::Dist::PostProcessor> that
+implements fetching Travis build information.
+
+=head1 EXPECTED DIST KEYS
+
+=head2 C<{_builder}{is_fresh}>
+
+    $dist->{_builder}{is_fresh} = 1;
+
+This boolean key indicates a dist has fresh commits, so we should run the
+postprocessor to obtain new Travis info. If this is not set, the postprocessor
+won't run.
+
+=head2 C<{_builder}{has_travis}>
+
+    $dist->{_builder}{has_travis} = 1;
+
+This boolean key indicates the dist has a C<.travis.yml> file. If this is not
+set, the postprocessor won't run.
+
+=head1 SET DIST KEYS
+
+=head2 C<{travis_status}>
+
+    say $dist->{travis_status};
+
+After the postprocessor finishes it will set the C<travis_status> dist key
+to the string indicating the Travis build status (e.g. C<failing>,
+C<passing>, C<error>, etc.)
+
+=head1 CONTACT INFORMATION
+
+Original version of this module was written by Zoffix Znet
+(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
+
+=head1 LICENSE
+
+You can use and distribute this module under the same terms as Perl itself.

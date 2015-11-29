@@ -207,6 +207,9 @@ It will be deleted after all postprocessors are run, before dist is added
 to the database. Check the documentation for the postprocessor you're
 interested in to learn how to activate its run for your dists.
 
+One of the keys that a Dist Source should try to set is C<{_builder}{is_fresh}>
+that will indicate when the dist has new commits.
+
 =head2 C<koalatee> key
 
 B<NOTE:> if the C<koalatee> L</_dist> key is present when your subclass
