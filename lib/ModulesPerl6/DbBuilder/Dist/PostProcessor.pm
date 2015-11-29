@@ -81,9 +81,8 @@ are passed and no return value is collected. You can obtain the hashref
 containing distribution's information via L<_dist private_method/_dist>
 and you can alter dist's info it by modifying that hashref directly.
 
-It is recommended to make decisions on whether your PostProcessor should run
-based on a specific key present in the L<_builder
-store key|ModulesPerl6::DbBuilder::Dist::Source/_builder>.
+Some Dist Sources may communicate extra information about the dist via
+L<_builder store key|ModulesPerl6::DbBuilder::Dist::Source/_builder>.
 
 =head1 PRIVATE ATTRIBUTES
 
