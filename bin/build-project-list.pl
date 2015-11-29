@@ -49,7 +49,7 @@ $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} = $github_token_file;
 
 ModulesPerl6::DbBuilder->new(
     app               => APP,
-    db_file           => DB_FILE,
+    db_file           => $db_file,
     interval          => $interval,
     limit             => $limit,
     logos_dir         => $logos_dir,
