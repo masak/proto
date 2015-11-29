@@ -31,6 +31,36 @@ subtest 'Not overridden methods from baseclass' => sub {
     throws_ok { $s->re   } qr/Unimplemented/, '->re throws';
 };
 
+subtest 'Private methods' => sub {
+    my $s = ModulesPerl6::DbBuilder::Dist::Source->new(
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                  . 'perl6-modules.perl6.org-test1/master/META.info-no-author',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+        dist      => { my => 'test-dist'},
+    );
+
+    $s->_set_readme( qw/foo/ );
+    $s->_set_tests(  qw/foo/ );
+    is_deeply $s->_dist, {my => 'test-dist', has_tests => 0, has_readme => 0},
+        'tests/readme are NOT set when files are not present';
+
+    $s->_set_readme( qw/foo README bar/ );
+    $s->_set_tests(  qw/foo tests  bar/ );
+    is_deeply $s->_dist, {my => 'test-dist', has_tests => 1, has_readme => 1},
+        'tests/readme are set when files are present';
+
+    is $s->_get_author({author => 'zoffix'}),
+        'zoffix', 'get author ID from `author` key set to string';
+    is $s->_get_author({author => ['zoffix', 'not zoffix']}),
+        'zoffix', 'get author ID from `author` key set to arrayref';
+    is $s->_get_author({authors => 'zoffix'}),
+        'zoffix', 'get author ID from `authors` key set to string';
+    is $s->_get_author({authors => ['zoffix', 'not zoffix']}),
+        'zoffix', 'get author ID from `authors` key set to arrayref';
+    is $s->_get_author({}), 'N/A', 'no author[s] key is present';
+};
+
 subtest 'Repo without a README, tests, or logotype' => sub {
     my @ar = (
         meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
