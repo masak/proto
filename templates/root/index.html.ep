@@ -1,0 +1,107 @@
+% layout 'default';
+
+<header class="panel panel-primary lead">
+  <div class="panel-heading">
+      <h1 class="panel-title">Perl&nbsp;6 Modules</h1>
+  </div>
+  <div class="panel-body suckin-btm">
+    <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
+        class="pull-right" width=291 height=273>
+    <p>Below you can find a list of the <span class="total_dist_count"
+        ><%= stash 'dists_num' %></span>
+        known Perl 6 modules. All of them
+        have been working on <a href="http://rakudo.org/">Rakudo</a> at
+        some point.
+        These modules can be installed with <a href="https://github.com/tadzik/panda/">panda</a>, a module management tool
+      that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
+        Star</a>.
+    </p>
+    <p>If you want to contribute your own module, please read
+        <a href="http://doc.perl6.org/language/modules">this guide</a>.
+        Missing a module you can't live without? Consider adding it
+        to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
+        file in the Most Wanted repository.
+    </p>
+  </div>
+</header>
+
+<p id="site_tip" class="text-center">
+  <i class="glyphicon glyphicon-info-sign"></i> <%== site_tips->tip %>
+</p>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h2 class="panel-title">Project List</h2>
+  </div>
+
+  <form action="<%= url_for '/' %>" id="search" class="row">
+    <div class="form-group col-sm-8 col-xs-12">
+      <input type="text" id="q" name="q" value="<%= param 'q' %>"
+      class="form-control">
+    </div>
+    <div class="form-group col-sm-4 col-xs-12">
+      <input type="submit" value="Search" class="btn btn-primary btn-block">
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-condensed table-striped panel-body" id="dists">
+      <thead>
+        <tr>
+          <th class="name">Name</th>
+          <th class="description">Description</th>
+          <th class="koalatee">Koalatee</th>
+          <th class="travis">Travis</th>
+          <th class="stars">Stars</th>
+          <th class="issues">Issues</th>
+          <th class="updated">Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        % for my $dist ( items_in 'dists' ) {
+          <tr <%== $dist->{is_hidden} ? 'class="hidden"' : '' %>>
+            <td class="name">
+              <a href="<%= $dist->{url} %>" class="github"></a>
+              <a href="<%= url_for('dist', dist => $dist->{name} ) %>"
+                ><%= $dist->{name} %>
+                % if ( length $dist->{logo} ) {
+                  <i class="dist-logos <%= $dist->{logo} %>"></i>
+                % }
+              </a>
+            </td>
+            <td class="desc"><%= $dist->{description} %></td>
+            <td class="koalatee">
+              <a href="<%= url_for('koalatee', dist => $dist->{name} ) %>"
+                ><%= $dist->{koalatee} %>%</a>
+            </td>
+            <td class="travis travis-<%= $dist->{travis_status} %>">
+              <a href="<%= $dist->{travis_url} %>"
+                >
+                % if ( $dist->{travis_status} eq 'not set up' ) {
+                  <i class="glyphicon glyphicon-question-sign"></i>
+                % }
+                <%= $dist->{travis_status} %>
+              </a>
+            </td>
+            <td class="stars">
+              <a href="<%= $dist->{url} . 'stargazers' %>"
+                ><%= $dist->{stars} %></a>
+            </td>
+            <td class="issues">
+              <a href="<%= $dist->{url} . 'issues' %>"
+                ><%= $dist->{issues} %></a>
+            </td>
+            <td class="updated"><%= $dist->{date_updated} %></td>
+          </tr>
+        % }
+        % unless ( grep ! $_->{is_hidden}, items_in 'dists' ) {
+          <tr>
+            <td colspan="7">
+              <p class="alert alert-danger error">No results were found</p>
+            </td>
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>

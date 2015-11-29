@@ -167,6 +167,11 @@ The modules in this distribution contain embedded POD documentation. To read it,
 $ perldoc lib/ModulesPerl6/Model/Dists.pm
 ```
 
+In `development` [mode](https://metacpan.org/pod/Mojolicious#mode)
+(e.g. run with `morbo` script), you can also view the
+documentation in your browser using the `/perldoc/` URL, e.g.
+L<http://localhost:3333/perldoc/ModulesPerl6::Model::Dists>
+
 ## More
 
 For alternative deployment methods, see http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT
