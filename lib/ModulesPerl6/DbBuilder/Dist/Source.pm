@@ -73,6 +73,7 @@ sub _fill_missing {
     %$dist = (
         name          => 'N/A',
         author_id     => $self->_get_author( $dist ),
+        meta_url      => $self->_meta_url,
         url           => 'N/A',
         description   => 'N/A',
         stars         => 0,
@@ -355,6 +356,7 @@ subclasses and postprocessors, see L</sharing> data during build process>.
         $dist->{author}
         // (ref $dist->{authors} ? $dist->{authors}[0] : $dist->{authors})
         // 'N/A',
+    meta_url      => $self->_meta_url,
     url           => 'N/A',
     description   => 'N/A',
     stars         => 0,

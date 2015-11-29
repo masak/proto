@@ -111,6 +111,8 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         issues        => 2,
         travis_status => 'not set up',
         stars         => 1,
+        meta_url      => 'https://raw.githubusercontent.com/zoffixznet/'
+                            . 'perl6-modules.perl6.org-test1/master/META.info',
         url           => 'https://github.com/zoffixznet/perl6-'
                             . 'modules.perl6.org-test1',
         build_id      => '42',

@@ -71,7 +71,7 @@ sub add {
             },
             dist_build_id => { id => $dist->{build_id} },
             map +( $_ => $dist->{$_} ),
-                qw/name  url  description  stars  issues  koalatee
+                qw/name  meta_url  url  description  stars  issues  koalatee
                     date_updated  date_added/,
         });
     }
@@ -169,7 +169,8 @@ if set, or C<modulesperl6.db>.
 
     $m->add({
         name         => 'Dist1',
-        url          => 'https://github.com/perl6/modules.perl6.org/',
+        meta_url     => 'https://raw.githubusercontent.com/zoffixznet/perl6-Color/master/META.info',
+        url          => 'https://github.com/zoffixznet/perl6-Color',
         description  => 'Test Dist1',
         author_id    => 'Dynacoder',
         has_readme   => 1,
@@ -192,9 +193,14 @@ represents a dist. The keys of the hashref are as follows:
 
 Name of the dist.
 
+=head3 C<meta_url>
+
+URL to the dist's L<META file|http://design.perl6.org/S22.html#META6.json>.
+This is meant to be usable by computers.
+
 =head3 C<url>
 
-URL of the dist's GitHub repo.
+URL of the dist's GitHub repo. This is meant to be usable by humans.
 
 =head3 C<description>
 

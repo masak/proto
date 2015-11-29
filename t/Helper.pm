@@ -30,6 +30,8 @@ sub dist_in_data {
     return (
         {
             name         => 'Dist1',
+            meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
+                                . '/perl6-Color/master/META.info',
             url          => 'https://github.com/perl6/modules.perl6.org/',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',
@@ -45,6 +47,8 @@ sub dist_in_data {
         },
         {
             name         => 'Dist2',
+            meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
+                                . '/perl6-Color/master/META.info',
             url          => 'https://github.com/perl6/ecosystem/',
             description  => 'Test Dist2',
             author_id    => 'Morbo',
@@ -66,6 +70,8 @@ sub dist_out_data {
     return (
         {
             name         => 'Dist1',
+            meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
+                                . '/perl6-Color/master/META.info',
             url          => 'https://github.com/perl6/modules.perl6.org/',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',
@@ -79,6 +85,8 @@ sub dist_out_data {
         },
         {
             name         => 'Dist2',
+            meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
+                                . '/perl6-Color/master/META.info',
             url          => 'https://github.com/perl6/ecosystem/',
             description  => 'Test Dist2',
             author_id    => 'Morbo',

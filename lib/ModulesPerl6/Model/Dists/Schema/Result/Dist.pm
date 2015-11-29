@@ -2,7 +2,8 @@ package ModulesPerl6::Model::Dists::Schema::Result::Dist;
 use     ModulesPerl6::Model::ResultClass;
 
 primary_column name          => { data_type => 'text'                      };
-primary_column author_id     => { data_type => 'text', is_foreign_key => 1 };
+primary_column meta_url      => { data_type => 'text',                     };
+column         author_id     => { data_type => 'text', is_foreign_key => 1 };
 column         build_id      => { data_type => 'text', is_foreign_key => 1 };
 column         travis_status => { data_type => 'text', is_foreign_key => 1 };
 column         url           => { data_type => 'text'                      };
