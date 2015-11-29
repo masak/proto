@@ -43,7 +43,6 @@ my $build = Module::Build->new(
       'POSIX' => 0,
       'Pithub' => '0.01030',
       'Pod::Usage' => '1.67',
-      'Test::LWP::UserAgent' => '0.030',
       'Test::Mojo::Role::Debug' => '1.003004',
       'Test::Mojo::Role::ElementCounter' => '1.001005',
       'Test::Mojo::Role::SubmitForm' => '1.001007',
