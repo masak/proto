@@ -21,7 +21,7 @@ use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
 ### This flock exists to allow only one copy of the script to run at a time
 unless ( flock DATA, LOCK_EX | LOCK_NB ) {
     print "Found duplicate script run. Stopping\n" if $ENV{MODULESPERL6_DEBUG};
-    exit;
+    exit -1;
 }
 
 my $meta_list         = META_LIST_FILE;
