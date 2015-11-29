@@ -28,8 +28,10 @@ my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
 my $interval          = 5;
 my $logos_dir         = LOGOS_DIR;
+my $db_file           = DB_FILE;
 
 GetOptions(
+    'db-file=s'           => \$db_file,
     'github-token-file=s' => \$github_token_file,
     'help|?'              => \my $help,
     'interval=i'          => \$interval,
@@ -73,7 +75,10 @@ __END__
 
 ./bin/build-project-list.pl [options]
 
+ All options are optional.
+
  Options:
+   --db-file=FILE
    --github-token-file=FILE
    --help
    --interval=N
@@ -85,6 +90,7 @@ __END__
    --restart-app
 
    Short form (first letter of the option or more when need to disambiguate):
+   -d=FILE
    -g=FILE
    -h
    -i=N
@@ -98,6 +104,12 @@ __END__
 =head1 OPTIONS
 
 =over 8
+
+=item B<--db-file=FILE>
+
+An SQLite file where the modules database will be written. Will be created
+if does not exist. B<Default to:> C<modulesperl6.db> in the current
+directory.
 
 =item B<--github-token-file=FILE>
 
