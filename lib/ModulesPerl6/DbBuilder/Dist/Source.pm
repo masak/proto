@@ -32,7 +32,7 @@ sub _download_meta {
 
     if ( $tx->success ) { return $tx->res->body }
     else {
-        my $err = $tx->error;
+        my $err   = $tx->error;
         log error => $err->{code} ? "$err->{code} response: $err->{message}"
                                   : "Connection error: $err->{message}";
     }

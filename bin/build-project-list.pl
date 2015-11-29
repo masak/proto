@@ -3,8 +3,8 @@
 use strictures 2;
 use 5.014;
 
-use Fcntl qw/LOCK_EX  LOCK_NB/;
-use File::Spec::Functions qw/catdir  catfile/;
+use Fcntl                 qw/LOCK_EX  LOCK_NB/;
+use File::Spec::Functions qw/catdir   catfile/;
 use Getopt::Long;
 use Pod::Usage;
 
@@ -46,15 +46,14 @@ pod2usage 1 if $help;
 pod2usage -exitval => 0, -verbose => 2 if $man;
 
 $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} = $github_token_file;
-
 ModulesPerl6::DbBuilder->new(
-    app               => APP,
-    db_file           => $db_file,
-    interval          => $interval,
-    limit             => $limit,
-    logos_dir         => $logos_dir,
-    meta_list         => $meta_list,
-    restart_app       => $restart_app,
+    app         => APP,
+    db_file     => $db_file,
+    interval    => $interval,
+    limit       => $limit,
+    logos_dir   => $logos_dir,
+    meta_list   => $meta_list,
+    restart_app => $restart_app,
 )->run;
 
 ### DO NOT REMOVE THE FOLLOWING LINES from __DATA__ ###

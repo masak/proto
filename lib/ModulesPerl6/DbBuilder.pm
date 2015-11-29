@@ -1,19 +1,18 @@
 package ModulesPerl6::DbBuilder;
 
 use Data::GUID;
-use File::Glob             qw/bsd_glob/;
-use File::Path             qw/make_path  remove_tree/;
-use File::Spec::Functions  qw/catfile/;
+use File::Glob            qw/bsd_glob/;
+use File::Path            qw/make_path  remove_tree/;
+use File::Spec::Functions qw/catfile/;
 use Mojo::URL;
 use Mojo::UserAgent;
-use Mojo::Util             qw/slurp  trim/;
+use Mojo::Util            qw/slurp  trim/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
 use ModulesPerl6::DbBuilder::Dist;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
-
 use Mew;
 use experimental 'postderef';
 
@@ -55,10 +54,10 @@ sub run {
             log info => 'Processing dist ' . ($idx+1) . ' of ' . @metas;
             $self->_model_dists->add(
                 ModulesPerl6::DbBuilder::Dist->new(
-                    meta_url          => $metas[$idx],
-                    build_id          => $build_id,
-                    logos_dir         => $self->_logos_dir,
-                    dist_db           => $self->_model_dists,
+                    meta_url  => $metas[$idx],
+                    build_id  => $build_id,
+                    logos_dir => $self->_logos_dir,
+                    dist_db   => $self->_model_dists,
                 )->info
             );
 
