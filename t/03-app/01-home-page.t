@@ -37,8 +37,8 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->element_count_is('.name   a[href="/dist/Dist1"]'             => 1)
         ->element_count_is('.name   a i.dist-logos.s-Dist1'            => 1)
         ->element_count_is(".travis a[href='$dist1->{travis_url}']"    => 1)
-        ->element_count_is(".stars  a[href='$dist1->{url}stargazers']" => 1)
-        ->element_count_is(".issues a[href='$dist1->{url}issues']"     => 1)
+        ->element_count_is(".stars  a[href='$dist1->{url}/stargazers']" => 1)
+        ->element_count_is(".issues a[href='$dist1->{url}/issues']"     => 1)
     ;
 
     $t->dive_reset
@@ -56,8 +56,8 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->element_count_is('.name   a i.dist-logos.s-Dist2'            => 0)
         ->element_count_is('.koalatee a[href="/koalatee/Dist2"]'       => 1)
         ->element_count_is(".travis a[href='$dist2->{travis_url}']"    => 1)
-        ->element_count_is(".stars  a[href='$dist2->{url}stargazers']" => 1)
-        ->element_count_is(".issues a[href='$dist2->{url}issues']"     => 1)
+        ->element_count_is(".stars  a[href='$dist2->{url}/stargazers']" => 1)
+        ->element_count_is(".issues a[href='$dist2->{url}/issues']"     => 1)
     ;
 }
 
@@ -72,7 +72,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 
     $t->dive_reset->get_ok('/repo/Dist1')
         ->status_is(302)
-        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org')
         ->get_ok('/repo/Non-Existant')
         ->status_is(404)
     ;
@@ -80,7 +80,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     # This should eventually be a proper page with info and not a redirect
     $t->dive_reset->get_ok('/dist/Dist1')
         ->status_is(302)
-        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org/')
+        ->header_is(Location => 'https://github.com/perl6/modules.perl6.org')
     ;
 
     $t->dive_reset->get_ok('/')->status_is(200)

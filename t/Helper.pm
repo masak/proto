@@ -32,7 +32,7 @@ sub dist_in_data {
             name         => 'Dist1',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
                                 . '/perl6-Pastebin-Gist/master/META.info',
-            url          => 'https://github.com/perl6/modules.perl6.org/',
+            url          => 'https://github.com/perl6/modules.perl6.org',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',
             has_readme   => 1,
@@ -49,7 +49,7 @@ sub dist_in_data {
             name         => 'Dist2',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
                                 . '/perl6-Color/master/META.info',
-            url          => 'https://github.com/perl6/ecosystem/',
+            url          => 'https://github.com/perl6/ecosystem',
             description  => 'Test Dist2',
             author_id    => 'Morbo',
             koalatee     => 22,
@@ -72,7 +72,7 @@ sub dist_out_data {
             name         => 'Dist1',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
                                 . '/perl6-Pastebin-Gist/master/META.info',
-            url          => 'https://github.com/perl6/modules.perl6.org/',
+            url          => 'https://github.com/perl6/modules.perl6.org',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',
             koalatee     => 100,
@@ -87,7 +87,7 @@ sub dist_out_data {
             name         => 'Dist2',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
                                 . '/perl6-Color/master/META.info',
-            url          => 'https://github.com/perl6/ecosystem/',
+            url          => 'https://github.com/perl6/ecosystem',
             description  => 'Test Dist2',
             author_id    => 'Morbo',
             koalatee     => 22,
