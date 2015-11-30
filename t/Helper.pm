@@ -31,7 +31,7 @@ sub dist_in_data {
         {
             name         => 'Dist1',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
-                                . '/perl6-Color/master/META.info',
+                                . '/perl6-Pastebin-Gist/master/META.info',
             url          => 'https://github.com/perl6/modules.perl6.org/',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',
@@ -71,7 +71,7 @@ sub dist_out_data {
         {
             name         => 'Dist1',
             meta_url     => 'https://raw.githubusercontent.com/zoffixznet'
-                                . '/perl6-Color/master/META.info',
+                                . '/perl6-Pastebin-Gist/master/META.info',
             url          => 'https://github.com/perl6/modules.perl6.org/',
             description  => 'Test Dist1',
             author_id    => 'Dynacoder',

@@ -112,10 +112,10 @@ sub remove_old {
 }
 
 sub salvage_build {
-    my ( $self, $url, $new_build_id ) = @_;
-    return unless length $url and length $new_build_id;
+    my ( $self, $meta_url, $new_build_id ) = @_;
+    return unless length $meta_url and length $new_build_id;
 
-    $self->_db->resultset('Dist')->search({ url => $url })
+    $self->_db->resultset('Dist')->search({ meta_url => $meta_url })
         ->update_all({ build_id => $new_build_id });
 
     return 1;

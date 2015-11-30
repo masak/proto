@@ -86,7 +86,7 @@ subtest 'Test salvage_build method' => sub {
     is_deeply [$m->salvage_build('fake-url')], [],
         '->salvage_build returns empty list without correct args';
 
-    is $m->salvage_build( $dist1->{url}, 'new-build-id'), 1,
+    is $m->salvage_build( $dist1->{meta_url}, 'new-build-id'), 1,
         '->salvage_build with correct arguments returns 1';
 
     is $m->remove_old('new-build-id'), 1,

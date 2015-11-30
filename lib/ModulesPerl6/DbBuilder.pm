@@ -52,14 +52,13 @@ sub run {
         try {
             warn "---\n";
             log info => 'Processing dist ' . ($idx+1) . ' of ' . @metas;
-            $self->_model_dists->add(
-                ModulesPerl6::DbBuilder::Dist->new(
-                    meta_url  => $metas[$idx],
-                    build_id  => $build_id,
-                    logos_dir => $self->_logos_dir,
-                    dist_db   => $self->_model_dists,
-                )->info
-            );
+            my $dist = ModulesPerl6::DbBuilder::Dist->new(
+                meta_url  => $metas[$idx],
+                build_id  => $build_id,
+                logos_dir => $self->_logos_dir,
+                dist_db   => $self->_model_dists,
+            )->info or die "Failed to build dist\n";
+            $self->_model_dists->add( $dist );
 
             # This interval, when defaulted to at least 5, prevents us from
             # going over GitHub's rate-limit of 5,000 requests per hour.
@@ -69,6 +68,7 @@ sub run {
         }
         catch {
             log error=> "Received fatal error while building $metas[$idx]: $_";
+            $self->_model_dists->salvage_build( $metas[$idx], $build_id );
         };
     }
 
