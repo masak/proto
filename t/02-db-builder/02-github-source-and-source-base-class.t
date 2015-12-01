@@ -2,6 +2,7 @@
 
 use strict;
 use warnings FATAL => 'all';
+use utf8;
 
 use File::Spec::Functions qw/catfile/;
 use Test::Most;
@@ -197,6 +198,19 @@ subtest 'Downloading logotype' => sub {
         $time_stamp_re\Q [info] Dist has new commits. Fetching more info.\E \s
         $time_stamp_re\Q [info] Dist has a logotype of size 160 bytes.\E \s
     $}x, 'Output from loader matches';
+};
+
+subtest 'Mojibake from utf-8 in META file (Issue #48)' => sub {
+    my $dist = ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(
+        meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
+                  . 'perl6-modules.perl6.org-test2/master/META.utf8',
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    )->load;
+
+    is $dist->{name}, 'テスト', 'Unicode chars in name look right';
+    is $dist->{description}, 'テストdist for modules.perl6.org build script',
+        'Unicode chars in name look right';
 };
 
 done_testing;

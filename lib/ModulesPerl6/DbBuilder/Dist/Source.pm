@@ -3,7 +3,7 @@ package ModulesPerl6::DbBuilder::Dist::Source;
 use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
 use Mojo::UserAgent;
-use Mojo::Util qw/spurt/;
+use Mojo::Util qw/spurt  decode/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -43,6 +43,7 @@ sub _download_meta {
 sub _parse_meta {
     my ( $self, $data ) = @_;
     length $data or return;
+    $data = decode 'utf8', $data;
 
     log info => 'Parsing META file';
     eval { $data->$json };
