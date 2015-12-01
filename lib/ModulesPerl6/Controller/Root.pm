@@ -146,6 +146,9 @@ database. This route was added to make it easier to encourage stats sites
 like L<http://www.modulecounts.com> to add Perl 6 ecosystem (they can just
 fetch the totals instead of Parsing HTML).
 
+B<NOTE:> currently this route is known to be used by
+L<http://www.modulecounts.com>, so it's important to keep it in working order.
+
 =head1 CONTACT INFORMATION
 
 Original version of this module was written by Zoffix Znet
