@@ -7,7 +7,7 @@
 
   <title><%= length(title) ? title() . ' - ' : '' %>Perl 6 Modules
       Directory</title>
-  <link href="http://perl6.org/favicon.ico" rel="shortcut icon">
+  <link href="//perl6.org/favicon.ico" rel="shortcut icon">
   %= asset "cerulean.css";
   %= asset "app.css";
 </head>
