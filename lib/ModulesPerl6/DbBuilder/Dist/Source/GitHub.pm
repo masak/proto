@@ -40,7 +40,16 @@ has _token => Str, (
     },
 );
 
-sub re { qr{^https?://\Qraw.githubusercontent.com\E/([^/]+)/([^/]+)}i }
+sub re {
+    qr{
+        ^   https?:// \Qraw.githubusercontent.com\E
+            /([^/]+)    # User
+            /([^/]+)    # Repo
+            /[^/]+      # Branch
+            /[^/]+      # Meta file
+        $
+    }ix
+}
 
 sub load {
     my $self = shift;

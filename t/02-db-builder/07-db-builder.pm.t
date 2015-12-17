@@ -23,12 +23,12 @@ subtest 'failing dist build (META file fetch fail)' => sub {
     my $meta_list = File::Temp->new;
     spurt "https://raw.githubusercontent.com/zoffixznet/"
         . "perl6-Color/master/META.info\nhttp://raw.githubusercontent"
-        . ".com/localhost/1\n"
+        . ".com/localhost/1/1/1\n"
     => $meta_list;
 
     $m->remove({ name => 'Dist1' }); # remove one dist inited by t::Helper
     my ( $other_dist ) = t::Helper::dist_in_data;
-    $other_dist->{meta_url} = 'http://raw.githubusercontent.com/localhost/1';
+    $other_dist->{meta_url}='http://raw.githubusercontent.com/localhost/1/1/1';
     $m->add( $other_dist );
 
     my $out = combined_from sub {
@@ -79,13 +79,13 @@ subtest 'failing dist build (META file fetch fail)' => sub {
     like $out[2], qr{^
         $re\Q [info] Processing dist 2 of 2\E \s
         $re\Q [info] Using ModulesPerl6::DbBuilder::Dist::Source::GitHub \E
-            \Qto load http://raw.githubusercontent.com/localhost/1\E \s
+            \Qto load http://raw.githubusercontent.com/localhost/1/1/1\E \s
         $re\Q [info] Fetching distro info and commits\E \s
         $re\Q [info] Downloading META file from http://raw.githubusercontent\E
-            \Q.com/localhost/1\E \s
-        $re\Q [error] 400 response: Bad Request\E \s
+            \Q.com/localhost/1/1/1\E \s
+        $re\Q [error] 404 response: Not Found\E \s
         $re\Q [error] Received fatal error while building http://raw.\E
-            \Qgithubusercontent.com/localhost/1: Failed to build dist\E
+            \Qgithubusercontent.com/localhost/1/1/1: Failed to build dist\E
     $}x, , 'part 2 of output matches';
 
     like $out[3], qr{^

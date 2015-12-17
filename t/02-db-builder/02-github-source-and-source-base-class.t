@@ -20,7 +20,6 @@ my $m = ModulesPerl6::Model::Dists->new( db_file => $db_file );
 my $logos_dir = tempdir CLEANUP => 1;
 my $time_stamp_re = t::Helper::time_stamp_re;
 
-
 subtest 'Not overridden methods from baseclass' => sub {
     my $s = ModulesPerl6::DbBuilder::Dist::Source->new(
         meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
@@ -212,5 +211,13 @@ subtest 'Mojibake from utf-8 in META file (Issue #48)' => sub {
     is $dist->{description}, 'テストdist for modules.perl6.org build script',
         'Unicode chars in name look right';
 };
+
+subtest 'Do not operate on weird URLs, even if they are on GitHub' => sub {
+    unlike 'https://raw.githubusercontent.com/perl6/ecosystem'
+        . '/master/SHELTER/lolsql/META.info',
+        ModulesPerl6::DbBuilder::Dist::Source::GitHub->re,
+        'Weird URL must not match GitHub Dist Source';
+};
+
 
 done_testing;
