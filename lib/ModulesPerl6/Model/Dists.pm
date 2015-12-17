@@ -59,10 +59,8 @@ sub add {
         $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
-        $dist->{koalatee} //= ModulesPerl6::Metrics::Koalatee->new->koalatee({
-            map +( $_ => $dist->{$_} ),
-                qw/has_readme  panda  has_tests  travis/,
-        });
+        $dist->{koalatee}      //= ModulesPerl6::Metrics::Koalatee->new
+                                                             ->total($dist);
 
         $db->resultset('Dist')->update_or_create({
             travis   => { status => $dist->{travis_status} },
