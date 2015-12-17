@@ -94,7 +94,7 @@ Specifies the file to use to read tips from. B<Defaults to:>
 C<MODULESPERL6_TIP_FILE> environmental variable, if set, or
 C<../site-tips.txt> relative to the location of the script.
 
-=head3 C<tip>
+=head2 C<tip>
 
     my $tip = $m->tip;
 
