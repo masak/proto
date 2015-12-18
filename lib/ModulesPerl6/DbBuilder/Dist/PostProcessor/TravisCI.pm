@@ -11,7 +11,9 @@ sub process {
     my $self = shift;
     my $dist = $self->_dist;
 
-    return if not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD};
+    # Fetch travis status only for dists that had new commits in the past 24hr
+    return if ($dist->{date_updated}//0) < (time - 60*60*24)
+        and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD};
     delete $dist->{travis_status}; # toss cached Travis status
     return unless $dist->{_builder}{has_travis};
 
@@ -72,13 +74,21 @@ implements fetching Travis build information.
 
 =head1 EXPECTED DIST KEYS
 
+=head2 C<{date_updated}>
+
+    $dist->{date_updated} = time;
+
+This boolean key indicates when the dist's last commit was done. The
+postprocessor won't attempt to fetch new Travis info for commits older than
+24 hours.
+
 =head2 C<{_builder}{is_fresh}>
 
     $dist->{_builder}{is_fresh} = 1;
 
-This boolean key indicates a dist has fresh commits, so we should run the
-postprocessor to obtain new Travis info. If this is not set, the postprocessor
-won't run.
+This boolean key indicates a dist has fresh commits (based on the current
+data in the database). The presence of this key will trigger Travis info
+fetch regardless of the value of C<{date_updated}> key.
 
 =head2 C<{_builder}{has_travis}>
 
