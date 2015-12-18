@@ -11,7 +11,7 @@ sub process {
     my $self = shift;
     my $dist = $self->_dist;
 
-    return unless $dist->{_builder}{is_fresh};
+    return unless $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD};
     delete $dist->{travis_status}; # toss cached Travis status
     return unless $dist->{_builder}{has_travis};
 

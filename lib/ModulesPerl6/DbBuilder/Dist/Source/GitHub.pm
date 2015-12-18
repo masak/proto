@@ -80,7 +80,8 @@ sub load {
     } // 0;
 
     # no new commits and we have cached results that will do just fine
-    return $dist if $dist->{date_updated} eq $date_updated;
+    return $dist
+        if $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD};
     $dist->{date_updated} = $date_updated;
 
     log info => 'Dist has new commits. Fetching more info.';

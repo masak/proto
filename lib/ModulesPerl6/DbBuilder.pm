@@ -41,6 +41,8 @@ sub run {
 
     my $build_id = Data::GUID->new->as_base64;
     log info => "Starting build $build_id";
+    $ENV{FULL_REBUILD}
+        and log info => "Full rebuild requested. Caches should be invalid";
 
     $self->_deploy_db;
 
