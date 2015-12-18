@@ -84,4 +84,27 @@ subtest 'Find Travis build status' => sub {
         'set travis status looks sane';
 };
 
+subtest q{Do NOT bailout if dist's last commit was over 24 hours ago}
+    . q{, but cached Travis status is "unknown"} => sub {
+    my $travis = ModulesPerl6::DbBuilder::Dist::PostProcessor::TravisCI->new(
+        dist => {
+            travis_status => 'unknown',
+            date_updated => time - 60*60*25,
+            _builder => {
+                has_travis => 1,
+                repo_user => 'zoffixznet',
+                repo => 'perl6-Color',
+            },
+        },
+        meta_url => 'https://raw.githubusercontent.com/zoffixznet/perl6'
+                        . '-Color/master/META.info',
+    );
+
+    is $travis->process, 1, '->process worked fine';
+
+    like $travis->_dist->{travis_status},
+        qr/unknown|cancell?ed|pending|error|failing|passing/,
+        'set travis status looks sane';
+};
+
 done_testing;
