@@ -56,6 +56,18 @@ Once committed, the production cron job will pick up your changes on the 20th an
 
 The cron job results can be found [here](http://modules.perl6.org/update.log).
 
+#### Note About Cache
+
+Certain data is cached by the site and is only updated when some event
+(like new commits to the dist's repo) happens. This includes travis statuses,
+logotypes, and Koality metrics. If your changes require doing so, you can
+trigger a full rebuild of the database and refresh of caches by including
+`[REBUILD]` as part of the **title** of your commit message.
+
+If you are adding a feature that caches something, it needs to watch for
+`FULL_REBUILD` environmental variable and refresh the caches if that variable
+is set to a true value.
+
 ## Author
 
 Intial version contributed by patrickas++ on #perl6
