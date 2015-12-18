@@ -1,6 +1,6 @@
 # modules.perl6.org
 
-These are the scripts to generate the website on http://modules.perl6.org/.
+These are the scripts to generate the website on http://modules.perl6.org/
 
 ## TODOs
 
