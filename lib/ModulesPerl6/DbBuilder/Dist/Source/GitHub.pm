@@ -100,7 +100,7 @@ sub load {
     # ::Dists model will ignore other metrics if we explicitly tell it the
     # koalatee of a distro;
     delete $dist->{koalatee};
-    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
+    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blob', @$tree );
     $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
 
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;

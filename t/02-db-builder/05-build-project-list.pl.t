@@ -15,6 +15,7 @@ BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist' };
 my $db_file = t::Helper::setup_db_file;
 END { unlink $db_file };
 
+my $m = ModulesPerl6::Model::Dists->new( db_file => $db_file );
 my $logos_dir = tempdir CLEANUP => 0;
 my $re = t::Helper::time_stamp_re;
 my $meta_list = File::Temp->new;
@@ -80,6 +81,45 @@ like $out[4], qr{^
     $re\Q [info] Removed 2 dists that are no longer in the ecosystem\E \s
     $re\Q [info] Finished build \E ([\w=+/.!:~-]{12,76})
 $}x, , 'part 4 of output matches';
+
+my ( $build_id ) = $out[4] =~ m{\QFinished build \E ([\w=+/.!:~-]{12,76})}x;
+
+subtest 'pop open the DB and check all values are correct in it' => sub {
+    cmp_deeply [$m->find->each], [
+        {
+            'build_id' => $build_id,
+            'date_added' => 0,
+            'meta_url' => 'https://raw.githubusercontent.com/zoffixznet/'
+                            . 'perl6-modules.perl6.org-test3/master/META.info',
+            'name' => 'TestRepo3',
+            'issues' => 0,
+            'stars' => 0,
+            'date_updated' => re('\A\d{10}\z'),
+            'description' => 'Test dist for modules.perl6.org build script',
+            'author_id' => 'Zoffix Znet',
+            'travis_status' => 'not set up',
+            'koalatee' => 80,
+            'url' => 'https://github.com/zoffixznet/perl6-modules.perl6'
+                        . '.org-test3'
+        },
+        {
+            'build_id' => $build_id,
+            'date_updated' => re('\A\d{10}\z'),
+            'stars' => re('\A\d+\z'),
+            'koalatee' => 100,
+            'url' => 'https://github.com/zoffixznet/perl6-Color',
+            'description' => 'Format conversion, manipulation, and math '
+                                . 'operations on colours',
+            'author_id' => 'Zoffix Znet',
+            'travis_status' => 'passing',
+            'date_added' => re('\A\d+\z'),
+            'meta_url' => 'https://raw.githubusercontent.com/zoffixznet/'
+                            . 'perl6-Color/master/META.info',
+            'name' => 'Color',
+            'issues' => re('\A\d+\z'),
+        }
+    ], 'data matches';
+};
 
 done_testing;
 

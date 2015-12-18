@@ -10,6 +10,7 @@ use Test::Output qw/combined_from/;
 use t::Helper;
 use File::Temp qw/tempdir/;
 use ModulesPerl6::Model::Dists;
+use ModulesPerl6::DbBuilder::Dist;
 BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist::Source'         };
 BEGIN { use_ok 'ModulesPerl6::DbBuilder::Dist::Source::GitHub' };
 
@@ -19,7 +20,7 @@ END { unlink $db_file };
 my $m = ModulesPerl6::Model::Dists->new( db_file => $db_file );
 my $logos_dir = tempdir CLEANUP => 1;
 my $time_stamp_re = t::Helper::time_stamp_re;
-
+=cut
 subtest 'Not overridden methods from baseclass' => sub {
     my $s = ModulesPerl6::DbBuilder::Dist::Source->new(
         meta_url  => 'https://raw.githubusercontent.com/zoffixznet/'
@@ -210,6 +211,28 @@ subtest 'Mojibake from utf-8 in META file (Issue #48)' => sub {
     is $dist->{name}, 'テスト', 'Unicode chars in name look right';
     is $dist->{description}, 'テストdist for modules.perl6.org build script',
         'Unicode chars in name look right';
+};
+=cut
+subtest 'Ensure we do find all the Koalatee metrics' => sub {
+    my $meta_url = 'https://raw.githubusercontent.com/zoffixznet/perl6'
+                        . '-Color/master/META.info';
+    my $dist = ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(
+        meta_url  => $meta_url,
+        logos_dir => $logos_dir,
+        dist_db   => $m,
+    )->load;
+
+    for my $postprocessor ( ModulesPerl6::DbBuilder::Dist->_postprocessors ) {
+        $postprocessor->new(
+            meta_url => $meta_url,
+            dist     => $dist,
+        )->process;
+    }
+
+    is $dist->{has_readme},    1,         'README found';
+    is $dist->{has_tests},     1,         'tests found';
+    is $dist->{panda},         2,         'panda conformance is correct';
+    is $dist->{travis_status}, 'passing', 'Travis status is correct';
 };
 
 subtest 'Do not operate on weird URLs, even if they are on GitHub' => sub {
