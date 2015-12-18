@@ -11,9 +11,14 @@ sub process {
     my $self = shift;
     my $dist = $self->_dist;
 
-    # Fetch travis status only for dists that had new commits in the past 24hr
+    # Fetch travis status only for dists that had new commits in the past 24hr.
+    # Unless their cached status is 'unknown' which likely indicates
+    # the author did not enable the dist on travis yet
     return if ($dist->{date_updated}//0) < (time - 60*60*24)
-        and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD};
+        and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
+        and not (
+            $dist->{travis_status} and $dist->{travis_status} eq 'unknown'
+        );
     delete $dist->{travis_status}; # toss cached Travis status
     return unless $dist->{_builder}{has_travis};
 
@@ -80,7 +85,7 @@ implements fetching Travis build information.
 
 This boolean key indicates when the dist's last commit was done. The
 postprocessor won't attempt to fetch new Travis info for commits older than
-24 hours.
+24 hours, unless cached Travis status is C<unknown>.
 
 =head2 C<{_builder}{is_fresh}>
 
