@@ -13,9 +13,11 @@ sub process {
 
     # Fetch travis status only for dists that had new commits in the past 24hr.
     # Unless their cached status is 'unknown' which likely indicates
-    # the author did not enable the dist on travis yet
+    # the author did not enable the dist on travis yet and the cached status
+    # actually exists and not "not set up"
     return if ($dist->{date_updated}//0) < (time - 60*60*24)
         and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
+        and $dist->{travis_status}
         and not (
             $dist->{travis_status} and $dist->{travis_status} eq 'unknown'
         );
