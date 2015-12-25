@@ -21,8 +21,11 @@ sub process {
         and not (
             $dist->{travis_status} and $dist->{travis_status} eq 'unknown'
         );
-    delete $dist->{travis_status}; # toss cached Travis status
-    return unless $dist->{_builder}{has_travis};
+
+    unless ( $dist->{_builder}{has_travis} ) {
+        delete $dist->{travis_status}; # toss cached Travis status
+        return;
+    }
 
     my ( $user, $repo ) = $dist->{_builder}->@{qw/repo_user  repo/};
     return unless length $user and length $repo;
