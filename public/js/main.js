@@ -11,8 +11,10 @@ function setup_search_box_defocus() {
         to be trying to scroll the page with keyboard, rather than typing
         a search query
     */
-    if( typeof window.orientation === 'undefined' ) {
-        $('#dists_filter input').focus().keydown( function(e){
+
+    var search = $('#dists_filter input');
+    if( typeof window.orientation === 'undefined' && ! search.val().length) {
+        search.focus().keydown( function(e){
             var el = $(this);
             if ( e.which == 32 && el.val().length ) { return true; }
             if (e.which == 32 || e.which == 34 || e.which == 40) { el.blur(); }
