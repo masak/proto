@@ -13,7 +13,8 @@ function setup_search_box_defocus() {
     */
 
     var search = $('#dists_filter input');
-    if( typeof window.orientation === 'undefined' && ! search.val().length) {
+    if( typeof window.orientation === 'undefined' && ! search.val().length
+        && $(window).scrollTop() == 0 ) {
         search.focus().keydown( function(e){
             var el = $(this);
             if ( e.which == 32 && el.val().length ) { return true; }
