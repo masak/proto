@@ -3,7 +3,6 @@
 use strict;
 use warnings FATAL => 'all';
 use utf8;
-
 use File::Spec::Functions qw/catfile/;
 use Test::Most;
 use Test::Output qw/combined_from/;
