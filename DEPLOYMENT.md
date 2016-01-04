@@ -2,6 +2,22 @@
 
 *Note: these instructions are for Debian Linux*
 
+# TABLE OF CONTENTS
+  - [The Basics](#the-basics)
+  - [Installing Required Software](#installing-required-software)
+          - [SASS](#sass)
+          - [Sprites](#sprites)
+  - [Clone The Repository](#clone-the-repository)
+          - [Install Perl 5 module dependencies:](#install-perl-5-module-dependencies)
+      - [Production Deployment](#production-deployment)
+  - [Generating The Database](#generating-the-database)
+  - [Launching Development Server](#launching-development-server)
+  - [Secrets](#secrets)
+  - [Production Deployment Setup](#production-deployment-setup)
+  - [Documentation](#documentation)
+  - [More](#more)
+  - [Troubleshooting](#troubleshooting)
+
 ## The Basics
 
 Assuming a virginal Debian install, you first need to setup a recent Perl 5
