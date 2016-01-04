@@ -196,11 +196,11 @@ For alternative deployment methods, see http://mojolicio.us/perldoc/Mojolicious/
 
 If you're deploying in production and you receive `Service Not Available`
 error from Apache:
-  1) Check `hypnotoad` is actually running. You can do that by running
+  1. Check `hypnotoad` is actually running. You can do that by running
     `ps ax | grep ModulesPerl6` and seeing whether the app is in the list
-    1) If it is, wait a minute or two. Sometimes the browser caches the
+    1. If it is, wait a minute or two. Sometimes the browser caches the
       response and still displays the message even if Apache is now serving
       the content
-  2) Check that the proxy has been configured to listen to the correct port
+  2. Check that the proxy has been configured to listen to the correct port
     specified in the app config. Currently, that's `:3333`
 
