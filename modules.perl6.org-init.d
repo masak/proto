@@ -16,4 +16,5 @@ eval 'exec /home/modules.perl6.org/perl5/perlbrew/perls/perl-5.22.0/bin/perl -S 
 use Toadfarm -init;
 run_as "modules.perl6.org";
 mount "/home/modules.perl6.org/modules.perl6.org/bin/ModulesPerl6.pl";
-start [ "http://*:3333" ], proxy => 1, workers => 8;
+start [ "http://*:3333" ], proxy => 1, workers => 8,
+	pid_file => '/home/modules.perl6.org/modules.perl6.org/bin/hypnotoad.pid';
