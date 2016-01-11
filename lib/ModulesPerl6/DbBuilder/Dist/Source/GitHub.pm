@@ -83,7 +83,7 @@ sub load {
     if ( $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD} ) {
         $dist->{_builder}{has_travis} = 1 # reinstate cached travis status
             unless $dist->{travis_status} eq 'not set up';
-        return;
+        return $dist;
     }
     $dist->{date_updated} = $date_updated;
 
