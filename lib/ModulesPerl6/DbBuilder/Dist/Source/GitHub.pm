@@ -80,8 +80,11 @@ sub load {
     } // 0;
 
     # no new commits and we have cached results that will do just fine
-    return $dist
-        if $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD};
+    if ( $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD} ) {
+        $dist->{_builder}{has_travis} = 1 # reinstate cached travis status
+            unless $dist->{travis_status} eq 'not set up';
+        return;
+    }
     $dist->{date_updated} = $date_updated;
 
     log info => 'Dist has new commits. Fetching more info.';
@@ -102,7 +105,6 @@ sub load {
     delete $dist->{koalatee};
     $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blob', @$tree );
     $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
-
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
 
     return $dist;
