@@ -52,6 +52,7 @@ sub _get_travis_status {
     return $state    if $state =~ /cancel|pend/;
     return 'error'   if $state =~ /error/;
     return 'failing' if $state =~ /fail/;
+	return 'passing' if $state =~ /finished/;
     return 'passing' if $state =~ /pass/;
     return 'unknown';
 }
