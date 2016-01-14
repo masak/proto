@@ -9,7 +9,7 @@
         class="pull-right" width=291 height=273>
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
-        known Perl 6 modules. The <a href="https://github.com/ugexe/P6TCI">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
+        known Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
         These modules can be installed with <a href="https://github.com/tadzik/panda/">panda</a>, a module management tool
       that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
         Star</a>.
