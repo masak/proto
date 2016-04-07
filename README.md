@@ -32,7 +32,7 @@ to specify the location of that file. See `--help` for all options.
 - The build script automatically starts the Mojolicious app that powers the
 front end. To disable that behaviour, specify the `--no-app-start` flag:
 ```bash
-    $ perl build-project-list.pl --no-app-start
+    $ perl bin/build-project-list.pl --no-app-start
 ```
 
 #### Browser Support
