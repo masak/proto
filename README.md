@@ -12,7 +12,7 @@ Want to help out? Check if any [open Issues](https://github.com/perl6/modules.pe
 Please use the following steps to aid you in your development:
 - Create a token with access to public repositories. To run the scripts, you need a [GitHub token](https://github.com/blog/1509-personal-api-tokens) with rights to query Perl 6 module GitHub repository information.
 
-- Save the token in file named `github-token` in `web` folder
+- Save the token in file named `github-token`
 
 - Install prerequisites for build script:
 ```
@@ -22,12 +22,12 @@ Please use the following steps to aid you in your development:
 
 - Run build script
 ```
-    $ cd web
-    $ perl build-project-list.pl --limit=<number-of-modules>
+    $ perl bin/build-project-list.pl --limit=<number-of-modules>
 ```
 
 You can also create file `META.list.local` that contains specific URLs
-you may wish to fetch for debug purposes.
+you may wish to fetch for debug purposes. Use the `--meta-list` argument
+to specify the location of that file. See `--help` for all options.
 
 - The build script automatically starts the Mojolicious app that powers the
 front end. To disable that behaviour, specify the `--no-app-start` flag:
