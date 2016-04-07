@@ -25,7 +25,9 @@ sub index {
             "content-pics/dist-logos/$logo_base.png"
         );
 
-        $_->{date_updated} = strftime "%Y-%m-%d", gmtime $_->{date_updated};
+        $_->{date_updated} = $_->{date_updated} ? strftime "%Y-%m-%d", 
+                           gmtime $_->{date_updated} : 'N/A';
+
         $_->{travis_url}   = Mojo::URL->new($_->{url})->host('travis-ci.org');
         $_->{is_hidden}    = 1
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
