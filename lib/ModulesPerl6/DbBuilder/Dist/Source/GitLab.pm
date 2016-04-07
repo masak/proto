@@ -14,6 +14,9 @@ sub re {
         ^   https?:// \Qgitlab.com\E
             /([^/]+)    # User
             /([^/]+)    # Repo
+            /[^/]+      # raw
+            /[^/]+      # Branch
+            /[^/]+      # Meta file
         $
     }ix;
 }
