@@ -16,11 +16,10 @@
         Star</a>.
     </p>
 
-    <p>Some standard modules are included with Rakudo.  Among them
-       is the 'Test' module mentioned in S24 (located 
-       <a href='https://design.perl6.org/S24.html'>here</a>) 
-       and found in the Rakudo repository 
-       <a href='https://github.com/rakudo/rakudo/blob/nom/lib/Test.pm6'>here</a>.
+    <p>Some standard modules are included with Rakudo. Among them
+       is <a href="http://docs.perl6.org/language/testing"><i>Test</i> for testing</a>
+       and <a href="http://docs.perl6.org/language/nativecall"><i>NativeCall</i> for
+       using C libraries</a>.
     </p>
 
     <p>If you want to contribute your own module, please read
