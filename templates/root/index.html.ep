@@ -7,19 +7,29 @@
   <div class="panel-body suckin-btm">
     <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
         class="pull-right" width=291 height=273>
+
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
-        known Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
+        known external Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
         These modules can be installed with <a href="https://github.com/tadzik/panda/">panda</a>, a module management tool
       that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
         Star</a>.
     </p>
+
+    <p>Some standard modules are included with Rakudo.  Among them
+       is the 'Test' module mentioned in S24 (located 
+       <a href='https://design.perl6.org/S24.html'>here</a>) 
+       and found in the Rakudo repository 
+       <a href='https://github.com/rakudo/rakudo/blob/nom/lib/Test.pm6'>here</a>.
+    </p>
+
     <p>If you want to contribute your own module, please read
         <a href="http://doc.perl6.org/language/modules">this guide</a>.
         Missing a module you can't live without? Consider adding it
         to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
         file in the Most Wanted repository.
     </p>
+
   </div>
 </header>
 
