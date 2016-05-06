@@ -23,7 +23,8 @@
     </p>
 
     <p>If you want to contribute your own module, please read
-        <a href="http://doc.perl6.org/language/modules">this guide</a>.
+        <a href="http://doc.perl6.org/language/modules">this guide</a>. 
+        See which <a href="http://finanalyst.github.io/ModuleCitation/">modules are popular</a>.
         Missing a module you can't live without? Consider adding it
         to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>
         file in the Most Wanted repository.
