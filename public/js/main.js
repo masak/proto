@@ -28,6 +28,15 @@ function setup_search_box_defocus() {
 function setup_table() {
     var el = $('#dists'), filter_container, filter, sort_order;
 
+    // Custom sorter for dates to sort N/A dates as oldest
+    $.fn.dataTable.ext.order['custom-na-date'] = function ( settings, col ) {
+        return this.api().column( col, {order:'index'} ).nodes().map(
+            function (td, i) {
+                var text = $(td).text();
+                return text == 'N/A' ? '0000-00-00' : text;
+            });
+    };
+
     table_plugin = el.DataTable({
         paging: false,
         autoWidth: false,
@@ -40,7 +49,8 @@ function setup_table() {
             },
             {
                 targets: [ 6 ],
-                orderSequence: [ "desc", "asc" ]
+                orderSequence: [ "desc", "asc" ],
+                orderDataType: "custom-na-date"
             }
         ]
     });
