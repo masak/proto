@@ -74,4 +74,16 @@ Intial version contributed by patrickas++ on #perl6
 
 ## License
 
-Artistic License 2.0
+Artistic License 2.0. See [LICENSE](LICENSE) file for details.
+
+# LICENSE
+
+See [LICENSE](LICENSE) file for the details of the license of the code in this repository.
+
+This repository also contains code authored by third parties that may be licensed under a different license. Such
+files indicate the copyright and license terms at the top of the file. Currently these include:
+
+* jQuery deparam plugin: Copyright (c) 2010 "Cowboy" Ben Alman. Dual licensed under the MIT and GPL licenses. See [http://benalman.com/about/license/](http://benalman.com/about/license/)
+* The Camelia image is copyright 2009 by Larry Wall. Permission to use is granted under the [Artistic License 2.0](License), or any subsequent version
+of the Artistic License.
+* GitHub Octocat logo is an exclusive trademark registered in the United States by GitHub, Inc and is used with permission. See [https://github.com/logos](https://github.com/logos) for details.
