@@ -72,10 +72,6 @@ is set to a true value.
 
 Intial version contributed by patrickas++ on #perl6
 
-## License
-
-Artistic License 2.0. See [LICENSE](LICENSE) file for details.
-
 # LICENSE
 
 See [LICENSE](LICENSE) file for the details of the license of the code in this repository.
