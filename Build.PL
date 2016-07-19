@@ -12,6 +12,7 @@ my $build = Module::Build->new(
       'DBIx::Class::Candy'               => '0.005000',
       'DBIx::Class::Schema'              => '0',
       'Data::GUID'                       => '0.048',
+      'Data::UUID'                       => '1.221',
       'Exporter::Easy'                   => '0.18',
       'Fcntl'                            => '0',
       'File::Glob'                       => '0',
