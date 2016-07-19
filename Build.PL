@@ -24,6 +24,7 @@ my $build = Module::Build->new(
       'Getopt::Long'                     => '2.48',
       'IO::Handle'                       => '0',
       'IPC::Open3'                       => '0',
+      'Imager::File::PNG'                => '0.92',
       'Import::Into'                     => '0',
       'JSON::Meth'                       => '1.001006',
       'LWP::UserAgent'                   => '0',
