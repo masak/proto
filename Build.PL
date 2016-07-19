@@ -50,6 +50,7 @@ my $build = Module::Build->new(
       'Test::Most'                       => '0.34',
       'Test::Output'                     => '1.03',
       'Test::Script'                     => '1.10',
+      'Time::Moment'                     => '0.38',
       'Toadfarm'                         => '0.72',
       'base'                             => '0',
       'blib'                             => '1.01',
