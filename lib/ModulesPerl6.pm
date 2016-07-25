@@ -30,11 +30,9 @@ sub startup {
     ]);
 
     # ASSETS
-    $self->plugin(bootstrap3 => theme =>
-            { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' },
-            jquery => 0, js => [],
-    );
+    $self->plugin('AssetPack');
     $self->asset('app.css' => qw{
+        https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
