@@ -37,7 +37,7 @@ front end. To disable that behaviour, specify the `--no-app-start` flag:
 
 #### Browser Support
 
-We support the current and previous major releases of Chrome, Firefox, Internet Explorer (Edge), and Safari. Please test layout changes. Lacking actual browers to test in, you can use [browsershots.org](http://browsershots.org)
+We support the current and previous major releases of Chrome, Firefox, Internet Explorer (Edge), and Safari. Please test layout changes. Lacking actual browsers to test in, you can use [browsershots.org](http://browsershots.org)
 or [browserstack.com](http://browserstack.com).
 
 ## Front-End App
