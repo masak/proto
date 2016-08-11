@@ -7,6 +7,7 @@ my $build = Module::Build->new(
     license            => 'perl',
     create_makefile_pl => 'passthrough',
     dist_version => '0.1',
+    recursive_test_files => 1,
     requires => {
       'Carp'                             => '0',
       'DBIx::Class::Candy'               => '0.005000',
