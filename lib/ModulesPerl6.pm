@@ -78,7 +78,6 @@ sub startup {
     # a proper dist page yet
     $r->get('/dist/:dist'    )->to('root#repo'    )->name('dist'    );
     $r->get('/repo/:dist'    )->to('root#repo'    )->name('repo'    );
-    $r->get('/koalatee/:dist')->to('root#koalatee')->name('koalatee');
     $r->get('/total'         )->to('root#total'   )->name('total'   );
 
     $r->any('/not_implemented_yet')

@@ -100,11 +100,6 @@ sub load {
         map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
     );
 
-    # ::Dists model will ignore other metrics if we explicitly tell it the
-    # koalatee of a distro;
-    delete $dist->{koalatee};
-    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blob', @$tree );
-    $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
 
     return $dist;
