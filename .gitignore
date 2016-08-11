@@ -23,3 +23,5 @@ META.list.local
 ModulesPerl6-*
 .build
 public/proto.json
+MYMETA.json
+MYMETA.yml

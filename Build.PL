@@ -2,6 +2,8 @@ use strict;
 use Module::Build;
 
 my $build = Module::Build->new(
+    module_name        => 'Perl6::Modules::Org',
+    dist_abstract      => 'Perl 6 Ecosystem',
     dist_name          => 'perl6.modules.org',
     dist_author        => 'Perl 6 Hackers',
     license            => 'perl',
