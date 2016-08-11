@@ -44,11 +44,11 @@ function setup_table() {
         info: false,
         columnDefs: [
             {
-                targets: [ 2, 3, 4, 5, 6 ],
+                targets: [ 2, 3, 4, 5 ],
                 searchable: false
             },
             {
-                targets: [ 6 ],
+                targets: [ 5 ],
                 orderSequence: [ "desc", "asc" ],
                 orderDataType: "custom-na-date"
             }
