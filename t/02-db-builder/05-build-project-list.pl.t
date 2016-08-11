@@ -98,7 +98,6 @@ subtest 'pop open the DB and check all values are correct in it' => sub {
             'description' => 'Test dist for modules.perl6.org build script',
             'author_id' => 'Zoffix Znet',
             'travis_status' => 'not set up',
-            'koalatee' => 80,
             'url' => 'https://github.com/zoffixznet/perl6-modules.perl6'
                         . '.org-test3'
         },
@@ -106,7 +105,6 @@ subtest 'pop open the DB and check all values are correct in it' => sub {
             'build_id' => $build_id,
             'date_updated' => re('\A\d{10}\z'),
             'stars' => re('\A\d+\z'),
-            'koalatee' => 100,
             'url' => 'https://github.com/zoffixznet/perl6-Color',
             'description' => 'Format conversion, manipulation, and math '
                                 . 'operations on colours',

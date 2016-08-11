@@ -57,10 +57,6 @@ sub repo {
     return $self->redirect_to( $dist->{url} );
 }
 
-sub koalatee {
-    shift->redirect_to('not_implemented_yet');
-}
-
 sub not_implemented_yet {
     shift->render( text => 'Not Implemented Yet' );
 }
@@ -82,7 +78,6 @@ ModulesPerl6::Controller::Root - controller handling a few root-space pages
     my $r = $self->routes;
     $r->get( $_ )->to('root#index') for qw{/  /q/:q  /s/:q  /search/:q};
     $r->get('/dist/:dist')->to('root#dist')->name('dist');
-    $r->get('/koalatee/:dist')->to('root#koalatee')->name('koalatee');
     $r->get('/total')->to('root#total')->name('total');
 
     $r->any('/not_implemented_yet')
@@ -112,14 +107,6 @@ parameter that is the term to perform the search for.
     $r->get('/dist/:dist')->to('root#repo')->name('dist');
 
 Render dist page (B<NIY>; currently just a redirect to GitHub repo).
-Expects the name of the dist in C<dist>
-L<Mojolicious::Controller/"stash"> parameter.
-
-=head2 C<koalatee>
-
-    $r->get('/koalatee/:dist')->to('root#koalatee')->name('koalatee');
-
-Render page displaying Koalatee metrics of a dist (B<NIY>).
 Expects the name of the dist in C<dist>
 L<Mojolicious::Controller/"stash"> parameter.
 

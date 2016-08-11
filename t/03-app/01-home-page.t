@@ -27,7 +27,6 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->dive_in('#dists tbody tr:first-child ')
         ->dived_text_is('.name a[href^="/"]' => 'Dist1'     )
         ->dived_text_is('.desc'              => 'Test Dist1')
-        ->dived_text_is('.koalatee a'        => '100%'      )
         ->dived_text_is('.travis a'          => 'passing'   )
         ->dived_text_is('.stars a'           => '42'        )
         ->dived_text_is('.issues a'          => '12'        )
@@ -45,7 +44,6 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->dive_in('#dists tbody tr:first-child + tr ')
         ->dived_text_is('.name a[href^="/"]' => 'Dist2'     )
         ->dived_text_is('.desc'              => 'Test Dist2')
-        ->dived_text_is('.koalatee a'        => '20%'       )
         ->dived_text_is('.travis a'          => 'failing'   )
         ->dived_text_is('.stars a'           => '14'        )
         ->dived_text_is('.issues a'          => '6'         )
@@ -54,7 +52,6 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->element_count_is(".name   a[href='$dist2->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist2"]'             => 1)
         ->element_count_is('.name   a i.dist-logos.s-Dist2'            => 0)
-        ->element_count_is('.koalatee a[href="/koalatee/Dist2"]'       => 1)
         ->element_count_is(".travis a[href='$dist2->{travis_url}']"    => 1)
         ->element_count_is(".stars  a[href='$dist2->{url}/stargazers']" => 1)
         ->element_count_is(".issues a[href='$dist2->{url}/issues']"     => 1)
@@ -85,12 +82,6 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
 
     $t->dive_reset->get_ok('/')->status_is(200)
         ->text_like('#site_tip' => qr/^Tip \d\z/, 'Site tip has correct text');
-    ;
-
-    # This will be an actual page soon, instead of NIY
-    $t->dive_reset->get_ok('/koalatee/Dist1')
-        ->status_is(302)
-        ->header_is(Location => '/not_implemented_yet')
     ;
 
     $t->dive_reset->get_ok('/not_implemented_yet')

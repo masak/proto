@@ -5,7 +5,8 @@ These are just brainstorming ideas and the mere inclusion of items on the list d
 
 ## Koalatee
 ### Status of the implementation
-Currently a `NIY` route assignment on `/koalatee/:dist` exists. A stub `ModulesPerl6::Metrics::Koalatee` module exists that currently simply returns `100` for the *Koalatee*. The implementation of "core" *Koalatee* metrics already exists and they just need to be summed up together. Work on this feature will commence immediately after `mojo-app` branch is merged into `master`. Current volunteers willing to work on the feature: [Zoffix Znet](https://github.com/zoffixznet/)
+
+Removed.
 
 ### Description
 The old site contained badges, like `has_readme`, `has_tests`, `panda spec conformance`, etc. More badges were being suggested, such as [POD Coverage](https://github.com/teodozjan/pod6-coverage/). Since 99% of the dists had all the badges and adding new badges would call for more precious screen real estate, it is proposed to merge all of those metrics into two numbers called *Koalatee*. They will range from `0` to `100` percent.

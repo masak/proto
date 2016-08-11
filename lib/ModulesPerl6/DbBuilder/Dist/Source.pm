@@ -85,12 +85,6 @@ sub _fill_missing {
         %{ $old_dist_data || {} },
         %$dist,
 
-        # Koalatee metrics
-        has_readme    => 0,
-        has_tests     => 0,
-        panda         => $dist->{'source-url'} && $dist->{provides}
-                            ? 2 : $dist->{'source-url'} ? 1 : 0,
-
         _builder      => {}, # key used only during build process to store data
     );
 
@@ -120,28 +114,6 @@ sub _save_logo {
 
     spurt $tx->res->body => $logo;
     return 1;
-}
-
-sub _set_readme {
-    my ( $self, @files ) = @_;
-    my %readmees = map +( "README$_" => 1 ), '', # just 'README'; no ext.
-        qw/.pod  .pod6  .md        .mkdn  .mkd  .markdown  .mkdown  .ron
-           .rst  .rest  .asciidoc  .adoc  .asc  .txt/;
-
-    my $dist = $self->_dist or return;
-    $dist->{has_readme} = grep( $readmees{$_}, @files ) ? 1 : 0;
-
-    $self;
-}
-
-sub _set_tests {
-    my ( $self, @files ) = @_;
-    my %tests = map +( $_ => 1 ), qw/t  test  tests/;
-
-    my $dist = $self->_dist or return;
-    $dist->{has_tests} = grep( $tests{$_}, @files ) ? 1 : 0;
-
-    $self;
 }
 
 sub _get_author {
@@ -212,12 +184,6 @@ interested in to learn how to activate its run for your dists.
 One of the keys that a Dist Source should try to set is C<{_builder}{is_fresh}>
 that will indicate when the dist has new commits.
 
-=head2 C<koalatee> key
-
-B<NOTE:> if the C<koalatee> L</_dist> key is present when your subclass
-finishes building dist info, B<its value will be used and all other Koalatee
-metrics will be ignored.> C<delete> it whenever you're recalculating individual
-metrics, since it will be present if the dist is already in the database.
 
 =head2 Logging
 
@@ -329,12 +295,6 @@ The keys and default values in the C<_dist> hashref are as follows:
         %{ $old_dist_data || {} },
         %$dist,
 
-        # Koalatee metrics
-        has_readme    => 0,
-        has_tests     => 0,
-        panda         => $dist->{'source-url'} && $dist->{provides}
-                            ? 2 : $dist->{'source-url'} ? 1 : 0,
-
         _builder      => {},
     );
 
@@ -342,8 +302,7 @@ The keys and default values in the C<_dist> hashref are as follows:
 
 First of all, all data from
 L<META file|http://design.perl6.org/S22.html#META6.json> will be present
-(this excludes keys we use during build process, like Koalatee metrics and
-private L</_builder> store).
+(this excludes keys we use during build process, like private L</_builder> store).
 
 =head3 C<_builder>
 
@@ -372,21 +331,7 @@ for L<ModulesPerl6::Model::Dists/find> for details.
 
 If the dist already exists in the databse, its info will override the defaults
 above. See L<ModulesPerl6::Model::Dists/find> for details on what those keys
-are. B<NOTE:> if the C<koalatee> key is present when your subclass finishes
-building dist info, B<its value will be used and all other Koalatee metrics
-will be ignored>
-
-=head3 Koalatee metrics
-
-    has_readme    => 0,
-    has_tests     => 0,
-    panda         => $dist->{'source-url'} && $dist->{provides}
-                        ? 2 : $dist->{'source-url'} ? 1 : 0,
-
-B<EXPERIMENTAL!> The Koalatee metrics will be set as above (and if the
-dist is already in the database, cached values will be used). This feature
-is currently experimental, pending implementation of the Koalatee system.
-
+are. 
 =head3 C<_dist_db>
 
     $self->_dist_db->find({ name => $dist->{name} })->first
@@ -476,22 +421,6 @@ logotype file.
 
 Returns C<1> on success (or if a cached version of logo was located), otherwise
 returns C<undef> or an empty list, depending on context.
-
-=head2 C<_set_readme>
-
-    $self->_set_readme( map $_->{path}, grep $_->{type} eq 'blog', @$tree );
-
-Takes a list of filenames and checks whether any of them looks like a repo
-README file. If it succeeds, it sets C<has_readme> Koalatee metric
-in L</_dist> to true. Returns its invocant.
-
-=head2 C<_set_tests>
-
-    $self->_set_tests(  map $_->{path}, grep $_->{type} eq 'tree', @$tree );
-
-Takes a list of directory names and checks whether any of them look like a
-directory containing tests. If it succeeds, it sets C<has_tests> Koalatee
-metric in L</_dist> to true. Returns its invocant.
 
 =head1 CONTACT INFORMATION
 

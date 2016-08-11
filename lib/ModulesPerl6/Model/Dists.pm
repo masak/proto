@@ -6,7 +6,6 @@ use FindBin; FindBin->again;
 use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::Dists::Schema;
-use ModulesPerl6::Metrics::Koalatee;
 use Mew;
 
 has db_file => Str | InstanceOf['File::Temp'], (
@@ -59,8 +58,6 @@ sub add {
         $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
-        $dist->{koalatee}      //= ModulesPerl6::Metrics::Koalatee->new
-                                                             ->total($dist);
 
         $db->resultset('Dist')->update_or_create({
             travis   => { status => $dist->{travis_status} },
@@ -69,7 +66,7 @@ sub add {
             },
             dist_build_id => { id => $dist->{build_id} },
             map +( $_ => $dist->{$_} ),
-                qw/name  meta_url  url  description  stars  issues  koalatee
+                qw/name  meta_url  url  description  stars  issues
                     date_updated  date_added/,
         });
     }
@@ -171,9 +168,6 @@ if set, or C<modulesperl6.db>.
         url          => 'https://github.com/zoffixznet/perl6-Color',
         description  => 'Test Dist1',
         author_id    => 'Dynacoder',
-        has_readme   => 1,
-        panda        => 2,
-        has_tests    => 1,
         travis_status=> 'passing',
         stars        => 42,
         issues       => 12,
@@ -207,20 +201,6 @@ Short description of the dist.
 =head3 C<author_id>
 
 Dists's "authority".
-
-=head3 C<has_readme>
-
-Boolean: does the dist have README file?
-
-=head3 C<panda>
-
-Takes values C<0> (dist is not conforming to latest specs),
-C<1> (dist conforms to specs, except for S11), or C<2> (dist fully conforms
-to current spec).
-
-=head3 C<has_tests>
-
-Boolean: does the dist have tests?
 
 =head3 C<travis_status>
 
@@ -272,9 +252,7 @@ tables needed for this module to operate. B<Will die> if they already exists.
 Searches the database for dists that match given criteria. B<Returns>
 a, possibly empty, L<Mojo::Collection> object containing found dists
 as hashrefs. Each hashref will contain the same keys and type of values
-as were given to L</add> method, B<except> the L</has_readme>, L</has_tests>,
-and L</panda> metrics are combined into a Koalatee metric ranging from
-C<0> to C<100>.
+as were given to L</add> method.
 
 B<Without arguments>, returns all dists in the database.
 B<Takes> a hashref specifying search criteria. If the search criteria a

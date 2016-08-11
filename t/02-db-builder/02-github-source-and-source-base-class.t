@@ -40,14 +40,10 @@ subtest 'Private methods' => sub {
         dist      => { my => 'test-dist'},
     );
 
-    $s->_set_readme( qw/foo/ );
-    $s->_set_tests(  qw/foo/ );
-    is_deeply $s->_dist, {my => 'test-dist', has_tests => 0, has_readme => 0},
+    is_deeply $s->_dist, {my => 'test-dist'},
         'tests/readme are NOT set when files are not present';
 
-    $s->_set_readme( qw/foo README bar/ );
-    $s->_set_tests(  qw/foo tests  bar/ );
-    is_deeply $s->_dist, {my => 'test-dist', has_tests => 1, has_readme => 1},
+    is_deeply $s->_dist, {my => 'test-dist'},
         'tests/readme are set when files are present';
 
     is $s->_get_author({author => 'zoffix'}),
@@ -106,7 +102,6 @@ subtest 'Repo without a README, tests, or logotype' => sub {
         date_added    => 0,
         author_id     => 'Zoffix Znet',
         name          => 'TestRepo1',
-        koalatee      => 60,
         date_updated  => 1448665634,
         issues        => 2,
         travis_status => 'not set up',
@@ -210,28 +205,6 @@ subtest 'Mojibake from utf-8 in META file (Issue #48)' => sub {
     is $dist->{name}, 'テスト', 'Unicode chars in name look right';
     is $dist->{description}, 'テストdist for modules.perl6.org build script',
         'Unicode chars in name look right';
-};
-
-subtest 'Ensure we do find all the Koalatee metrics' => sub {
-    my $meta_url = 'https://raw.githubusercontent.com/zoffixznet/perl6'
-                        . '-Color/master/META.info';
-    my $dist = ModulesPerl6::DbBuilder::Dist::Source::GitHub->new(
-        meta_url  => $meta_url,
-        logos_dir => $logos_dir,
-        dist_db   => $m,
-    )->load;
-
-    for my $postprocessor ( ModulesPerl6::DbBuilder::Dist->_postprocessors ) {
-        $postprocessor->new(
-            meta_url => $meta_url,
-            dist     => $dist,
-        )->process;
-    }
-
-    is $dist->{has_readme},    1,         'README found';
-    is $dist->{has_tests},     1,         'tests found';
-    is $dist->{panda},         2,         'panda conformance is correct';
-    is $dist->{travis_status}, 'passing', 'Travis status is correct';
 };
 
 subtest 'Do not operate on weird URLs, even if they are on GitHub' => sub {
