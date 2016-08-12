@@ -22,7 +22,7 @@ my $re = t::Helper::time_stamp_re;
 subtest 'failing dist build (META file fetch fail)' => sub {
     my $meta_list = File::Temp->new;
     spurt "https://raw.githubusercontent.com/zoffixznet/"
-        . "perl6-Color/master/META.info\nhttp://raw.githubusercontent"
+        . "perl6-Color/master/META6.json\nhttp://raw.githubusercontent"
         . ".com/localhost/1/1/1\n"
     => $meta_list;
 
@@ -64,12 +64,11 @@ subtest 'failing dist build (META file fetch fail)' => sub {
         $re\Q [info] Processing dist 1 of 2\E \s
         $re\Q [info] Using ModulesPerl6::DbBuilder::Dist::Source::GitHub to \E
             \Qload https://raw.githubusercontent.com/zoffixznet/perl6-Color/\E
-            \Qmaster/META.info\E \s
+            \Qmaster/META6.json\E \s
         $re\Q [info] Fetching distro info and commits\E \s
         $re\Q [info] Downloading META file from https://raw.githubusercontent\E
-            \Q.com/zoffixznet/perl6-Color/master/META.info\E \s
+            \Q.com/zoffixznet/perl6-Color/master/META6.json\E \s
         $re\Q [info] Parsing META file\E \s
-        $re\Q [warn] Required `perl` field is missing\E \s
         $re\Q [info] Dist has new commits. Fetching more info.\E \s
         $re\Q [info] Dist has a logotype of size 1390 bytes.\E \s
         $re\Q [info] Did not find cached dist logotype. Downloading.\E \s

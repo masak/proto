@@ -29,3 +29,6 @@ MYMETA.json
 MYMETA.yml
 assets/assetpack.db
 assets/cache
+t/03-app/public/sprite.css
+t/03-app/public/sprite.png
+
