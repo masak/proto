@@ -40,14 +40,14 @@ perl-5.22.0
 ...
 ...
 ```
-Pick the latest available `perl` and run (substituting `perl-5.22.0` for
+Pick the latest available `perl` and run (substituting `perl-5.24.0` for
 the latest version you see available):
 
 ```bash
-$ perlbrew install perl-5.22.0`
+$ perlbrew install perl-5.24.0`
 ```
 
-Now, run `perlbrew switch perl-5.22.0` to switch to that version of Perl 5.
+Now, run `perlbrew switch perl-5.24.0` to switch to that version of Perl 5.
 
 We'll also need [cpanm](metacpan.org/pod/App::cpanminus) and a
 module, so run this next:
@@ -106,11 +106,8 @@ $ cd modules.perl6.org;
 #### Install Perl 5 module dependencies:
 
 ```bash
-$ perl Build.PL
-$ ./Build installdeps
+$ cpanm --installdeps -vn .
 ```
-
-If asked whether to configure stuff automatically, just respond with `yes`.
 
 ### Production Deployment
 
@@ -121,10 +118,10 @@ to use [Mojolicious](http://mojolicio.us/)'s server).
 
 ## Generating The Database
 
-Run the `build-project-list.pl` build script that will generate the SQLite database file and launch the app in production mode. If you
-want to launch the app yourself, specify `--no-app-start` flag (you may also use the `--limit=` parameter so you don't build info for all the dists):
+Run the `build-project-list.pl` build script that will generate the SQLite database file. If you want it to also start the app in production mode, pass
+`--restart-app` option. (you may also use the `--limit=` parameter so you don't build info for all the dists):
 ```bash
-$ perl build-project-list.pl --no-app-start --limit=10
+$ perl build-project-list.pl --limit=10
 ```
 
 ## Launching Development Server
@@ -203,4 +200,3 @@ error from Apache:
       the content
   2. Check that the proxy has been configured to listen to the correct port
     specified in the app config. Currently, that's `:3333`
-

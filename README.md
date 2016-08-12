@@ -29,11 +29,14 @@ You can also create file `META.list.local` that contains specific URLs
 you may wish to fetch for debug purposes. Use the `--meta-list` argument
 to specify the location of that file. See `--help` for all options.
 
-- The build script automatically starts the Mojolicious app that powers the
-front end. To disable that behaviour, specify the `--no-app-start` flag:
+- The build script can start the Mojolicious app that powers the
+front end of you pass the `--restart-app` option:
 ```bash
-    $ perl bin/build-project-list.pl --no-app-start
+    $ perl bin/build-project-list.pl --restart-app
 ```
+
+For development purposes, you can use `bin/morbo` to power the web app,
+as it will watch for changes and auto-restart the app.
 
 #### Browser Support
 
