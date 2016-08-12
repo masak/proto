@@ -79,6 +79,9 @@ See [LICENSE](LICENSE) file for the details of the license of the code in this r
 This repository also contains code authored by third parties that may be licensed under a different license. Such
 files indicate the copyright and license terms at the top of the file. Currently these include:
 
+* Sprite generation code modified from now-deprecated [original
+`Mojolicious::Plugin::AssetPack::Handler::Sprites`](https://github.com/jhthorsen/mojolicious-plugin-assetpack/blob/f2a31c17d5076b056673f26dcb82071b505c9059/lib/Mojolicious/Plugin/AssetPack/Handler/Sprites.pm)
+Copyright (C) 2014 Jan Henning Thorsen
 * jQuery deparam plugin: Copyright (c) 2010 "Cowboy" Ben Alman. Dual licensed under the MIT and GPL licenses. See [http://benalman.com/about/license/](http://benalman.com/about/license/)
 * The Camelia image is copyright 2009 by Larry Wall. Permission to use is granted under the [Artistic License 2.0](License), or any subsequent version
 of the Artistic License.

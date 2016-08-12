@@ -10,6 +10,7 @@ use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::SiteTips;
+use ModulesPerl6::SpriteMaker;
 use experimental 'postderef';
 
 sub startup {
@@ -37,9 +38,17 @@ sub startup {
         /sass/main.scss
     });
 
-    # $self->asset->process('sprite.css' => 'sprites:///content-pics/dist-logos')
-    #     if map bsd_glob("$_/content-pics/dist-logos/*"),
-    #         $self->static->paths->@*;
+    for ( $self->static->paths->@* ) {
+        next unless bsd_glob("$_/content-pics/dist-logos/*");
+        ModulesPerl6::SpriteMaker->new->make_sprites(
+            static_path => $_,
+            pic_dir     => 'content-pics/dist-logos/',
+            class       => 'dist-logos',
+            image_file  => 'sprite.png',
+            css_file    => 'sprite.css',
+        );
+        last;
+    }
 
     $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-1.11.3.min.js

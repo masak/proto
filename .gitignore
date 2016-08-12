@@ -12,6 +12,8 @@ public/sass/cerulean.scss
 public/sass/cerulean/
 public/packed/
 public/content-pics/dist-logos/
+public/sprite.css
+public/sprite.png
 modulesperl6.db
 building-modulesperl6.db
 bin/hypnotoad.pid
@@ -27,4 +29,3 @@ MYMETA.json
 MYMETA.yml
 assets/assetpack.db
 assets/cache
-

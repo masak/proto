@@ -42,5 +42,7 @@
   </div>
 
   %= asset "app.js";
+  <link rel="stylesheet" type="text/css"
+    href="/sprite.css" media="screen,tv,projection">
 </body>
 </html>
