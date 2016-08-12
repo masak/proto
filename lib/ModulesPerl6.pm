@@ -30,24 +30,23 @@ sub startup {
     ]);
 
     # ASSETS
-    $self->plugin('AssetPack');
-    $self->asset('app.css' => qw{
+    $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
+    $self->asset->process('app.css' => qw{
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
 
-    $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos')
-        if map bsd_glob("$_/content-pics/dist-logos/*"),
-            $self->static->paths->@*;
+    # $self->asset->process('sprite.css' => 'sprites:///content-pics/dist-logos')
+    #     if map bsd_glob("$_/content-pics/dist-logos/*"),
+    #         $self->static->paths->@*;
 
-    $self->asset('app.js'  => qw{
+    $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-1.11.3.min.js
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
         /js/jquery-deparam.js
         /js/main.js
     });
-    $self->asset->purge({always => 1}); # clean up old packed files
 
     # HELPERS
     $self->helper( dists => sub {

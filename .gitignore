@@ -25,3 +25,6 @@ ModulesPerl6-*
 public/proto.json
 MYMETA.json
 MYMETA.yml
+assets/assetpack.db
+assets/cache
+
