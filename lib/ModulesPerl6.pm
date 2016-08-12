@@ -82,9 +82,9 @@ sub startup {
 
     # TODO: the /dist/ route currently redirects to repo, because we don't have
     # a proper dist page yet
-    $r->get('/dist/:dist'    )->to('root#repo'    )->name('dist'    );
-    $r->get('/repo/:dist'    )->to('root#repo'    )->name('repo'    );
-    $r->get('/total'         )->to('root#total'   )->name('total'   );
+    $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
+    $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
+    $r->get('/total'     )->to('root#total')->name('total');
 
     $r->any('/not_implemented_yet')
         ->to('root#not_implemented_yet')
