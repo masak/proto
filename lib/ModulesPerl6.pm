@@ -10,6 +10,7 @@ use Mojo::Util qw/slurp/;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::SiteTips;
+use ModulesPerl6::SpriteMaker;
 use experimental 'postderef';
 
 sub startup {
@@ -30,26 +31,31 @@ sub startup {
     ]);
 
     # ASSETS
-    $self->plugin(bootstrap3 => theme =>
-            { cerulean => 'https://bootswatch.com/cerulean/_bootswatch.scss' },
-            jquery => 0, js => [],
-    );
-    $self->asset('app.css' => qw{
+    $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
+    $self->asset->process('app.css' => qw{
+        https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
         https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
 
-    $self->asset('sprite.css' => 'sprites:///content-pics/dist-logos')
-        if map bsd_glob("$_/content-pics/dist-logos/*"),
-            $self->static->paths->@*;
+    for ( $self->static->paths->@* ) {
+        next unless bsd_glob("$_/content-pics/dist-logos/*");
+        ModulesPerl6::SpriteMaker->new->make_sprites(
+            static_path => $_,
+            pic_dir     => 'content-pics/dist-logos/',
+            class       => 'dist-logos',
+            image_file  => 'sprite.png',
+            css_file    => 'sprite.css',
+        );
+        last;
+    }
 
-    $self->asset('app.js'  => qw{
+    $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-1.11.3.min.js
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
         /js/jquery-deparam.js
         /js/main.js
     });
-    $self->asset->purge({always => 1}); # clean up old packed files
 
     # HELPERS
     $self->helper( dists => sub {

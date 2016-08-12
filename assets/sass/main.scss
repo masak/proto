@@ -1,5 +1,22 @@
+$color-link: #2FA4E7;
+$color-panel-primary-bg: $color-link;
+
 body {
-    background: lighten(#2FA4E7, 45%);
+    background: lighten($color-link, 45%);
+    color: #555;
+}
+
+a {
+    color: $color-link;
+}
+
+.panel-primary,
+.panel-primary > .panel-heading {
+    border-color: lighten($color-panel-primary-bg, 30%);
+}
+
+.panel-primary > .panel-heading {
+    background: $color-panel-primary-bg;
 }
 
 .error-page {

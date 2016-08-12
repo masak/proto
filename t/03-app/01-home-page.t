@@ -30,7 +30,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
         ->dived_text_is('.travis a'          => 'passing'   )
         ->dived_text_is('.stars a'           => '42'        )
         ->dived_text_is('.issues a'          => '12'        )
-        ->dived_text_is('.updated'           => '1970-01-01')
+        ->dived_text_is('.updated'           => 'N/A'       )
         # ->dived_text_is('.added'             => '2015-11-04')
         ->element_count_is(".name   a[href='$dist1->{url}']"           => 1)
         ->element_count_is('.name   a[href="/dist/Dist1"]'             => 1)
@@ -81,7 +81,7 @@ $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org')
     ;
 
     $t->dive_reset->get_ok('/')->status_is(200)
-        ->text_like('#site_tip' => qr/^Tip \d\z/, 'Site tip has correct text');
+        ->text_like('#site_tip' => qr/^\s*Tip \d\s*\z/, 'Site tip has correct text');
     ;
 
     $t->dive_reset->get_ok('/not_implemented_yet')

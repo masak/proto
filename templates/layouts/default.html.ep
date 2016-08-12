@@ -8,7 +8,6 @@
   <title><%= length(title) ? title() . ' - ' : '' %>Perl 6 Modules
       Directory</title>
   <link href="//perl6.org/favicon.ico" rel="shortcut icon">
-  %= asset "cerulean.css";
   %= asset "app.css";
 </head>
 <body>
@@ -43,9 +42,7 @@
   </div>
 
   %= asset "app.js";
-
-  % if ( length (my $sprite = (asset->get('sprite.css'))[0]) ) {
-    <link rel="stylesheet" property="stylesheet" href="<%= $sprite %>">
-  % }
+  <link rel="stylesheet" type="text/css"
+    href="/sprite.css" media="screen,tv,projection">
 </body>
 </html>

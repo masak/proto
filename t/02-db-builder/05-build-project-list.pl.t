@@ -61,12 +61,11 @@ like $out[2], qr{^
     $re\Q [info] Processing dist 2 of 2\E \s
     $re\Q [info] Using ModulesPerl6::DbBuilder::Dist::Source::GitHub to \E
         \Qload https://raw.githubusercontent.com/zoffixznet/perl6-Color/\E
-        \Qmaster/META.info\E \s
+        \Qmaster/META6.json\E \s
     $re\Q [info] Fetching distro info and commits\E \s
     $re\Q [info] Downloading META file from https://raw.githubusercontent.com\E
-        \Q/zoffixznet/perl6-Color/master/META.info\E \s
+        \Q/zoffixznet/perl6-Color/master/META6.json\E \s
     $re\Q [info] Parsing META file\E \s
-    $re\Q [warn] Required `perl` field is missing\E \s
     $re\Q [info] Dist has new commits. Fetching more info.\E \s
     $re\Q [info] Dist has a logotype of size 1390 bytes.\E \s
     $re\Q [info] Did not find cached dist logotype. Downloading.\E \s
@@ -112,7 +111,7 @@ subtest 'pop open the DB and check all values are correct in it' => sub {
             'travis_status' => 'passing',
             'date_added' => re('\A\d+\z'),
             'meta_url' => 'https://raw.githubusercontent.com/zoffixznet/'
-                            . 'perl6-Color/master/META.info',
+                            . 'perl6-Color/master/META6.json',
             'name' => 'Color',
             'issues' => re('\A\d+\z'),
         }
@@ -125,6 +124,6 @@ done_testing;
 sub get_meta_list {
     return <<'END'
 https://raw.githubusercontent.com/zoffixznet/perl6-modules.perl6.org-test3/master/META.info
-https://raw.githubusercontent.com/zoffixznet/perl6-Color/master/META.info
+https://raw.githubusercontent.com/zoffixznet/perl6-Color/master/META6.json
 END
 }

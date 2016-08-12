@@ -22,17 +22,17 @@ my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
             ->element_exists('#search [name="q"][value="Test"]')
             ->element_count_is('#dists tbody tr:not(.hidden)' => 2,
                 'we have two results')
-            ->text_is( '#dists tbody tr:first-child td:first-child a + a'
-                => 'Dist1')
-            ->text_is( '#dists tbody tr:first-child + tr td:first-child a + a'
-                => 'Dist2');
+            ->text_like( '#dists tbody tr:first-child td:first-child a + a'
+                => qr/^\s*Dist1\s*$/)
+            ->text_like( '#dists tbody tr:first-child + tr td:first-child a + a'
+                => qr/^\s*Dist2\s*$/);
 
     $t->click_ok('#search' => {q => 'Dist2'})->status_is(200)
             ->element_count_is('#dists tbody tr:not(.hidden)' => 1,
                 'we have one result')
             ->element_exists('#dists tbody tr:first-child.hidden')
-            ->text_is('#dists tbody tr:first-child + tr td:first-child a + a'
-                => 'Dist2');
+            ->text_like('#dists tbody tr:first-child + tr td:first-child a + a'
+                => qr/^\s*Dist2\s*$/);
 
     $t->click_ok('#search' => {q => 'Dist42'})->status_is(200)
             ->element_count_is('#dists tbody tr' => 3,
@@ -40,8 +40,8 @@ my $t = Test::Mojo::WithRoles->new('ModulesPerl6');
                 . 'and 1 message saying there are no results')
             ->element_count_is('#dists tbody tr:not(.hidden)' => 1,
                 'we have no results and showing the error message')
-            ->text_is('#dists tbody tr:not(.hidden) .error'  =>
-                'No results were found')
+            ->text_like('#dists tbody tr:not(.hidden) .error'  =>
+                qr/^\s*No results were found\s*$/)
     ;
 }
 
