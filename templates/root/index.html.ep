@@ -17,7 +17,7 @@
     </p>
 
     <p>Some standard modules are included with Rakudo. Among them
-       is <a href="http://docs.perl6.org/language/testing"><i>Test</i> for testing</a>
+       are <a href="http://docs.perl6.org/language/testing"><i>Test</i> for testing</a>
        and <a href="http://docs.perl6.org/language/nativecall"><i>NativeCall</i> for
        using C libraries</a>.
     </p>
