@@ -77,7 +77,7 @@
               </a>
             </td>
             <td class="desc"><%= $dist->{description} %></td>
-            <td class="travis travis-<%= $dist->{travis_status} %> " >
+            <td class="travis travis-<%= $dist->{travis_status} %>">
               % if ( $dist->{travis_status} eq 'not set up') {
                 <a href="https://docs.travis-ci.com/user/languages/perl6">
                 <i class="glyphicon glyphicon-question-sign"></i>
