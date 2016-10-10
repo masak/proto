@@ -78,11 +78,12 @@
             </td>
             <td class="desc"><%= $dist->{description} %></td>
             <td class="travis travis-<%= $dist->{travis_status} %>">
-              <a href="<%= $dist->{travis_url} %>"
-                >
-                % if ( $dist->{travis_status} eq 'not set up' ) {
-                  <i class="glyphicon glyphicon-question-sign"></i>
-                % }
+              % if ( $dist->{travis_status} eq 'not set up') {
+                <a href="https://docs.travis-ci.com/user/languages/perl6">
+                <i class="glyphicon glyphicon-question-sign"></i>
+              % }else{
+                 <a href="<%= $dist->{travis_url} %>">
+              % }
                 <%= $dist->{travis_status} %>
               </a>
             </td>
