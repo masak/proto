@@ -10,6 +10,7 @@ use experimental 'postderef';
 sub process {
     my $self = shift;
     my $dist = $self->_dist;
+    return unless $dist->{_builder}{is_fresh};
 
     my $code = Mojo::UserAgent->new( max_redirects => 5 )
         ->get( $dist->{url} )->res->code;
