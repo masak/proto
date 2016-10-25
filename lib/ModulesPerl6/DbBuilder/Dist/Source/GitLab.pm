@@ -34,6 +34,8 @@ sub load {
 
     return if $dist->{name} eq 'N/A';
 
+    # TODO: Add proper check for whether we got new commits
+    $dist->{_builder}{is_fresh} = 1;
     return $dist;
 }
 
