@@ -10,7 +10,14 @@ use experimental 'postderef';
 sub process {
     my $self = shift;
     my $dist = $self->_dist;
-    return unless $dist->{_builder}{is_fresh};
+
+    my $repo_url = 'https://github.com/'
+        . join '/', grep length, @{ $dist->{_builder} }{qw/repo_user  repo/};
+
+    if ( $repo_url eq $dist->{url} ) {
+        log info => "dist source URL is same as META repo URL ($repo_url)";
+        return;
+    }
 
     my $code = Mojo::UserAgent->new( max_redirects => 5 )
         ->get( $dist->{url} )->res->code;
