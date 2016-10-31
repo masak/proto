@@ -53,6 +53,7 @@ sub startup {
     $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-1.11.3.min.js
         https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
+        /js/dataTables.filter.perlModule.js
         /js/jquery-deparam.js
         /js/main.js
     });

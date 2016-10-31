@@ -44,6 +44,10 @@ function setup_table() {
         info: false,
         columnDefs: [
             {
+                targets: [ 0, 1 ],
+                type: "perlModule"
+            },
+            {
                 targets: [ 2, 3, 4, 5 ],
                 searchable: false
             },
