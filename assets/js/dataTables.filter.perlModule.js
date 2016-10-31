@@ -22,6 +22,6 @@ jQuery.fn.DataTable.ext.type.search.perlModule = function(data) {
     return !data ?
         '' :
         typeof data === 'string' ?
-        data + data.replace(/[ \-]/g, '::') :
+        data.replace(/::/g, '-') :
         data;
 };
