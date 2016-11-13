@@ -19,9 +19,11 @@
  */
 
 jQuery.fn.DataTable.ext.type.search.perlModule = function(data) {
-    return !data ?
+    data = $("<div/>").html(data).text().replace(/\n/g,'');
+    var ret =  !data ?
         '' :
         typeof data === 'string' ?
         data + data.replace(/::/g, '-') :
         data;
+    return ret;
 };
