@@ -37,6 +37,14 @@ function setup_table() {
             });
     };
 
+    // it appears to need this in order to sort the name column right
+    $.fn.dataTable.ext.order['text-only'] = function ( settings, col ) {
+        return this.api().column( col, {order:'index'} ).nodes().map(
+            function (td, i) {
+                return $(td).text();
+            });
+    };
+
     table_plugin = el.DataTable({
         paging: false,
         autoWidth: false,
@@ -44,8 +52,13 @@ function setup_table() {
         info: false,
         columnDefs: [
             {
-                targets: [ 0, 1 ],
+                targets: [ 0 ],
+                orderDataType: "text-only",
                 type: "perlModule"
+            },
+            {
+                targets: [ 1 ],
+                searchable: true
             },
             {
                 targets: [ 2, 3, 4, 5 ],
