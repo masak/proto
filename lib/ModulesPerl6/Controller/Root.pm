@@ -33,9 +33,16 @@ sub index {
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
     }
 
-    $self->stash(
+    my %data = (
         dists => $dists,
+        more  => $self->url_for('current')->to_abs,
         $self->build_stats->stats(qw/dists_num  last_updated/)->%*,
+    );
+    $self->respond_to(
+        html => { %data, template => 'root/index' },
+        json => { json => {
+            dists => [ grep !$_->{is_hidden}, @{%data{dists}} ],
+        }},
     );
 }
 
