@@ -25,7 +25,7 @@ sub index {
             "content-pics/dist-logos/$logo_base.png"
         );
 
-        $_->{date_updated} = $_->{date_updated} ? strftime "%Y-%m-%d", 
+        $_->{date_updated} = $_->{date_updated} ? strftime "%Y-%m-%d",
                            gmtime $_->{date_updated} : 'N/A';
 
         $_->{travis_url}   = Mojo::URL->new($_->{url})->host('travis-ci.org');
