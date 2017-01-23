@@ -11,7 +11,7 @@
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
         known external Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
-        These modules can be installed with <a href="https://github.com/tadzik/panda/">panda</a>, a module management tool
+        These modules can be installed with <a href="https://github.com/ugexe/zef/">zef</a>, a module management tool
       that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
         Star</a>.
     </p>
