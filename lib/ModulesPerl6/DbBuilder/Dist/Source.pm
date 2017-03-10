@@ -57,6 +57,10 @@ sub _parse_meta {
             // $json->{'repo-url'}
             // $json->{support}{source};
 
+    $json->{tags} = [] unless ref($json->{tags}) eq 'ARRAY';
+    @{ $json->{tags} } = map uc, map {
+        length > 20 ? substr($_, 0, 17) . '...' : $_
+    } grep {length and not ref} @{ $json->{tags} };
     return $self->_fill_missing( {%$json} );
 }
 
@@ -77,6 +81,7 @@ sub _fill_missing {
         meta_url      => $self->_meta_url,
         url           => 'N/A',
         description   => 'N/A',
+        tags          => [],
         stars         => 0,
         issues        => 0,
         date_updated  => 0,
@@ -331,7 +336,7 @@ for L<ModulesPerl6::Model::Dists/find> for details.
 
 If the dist already exists in the databse, its info will override the defaults
 above. See L<ModulesPerl6::Model::Dists/find> for details on what those keys
-are. 
+are.
 =head3 C<_dist_db>
 
     $self->_dist_db->find({ name => $dist->{name} })->first

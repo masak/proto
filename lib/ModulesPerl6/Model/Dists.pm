@@ -38,14 +38,18 @@ sub _find {
             : $what->{$_}
                 ? ( $_ => $what->{$_} ) : ()
     } qw/name  author_id  travis_status  description/;
-
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
+            prefetch => { tag_dists => 'tag' },
             result_class => 'DBIx::Class::ResultClass::HashRefInflator'
         } : ()
     );
 
-    return $is_hri ? c $res->all : $res;
+    return $is_hri ? c map {
+        # TODO XXX: there gotta be a less stupid way to do this?
+        $_->{tags} = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
+        $_
+    } $res->all : $res;
 }
 
 sub add {
@@ -54,21 +58,28 @@ sub add {
 
     my $db = $self->_db;
     for my $dist ( @data ) {
+        my @tags = grep length, map trim($_//''),
+            @{ delete $dist->{tags} || [] };
+
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
 
-        $db->resultset('Dist')->update_or_create({
+        my $res = $db->resultset('Dist')->update_or_create({
             travis   => { status => $dist->{travis_status} },
             author => { # use same field for both, for now. TODO:fetch realname
                 author_id => $dist->{author_id}, name => $dist->{author_id},
             },
             dist_build_id => { id => $dist->{build_id} },
-            map +( $_ => $dist->{$_} ),
+            (map +( $_ => $dist->{$_} ),
                 qw/name  meta_url  url  description  stars  issues
-                    date_updated  date_added/,
+                    date_updated  date_added /,
+            ),
         });
+        for (@tags) {
+            $res->add_to_tags({ tag => $_ });
+        }
     }
 
     $self;
