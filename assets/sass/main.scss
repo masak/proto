@@ -219,6 +219,24 @@ table.dataTable {
     margin: 20px 5px 0;
 }
 
+#tags {
+    list-style: none;
+    margin: 20px 20px 0;
+    padding: 0;
+
+    li {
+        display: inline-block;
+        margin-bottom: 4px;
+
+        .btn-default { background: #F5F5F5 }
+        a {
+            small {
+                font-size: 60%;
+            }
+        }
+    }
+}
+
 
 /* Bootstrap amendments */
 

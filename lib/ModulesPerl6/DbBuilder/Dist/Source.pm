@@ -58,7 +58,9 @@ sub _parse_meta {
             // $json->{support}{source};
 
     $json->{tags} = [] unless ref($json->{tags}) eq 'ARRAY';
-    @{ $json->{tags} } = grep {length and not ref} @{ $json->{tags} };
+    @{ $json->{tags} } = map uc, map {
+        length > 20 ? substr($_, 0, 17) . '...' : $_
+    } grep {length and not ref} @{ $json->{tags} };
     return $self->_fill_missing( {%$json} );
 }
 

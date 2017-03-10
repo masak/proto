@@ -19,7 +19,9 @@ sub index {
             $self->dists->find({ description => \$q })->each;
     }
 
+    my %tags;
     for ( @$dists ) {
+        $tags{$_}++ for @{ $_->{tags} };
         my $logo_base = 's-' . $_->{name} =~ s/\W/_/gr;
         $_->{logo} = $logo_base if $self->app->static->file(
             "content-pics/dist-logos/$logo_base.png"
@@ -33,7 +35,14 @@ sub index {
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
     }
 
+    if ( my $active_tag = $self->param('tag') ) {
+        @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists;
+    }
+
     my %data = (
+        tags  => [
+            map +{ tag => $_, count => $tags{$_} }, sort keys %tags
+        ],
         dists => $dists,
         more  => $self->url_for('current')->to_abs,
         $self->build_stats->stats(qw/dists_num  last_updated/)->%*,
