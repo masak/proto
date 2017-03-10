@@ -54,6 +54,9 @@ sub add {
 
     my $db = $self->_db;
     for my $dist ( @data ) {
+        my @tags = grep length, map trim($_//''),
+            @{ delete $dist->{tags} || [] };
+
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
@@ -65,9 +68,11 @@ sub add {
                 author_id => $dist->{author_id}, name => $dist->{author_id},
             },
             dist_build_id => { id => $dist->{build_id} },
-            map +( $_ => $dist->{$_} ),
+            (map +( $_ => $dist->{$_} ),
                 qw/name  meta_url  url  description  stars  issues
-                    date_updated  date_added/,
+                    date_updated  date_added /,
+            ),
+            tags => \@tags,
         });
     }
 

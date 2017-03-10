@@ -1,8 +1,9 @@
 package ModulesPerl6::Model::Dists::Schema::Result::Dist;
 use     ModulesPerl6::Model::ResultClass;
 
-primary_column name          => { data_type => 'text'                      };
 primary_column meta_url      => { data_type => 'text',                     };
+column         name          => { data_type => 'text'                      };
+column         tags          => { data_type => 'text', is_foreign_key => 1 };
 column         author_id     => { data_type => 'text', is_foreign_key => 1 };
 column         build_id      => { data_type => 'text', is_foreign_key => 1 };
 column         travis_status => { data_type => 'text', is_foreign_key => 1 };
@@ -12,6 +13,12 @@ column         stars         => { data_type => 'integer'                   };
 column         issues        => { data_type => 'integer'                   };
 column         date_updated  => { data_type => 'integer'                   };
 column         date_added    => { data_type => 'integer'                   };
+
+has_many tag_dists
+    => 'ModulesPerl6::Model::Dists::Schema::Result::TagDist'
+    => 'dist';
+
+many_to_many tags => tag_dists => 'tag';
 
 belongs_to author
     => 'ModulesPerl6::Model::Dists::Schema::Result::Author'
