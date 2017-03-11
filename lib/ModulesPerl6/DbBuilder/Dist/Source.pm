@@ -88,7 +88,8 @@ sub _parse_meta {
             length and not $no_index->{$_}
         } map { trim uc } grep { not ref } @{ $json->{tags} };
 
-    log warn => "`$json->{name}` does not have any tags";
+    log warn => "`$json->{name}` does not have any tags"
+        unless @{ $json->{tags} };
 
     return $self->_fill_missing( {%$json} );
 }
