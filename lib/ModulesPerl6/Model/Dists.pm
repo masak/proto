@@ -114,6 +114,12 @@ sub remove_old {
     my $num_deleted = $res->all;
     $res->delete_all;
 
+    # toss no-longer-used tags
+    $self->_db->resultset("Tag")->search(
+        { "tag_dists.tag" => undef },
+        { prefetch => { "tag_dists" => "tag" } },
+    )->delete_all;
+
     $num_deleted;
 }
 

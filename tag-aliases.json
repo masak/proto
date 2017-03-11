@@ -1,0 +1,18 @@
+{
+    "replacements": {
+        "database": ["dbdish", "dbish", "odbc"],
+        "filesystem": ["file"],
+        "json": ["json-c"],
+        "IPv4/IPv6": ["IP", "IPv4", "IPv6", "IP address"],
+        "testing": ["test"],
+        "utils": ["util", "utilities", "utility"],
+        "users": ["user"],
+        "url": ["uri"],
+        "web": ["web service", "webservice", "p6sgi", "websocket"]
+    },
+
+    "do_not_index": [
+        "***TAGS IN THIS LIST ARE ONES MARKED NOT TO BE INDEXED***",
+        "football-data.org"
+    ]
+}

@@ -1,10 +1,44 @@
 var table_plugin;
 
 $(function(){
+    setup_tags();
     setup_table();
     setup_search_query_save();
     setup_search_box_defocus();
 });
+
+function setup_tags() {
+    var limit_count = 3, added_weak_tag_expander = 0;
+    $('#tags').html(
+        $('#tags li').sort(function(el){
+            return $(el).find('small').text() < limit_count ? 1 : 0;
+        }).sort(function(el){
+            // our < limit_count tags are in reverse-alphabetic order now
+            // sort them again to reverse the order
+            return $(el).find('small').text() < limit_count ? 1 : 0;
+        })
+    );
+
+    $('#tags li').each(function (i, el) {
+        if($(el).find('small').text() < limit_count) {
+            if ( ! added_weak_tag_expander ) {
+                $(el).before(
+                    '<li id="weak-tag-expander"><a class="btn btn-xs'
+                    + ' btn-default" href="#">VIEW ALL TAGS</a></li>'
+                );
+                $('#weak-tag-expander').click(function() {
+                    $('.weak-tag').removeClass('hidden');
+                    $(this).remove();
+                    return false;
+                });
+                added_weak_tag_expander = 1;
+            }
+            $(el).addClass('weak-tag hidden');
+        }
+    });
+
+    $('#tags').removeClass('hidden');
+}
 
 function setup_search_box_defocus() {
     /* Focus search box on page load, but remove focus if the user appears
