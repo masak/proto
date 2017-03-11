@@ -9,16 +9,6 @@ $(function(){
 
 function setup_tags() {
     var limit_count = 3, added_weak_tag_expander = 0;
-    $('#tags').html(
-        $('#tags li').sort(function(el){
-            return $(el).find('small').text() < limit_count ? 1 : 0;
-        }).sort(function(el){
-            // our < limit_count tags are in reverse-alphabetic order now
-            // sort them again to reverse the order
-            return $(el).find('small').text() < limit_count ? 1 : 0;
-        })
-    );
-
     $('#tags li').each(function (i, el) {
         if($(el).find('small').text() < limit_count) {
             if ( ! added_weak_tag_expander ) {

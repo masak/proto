@@ -39,9 +39,11 @@ sub index {
         @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists;
     }
 
+    my @tags = map +{ tag => $_, count => $tags{$_} }, sort keys %tags;
     my %data = (
         tags  => [
-            map +{ tag => $_, count => $tags{$_} }, sort keys %tags
+            ( grep { $_->{count} >= 3 } @tags ),
+            ( grep { $_->{count}  < 3 } @tags )
         ],
         dists => $dists,
         more  => $self->url_for('current')->to_abs,
