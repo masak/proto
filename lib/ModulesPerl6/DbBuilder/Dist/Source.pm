@@ -3,10 +3,9 @@ package ModulesPerl6::DbBuilder::Dist::Source;
 use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
-use Mojo::File;
 use Mojo::JSON qw/from_json/;
 use Mojo::UserAgent;
-use Mojo::Util qw/spurt  decode/;
+use Mojo::Util qw/slurp  spurt  decode/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -28,10 +27,9 @@ has _ua => InstanceOf['Mojo::UserAgent'], (
 has _tag_aliases => Maybe[Ref['HASH']], (
     is => 'lazy',
     default => sub {
-        my $raw_tags = eval { from_json( Mojo::File->new(
-                $ENV{MODULESPERL6_TAG_ALIASES_FILE}
-                    // catfile $FindBin::Bin, qw/.. tag-aliases.json/
-            )->slurp);
+        my $raw_tags = eval {
+            from_json slurp $ENV{MODULESPERL6_TAG_ALIASES_FILE}
+                // catfile $FindBin::Bin, qw/.. tag-aliases.json/;
         } || do { warn "\n\nFailed to load tag-aliases.json: $@\n\n"; exit; };
 
         my %tags;
