@@ -42,19 +42,19 @@
     <h2 class="panel-title">Project List</h2>
   </div>
 
-  <ul id="tags">
-    <li><a href="/" class="btn btn-xs <%=
+  <ul id="tags" class="hidden"
+    ><li><a href="/" class="btn btn-xs <%=
         stash('tag') ? 'btn-default' : 'btn-primary'%>">ALL
-      <small>(<%= stash 'dists_num' %>)</small></a></li>
+      <small><%= stash 'dists_num' %></small></a></li>
     % for my $t ( @{stash('tags')}  ) {
     % my $active_tag = uc (stash('tag') // '');
-      <li>
-        <a href="/t/<%= $t->{tag} %>"
+      <li
+        ><a href="/t/<%= $t->{tag} %>"
             class="btn btn-xs <%=
               $active_tag eq $t->{tag} ? 'btn-primary' : 'btn-default'
             %>"
-          ><%= $t->{tag} %> <small>(<%= $t->{count} %>)</small></a>
-      </li>
+          ><%= $t->{tag} %> <small><%= $t->{count} %></small></a
+      ></li>
     % }
   </ul>
 

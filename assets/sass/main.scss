@@ -227,16 +227,26 @@ table.dataTable {
     li {
         display: inline-block;
         margin-bottom: 4px;
+        margin-right: 4px;
 
         .btn-default { background: #F5F5F5 }
         a {
             small {
-                font-size: 60%;
+                font-size: 70%;
             }
         }
     }
-}
 
+    .weak-tag {
+        a {
+            background: #e5e5e5;
+        }
+    }
+
+    #weak-tag-expander a {
+        background: #96D1F3;
+    }
+}
 
 /* Bootstrap amendments */
 
