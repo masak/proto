@@ -5,7 +5,7 @@ use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
 use Mojo::JSON qw/from_json/;
 use Mojo::UserAgent;
-use Mojo::Util qw/slurp  spurt  decode/;
+use Mojo::Util qw/slurp  spurt  decode  trim/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -85,9 +85,11 @@ sub _parse_meta {
         } map {
             $tags->{$_} || $_ # perform substitution to common form
         } grep {
-            length and not ref and not $no_index->{$_}
-        } map uc, @{ $json->{tags} };
+            length and not $no_index->{$_}
+        } map { trim uc } grep { not ref } @{ $json->{tags} };
+
     log warn => "`$json->{name}` does not have any tags";
+
     return $self->_fill_missing( {%$json} );
 }
 
