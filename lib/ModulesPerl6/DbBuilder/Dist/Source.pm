@@ -1,9 +1,11 @@
 package ModulesPerl6::DbBuilder::Dist::Source;
 
+use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
+use Mojo::JSON qw/from_json/;
 use Mojo::UserAgent;
-use Mojo::Util qw/spurt  decode/;
+use Mojo::Util qw/slurp  spurt  decode/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -21,6 +23,24 @@ has _dist      => Maybe[Ref['HASH']], (
 has _ua => InstanceOf['Mojo::UserAgent'], (
     is      => 'lazy',
     default => sub { Mojo::UserAgent->new( max_redirects => 10 ) },
+);
+has _tag_aliases => Maybe[Ref['HASH']], (
+    is => 'lazy',
+    default => sub {
+        my $raw_tags = eval {
+            from_json slurp $ENV{MODULESPERL6_TAG_ALIASES_FILE}
+                // catfile $FindBin::Bin, qw/.. tag-aliases.json/;
+        } || do { warn "\n\nFailed to load tag-aliases.json: $@\n\n"; exit; };
+
+        my %tags;
+        for my $key (keys %{ $raw_tags->{replacements} || {}}) {
+            for (@{$raw_tags->{replacements}{$key}}) {
+                $tags{+uc} = uc $key;
+            }
+        }
+        my %no_index = map +((uc) => 1), @{ $raw_tags->{do_not_index} || [] };
+        { no_index => \%no_index, replacements => \%tags }
+    }
 );
 
 sub _download_meta {
@@ -57,10 +77,16 @@ sub _parse_meta {
             // $json->{'repo-url'}
             // $json->{support}{source};
 
+    my ($no_index, $tags) = @{ $self->_tag_aliases }{qw/no_index replacements/};
+
     $json->{tags} = [] unless ref($json->{tags}) eq 'ARRAY';
-    @{ $json->{tags} } = map uc, map {
-        length > 20 ? substr($_, 0, 17) . '...' : $_
-    } grep {length and not ref} @{ $json->{tags} };
+    @{ $json->{tags} } = map {
+            length > 20 ? substr($_, 0, 17) . '...' : $_
+        } map {
+            $tags->{$_} || $_ # perform substitution to common form
+        } grep {
+            length and not ref and not $no_index->{$_}
+        } map uc, @{ $json->{tags} };
     return $self->_fill_missing( {%$json} );
 }
 
@@ -435,4 +461,3 @@ Original version of this module was written by Zoffix Znet
 =head1 LICENSE
 
 You can use and distribute this module under the same terms as Perl itself.
-
