@@ -83,7 +83,9 @@ sub _parse_meta {
     @{ $json->{tags} } = map {
             length > 20 ? substr($_, 0, 17) . '...' : $_
         } map {
-            $tags->{$_} || $_ # perform substitution to common form
+            # perform substitution to common form and sub all '/' to ' '
+            # because we need '/' as part of route matching in the web app
+            ($tags->{$_} || $_) =~ tr{/}{ }r
         } grep {
             length and not $no_index->{$_}
         } map { trim uc } grep { not ref } @{ $json->{tags} };
