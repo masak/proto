@@ -36,6 +36,7 @@ sub index {
     }
 
     if ( my $active_tag = $self->param('tag') ) {
+        $active_tag = uc $active_tag;
         @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists;
     }
 
