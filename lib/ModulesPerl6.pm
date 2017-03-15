@@ -80,7 +80,7 @@ sub startup {
 
     # multiple search aliases, because why not?
     $r->get( $_ )->to('root#index') for qw{
-        /  /q/:q  /s/:q  /search/:q  /t/*tag /tag/*tag
+        /  /q/#q  /s/#q  /search/#q  /t/#tag /tag/#tag
     };
 
     # TODO: the /dist/ route currently redirects to repo, because we don't have
