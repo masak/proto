@@ -46,7 +46,7 @@ sub _find {
     );
 
     return $is_hri ? c map {
-        # TODO XXX: there gotta be a less stupid way to do this?
+        # TODO XXX: there got to be a better way to do this?
         $_->{tags} = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
         $_
     } $res->all : $res;
