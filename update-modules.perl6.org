@@ -4,12 +4,23 @@ set -e -x
 echo 'Starting module update'
 date
 cd ~/modules.perl6.org/
-git pull -q -n
+
+git fetch
+before=$(git rev-parse HEAD)
+git checkout origin/master
+after=$(git rev-parse HEAD)
 cp update-modules.perl6.org ../
+
 DO_REBUILD=0
-if [[ `git log -1 --oneline` =~ '[REBUILD]' ]]; then
-    DO_REBUILD=1
+if [ "$before" != "$after" ]
+then
+    echo "Got new commits"
+    if [[ `git log "$before"..."$after" --oneline` =~ '[REBUILD]' ]]; then
+        echo "Full database rebuild triggered"
+        DO_REBUILD=1
+    fi
 fi
+
 log_file=$(mktemp);
 FULL_REBUILD=$DO_REBUILD perl bin/build-project-list.pl --restart-app > $log_file 2>&1 && cp $log_file public/update.log
 rm $log_file;
