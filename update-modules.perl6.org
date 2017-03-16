@@ -1,9 +1,11 @@
 #!/bin/bash
 . /home/modules.perl6.org/perl5/perlbrew/etc/bashrc
+set -e -x
 echo 'Starting module update'
 date
 cd ~/modules.perl6.org/
 git pull -q -n
+cp update-modules.perl6.org ../
 DO_REBUILD=0
 if [[ `git log -1 --oneline` =~ '[REBUILD]' ]]; then
     DO_REBUILD=1
