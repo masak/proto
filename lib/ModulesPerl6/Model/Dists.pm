@@ -77,9 +77,9 @@ sub add {
                     date_updated  date_added /,
             ),
         });
-        for (@tags) {
-            $res->add_to_tags({ tag => $_ });
-        }
+
+        $db->resultset('TagDist')->search({ dist => $res->id })->delete;
+        $res->add_to_tags({ tag => $_ }) for @tags;
     }
 
     $self;
