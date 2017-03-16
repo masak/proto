@@ -31,4 +31,5 @@ assets/assetpack.db
 assets/cache
 t/03-app/public/sprite.css
 t/03-app/public/sprite.png
-
+/log/
+/public/update.log
