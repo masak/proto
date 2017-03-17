@@ -8,26 +8,11 @@ $(function(){
 });
 
 function setup_tags() {
-    var limit_count = 3, added_weak_tag_expander = 0;
-    $('#tags li').each(function (i, el) {
-        if($(el).find('small').text() < limit_count) {
-            if ( ! added_weak_tag_expander ) {
-                $(el).before(
-                    '<li id="weak-tag-expander"><a class="btn btn-xs'
-                    + ' btn-default" href="#">VIEW ALL TAGS</a></li>'
-                );
-                $('#weak-tag-expander').click(function() {
-                    $('.weak-tag').removeClass('hidden');
-                    $(this).remove();
-                    return false;
-                });
-                added_weak_tag_expander = 1;
-            }
-            $(el).addClass('weak-tag hidden');
-        }
+    $('#weak-tag-expander').click(function() {
+        $('.weak-tag').removeClass('hidden');
+        $(this).remove();
+        return false;
     });
-
-    $('#tags').removeClass('hidden');
 }
 
 function setup_search_box_defocus() {

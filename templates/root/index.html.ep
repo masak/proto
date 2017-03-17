@@ -42,14 +42,25 @@
     <h2 class="panel-title">Project List</h2>
   </div>
 
-  <ul id="tags" class="hidden"
-    ><li><a href="/" class="btn btn-xs <%=
+  <ul id="tags"><li><a href="/" class="btn btn-xs <%=
         stash('tag') ? 'btn-default' : 'btn-primary'%>">ALL
       <small><%= stash 'dists_num' %></small></a></li>
-    % for my $t ( @{stash('tags')}  ) {
+    % my $is_active_weak_tag = stash 'is_active_weak_tag';
+    % my $did_add_expander = 0;
     % my $active_tag = uc (stash('tag') // '');
-      <li
-        ><a href="/t/<%= $t->{tag} %>"
+    % for my $t ( @{stash('tags')}  ) {
+      % if ( not $did_add_expander
+      %  and not $is_active_weak_tag and $t->{is_weak}
+      % ) {
+        % $did_add_expander = 1;
+        <li id="weak-tag-expander"
+          ><a class="btn btn-xs btn-default" href="#">VIEW ALL TAGS</a></li>
+      % }
+      <li class="<%=
+        $t->{is_weak} ? ( $is_active_weak_tag ? '' : 'hidden ') . 'weak-tag'
+                      : ''
+      %>"
+        ><a href="<%= $active_tag eq $t->{tag} ? '/' : '/t/' . $t->{tag} %>"
             class="btn btn-xs <%=
               $active_tag eq $t->{tag} ? 'btn-primary' : 'btn-default'
             %>"

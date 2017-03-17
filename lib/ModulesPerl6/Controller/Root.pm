@@ -35,13 +35,20 @@ sub index {
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
     }
 
-    if ( my $active_tag = $self->param('tag') ) {
-        $active_tag = uc $active_tag;
-        @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists;
-    }
+    my $active_tag = uc $self->param('tag') // '';
+    @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists
+        if $active_tag;
 
-    my @tags = map +{ tag => $_, count => $tags{$_} }, sort keys %tags;
+    my @tags = map +{
+        tag        => $_,
+        count      => $tags{$_},
+        is_weak    => $tags{$_} < 3,
+    }, sort keys %tags;
+
     my %data = (
+        is_active_weak_tag => (
+            scalar grep { $_->{is_weak} and $_->{tag} eq $active_tag } @tags
+        ),
         tags  => [
             ( grep { $_->{count} >= 3 } @tags ),
             ( grep { $_->{count}  < 3 } @tags )
@@ -50,10 +57,11 @@ sub index {
         more  => $self->url_for('current')->to_abs,
         $self->build_stats->stats(qw/dists_num  last_updated/)->%*,
     );
+
     $self->respond_to(
         html => { %data, template => 'root/index' },
         json => { json => {
-            dists => [ grep !$_->{is_hidden}, @{%data{dists}} ],
+            dists => [ grep !$_->{is_hidden}, @{$data{dists}} ],
         }},
     );
 }
