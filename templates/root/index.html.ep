@@ -5,8 +5,9 @@
       <h1 class="panel-title">Perl&nbsp;6 Modules</h1>
   </div>
   <div class="panel-body suckin-btm">
-    <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
-        class="pull-right" width=291 height=273>
+    <a class="pull-right" href="https://perl6.org/"
+      ><img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
+        width=291 height=273></a>
 
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
