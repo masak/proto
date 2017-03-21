@@ -79,7 +79,11 @@ sub _parse_meta {
 
     my ($no_index, $tags) = @{ $self->_tag_aliases }{qw/no_index replacements/};
 
-    $json->{tags} = [] unless ref($json->{tags}) eq 'ARRAY';
+    unless ( ref($json->{tags}) eq 'ARRAY' ) {
+        log warn
+            => '`tags` key found but it does not contain an array; ignoring.'
+        $json->{tags} = [];
+    }
     @{ $json->{tags} } = map {
             length > 20 ? substr($_, 0, 17) . '...' : $_
         } map {
