@@ -35,7 +35,7 @@ sub index {
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
     }
 
-    my $active_tag = uc $self->param('tag') // '';
+    my $active_tag = uc($self->param('tag') // '');
     @$dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @$dists
         if $active_tag;
 
