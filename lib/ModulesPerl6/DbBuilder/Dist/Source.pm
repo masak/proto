@@ -81,7 +81,7 @@ sub _parse_meta {
 
     unless ( ref($json->{tags}) eq 'ARRAY' ) {
         log warn
-            => '`tags` key found but it does not contain an array; ignoring.'
+            => '`tags` key found but it does not contain an array; ignoring.';
         $json->{tags} = [];
     }
     @{ $json->{tags} } = map {
