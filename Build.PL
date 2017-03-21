@@ -30,6 +30,7 @@ my $build = Module::Build->new(
       'Imager::File::PNG'                => '0.92',
       'Import::Into'                     => '0',
       'JSON::Meth'                       => '1.001006',
+      'List::Util'                       => '1.45',
       'LWP::UserAgent'                   => '0',
       'Mew'                              => '1.001006',
       'Mojo::Base'                       => '0',

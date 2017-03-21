@@ -3,6 +3,7 @@ package ModulesPerl6::DbBuilder::Dist::Source;
 use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
 use JSON::Meth qw/$json/;
+use List::Util qw/uniqstr/;
 use Mojo::JSON qw/from_json/;
 use Mojo::UserAgent;
 use Mojo::Util qw/slurp  spurt  decode  trim/;
@@ -84,7 +85,7 @@ sub _parse_meta {
             => '`tags` key found but it does not contain an array; ignoring.';
         $json->{tags} = [];
     }
-    @{ $json->{tags} } = map {
+    @{ $json->{tags} } = uniqstr map {
             length > 20 ? substr($_, 0, 17) . '...' : $_
         } map {
             # perform substitution to common form and sub all '/' to ' '
