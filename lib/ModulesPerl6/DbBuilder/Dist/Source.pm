@@ -80,9 +80,11 @@ sub _parse_meta {
 
     my ($no_index, $tags) = @{ $self->_tag_aliases }{qw/no_index replacements/};
 
-    unless ( ref($json->{tags}) eq 'ARRAY' ) {
+    unless ( ref $json->{tags} eq 'ARRAY' ) {
         log warn
-            => '`tags` key found but it does not contain an array; ignoring.';
+            => '`tags` key found but it does not contain an array; ignoring.'
+        if exists $json->{tags};
+
         $json->{tags} = [];
     }
     @{ $json->{tags} } = uniqstr map {
