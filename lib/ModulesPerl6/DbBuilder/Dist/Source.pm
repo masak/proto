@@ -165,14 +165,17 @@ sub _save_logo {
     }
 
     spurt $tx->res->body => $logo;
+
     eval {
         my ($x, $y) = imgsize $logo;
         die log error => "logotype needs to be 32px x 32px, but is actually "
             . "${x}px x ${y}px. Rejecting."
         unless $x == 32 and $y == 32;
         1;
-    } or unlink $logo;
-    return 1;
+    } and return 1;
+
+    unlink $logo; # size wasn't good; toss the file and return failure
+    return;
 }
 
 sub _get_author {
