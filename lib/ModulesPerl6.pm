@@ -6,7 +6,7 @@ use constant SECRETS_FILE => $ENV{MODULESPERL6_SECRETS}
                                 // catfile $FindBin::Bin, '..', 'secrets';
 use Mojo::Base 'Mojolicious';
 use File::Glob qw/bsd_glob/;
-use Mojo::Util qw/slurp/;
+use Mojo::File qw/path/;
 use ModulesPerl6::Model::BuildStats;
 use ModulesPerl6::Model::Dists;
 use ModulesPerl6::Model::SiteTips;
@@ -27,7 +27,7 @@ sub startup {
         unless -r SECRETS_FILE;
 
     $self->secrets([
-        -r SECRETS_FILE ? slurp SECRETS_FILE : 'Perl 6 is awesome!'
+        -r SECRETS_FILE ? path(SECRETS_FILE)->slurp : 'Perl 6 is awesome!'
     ]);
 
     # ASSETS

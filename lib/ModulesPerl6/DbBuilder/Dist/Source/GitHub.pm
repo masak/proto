@@ -3,7 +3,8 @@ package ModulesPerl6::DbBuilder::Dist::Source::GitHub;
 use base 'ModulesPerl6::DbBuilder::Dist::Source';
 
 use Carp       qw/croak/;
-use Mojo::Util qw/slurp  decode/;
+use Mojo::File qw/path/;
+use Mojo::Util qw/decode/;
 use Pithub;
 use LWP::UserAgent;
 use Time::Moment;
@@ -36,7 +37,7 @@ has _token => Str, (
         my $file = $ENV{MODULES_PERL6_GITHUB_TOKEN_FILE} // 'github-token';
         -r $file or log fatal => "GitHub token file [$file] is missing "
                             . 'or has no read permissions';
-        return decode 'utf8', slurp $file;
+        return decode 'utf8', path($file)->slurp;
     },
 );
 

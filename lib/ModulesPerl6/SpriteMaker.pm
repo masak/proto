@@ -7,7 +7,7 @@ use File::Basename 'basename';
 use File::Spec::Functions qw/catfile  catdir/;
 use Imager::File::PNG;
 use Mojo::Base -base;
-use Mojo::Util qw/spurt/;
+use Mojo::File qw/path/;
 
 sub make_sprites {
     my $self = shift;
@@ -48,8 +48,8 @@ sub make_sprites {
 
     $css .= ".$class { background: url(/$opts{image_file})"
             . " no-repeat; display: inline-block; }\n";
-    spurt $sprite => $image_file;
-    spurt $css    => $css_file;
+    path($image_file)->spurt($sprite);
+    path(  $css_file)->spurt($css);
 }
 
 1;

@@ -4,9 +4,10 @@ use Data::GUID;
 use File::Glob            qw/bsd_glob/;
 use File::Path            qw/make_path  remove_tree/;
 use File::Spec::Functions qw/catfile/;
+use Mojo::File            qw/path/;
 use Mojo::URL;
 use Mojo::UserAgent;
-use Mojo::Util            qw/slurp  trim/;
+use Mojo::Util            qw/trim/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -136,7 +137,7 @@ sub _metas {
     }
     elsif ( -r $meta_list ) {
         log info => '... a file detected; trying to read';
-        $raw_data = slurp $meta_list;
+        $raw_data = path($meta_list)->slurp;
     }
     else {
         log fatal => 'Could not figure out how to load META.list. It does '

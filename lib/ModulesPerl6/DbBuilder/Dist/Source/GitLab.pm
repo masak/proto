@@ -3,7 +3,7 @@ package ModulesPerl6::DbBuilder::Dist::Source::GitLab;
 use base 'ModulesPerl6::DbBuilder::Dist::Source';
 
 use Carp       qw/croak/;
-use Mojo::Util qw/slurp  decode/;
+use Mojo::Util qw/decode/;
 
 use ModulesPerl6::DbBuilder::Log;
 use Mew;

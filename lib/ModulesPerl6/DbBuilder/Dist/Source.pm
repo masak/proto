@@ -5,9 +5,10 @@ use File::Spec::Functions qw/catfile/;
 use Image::Size qw/imgsize/;
 use JSON::Meth qw/$json/;
 use List::Util qw/uniqstr/;
+use Mojo::File qw/path/;
 use Mojo::JSON qw/from_json/;
 use Mojo::UserAgent;
-use Mojo::Util qw/slurp  spurt  decode  trim/;
+use Mojo::Util qw/decode  trim/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -30,8 +31,10 @@ has _tag_aliases => Maybe[Ref['HASH']], (
     is => 'lazy',
     default => sub {
         my $raw_tags = eval {
-            from_json slurp $ENV{MODULESPERL6_TAG_ALIASES_FILE}
-                // catfile $FindBin::Bin, qw/.. tag-aliases.json/;
+            from_json path(
+                $ENV{MODULESPERL6_TAG_ALIASES_FILE}
+                // catfile $FindBin::Bin, qw/.. tag-aliases.json/
+            )->slurp;
         } || do { warn "\n\nFailed to load tag-aliases.json: $@\n\n"; exit; };
 
         my %tags;
@@ -164,7 +167,7 @@ sub _save_logo {
         return;
     }
 
-    spurt $tx->res->body => $logo;
+    path($logo)->spurt($tx->res->body);
 
     eval {
         my ($x, $y) = imgsize $logo;
