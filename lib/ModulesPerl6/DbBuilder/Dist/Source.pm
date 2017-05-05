@@ -2,6 +2,7 @@ package ModulesPerl6::DbBuilder::Dist::Source;
 
 use FindBin; FindBin->again;
 use File::Spec::Functions qw/catfile/;
+use Image::Size qw/imgsize/;
 use JSON::Meth qw/$json/;
 use List::Util qw/uniqstr/;
 use Mojo::JSON qw/from_json/;
@@ -139,6 +140,13 @@ sub _save_logo {
     my ( $self, $size ) = @_;
     my $dist = $self->_dist;
     return unless defined $size and $dist and $dist->{name} ne 'N/A';
+    my $max_size = 32*32*32*2; # 32px x 32px x 32-bits-per-pixel x 2x fudge
+    if ($size > $max_size) {
+        log error => "Dist has logotype of size $size bytes, which is above "
+            . " the $max_size maximum size. Is it larger than allowed "
+            . ' 32x32 pixels?';
+        return;
+    }
     log info => "Dist has a logotype of size $size bytes.";
 
     my $logo
@@ -157,6 +165,13 @@ sub _save_logo {
     }
 
     spurt $tx->res->body => $logo;
+    eval {
+        my ($x, $y) = imgsize $logo;
+        die log error => "logotype needs to be 32px x 32px, but is actually "
+            . "${x}px x ${y}px. Rejecting."
+        unless $x == 32 and $y == 32;
+        1;
+    } or unlink $logo;
     return 1;
 }
 

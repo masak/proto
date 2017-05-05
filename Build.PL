@@ -28,6 +28,7 @@ my $build = Module::Build->new(
       'IO::Handle'                       => '0',
       'IPC::Open3'                       => '0',
       'Imager::File::PNG'                => '0.92',
+      'Image::Size'                      => '3.3',
       'Import::Into'                     => '0',
       'JSON::Meth'                       => '1.001006',
       'List::Util'                       => '1.45',
