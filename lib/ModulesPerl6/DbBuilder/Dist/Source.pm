@@ -74,9 +74,6 @@ sub _parse_meta {
     eval { $data->$json };
     if ( $@ ) { log error => "Failed to parse: JSON error: $@"; return; }
 
-    length $json->{ $_ } or log warn => "Required `$_` field is missing"
-        for qw/perl  name  version  description  provides/;
-
     $json->{url}
              = $json->{'source-url'}
             // $json->{'repo-url'}
@@ -100,9 +97,6 @@ sub _parse_meta {
         } grep {
             length and not $no_index->{$_}
         } map { trim uc } grep { not ref } @{ $json->{tags} };
-
-    log warn => "`$json->{name}` does not have any tags"
-        unless @{ $json->{tags} };
 
     return $self->_fill_missing( {%$json} );
 }

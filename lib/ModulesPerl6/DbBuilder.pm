@@ -61,6 +61,8 @@ sub run {
                 logos_dir => $self->_logos_dir,
                 dist_db   => $self->_model_dists,
             )->info or die "Failed to build dist\n";
+            use Data::Dumper;
+            print Dumper $dist;
             $self->_model_dists->add( $dist );
 
             # This interval, when defaulted to at least 5, prevents us from

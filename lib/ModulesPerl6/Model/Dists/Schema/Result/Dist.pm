@@ -19,6 +19,12 @@ has_many tag_dists
 
 many_to_many tags => tag_dists => 'tag';
 
+has_many problem_dists
+    => 'ModulesPerl6::Model::Dists::Schema::Result::ProblemDist'
+    => 'dist';
+
+many_to_many problems => problem_dists => 'problem';
+
 belongs_to author
     => 'ModulesPerl6::Model::Dists::Schema::Result::Author'
     => 'author_id';

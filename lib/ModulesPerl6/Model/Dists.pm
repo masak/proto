@@ -60,6 +60,8 @@ sub add {
     for my $dist ( @data ) {
         my @tags = grep length, map trim($_//''),
             @{ delete $dist->{tags} || [] };
+        my @problems = grep length, map trim($_//''),
+            @{ delete $dist->{problems} || [] };
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
@@ -80,6 +82,8 @@ sub add {
 
         $db->resultset('TagDist')->search({ dist => $res->id })->delete;
         $res->add_to_tags({ tag => $_ }) for @tags;
+        $db->resultset('ProblemDist')->search({ dist => $res->id })->delete;
+        $res->add_to_problems({ problem => $_ }) for @problems;
     }
 
     $self;

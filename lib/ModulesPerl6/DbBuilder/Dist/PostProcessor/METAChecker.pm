@@ -14,6 +14,14 @@ sub process {
     my $repo_url = 'https://github.com/'
         . join '/', grep length, @{ $dist->{_builder} }{qw/repo_user  repo/};
 
+    my @problems;
+    length $dist->{ $_ } or push @problems, "Required `$_` field is missing"
+        for qw/perl  name  version  description  provides/;
+
+    push @problems, "dist does not have any tags"
+        unless @{ $dist->{tags} };
+
+    $dist->{problems} = \@problems;
     if ( $repo_url eq $dist->{url} ) {
         log info => "dist source URL is same as META repo URL ($repo_url)";
         return;
