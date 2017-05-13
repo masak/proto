@@ -1,0 +1,43 @@
+% layout 'default';
+
+<header class="panel panel-primary lead">
+  <div class="panel-heading">
+      <h1 class="panel-title">Perl&nbsp;6 Module Todo</h1>
+  </div>
+</header>
+
+<div class="panel panel-default">
+  <div class="table-responsive">
+    <table class="table table-condensed table-striped panel-body" id="dists">
+      <thead>
+        <tr>
+          <th class="name">Name</th>
+          <th class="problems">Problems</th>
+        </tr>
+      </thead>
+      <tbody>
+        % for my $dist ( items_in 'dists' ) {
+        % next unless $dist->{problems};
+          <tr>
+            <td class="name">
+              <a href="<%= $dist->{url} %>" class="github"></a>
+              <a href="<%= url_for('dist', dist => $dist->{name} ) %>"
+                ><%= $dist->{name} %>
+                % if ( length $dist->{logo} ) {
+                  <i class="dist-logos <%= $dist->{logo} %>"></i>
+                % }
+              </a>
+            </td>
+            <td class="desc">
+                <ul>
+                    % for my $p (@{$dist->{problems}}) {
+                        <li><%= $p %>&nbsp;<a class="glyphicon glyphicon-question-sign" href="#"></a>
+                    % }
+                </ul>
+            </td>
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>

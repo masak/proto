@@ -37,17 +37,20 @@ sub _find {
             ? ( $_ => { -like => "%${ $what->{$_} }%" } )
             : $what->{$_}
                 ? ( $_ => $what->{$_} ) : ()
-    } qw/name  author_id  travis_status  description/;
+    } qw/name  url  author_id  travis_status  description/;
+    use Data::Dumper;
+    print Dumper $what;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
-            prefetch => { tag_dists => 'tag' },
+            prefetch => { tag_dists => 'tag', problem_dists => 'problem' },
             result_class => 'DBIx::Class::ResultClass::HashRefInflator'
         } : ()
     );
 
     return $is_hri ? c map {
         # TODO XXX: there got to be a better way to do this?
-        $_->{tags} = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
+        $_->{tags}     = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
+        $_->{problems} = [ sort map $_->{problem}{problem}, @{ delete $_->{problem_dists} } ];
         $_
     } $res->all : $res;
 }

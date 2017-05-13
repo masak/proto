@@ -22,6 +22,7 @@ sub process {
         unless @{ $dist->{tags} };
 
     $dist->{problems} = \@problems;
+
     if ( $repo_url eq $dist->{url} ) {
         log info => "dist source URL is same as META repo URL ($repo_url)";
         return;

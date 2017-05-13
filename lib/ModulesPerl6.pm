@@ -89,6 +89,9 @@ sub startup {
     $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
     $r->get('/total'     )->to('root#total')->name('total');
 
+    $r->get('/todo'        )->to('todo#index');
+    $r->get('/todo/:author')->to('todo#author')->name('author');
+
     $r->any('/not_implemented_yet')
         ->to('root#not_implemented_yet')
         ->name('not_implemented_yet');
