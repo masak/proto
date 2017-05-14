@@ -10,6 +10,7 @@ sub index {
     my $self = shift;
 
     my $dists = $self->dists->find;
+    @$dists = grep { @{$_->{problems}} } @$dists; # XXX Do it on the DB level?
 
     $self->respond_to(
         html => { dists => $dists, template => 'todo/index' },
@@ -21,6 +22,7 @@ sub author {
     my $self = shift;
     my $author = $self->stash('author');
     my $dists = $self->dists->find({ author_id => { -like => "%$author%" } });
+    @$dists = grep { @{$_->{problems}} } @$dists; # XXX Do it on the DB level?
 
     $self->respond_to(
         html => { dists => $dists, template => 'todo/index' },
