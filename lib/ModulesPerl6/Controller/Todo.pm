@@ -20,7 +20,7 @@ sub index {
 sub author {
     my $self = shift;
     my $author = $self->stash('author');
-    my $dists = $self->dists->find({ url => { -like => "%$author%" } });
+    my $dists = $self->dists->find({ author_id => { -like => "%$author%" } });
 
     $self->respond_to(
         html => { dists => $dists, template => 'todo/index' },

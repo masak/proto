@@ -24,6 +24,10 @@ sub process {
         push @problems, problem("dist has no MANIFEST file", 3);
     }
 
+    if ($dist->{_builder}{no_author_set}) {
+        push @problems, problem("dist has no author(s) specified", 3);
+    }
+
     length $dist->{ $_ } or push @problems, problem("required `$_` field is missing", 5)
         for qw/perl  name  version  description  provides/;
 
