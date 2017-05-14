@@ -48,7 +48,7 @@ sub _find {
     return $is_hri ? c map {
         # TODO XXX: there got to be a better way to do this?
         $_->{tags}     = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
-        $_->{problems} = [ sort map $_->{problem}{problem}, @{ delete $_->{problem_dists} } ];
+        $_->{problems} = [ sort map $_->{problem}, @{ delete $_->{problem_dists} } ];
         $_
     } $res->all : $res;
 }
@@ -61,8 +61,7 @@ sub add {
     for my $dist ( @data ) {
         my @tags = grep length, map trim($_//''),
             @{ delete $dist->{tags} || [] };
-        my @problems = grep length, map trim($_//''),
-            @{ delete $dist->{problems} || [] };
+        my @problems = @{delete $dist->{problems}};
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
@@ -84,7 +83,7 @@ sub add {
         $db->resultset('TagDist')->search({ dist => $res->id })->delete;
         $res->add_to_tags({ tag => $_ }) for @tags;
         $db->resultset('ProblemDist')->search({ dist => $res->id })->delete;
-        $res->add_to_problems({ problem => $_ }) for @problems;
+        $res->add_to_problems($_) for @problems;
     }
 
     $self;

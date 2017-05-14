@@ -212,6 +212,14 @@ table.dataTable {
         .travis-not:hover {
             background: #ccc;
         }
+
+        .problem-severity-1 {
+            color: #00f;
+        }
+
+        .problem-severity-5 {
+            color: #f00;
+        }
     }
 }
 

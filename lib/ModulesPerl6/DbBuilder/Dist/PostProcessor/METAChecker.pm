@@ -7,6 +7,11 @@ use Mojo::UserAgent;
 use ModulesPerl6::DbBuilder::Log;
 use experimental 'postderef';
 
+sub problem {
+    my ($problem, $severity) = @_;
+    { problem => $problem, severity => $severity }
+}
+
 sub process {
     my $self = shift;
     my $dist = $self->_dist;
@@ -15,11 +20,14 @@ sub process {
         . join '/', grep length, @{ $dist->{_builder} }{qw/repo_user  repo/};
 
     my @problems;
-    length $dist->{ $_ } or push @problems, "Required `$_` field is missing"
+    length $dist->{ $_ } or push @problems, problem("required `$_` field is missing", 5)
         for qw/perl  name  version  description  provides/;
 
-    push @problems, "dist does not have any tags"
+    push @problems, problem("dist does not have any tags", 1)
         unless @{ $dist->{tags} };
+
+    push @problems, problem("dist does not have a version set", 5)
+        unless ($dist->{version} and $dist->{version} ne '*');
 
     $dist->{problems} = \@problems;
 
