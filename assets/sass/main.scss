@@ -217,8 +217,13 @@ table.dataTable {
             color: #00f;
         }
 
+        .problem-severity-3 {
+            color: #dd8300;
+        }
+
         .problem-severity-5 {
             color: #f00;
+            font-weight: bold;
         }
     }
 }
