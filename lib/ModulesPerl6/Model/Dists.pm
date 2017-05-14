@@ -38,8 +38,6 @@ sub _find {
             : $what->{$_}
                 ? ( $_ => $what->{$_} ) : ()
     } qw/name  url  author_id  travis_status  description/;
-    use Data::Dumper;
-    print Dumper $what;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
             prefetch => { tag_dists => 'tag', problem_dists => 'problem' },
