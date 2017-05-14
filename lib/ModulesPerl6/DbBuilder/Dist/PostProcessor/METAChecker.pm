@@ -28,6 +28,14 @@ sub process {
         push @problems, problem("dist has no author(s) specified", 3);
     }
 
+    if ($dist->{_builder}{has_no_readme}) {
+        push @problems, problem("dist has no readme", 1);
+    }
+
+    if ($dist->{_builder}{mentions_old_tools}) {
+        push @problems, problem("dist mentions discouraged tools (panda, ufo etc.) in the readme", 2);
+    }
+
     length $dist->{ $_ } or push @problems, problem("required `$_` field is missing", 5)
         for qw/perl  name  version  description  provides/;
 

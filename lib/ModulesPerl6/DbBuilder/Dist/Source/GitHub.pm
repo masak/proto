@@ -103,6 +103,19 @@ sub load {
 
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
     $dist->{_builder}{has_manifest} = grep $_->{path} eq 'MANIFEST', @$tree;
+    my ($readme) = grep { $_->{path} =~ /^README/ } @$tree;
+    if ($readme) {
+        my $repo_root = $self->_meta_url =~ s{[^/]+$}{}r;
+        my $tx = $self->_ua->get("$repo_root/$readme->{path}");
+        if ($tx->success) {
+            my $contents = $tx->res->body;
+            if ($contents =~ /panda|ufo/) {
+                $dist->{_builder}{mentions_old_tools} = 1;
+            }
+        }
+    } else {
+        $dist->{_builder}{has_no_readme} = 1;
+    }
 
     return $dist;
 }
