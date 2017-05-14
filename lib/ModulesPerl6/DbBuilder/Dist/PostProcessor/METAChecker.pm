@@ -20,6 +20,10 @@ sub process {
         . join '/', grep length, @{ $dist->{_builder} }{qw/repo_user  repo/};
 
     my @problems;
+    unless ($dist->{_builder}{has_manifest}) {
+        push @problems, problem("dist has no MANIFEST file", 3);
+    }
+
     length $dist->{ $_ } or push @problems, problem("required `$_` field is missing", 5)
         for qw/perl  name  version  description  provides/;
 

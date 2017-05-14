@@ -102,6 +102,7 @@ sub load {
     );
 
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
+    $dist->{_builder}{has_manifest} = grep $_->{path} eq 'MANIFEST', @$tree;
 
     return $dist;
 }
