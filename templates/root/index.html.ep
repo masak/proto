@@ -20,7 +20,8 @@
     <p>Some standard modules are included with Rakudo. Among them
        are <a href="http://docs.perl6.org/language/testing"><i>Test</i> for testing</a>
        and <a href="http://docs.perl6.org/language/nativecall"><i>NativeCall</i> for
-       using C libraries</a>.
+       using C libraries</a>.  See a list of all core modules
+       <a href="http://docs.perl6.org/language/modules-core">here</a>.
     </p>
 
     <p>If you want to contribute your own module, please read
