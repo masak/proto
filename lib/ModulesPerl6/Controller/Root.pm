@@ -31,6 +31,8 @@ sub index {
                            gmtime $_->{date_updated} : 'N/A';
 
         $_->{travis_url}   = Mojo::URL->new($_->{url})->host('travis-ci.org');
+        my $m = Mojo::URL->new($_->{url});
+        $_->{appveyor_url} = $m->host('ci.appveyor.com')->path('/project' . $m->path);
         $_->{is_hidden}    = 1
             if length $q and not $found_dists{"$_->{name}\0$_->{author_id}"};
     }

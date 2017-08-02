@@ -87,6 +87,7 @@
           <th class="name">Name</th>
           <th class="description">Description</th>
           <th class="travis">Travis</th>
+          <th class="appveyor">Appveyor</th>
           <th class="stars">Stars</th>
           <th class="issues">Issues</th>
           <th class="updated">Updated</th>
@@ -113,6 +114,16 @@
                  <a href="<%= $dist->{travis_url} %>">
               % }
                 <%= $dist->{travis_status} %>
+              </a>
+            </td>
+            <td class="appveyor appveyor-<%= $dist->{appveyor_status} %>">
+              % if ( $dist->{appveyor_status} eq 'not set up') {
+                <a href="https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/">
+                <i class="glyphicon glyphicon-question-sign"></i>
+              % }else{
+                 <a href="<%= $dist->{appveyor_url} %>">
+              % }
+                <%= $dist->{appveyor_status} %>
               </a>
             </td>
             <td class="stars">

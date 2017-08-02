@@ -37,7 +37,7 @@ sub _find {
             ? ( $_ => { -like => "%${ $what->{$_} }%" } )
             : $what->{$_}
                 ? ( $_ => $what->{$_} ) : ()
-    } qw/name  url  author_id  travis_status  description/;
+    } qw/name  url  author_id  travis_status appveyor_status description/;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
             prefetch => { tag_dists => 'tag', problem_dists => 'problem' },
@@ -65,11 +65,13 @@ sub add {
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status} ||= 'not set up';
+        $dist->{appveyor_status} ||= 'not set up';
         $dist->{date_updated}  ||= 0;
         $dist->{date_added}    ||= 0;
 
         my $res = $db->resultset('Dist')->update_or_create({
             travis   => { status => $dist->{travis_status} },
+            appveyor => { status => $dist->{appveyor_status} },
             author => { # use same field for both, for now. TODO:fetch realname
                 author_id => $dist->{author_id}, name => $dist->{author_id},
             },
@@ -190,6 +192,7 @@ if set, or C<modulesperl6.db>.
         description  => 'Test Dist1',
         author_id    => 'Dynacoder',
         travis_status=> 'passing',
+        appveyor_status => 'passing',
         stars        => 42,
         issues       => 12,
         date_updated => 1446999664,
