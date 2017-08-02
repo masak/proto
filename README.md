@@ -38,6 +38,28 @@ front end of you pass the `--restart-app` option:
 For development purposes, you can use `bin/morbo` to power the web app,
 as it will watch for changes and auto-restart the app.
 
+#### Changes to database
+
+The build script uses a caching mechanism that avoids fetching extra
+info for a distro if no commits to it were made. If you made a change
+that needs to update database information for all dists, include string
+`[REBUILD]` (including the brackets) as the first thing in your commit
+message title. That will clear the cache and cause full rebuild.
+
+If you made a change to the *structure* of the database, you'll need
+to generate a new database file (the tables are created by deploy
+from DBIC). To propagate this change to the live site, someone will
+need to generate a new database file:
+
+    bin/build-project-list.pl --interval=0 --db-file=new.db
+
+And then swap old database with the new one:
+
+    cp modulesperl6.db old-db.db.bak;
+    cp new.db modulesperl6.db;
+
+And then restart the site.
+    
 #### Browser Support
 
 We support the current and previous major releases of Chrome, Firefox, Internet Explorer (Edge), and Safari. Please test layout changes. Lacking actual browsers to test in, you can use [browsershots.org](http://browsershots.org)
