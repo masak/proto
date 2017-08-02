@@ -70,11 +70,11 @@ function setup_table() {
                 searchable: true
             },
             {
-                targets: [ 2, 3, 4, 5 ],
+                targets: [ 2, 3, 4, 5, 6 ],
                 searchable: false
             },
             {
-                targets: [ 5 ],
+                targets: [ 6 ],
                 orderSequence: [ "desc", "asc" ],
                 orderDataType: "custom-na-date"
             }
