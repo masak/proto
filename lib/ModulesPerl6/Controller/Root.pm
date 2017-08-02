@@ -57,7 +57,7 @@ sub index {
         ],
         dists => $dists,
         more  => $self->url_for('current')->to_abs,
-        $self->build_stats->stats(qw/dists_num  last_updated/)->%*,
+        $self->build_stats->stats(qw/dists_num  last_updated has_appveyor has_travis/)->%*,
     );
 
     $self->respond_to(

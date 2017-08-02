@@ -186,9 +186,12 @@ sub _remove_old_logotypes {
 sub _save_build_stats {
     my $self = shift;
 
+   my $dist_num = scalar( $self->_model_dists->find->@* );
     $self->_model_build_stats->update(
         last_updated => time(),
-        dists_num    => scalar( $self->_model_dists->find->@* ),
+        dists_num    => $dist_num,
+        has_appveyor => $dist_num - scalar( $self->_model_dists->find({ appveyor_status  => 'not set up'})->@* ),
+        has_travis   => $dist_num - scalar( $self->_model_dists->find({ travis_status    => 'not set up'})->@* ),
     );
 
     $self;

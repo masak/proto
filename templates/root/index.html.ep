@@ -11,7 +11,9 @@
 
     <p>Below you can find a list of the <span class="total_dist_count"
         ><%= stash 'dists_num' %></span>
-        known external Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>.
+        known external Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>
+        (currently <%= stash 'has_travis' %>).
+        The Appveyor column shows which modules are configured to be tested on Windows (currently <%= stash 'has_appveyor' %>).
         These modules can be installed with <a href="https://github.com/ugexe/zef/">zef</a>, a module management tool
       that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
         Star</a>.
