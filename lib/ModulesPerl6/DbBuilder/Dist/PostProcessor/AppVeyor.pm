@@ -35,7 +35,7 @@ sub process {
         # The API says you always need a Bearer token, but I think
         # that's for the private stuff.
         Mojo::UserAgent->new( max_redirects => 5 )->get(
-            "https://ci.appveyor.com/api/projects/$user/$repo"
+            "https://ci.appveyor.com/api/projects/$user/$repo/history"
         )->res->json->{builds}->@*;
     }; if ( $@ ) { log error => "Error fetching appveyor status: $@"; return; }
 
