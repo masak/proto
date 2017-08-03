@@ -101,7 +101,7 @@ sub load {
         map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
     );
 
-    $dist->{_builder}{has_appveyor} = grep $_->{path} eq 'appveyor.yml', @$tree;
+    $dist->{_builder}{has_appveyor} = grep { $_->{path} =~ /\A \.? appveyor\.yml \z/x } @$tree;
     $dist->{appveyor_status} = $dist->{_builder}{has_appveyor} ? 'unknown' : 'not set up';
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
     $dist->{_builder}{has_manifest} = grep $_->{path} eq 'MANIFEST', @$tree;
