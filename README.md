@@ -110,4 +110,4 @@ Copyright (C) 2014 Jan Henning Thorsen
 * jQuery deparam plugin: Copyright (c) 2010 "Cowboy" Ben Alman. Dual licensed under the MIT and GPL licenses. See [http://benalman.com/about/license/](http://benalman.com/about/license/)
 * The Camelia image is copyright 2009 by Larry Wall. Permission to use is granted under the [Artistic License 2.0](License), or any subsequent version
 of the Artistic License.
-* GitHub Octocat logo is an exclusive trademark registered in the United States by GitHub, Inc and is used with permission. See [https://github.com/logos](https://github.com/logos) for details.
+* GitHub Octocat logo is an exclusive trademark registered in the United States by GitHub, Inc and is used with permission. See [https://github.com/logos](https://github.com/logos) for details
