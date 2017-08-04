@@ -107,7 +107,7 @@ sub load {
 
     # if you add {_builder} stuff, ensure it still maintains correct stuff when dist has
     # no new commits and we bail out of this routine early.
-    # (see conditional a dozen of lines above that `reinstates` travis status for example
+    # (see conditional a dozen of lines above that `reinstates` travis status for example)
     $dist->{_builder}{has_appveyor} = grep { $_->{path} =~ /\A \.? appveyor\.yml \z/x } @$tree;
     $dist->{appveyor_status} = $dist->{_builder}{has_appveyor} ? 'unknown' : 'not set up';
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
