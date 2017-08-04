@@ -36,7 +36,7 @@ sub process {
         # Need to implement a way to fetch info for other dist sources too
 
         Mojo::UserAgent->new( max_redirects => 5 )->get(
-            "https://ci.appveyor.com/api/projects/status/github/$user/$repo"
+            "https://ci.appveyor.com/api/projects/status/github/$user/$repo",
             form => {
                 svg         => 'true',
                 pendingText => 'MODP6-pending',
