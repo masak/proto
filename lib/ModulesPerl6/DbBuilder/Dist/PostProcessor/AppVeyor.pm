@@ -78,7 +78,7 @@ ModulesPerl6::DbBuilder::Dist::PostProcessor::AppVeyor - postprocessor that dete
     $dist->{_builder}{has_appveyor} = 1; # Dist has an AppVeyor config file
 
     # After preprocessor is run:
-    say $dist->{appveyor_status}; # says 'passing' for passing Travis builds
+    say $dist->{appveyor_status}; # says 'passing' for passing AppVeyor builds
 
 =head1 DESCRIPTION
 
@@ -92,15 +92,15 @@ implements fetching AppVeyor build information.
     $dist->{date_updated} = time;
 
 This boolean key indicates when the dist's last commit was done. The
-postprocessor won't attempt to fetch new Travis info for commits older than
-24 hours, unless cached Travis status is C<unknown>.
+postprocessor won't attempt to fetch new AppVeyor info for commits older than
+24 hours, unless cached AppVeyor status is C<unknown>.
 
 =head2 C<{_builder}{is_fresh}>
 
     $dist->{_builder}{is_fresh} = 1;
 
 This boolean key indicates a dist has fresh commits (based on the current
-data in the database). The presence of this key will trigger Travis info
+data in the database). The presence of this key will trigger AppVeyor info
 fetch regardless of the value of C<{date_updated}> key.
 
 =head2 C<{_builder}{has_appveyor}>
@@ -118,13 +118,8 @@ set, the postprocessor won't run.
     say $dist->{appveyor_status};
 
 After the postprocessor finishes it will set the C<appveyor_status> dist key
-to the string indicating the Travis build status (e.g. C<failing>,
+to the string indicating the AppVeyor build status (e.g. C<failing>,
 C<passing>, C<error>, etc.)
-
-=head1 CONTACT INFORMATION
-
-Original version of this module was written by Zoffix Znet
-(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
 
 =head1 LICENSE
 
