@@ -1,5 +1,7 @@
 # TODO Ideas
 
+---
+
 ## Please Note
 These are just brainstorming ideas and the mere inclusion of items on the list does not mean they automatically are cleared for implementation in the specific way described here. It is recommended anything large should be first discussed on [IRC](irc://irc.freenode.net/perl6) or [in a GitHub Issue](https://github.com/perl6/modules.perl6.org/issues/), lest the implementation effort is wasted if the large part of the community has a different point of view.
 
