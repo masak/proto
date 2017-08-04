@@ -17,10 +17,7 @@ sub process {
     # actually exists and not "not set up"
     return if ($dist->{date_updated}//0) < (time - 60*60*24)
         and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
-        and $dist->{travis_status}
-        and not (
-            $dist->{travis_status} and $dist->{travis_status} eq 'unknown'
-        );
+        and not ($dist->{travis_status}//'') =~ /\A(unknown|pending)\z/;
 
     unless ( $dist->{_builder}{has_travis} ) {
         delete $dist->{travis_status}; # toss cached Travis status
@@ -49,7 +46,7 @@ sub _get_travis_status {
     return 'unknown' unless @builds;
     my $state = $builds[0]->{state};
 
-    return $state    if $state =~ /cancel|pend/;
+    return 'pending' if $state =~ /cancel|pend/;
     return 'error'   if $state =~ /error/;
     return 'failing' if $state =~ /fail/;
     return 'passing' if $state =~ /pass/;

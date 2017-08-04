@@ -256,6 +256,17 @@ table.dataTable {
             background: #dc6750;
         }
 
+        .appveyor-pending,
+        .travis-pending {
+            background: #8555FE;
+            background: -ms-linear-gradient(top,  #8555FE 0%,#6A46C6 100%);
+            background: linear-gradient(to bottom,  #8555FE 0%,#6A46C6 100%);
+        }
+        .appveyor-pending:hover {
+        .travis-pending:hover {
+            background: #8555FE;
+        }
+
         .travis a {
             padding: 0 5px;
             text-decoration: none;

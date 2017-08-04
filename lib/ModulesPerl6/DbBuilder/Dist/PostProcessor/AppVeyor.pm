@@ -17,10 +17,7 @@ sub process {
     # actually exists and not "not set up"
     return if ($dist->{date_updated}//0) < (time - 60*60*24)
         and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
-        and $dist->{appveyor_status}
-        and not (
-            $dist->{appveyor_status} and $dist->{appveyor_status} eq 'unknown'
-        );
+        and not ($dist->{appveyor_status}//'') =~ /\A(unknown|pending)\z/;
 
     unless ( $dist->{_builder}{has_appveyor} ) {
         delete $dist->{appveyor_status}; # toss cached status
@@ -30,32 +27,38 @@ sub process {
     my ( $user, $repo ) = $dist->{_builder}->@{qw/repo_user  repo/};
     return unless length $user and length $repo;
 
-    my @builds = eval {
-        # https://www.appveyor.com/docs/api/projects-builds/#get-project-last-build
-        # The API says you always need a Bearer token, but I think
-        # that's for the private stuff.
-        Mojo::UserAgent->new( max_redirects => 5 )->get(
-            "https://ci.appveyor.com/api/projects/$user/$repo/history?recordsNumber=2"
-        )->res->json->{builds}->@*;
-    }; if ( $@ ) { log error => "Error fetching appveyor status: $@"; return; }
+    my $badge_text = eval {
+        # XXX TODO: user/repo can differ between GitHub and AppVeyor.
+        # Found a way to get the build info by fetching an SVG of the badge
+        # that lets you add `github` to the URL. This works for GitHub, but
+        # we have other Dist sources, e.g.
+        # ModulesPerl6::DbBuilder::Dist::Source::GitLab
+        # Need to implement a way to fetch info for other dist sources too
 
-    $dist->{appveyor_status} = $self->_get_appveyor_status( @builds );
+        Mojo::UserAgent->new( max_redirects => 5 )->get(
+            "https://ci.appveyor.com/api/projects/status/github/$user/$repo"
+            form => {
+                svg         => 'true',
+                pendingText => 'MODP6-pending',
+                failingText => 'MODP6-failing',
+                passingText => 'MODP6-passing',
+
+            },
+        )->result->dom->all_text
+    }; if ($@) { log error => "Error fetching appveyor status: $@"; return; }
+
+    $dist->{appveyor_status} = $self->_get_appveyor_status($badge_text);
     log info => "Determined appveyor status is $dist->{appveyor_status}";
 
     return 1;
 }
 
 sub _get_appveyor_status {
-    my ( $self, @builds ) = @_;
+    my ( $self, $raw_status ) = @_;
 
-    return 'unknown' unless @builds;
-    my $state = $builds[0]->{status};
-
-    return $state    if $state =~ /running/;
-    # Haven't encountered this one
-    # return 'error'   if $state =~ /error/;
-    return 'failing' if $state =~ /failed/;
-    return 'passing' if $state =~ /success/;
+    return 'pending' if $raw_status =~ /\bMODP6-pending\b/;
+    return 'failing' if $raw_status =~ /\bMODP6-failing\b/;
+    return 'passing' if $raw_status =~ /\bMODP6-passing\b/;
     return 'unknown';
 }
 
