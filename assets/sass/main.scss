@@ -140,13 +140,13 @@ table.dataTable {
         display: inline-block;
     }
 
-    .appveyor, .travis, .stars, .issues, .updated {
+    .ci, .stars, .issues, .updated {
         text-align: center;
         white-space: nowrap;
     }
 
     tbody {
-        .appveyor {
+        .ci {
             padding: 0;
             white-space: nowrap;
             font-size: 95%;
@@ -155,119 +155,50 @@ table.dataTable {
             background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
         }
 
-        .appveyor:hover {
+        .ci:hover {
             background: #a2a2a2;
         }
 
-        .appveyor-passing {
+        .ci-passing {
             background: #50ca22;
             background: -ms-linear-gradient(top,  #50ca22 0%,#3eb810 100%);
             background: linear-gradient(to bottom,  #50ca22 0%,#3eb810 100%);
         }
 
-        .appveyor-passing:hover {
+        .ci-passing:hover {
             background: #50ca22;
         }
 
-        .appveyor-pending {
+        .ci-pending {
             background: #dbb428;
             background: -ms-linear-gradient(top,  #dbb428 0%,#c9a216 100%);
             background: linear-gradient(to bottom,  #dbb428 0%,#c9a216 100%);
         }
 
-        .appveyor-pending:hover {
+        .ci-pending:hover {
             background: #dbb428;
         }
 
-        .appveyor-failing {
+        .ci-failing {
             background: #dc6750;
             background: -ms-linear-gradient(top,  #dc6750 0%,#ca553e 100%);
             background: linear-gradient(to bottom,  #dc6750 0%,#ca553e 100%);
         }
 
-        .appveyor-failing:hover {
+        .ci-failing:hover {
             background: #dc6750;
         }
 
-        .appveyor a {
-            padding: 0 5px;
-            text-decoration: none;
-            color: #fff;
-            text-shadow: 1px 1px #333;
-            display: block;
-            height: 32px + 5px + 5px;
-            line-height: 32px + 5px + 5px;
-        }
-
-        .appveyor-not {
-            font-size: 80%;
-            background: #ddd;
-        }
-
-        .appveyor-not a {
-            text-shadow: none;
-            color: #333;
-        }
-
-        .appveyor-not:hover {
-            background: #ccc;
-        }
-
-        .travis {
-            padding: 0;
-            white-space: nowrap;
-            font-size: 95%;
-            background: #a2a2a2;
-            background: -ms-linear-gradient(top,  #a2a2a2 0%,#909090 100%);
-            background: linear-gradient(to bottom,  #a2a2a2 0%,#909090 100%);
-        }
-
-        .travis:hover {
-            background: #a2a2a2;
-        }
-
-        .travis-passing {
-            background: #50ca22;
-            background: -ms-linear-gradient(top,  #50ca22 0%,#3eb810 100%);
-            background: linear-gradient(to bottom,  #50ca22 0%,#3eb810 100%);
-        }
-
-        .travis-passing:hover {
-            background: #50ca22;
-        }
-
-        .travis-pending {
-            background: #dbb428;
-            background: -ms-linear-gradient(top,  #dbb428 0%,#c9a216 100%);
-            background: linear-gradient(to bottom,  #dbb428 0%,#c9a216 100%);
-        }
-
-        .travis-pending:hover {
-            background: #dbb428;
-        }
-
-        .travis-failing {
-            background: #dc6750;
-            background: -ms-linear-gradient(top,  #dc6750 0%,#ca553e 100%);
-            background: linear-gradient(to bottom,  #dc6750 0%,#ca553e 100%);
-        }
-
-        .travis-failing:hover {
-            background: #dc6750;
-        }
-
-        .appveyor-pending,
-        .travis-pending {
+        .ci-pending {
             background: #8555FE;
             background: -ms-linear-gradient(top,  #8555FE 0%,#6A46C6 100%);
             background: linear-gradient(to bottom,  #8555FE 0%,#6A46C6 100%);
         }
-        .appveyor-pending:hover {
-        .travis-pending:hover {
+        .ci-pending:hover {
             background: #8555FE;
         }
 
-        .travis a {
+        .ci a {
             padding: 0 5px;
             text-decoration: none;
             color: #fff;
@@ -277,17 +208,17 @@ table.dataTable {
             line-height: 32px + 5px + 5px;
         }
 
-        .travis-not {
+        .ci-not {
             font-size: 80%;
             background: #ddd;
         }
 
-        .travis-not a {
+        .ci-not a {
             text-shadow: none;
             color: #333;
         }
 
-        .travis-not:hover {
+        .ci-not:hover {
             background: #ccc;
         }
 

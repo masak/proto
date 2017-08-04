@@ -108,7 +108,7 @@
               </a>
             </td>
             <td class="desc"><%= $dist->{description} %></td>
-            <td class="travis travis-<%= $dist->{travis_status} %>">
+            <td class="ci ci-<%= $dist->{travis_status} %>">
               % if ( $dist->{travis_status} eq 'not set up') {
                 <a href="https://docs.travis-ci.com/user/languages/perl6">
                 <i class="glyphicon glyphicon-question-sign"></i>
@@ -118,7 +118,7 @@
                 <%= $dist->{travis_status} %>
               </a>
             </td>
-            <td class="appveyor appveyor-<%= $dist->{appveyor_status} %>">
+            <td class="ci ci-<%= $dist->{appveyor_status} %>">
               % if ( $dist->{appveyor_status} eq 'not set up') {
                 <a href="https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/">
                 <i class="glyphicon glyphicon-question-sign"></i>
