@@ -22,5 +22,5 @@ then
 fi
 
 log_file=$(mktemp);
-FULL_REBUILD=1 perl bin/build-project-list.pl --restart-app > $log_file 2>&1 && cp $log_file public/update.log
+FULL_REBUILD=$DO_REBUILD perl bin/build-project-list.pl --restart-app > $log_file 2>&1 && cp $log_file public/update.log
 rm $log_file;
