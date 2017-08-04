@@ -26,7 +26,7 @@ unless ( flock DATA, LOCK_EX | LOCK_NB ) {
 
 my $meta_list         = META_LIST_FILE;
 my $github_token_file = GITHUB_TOKEN_FILE;
-my $interval          = 3;
+my $interval          = 1;
 my $logos_dir         = LOGOS_DIR;
 my $db_file           = DB_FILE;
 
