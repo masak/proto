@@ -3,20 +3,6 @@
 ## Please Note
 These are just brainstorming ideas and the mere inclusion of items on the list does not mean they automatically are cleared for implementation in the specific way described here. It is recommended anything large should be first discussed on [IRC](irc://irc.freenode.net/perl6) or [in a GitHub Issue](https://github.com/perl6/modules.perl6.org/issues/), lest the implementation effort is wasted if the large part of the community has a different point of view.
 
-## Koalatee
-### Status of the implementation
-
-Removed.
-
-### Description
-The old site contained badges, like `has_readme`, `has_tests`, `panda spec conformance`, etc. More badges were being suggested, such as [POD Coverage](https://github.com/teodozjan/pod6-coverage/). Since 99% of the dists had all the badges and adding new badges would call for more precious screen real estate, it is proposed to merge all of those metrics into two numbers called *Koalatee*. They will range from `0` to `100` percent.
-
-The first number will include *Koalatee* metrics the necessity of conformance to which is widely accepted, are achievable for most dists, and automated tests for which have sturdy implementation (the readme, tests, spec badges would fall into that). The second number will include "experimental" *Koalatee* metrics that don't fall into the first category. Currently, `POD::Coverage` metric will be included here, since the `POD::Coverage` module is still on the experimental side of things and it is not yet clear how many false positives it will identify. So as not to upset the authors by lowering their "standard" (or call it "core") *Koalatee*, only the experimental metric might be lowered instead.
-
-The *Koalatee* numbers will be displayed on the dists list page and clicking the Koalatee number will lead to the more detailed page for that dist where issues, if any, could be inspected and explained, so the authors could address them. The ranking of dists/authors by *Koalatee* could also be made into a sort of a game, where authors compete against each other by improving their dists to attain higher *Koalatee* scores.
-
-There is a successful implementation of this idea in other languages, such as Perl 5. [Here](http://cpants.cpanauthors.org/dist/Imager-Tiler) is the example of viewing metrics for a single dist. [Here](http://cpants.cpanauthors.org/author/ZOFFIX) is the page showing *Koalatee* metrics for all the dists of a single author in a concise table. And [here](http://cpants.cpanauthors.org/ranking/five_or_more) is the aforementioned game; note how the authors do not lose any points if their experimental metrics are failing.
-
 ## Dist Information
 ### Status of the implementation
 No code yet, other than `/dist/:dist` route defined that currently simply redirects to the
