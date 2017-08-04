@@ -158,8 +158,6 @@ sub _metas {
 sub _remove_old_dists {
     my ( $self, $build_id ) = @_;
 
-    return $self if $ENV{MODULES_PERL6_DO_NOT_REMOVE_OLD_DISTS};
-
     my $delta = $self->_model_dists->remove_old( $build_id );
     log info => "Removed $delta dists that are no longer in the ecosystem"
         if $delta;

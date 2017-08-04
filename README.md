@@ -59,7 +59,7 @@ And then swap old database with the new one:
     cp new.db modulesperl6.db;
 
 And then restart the site.
-
+    
 #### Browser Support
 
 We support the current and previous major releases of Chrome, Firefox, Internet Explorer (Edge), and Safari. Please test layout changes. Lacking actual browsers to test in, you can use [browsershots.org](http://browsershots.org)
@@ -92,13 +92,6 @@ trigger a full rebuild of the database and refresh of caches by including
 If you are adding a feature that caches something, it needs to watch for
 `FULL_REBUILD` environmental variable and refresh the caches if that variable
 is set to a true value.
-
-#### DEBUG ENV VARS
-
-Normally, the database builder will delete any dists without an updated build
-ID from the database.
-
-Set `MODULES_PERL6_DO_NOT_REMOVE_OLD_DISTS` env var to `1` to skip this step.
 
 ## Author
 
