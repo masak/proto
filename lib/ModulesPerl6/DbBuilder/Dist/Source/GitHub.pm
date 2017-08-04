@@ -84,6 +84,10 @@ sub load {
     if ( $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD} ) {
         $dist->{_builder}{has_travis} = 1 # reinstate cached travis status
             unless $dist->{travis_status} eq 'not set up';
+            
+        $dist->{_builder}{has_appveyor} = 1 # reinstate cached appveyor status
+            unless $dist->{appveyor_status} eq 'not set up';
+            
         return $dist;
     }
     $dist->{date_updated} = $date_updated;
@@ -101,6 +105,9 @@ sub load {
         map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
     );
 
+    # if you add {_builder} stuff, ensure it still maintains correct stuff when dist has
+    # no new commits and we bail out of this routine early.
+    # (see conditional a dozen of lines above that `reinstates` travis status for example
     $dist->{_builder}{has_appveyor} = grep { $_->{path} =~ /\A \.? appveyor\.yml \z/x } @$tree;
     $dist->{appveyor_status} = $dist->{_builder}{has_appveyor} ? 'unknown' : 'not set up';
     $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
