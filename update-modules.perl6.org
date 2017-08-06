@@ -36,6 +36,7 @@ if [ "$db_file" != "modulesperl6.db" ]
 then
     echo "Moving temp db to regular place"
     mv $db_file modulesperl6.db
+    hypnotoad bin/ModulesPerl6.pl
 fi
 
 rm $log_file;
