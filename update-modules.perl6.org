@@ -24,6 +24,11 @@ then
         db_file=$(mktemp -u)
         echo "New database creation requested; using $db_file as temp db"
     fi
+    if [[ `git log "$before"..."$after" --oneline` =~ '[REAPP]' ]]; then
+        db_file=$(mktemp -u)
+        echo "Restarting app before build"
+        hypnotoad bin/ModulesPerl6.pl
+    fi
 fi
 
 log_file=$(mktemp);

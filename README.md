@@ -72,6 +72,11 @@ Once committed, the production cron job will pick up your changes on the 20th an
 
 The cron job results can be found [here](http://modules.perl6.org/update.log).
 
+If you only made changes to the web app, you can get them live a bit faster
+by using `[REAPP]` as first thing in commit message title (including brackets),
+which will cause the updater to restart the app after pulling and before
+rebuilding the db (which takes ~1.5hr)
+
 #### Note About Cache
 
 Certain data is cached by the site and is only updated when some event
