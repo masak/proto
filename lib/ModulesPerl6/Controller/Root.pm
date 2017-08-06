@@ -3,7 +3,7 @@ package ModulesPerl6::Controller::Root;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Mojo::URL;
-use List::UtilsBy qw/nsort_by/;
+use List::UtilsBy qw/nsort_by  uniq_by/;
 use POSIX qw/strftime/;
 use experimental 'postderef';
 
@@ -15,14 +15,34 @@ sub index {
     );
 }
 
+sub _parse_search_options {
+    my ($self, $q) = @_;
+    my %opts;
+    $q =~ s/ \s*\b author: (?: (['"]?)(.+)\1) \s*//xig
+        and $opts{author} = +{ type => $1||"'", q => CORE::fc $2 };
+
+    return (\%opts, $q);
+}
+
 sub search {
     my $self = shift;
     return $self->lucky if $self->param('lucky');
 
     my @dists;
     if (length (my $q = $self->param('q'))) {
-        @dists = $self->dists->find({ name        => \$q })->each,
-                 $self->dists->find({ description => \$q })->each;
+        (my $opts, $q) = $self->_parse_search_options($q);
+
+        @dists = length $q
+            ? (uniq_by { $_->{meta_url} } (
+                 $self->dists->find({ name        => \$q })->each,
+                 $self->dists->find({ description => \$q })->each
+            )) : $self->dists->find->each;
+
+        @dists = grep $_->{author_id} =~ /\Q$opts->{author}{q}\E/i, @dists
+            if $opts->{author} and $opts->{author}{type} eq "'";
+
+        @dists = grep CORE::fc($_->{author_id}) eq $opts->{author}{q}, @dists
+            if $opts->{author} and $opts->{author}{type} eq '"';
     }
     else {
         @dists = $self->dists->find->each;
