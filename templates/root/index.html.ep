@@ -12,8 +12,8 @@
         %= submit_button Search => class => 'btn btn-primary btn-block'
       </div>
       <div class="col-sm-6">
-        <%= submit_button "I'm feeling lucky"
-          => class => 'btn btn-default btn-block' %>
+        <%= submit_button "I'm feeling lucky" => name => 'lucky',
+          class => 'btn btn-default btn-block' %>
       </div>
     </div>
   % end

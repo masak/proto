@@ -3,6 +3,7 @@ package ModulesPerl6::Controller::Root;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Mojo::URL;
+use List::UtilsBy qw/nsort_by/;
 use POSIX qw/strftime/;
 use experimental 'postderef';
 
@@ -18,6 +19,10 @@ sub search {
     my @dists = $self->dists->find({ name        => \$q })->each,
                 $self->dists->find({ description => \$q })->each;
 
+    $self->redirect_to(
+        dist => dist => (nsort_by { $_->{stars} } @dists)[0]->{name}
+    ) if @dists and length $self->param('lucky');
+
     for (@dists) {
         $_->{source} = 'github'; # TODO XXX: use dist source data from db
         $_->{date_updated} = $_->{date_updated}
@@ -32,6 +37,19 @@ sub search {
     }
 
     $self->stash(dists => \@dists);
+}
+
+sub lucky {
+    my $self = shift;
+
+    my $q = $self->stash('q');
+    my @dists = $self->dists->find({ name        => \$q })->each,
+                $self->dists->find({ description => \$q })->each;
+    @dists or return $self->reply->not_found;
+
+    $self->redirect_to(
+        dist => dist => (nsort_by { $_->{stars} } @dists)[0]->{name}
+    );
 }
 
 sub total {

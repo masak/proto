@@ -85,6 +85,8 @@ sub startup {
 
     $r->get('/')->to('root#index')->name('home');
     $r->get('/search')->to('root#search')->name('search');
+    $r->get('/l/*q')->to('root#lucky')->name('lucky');
+    $r->get('/lucky/*q')->to('root#lucky')->name('lucky');
 
 
     $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
