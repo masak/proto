@@ -19,8 +19,14 @@ sub process {
         and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
         and not ($dist->{appveyor_status}//'') =~ /\A(unknown|pending)\z/;
 
-    unless ( $dist->{_builder}{has_appveyor} ) {
-        delete $dist->{appveyor_status}; # toss cached status
+    my $has_appveyor = ($dist->{_builder}{files} || [])->@*
+        ? (grep $_->{name} =~ /\A \.? appveyor\.yml \z/x,
+            $dist->{_builder}{files}->@*)
+        : ($dist->{appveyor_status}
+            and $dist->{appveyor_status} ne 'not set up');
+
+    unless ($has_appveyor) {
+        delete $dist->{appveyor_status}; # toss cached AppVeyor status, if any
         return;
     }
 

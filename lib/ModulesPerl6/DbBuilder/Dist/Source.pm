@@ -175,15 +175,8 @@ sub _save_logo {
 
 sub _get_author {
     my ( $self, $dist ) = @_;
-    my $author = $dist->{author} // $dist->{authors};
+    my $author = $dist->{author} // $dist->{authors} // 'N/A';
     $author = $author->[0] if ref $author eq 'ARRAY';
-    unless ($author) {
-        # assume the github user/org name as the author,
-        # but note the lack of proper authorship as a problem
-        ($author) = $dist->{url} =~ m{github\.com/([^/]+)/};
-        $dist->{_builder}{no_author_set} = 1;
-    }
-
     return $author;
 }
 

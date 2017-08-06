@@ -19,8 +19,12 @@ sub process {
         and not $dist->{_builder}{is_fresh} and not $ENV{FULL_REBUILD}
         and not ($dist->{travis_status}//'') =~ /\A(unknown|pending)\z/;
 
-    unless ( $dist->{_builder}{has_travis} ) {
-        delete $dist->{travis_status}; # toss cached Travis status
+    my $has_travis = ($dist->{_builder}{files} || [])->@*
+        ? (grep $_->{name} eq '.travis.yml', $dist->{_builder}{files}->@*)
+        : ($dist->{travis_status} and $dist->{travis_status} ne 'not set up');
+
+    unless ($has_travis) {
+        delete $dist->{travis_status}; # toss cached Travis status, if any
         return;
     }
 
@@ -31,7 +35,7 @@ sub process {
         Mojo::UserAgent->new( max_redirects => 5 )->get(
             "https://api.travis-ci.org/repos/$user/$repo/builds"
             => { Accept => 'application/vnd.travis-ci.2+json' }
-        )->res->json->{builds}->@*;
+        )->result->json->{builds}->@*;
     }; if ( $@ ) { log error => "Error fetching travis status: $@"; return; }
 
     $dist->{travis_status} = $self->_get_travis_status( @builds );

@@ -82,17 +82,10 @@ sub load {
     } // 0;
 
     # no new commits and we have cached results that will do just fine
-    if ( $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD} ) {
-        $dist->{_builder}{has_travis} = 1 # reinstate cached travis status
-            unless $dist->{travis_status} eq 'not set up';
+    return $dist
+        if $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD};
 
-        $dist->{_builder}{has_appveyor} = 1 # reinstate cached appveyor status
-            unless $dist->{appveyor_status} eq 'not set up';
-
-        return $dist;
-    }
     $dist->{date_updated} = $date_updated;
-
     log info => 'Dist has new commits. Fetching more info.';
     $dist->{_builder}{is_fresh} = 1;
 
@@ -106,27 +99,10 @@ sub load {
         map $_->{size}, grep $_->{path} eq 'logotype/logo_32x32.png', @$tree
     );
 
-    # if you add {_builder} stuff, ensure it still maintains correct stuff when dist has
-    # no new commits and we bail out of this routine early.
-    # (see conditional a dozen of lines above that `reinstates` travis status for example)
-    $dist->{_builder}{has_appveyor}
-    = grep $_->{path} =~ /\A \.? appveyor\.yml \z/x, @$tree;
-
-    $dist->{_builder}{has_travis} = grep $_->{path} eq '.travis.yml', @$tree;
-    $dist->{_builder}{has_manifest} = grep $_->{path} eq 'MANIFEST', @$tree;
-    my ($readme) = grep { $_->{path} =~ /^README/ } @$tree;
-    if ($readme) {
-        my $repo_root = $self->_meta_url =~ s{[^/]+$}{}r;
-        my $tx = $self->_ua->get("$repo_root/$readme->{path}");
-        if ($tx->success) {
-            my $contents = $tx->res->body;
-            if ($contents =~ /panda|ufo/) {
-                $dist->{_builder}{mentions_old_tools} = 1;
-            }
-        }
-    } else {
-        $dist->{_builder}{has_no_readme} = 1;
-    }
+    $dist->{_builder}{files} = [
+        map +{ url => $_->{url}, name => $_->{path} },
+            grep $_->{type} eq 'blob', @$tree
+    ];
 
     return $dist;
 }
