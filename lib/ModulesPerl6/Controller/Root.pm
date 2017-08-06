@@ -17,8 +17,6 @@ sub index {
 
 sub search {
     my $self = shift;
-    return $self->redirect_to('home')
-        unless length $self->param('q') or length $self->param('tag');
 
     my @dists;
     if (length (my $q = $self->param('q'))) {

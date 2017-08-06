@@ -1,6 +1,8 @@
 % layout 'default';
 
-% if (length param 'q') {
+% if (length param 'tag') {
+  %= include 'partials/tags-box'
+% } else {
   %= form_for search => class => "form-inline well well-sm" => begin
     <div class="form-group">
       <%= text_field q => class => 'form-control',
@@ -8,10 +10,6 @@
     </div>
     %= submit_button Search => class => 'btn btn-default'
   % end
-% }
-
-% if (length param 'tag') {
-  %= include 'partials/tags-box'
 % }
 
 <ul id="dist-list" class="shy-list">
