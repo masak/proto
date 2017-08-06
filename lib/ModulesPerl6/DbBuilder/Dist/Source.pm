@@ -53,7 +53,8 @@ sub _download_meta {
     my $url = $self->_meta_url;
 
     log info => "Downloading META file from $url";
-    my $tx = $self->_ua->get( $url );
+    # Pass `v` arg with URL to bypass GitHub's overly eager cacher of raw files
+    my $tx = $self->_ua->get($url, form => { v => time });
 
     if ( $tx->success ) { return $tx->res->body }
     else {
