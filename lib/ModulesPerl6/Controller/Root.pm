@@ -17,6 +17,7 @@ sub index {
 
 sub search {
     my $self = shift;
+    return $self->lucky if $self->param('lucky');
 
     my @dists;
     if (length (my $q = $self->param('q'))) {
@@ -26,10 +27,6 @@ sub search {
     else {
         @dists = $self->dists->find->each;
     }
-
-    $self->redirect_to(
-        dist => dist => (nsort_by { -$_->{stars} } @dists)[0]->{name}
-    ) if @dists and length $self->param('lucky');
 
     @dists = nsort_by { -$_->{stars} } @dists;
 
@@ -70,14 +67,15 @@ sub search {
 sub lucky {
     my $self = shift;
 
-    my $q = $self->stash('q');
+    my $q = $self->param('q') // '';
     my @dists = $self->dists->find({ name        => \$q })->each,
                 $self->dists->find({ description => \$q })->each;
     @dists or return $self->reply->not_found;
 
-    $self->redirect_to(
-        dist => dist => (nsort_by { -$_->{stars} } @dists)[0]->{name}
-    );
+    my $dist = (grep $_->{name} eq $q, @dists)[0]
+         || (nsort_by { -$_->{stars} } @dists)[0];
+
+    $self->redirect_to(dist => dist => $dist->{name});
 }
 
 sub total {
