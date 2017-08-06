@@ -3,6 +3,10 @@ $color-panel-primary-bg: $color-link;
 $text-color-muted: #aaa;
 $line-color-muted: #eee;
 
+html {
+    overflow-y: scroll;
+}
+
 nav.navbar {
     margin-bottom: 0;
     div.container a:hover {
