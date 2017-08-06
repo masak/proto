@@ -1,0 +1,13 @@
+This file exists for editing it to trigger commit events when
+there's nothing else to edit.
+
+Make some changes to this file and use one of these triggers as first
+word in the title of the commit message (including the brackets)
+
+[REBUILD] - Invalidate dist build caches and fetch full dist info for all dists
+[NEWDB]   - Rebuild the database from scratch. Use this when you made changes to db structure
+
+See this commit for example usage:
+https://github.com/perl6/modules.perl6.org/commit/4e42840278e2681c21ee118f30106dc2b8d5d0d1
+
+----------------
