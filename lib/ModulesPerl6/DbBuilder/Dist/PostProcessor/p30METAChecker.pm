@@ -1,4 +1,4 @@
-package ModulesPerl6::DbBuilder::Dist::PostProcessor::METAChecker;
+package ModulesPerl6::DbBuilder::Dist::PostProcessor::p30METAChecker;
 
 use strictures 2;
 use base 'ModulesPerl6::DbBuilder::Dist::PostProcessor';

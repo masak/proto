@@ -1,4 +1,4 @@
-package ModulesPerl6::DbBuilder::Dist::PostProcessor::AppVeyor;
+package ModulesPerl6::DbBuilder::Dist::PostProcessor::p10AppVeyor;
 
 use strictures 2;
 use base 'ModulesPerl6::DbBuilder::Dist::PostProcessor';

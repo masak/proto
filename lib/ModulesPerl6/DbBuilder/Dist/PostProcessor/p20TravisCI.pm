@@ -1,4 +1,4 @@
-package ModulesPerl6::DbBuilder::Dist::PostProcessor::TravisCI;
+package ModulesPerl6::DbBuilder::Dist::PostProcessor::p20TravisCI;
 
 use strictures 2;
 use base 'ModulesPerl6::DbBuilder::Dist::PostProcessor';
