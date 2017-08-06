@@ -1,5 +1,13 @@
 % layout 'default';
 
+%= form_for search => class => "form-inline well well-sm" => begin
+  <div class="form-group">
+    <%= text_field q => class => 'form-control',
+      placeholder => 'Type a module name or search term' %>
+  </div>
+  %= submit_button Search => class => 'btn btn-default'
+% end
+
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>

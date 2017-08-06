@@ -3,6 +3,10 @@ $color-panel-primary-bg: $color-link;
 $text-color-muted: #aaa;
 $line-color-muted: #eee;
 
+body {
+    padding-top: 20px;
+}
+
 .shy-list {
     margin-left: 0;
     padding-left: 0;
