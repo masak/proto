@@ -28,7 +28,9 @@ sub startup {
         die 'Refusing to start without proper secrets'
             if $self->mode eq 'production';
     }
-    $self->secrets([-r SECRETS_FILE ? path(SECRETS_FILE)->slurp]);
+    $self->secrets([
+        -r SECRETS_FILE ? path(SECRETS_FILE)->slurp : 'Perl 6 is awesome!'
+    ]);
 
     # ASSETS
     $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
