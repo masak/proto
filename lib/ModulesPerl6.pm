@@ -23,12 +23,12 @@ sub startup {
     unshift $self->static->paths->@*, $ENV{MODULESPERL6_EXTRA_STATIC_PATH}
         if length $ENV{MODULESPERL6_EXTRA_STATIC_PATH};
 
-    $self->app->log->info("Did not find secrets file at " . SECRETS_FILE)
-        unless -r SECRETS_FILE;
-
-    $self->secrets([
-        -r SECRETS_FILE ? path(SECRETS_FILE)->slurp : 'Perl 6 is awesome!'
-    ]);
+    unless (-r SECRETS_FILE) {
+        $self->app->log->info("Did not find secrets file at " . SECRETS_FILE);
+        die 'Refusing to start without proper secrets'
+            if $self->mode eq 'production';
+    }
+    $self->secrets([-r SECRETS_FILE ? path(SECRETS_FILE)->slurp]);
 
     # ASSETS
     $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
