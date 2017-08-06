@@ -27,10 +27,12 @@ sub load {
     log info => 'Fetching distro info and commits';
     my $dist    = $self->_dist or return;
 
+    $dist->{dist_source} = 'gitlab';
+
     $dist->{author_id} = $dist->{_builder}{repo_user}
         if $dist->{author_id} eq 'N/A';
 
-    $dist->{date_updated}=undef; # XXX displays as Epoch start in UI
+    $dist->{date_updated} = undef;
 
     return if $dist->{name} eq 'N/A';
 

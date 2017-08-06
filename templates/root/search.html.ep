@@ -61,7 +61,8 @@
             <%= $dist->{date_updated} %></li>
         <li>
           <a href="<%= $dist->{url} %>"
-            class="source-<%= $dist->{source} %>"><%= $dist->{source} %> / </a>
+            class="source-<%= $dist->{dist_source} %>"
+              ><%= $dist->{dist_source} %> / </a>
             <%= $dist->{author_id} %></li>
       </ul>
 

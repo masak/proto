@@ -65,6 +65,7 @@ sub load {
 
     %$dist      = (
         %$dist,
+        dist_source => 'github',
         url         => $repo->{html_url},
         issues      => $repo->{open_issues_count} // 0,
         stars       => $repo->{stargazers_count}  // 0,
@@ -84,10 +85,10 @@ sub load {
     if ( $dist->{date_updated} eq $date_updated and not $ENV{FULL_REBUILD} ) {
         $dist->{_builder}{has_travis} = 1 # reinstate cached travis status
             unless $dist->{travis_status} eq 'not set up';
-            
+
         $dist->{_builder}{has_appveyor} = 1 # reinstate cached appveyor status
             unless $dist->{appveyor_status} eq 'not set up';
-            
+
         return $dist;
     }
     $dist->{date_updated} = $date_updated;

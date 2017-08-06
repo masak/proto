@@ -32,7 +32,6 @@ sub search {
     ) if @dists and length $self->param('lucky');
 
     for (@dists) {
-        $_->{source} = 'github'; # TODO XXX: use dist source data from db
         $_->{date_updated} = $_->{date_updated}
             ? strftime '%Y-%m-%d', gmtime $_->{date_updated}
             : 'N/A';

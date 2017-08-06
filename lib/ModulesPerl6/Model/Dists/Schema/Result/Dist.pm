@@ -5,6 +5,7 @@ primary_column meta_url      => { data_type => 'text',                     };
 column         name          => { data_type => 'text'                      };
 column         author_id     => { data_type => 'text', is_foreign_key => 1 };
 column         build_id      => { data_type => 'text', is_foreign_key => 1 };
+column         dist_source   => { data_type => 'text', is_foreign_key => 1 };
 column         travis_status => { data_type => 'text', is_foreign_key => 1 };
 column         appveyor_status => { data_type => 'text', is_foreign_key => 1 };
 column         url           => { data_type => 'text'                      };
@@ -29,6 +30,10 @@ many_to_many problems => problem_dists => 'problem';
 belongs_to author
     => 'ModulesPerl6::Model::Dists::Schema::Result::Author'
     => 'author_id';
+
+belongs_to distro_source
+    => 'ModulesPerl6::Model::Dists::Schema::Result::DistSource'
+    => { source => 'dist_source' };
 
 belongs_to travis
     => 'ModulesPerl6::Model::Dists::Schema::Result::TravisStatus'
