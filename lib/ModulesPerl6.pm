@@ -91,64 +91,9 @@ sub startup {
 
     $r->get('/todo'        )->to('todo#index');
     $r->get('/todo/:author')->to('todo#author')->name('author');
-
-    $r->any('/not_implemented_yet')
-        ->to('root#not_implemented_yet')
-        ->name('not_implemented_yet');
 }
 
 1;
 
 __END__
 
-=encoding utf8
-
-=for stopwords md
-
-=head1 NAME
-
-ModulesPerl6 - Web app powering modules.perl6.org
-
-=head1 SYNOPSIS
-
-    #!/usr/bin/env perl
-
-    use FindBin;
-    BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
-
-    require Mojolicious::Commands;
-    Mojolicious::Commands->start_app('ModulesPerl6');
-
-=head1 DESCRIPTION
-
-You would not use this module directly, but instead start your app
-with a script.
-
-See DEPLOYMENT.md file included with this distribution.
-
-Also, you may wish to consult
-L<http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook#DEPLOYMENT>
-for more details.
-
-=head1 ENVIRONMENTAL VARIABLES
-
-There are two environmental variables supported by the app that are used
-by the test scripts.
-
-=head2 C<MODULESPERL6_SECRETS>
-
-Specifies the location of the secrets file.
-
-=head2 C<MODULESPERL6_EXTRA_STATIC_PATH>
-
-Specifies an additional directory to C<unshift> into
-L<Mojolicious::Static/paths>.
-
-=head1 CONTACT INFORMATION
-
-Original version of this module was written by Zoffix Znet
-(L<https://github.com/zoffixznet/>, C<Zoffix> on irc.freenode.net).
-
-=head1 LICENSE
-
-You can use and distribute this module under the same terms as Perl itself.
