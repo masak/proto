@@ -170,6 +170,7 @@ footer:hover {
 
         }
 
+        .source-gitlab,
         .source-github {
             vertical-align: middle;
             display: inline-block;
@@ -178,6 +179,9 @@ footer:hover {
             background: url(/pics/github-icon.png);
             text-indent: -9999px;
             overflow: hidden;
+        }
+        .source-gitlab {
+            background: url(/pics/gitlab-icon.png);
         }
 
         .glyphicon-ok {
