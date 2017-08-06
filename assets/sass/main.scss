@@ -134,7 +134,6 @@ footer:hover {
 
     ul {
         margin-left: 0;
-        margin-bottom: 10px;
         padding-left: 0;
         overflow: hidden;
         font-size: 90%;
@@ -187,6 +186,10 @@ footer:hover {
         .glyphicon-info-sign,
         .glyphicon-remove {
             color: red;
+        }
+
+        + div {
+            margin-top: 10px;
         }
     }
 }
