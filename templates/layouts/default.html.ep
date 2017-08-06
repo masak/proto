@@ -13,31 +13,30 @@
 <body>
   <div class="container">
     <%= content %>
-    <footer class="panel panel-default">
-      <div class="panel-body suckin-btm">
-        <p>For feedback and patches, please contact us through the
-          <a href="https://perl6.org/community/irc">#perl6 IRC
-          channel</a>, or send an email to the perl6-compiler@perl.org mailing
-          list.
-        </p>
-        <p class="text-muted">
-          <small>
-            This page was generated from the files in the
-            <a href="http://github.com/perl6/modules.perl6.org/"
-              >modules.perl6.org repository</a>
-              on <i class="build_last_updated"><%=
-                localtime(
-                  stash('last_updated')
-                    ? stash('last_updated')
-                    : build_stats->stats('last_updated')->{last_updated}
-                )
-                %></i>.
-              <a href="/update.log" class="btn btn-primary btn-sm">
-                <i class="glyphicon glyphicon-log-in"></i>
-                view build log</a>
-          </small>
-        </p>
-      </div>
+    <footer>
+      <hr>
+      <p>For feedback and patches, please contact us through the
+        <a href="https://perl6.org/community/irc">#perl6 IRC
+        channel</a>, or send an email to the perl6-compiler@perl.org mailing
+        list.
+      </p>
+      <p class="text-muted">
+        <small>
+          This page was generated from the files in the
+          <a href="http://github.com/perl6/modules.perl6.org/"
+            >modules.perl6.org repository</a>
+            on <i class="build_last_updated"><%=
+              localtime(
+                stash('last_updated')
+                  ? stash('last_updated')
+                  : build_stats->stats('last_updated')->{last_updated}
+              )
+              %></i>.
+            <a href="/update.log">
+              <i class="glyphicon glyphicon-log-in"></i>
+              view build log</a>
+        </small>
+      </p>
     </footer>
   </div>
 

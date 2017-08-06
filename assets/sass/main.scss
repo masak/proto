@@ -1,2 +1,30 @@
 $color-link: #2FA4E7;
 $color-panel-primary-bg: $color-link;
+
+#index-search-form {
+    padding: 100px 2px;
+    text-align: center;
+
+    h1 {
+        margin-top: 5px;
+        letter-spacing: -1px;
+    }
+
+    form {
+        display: inline-block;
+        min-height: 146px;
+        min-width: 600px;
+        padding-right: 210px;
+        background: url(/pics/camelia.png) right no-repeat;
+    }
+}
+
+footer {
+    text-align: center;
+    opacity: .6;
+    transition: opacity 1s;
+}
+
+footer:hover {
+    opacity: 1;
+}

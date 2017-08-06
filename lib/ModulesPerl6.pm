@@ -61,6 +61,7 @@ sub startup {
     });
 
     # HELPERS
+    $self->helper(lang_name => sub { "Perl\x{A0}6" });
     $self->helper( dists => sub {
         state $dists = ModulesPerl6::Model::Dists->new;
     });
