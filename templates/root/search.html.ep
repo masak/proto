@@ -22,14 +22,21 @@
         ><%= $dist->{name} %></a>
           <b><%= $dist->{description} %></b></h2>
       <ul>
-        <li title="Number of likes"
-          ><a href="<%= $dist->{url} . '/stargazers' %>"
-          ><i class="glyphicon glyphicon-star"></i>
-            <%= $dist->{stars} %></a></li>
-        <li title="Number of open Issues"
-          ><a href="<%= $dist->{url} . '/issues' %>"
-          ><i class="glyphicon glyphicon-info-sign"></i>
-            <%= $dist->{issues} %></a></li>
+        % if ($dist->{dist_source} eq 'github') {
+          <li title="Number of likes"
+            ><a href="<%= $dist->{url} . '/stargazers' %>"
+            ><i class="glyphicon glyphicon-star"></i>
+              <%= $dist->{stars} %></a></li>
+          <li title="Number of open Issues"
+            ><a href="<%= $dist->{url} . '/issues' %>"
+            ><i class="glyphicon glyphicon-info-sign"></i>
+              <%= $dist->{issues} %></a></li>
+        % } else {
+          <li title="Number of likes"
+            ><i class="glyphicon glyphicon-star"></i> N/A</li>
+          <li title="Number of open Issues"
+            ><i class="glyphicon glyphicon-info-sign"></i> N/A</li>
+        % }
         <li title="Travis status">
           <a class="travis" href="<%= $dist->{travis_status} eq 'not set up'
             ? 'https://docs.travis-ci.com/user/languages/perl6'
