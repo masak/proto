@@ -36,7 +36,6 @@ sub startup {
     $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
     $self->asset->process('app.css' => qw{
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
-        https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css
         /sass/main.scss
     });
 
@@ -53,10 +52,8 @@ sub startup {
     }
 
     $self->asset->process('app.js'  => qw{
-        https://code.jquery.com/jquery-1.11.3.min.js
-        https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js
-        /js/dataTables.filter.perlModule.js
-        /js/jquery-deparam.js
+        https://code.jquery.com/jquery-3.2.1.min.js
+        https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
         /js/main.js
     });
 
