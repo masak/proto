@@ -49,7 +49,7 @@ message title. That will clear the cache and cause full rebuild.
 If you made a change to the *structure* of the database, specify `[NEWDB]`
 as the first thing in the commit's title, to re-deploy site's database.
 When testing locally, you can just delete existing database file
-(the tables will created by deploy from DBIC automatically).
+(the tables will be created by deploy from DBIC automatically).
 
 #### Browser Support
 
