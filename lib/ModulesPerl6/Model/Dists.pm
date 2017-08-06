@@ -67,6 +67,7 @@ sub add {
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status}   ||= 'not set up';
         $dist->{appveyor_status} ||= 'not set up';
+        $dist->{appveyor_url}    ||= '';
         $dist->{date_updated}    ||= 0;
         $dist->{date_added}      ||= 0;
         $dist->{dist_source}     ||= 'unknown';
@@ -81,7 +82,7 @@ sub add {
             dist_build_id => { id => $dist->{build_id} },
             (map +( $_ => $dist->{$_} ),
                 qw/name  meta_url  url  description  stars  issues
-                    date_updated  date_added /,
+                    date_updated  date_added  appveyor_url/,
             ),
         });
 

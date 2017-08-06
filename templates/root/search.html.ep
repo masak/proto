@@ -57,7 +57,8 @@
           <a class="appveyor" href="<%=
             $dist->{appveyor_status} eq 'not set up'
             ? 'https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/'
-            : $dist->{appveyor_url} %>"
+            : $dist->{appveyor_url}
+              || url_for 'dist', dist => $dist->{name} %>"
           >
             % if      ($dist->{appveyor_status} eq 'passing') {
               <i class="glyphicon glyphicon-ok"></i>

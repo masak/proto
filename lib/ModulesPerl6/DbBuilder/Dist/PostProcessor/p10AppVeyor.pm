@@ -33,6 +33,33 @@ sub process {
     my ( $user, $repo ) = $dist->{_builder}->@{qw/repo_user  repo/};
     return unless length $user and length $repo;
 
+    my $build = eval {
+        # https://www.appveyor.com/docs/api/projects-builds/
+        Mojo::UserAgent->new( max_redirects => 5 )->get(
+            "https://ci.appveyor.com/api/projects/$user/$repo"
+                . '/history?recordsNumber=1'
+          )->result->json->{builds}[0];
+    };
+    if ($@ or not $build) {
+        log info => "appveyor project URL appears to differ from repo URL"
+            . ($@ ? " (got error when fetching: $@)" : '');
+        return $self->_get_status_from_badge($user, $repo);
+    }
+
+    $dist->{appveyor_status} = $self->_build_to_status($build);
+    log info => "Determined appveyor status is $dist->{appveyor_status}";
+
+    $dist->{appveyor_url} = "https://ci.appveyor.com/project/$user/$repo";
+    log info
+    => "Determined appveyor project URL to be is $dist->{appveyor_url}";
+
+    return 1;
+}
+
+sub _get_status_from_badge {
+    my ($self, $user, $repo) = @_;
+    my $dist = $self->_dist;
+
     my $badge_text = eval {
         # XXX TODO: user/repo can differ between GitHub and AppVeyor.
         # Found a way to get the build info by fetching an SVG of the badge
@@ -51,15 +78,62 @@ sub process {
 
             },
         )->result->dom->all_text
-    }; if ($@) { log error => "Error fetching appveyor status: $@"; return; }
+    };
+    if ($@) {
+        log error => "Error fetching appveyor status from badge: $@";
+        return;
+    }
 
-    $dist->{appveyor_status} = $self->_get_appveyor_status($badge_text);
+    $dist->{appveyor_status} = $self->_badge_text_to_status($badge_text);
     log info => "Determined appveyor status is $dist->{appveyor_status}";
+
+    $dist->{appveyor_url} = $self->_project_url_from_readme
+        and log info => "Determined appveyor project URL to be "
+            . $dist->{appveyor_url};
 
     return 1;
 }
 
-sub _get_appveyor_status {
+sub _project_url_from_readme {
+    my $self = shift;
+    my $dist = $self->_dist;
+
+    my ($readme) = grep $_->{name} =~ /^README/,
+        ($dist->{_builder}{files} || [])->@*;
+
+    if (not $readme or $readme->{error}) {
+        if ($dist->{_builder}{is_fresh}) {
+            log error => 'dist has no README; cannot get appveyor project URL';
+            return;
+        }
+        return $dist->{appveyor_url};
+    };
+
+    my ($url) = $readme->{content} =~ m{
+        \b(
+            \Qhttps://ci.appveyor.com/project/\E
+            [^/]+ / [^/]+
+            (?: /branch/[^a-zA-Z0-9_-]+ )?
+        )\b
+    }xim;
+    $url and return $url;
+
+    log error => 'dist does not appear to have an appveyor badge in README; '
+        . 'cannot figure out appveyour project URL';
+    return;
+}
+
+sub _build_to_status {
+    my ( $self, $build ) = @_;
+    my $raw_status = $build->{status} // '';
+
+    return 'pending' if $raw_status eq 'running';
+    return 'failing' if $raw_status eq 'failed';
+    return 'passing' if $raw_status eq 'success';
+    return 'unknown';
+}
+
+sub _badge_text_to_status {
     my ( $self, $raw_status ) = @_;
 
     return 'pending' if $raw_status =~ /\bMODP6-pending\b/;

@@ -56,10 +56,6 @@ sub search {
             : 'N/A';
 
         $_->{travis_url} = Mojo::URL->new($_->{url})->host('travis-ci.org');
-
-        my $m = Mojo::URL->new($_->{url});
-        $_->{appveyor_url} = $m->host('ci.appveyor.com')
-            ->path('/project' . $m->path);
     }
 
     my $active_tag = uc($self->param('tag') // '');
