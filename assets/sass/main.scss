@@ -36,15 +36,20 @@ nav.navbar {
 }
 
 .appveyor,
-.travis {
+.travis,
+.github {
     display: inline-block;
     padding-left: 20px;
     min-height: 16px;
     background: url(/pics/travis-icon.png) left no-repeat;
+    vertical-align: middle;
 }
 
 .appveyor {
     background-image: url(/pics/appveyor-icon.png);
+}
+.github {
+    background-image: url(/pics/github-icon.png);
 }
 
 #index-search-form {
@@ -186,4 +191,15 @@ footer:hover {
     margin: 0;
 }
 
+.problem-severity-1 {
+    color: #00f;
+}
 
+.problem-severity-3 {
+    color: #dd8300;
+}
+
+.problem-severity-5 {
+    color: #f00;
+    font-weight: bold;
+}

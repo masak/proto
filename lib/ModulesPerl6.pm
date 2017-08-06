@@ -77,12 +77,6 @@ sub startup {
 
     # ROUTES
     my $r = $self->routes;
-
-    # multiple search aliases, because why not?
-    # $r->get( $_ )->to('root#index') for (
-    #     '/',  '/q/#q',  '/s/#q',  '/search/#q',  '/t/#tag', '/tag/#tag'
-    # );
-
     $r->get('/')->to('root#index')->name('home');
     $r->get($_)->to('root#search')->name('search')
         for '/search', '/s/#q', '/search/#q';
