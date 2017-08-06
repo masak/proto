@@ -8,6 +8,7 @@ use experimental 'postderef';
 
 sub index {
     my $self = shift;
+    $self->stash(body_class => 'page_index');
 }
 
 sub search {

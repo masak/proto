@@ -16,22 +16,6 @@
           => class => 'btn btn-default btn-block' %>
       </div>
     </div>
-
-    <hr>
-
-    <div class="btn-group">
-      <a href="https://github.com/ugexe/zef/"
-        class="btn btn-default btn-sm">module installer</a>
-      <a href="http://docs.perl6.org/language/modules-core"
-        class="btn btn-default btn-sm">core modules</a>
-      <a href="http://finanalyst.github.io/ModuleCitation/"
-        class="btn btn-default btn-sm">citations</a>
-      <a href="http://doc.perl6.org/language/modules"
-        class="btn btn-default btn-sm">create a module</a>
-      <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md"
-        class="btn btn-default btn-sm">most wanted</a>
-    </div>
-
   % end
 </div>
 

@@ -3,8 +3,25 @@ $color-panel-primary-bg: $color-link;
 $text-color-muted: #aaa;
 $line-color-muted: #eee;
 
-body {
-    padding-top: 20px;
+nav.navbar div.container a:hover {
+    background: $line-color-muted;
+}
+
+.page_index {
+    .navbar {
+        .navbar-nav {
+            display: inline-block;
+            float: none;
+        }
+
+        .navbar-collapse {
+            text-align: center;
+        }
+
+        #bs-navbar-collapse-1 {
+            line-height: 0;
+        }
+    }
 }
 
 .shy-list {
