@@ -28,7 +28,9 @@ fi
 
 log_file=$(mktemp);
 FULL_REBUILD=$DO_REBUILD perl bin/build-project-list.pl --restart-app \
-    --db-file="$db_file" > "$log_file" 2>&1 && cp "$log_file" public/update.log
+    --db-file="$db_file" > "$log_file" 2>&1 &&
+    cp "$log_file" public/update.log ||
+    { echo 'Building failed'; rm $log_file; exit 1; }
 
 if [ "$db_file" != "modulesperl6.db" ]
 then
