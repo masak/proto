@@ -28,8 +28,10 @@ sub search {
     }
 
     $self->redirect_to(
-        dist => dist => (nsort_by { $_->{stars} } @dists)[0]->{name}
+        dist => dist => (nsort_by { -$_->{stars} } @dists)[0]->{name}
     ) if @dists and length $self->param('lucky');
+
+    @dists = nsort_by { -$_->{stars} } @dists;
 
     for (@dists) {
         $_->{date_updated} = $_->{date_updated}
@@ -74,7 +76,7 @@ sub lucky {
     @dists or return $self->reply->not_found;
 
     $self->redirect_to(
-        dist => dist => (nsort_by { $_->{stars} } @dists)[0]->{name}
+        dist => dist => (nsort_by { -$_->{stars} } @dists)[0]->{name}
     );
 }
 
