@@ -9,15 +9,25 @@ use experimental 'postderef';
 
 sub index {
     my $self = shift;
-    $self->stash(body_class => 'page_index');
+    $self->stash(
+        body_class => 'page_index',
+        tags       => $self->dists->tags->{by_count},
+    );
 }
 
 sub search {
     my $self = shift;
-    my $q = $self->param('q') // return $self->redirect_to('home');
+    return $self->redirect_to('home')
+        unless length $self->param('q') or length $self->param('tag');
 
-    my @dists = $self->dists->find({ name        => \$q })->each,
-                $self->dists->find({ description => \$q })->each;
+    my @dists;
+    if (length (my $q = $self->param('q'))) {
+        @dists = $self->dists->find({ name        => \$q })->each,
+                 $self->dists->find({ description => \$q })->each;
+    }
+    else {
+        @dists = $self->dists->find->each;
+    }
 
     $self->redirect_to(
         dist => dist => (nsort_by { $_->{stars} } @dists)[0]->{name}
@@ -36,7 +46,25 @@ sub search {
             ->path('/project' . $m->path);
     }
 
-    $self->stash(dists => \@dists);
+    my $active_tag = uc($self->param('tag') // '');
+    @dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @dists
+        if $active_tag;
+
+    my $tags = $self->dists->tags;
+    my %data = (
+        is_active_weak_tag => (
+            scalar grep {
+                $_->{is_weak} and $_->{tag} eq $active_tag
+            } @{ $tags->{all} }
+        ),
+        tags  => $tags->{by_count},
+        dists => \@dists,
+    );
+
+    $self->respond_to(
+        html => { %data, template => 'root/search' },
+        json => { json => { dists => \@dists } },
+    );
 }
 
 sub lucky {

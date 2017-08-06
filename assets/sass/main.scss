@@ -61,8 +61,38 @@ nav.navbar {
         min-height: 146px;
         min-width: 600px;
         padding-right: 210px;
-        padding-bottom: 40px;
         background: url(/pics/camelia.png) right no-repeat;
+    }
+}
+
+
+.page_index #tags {
+    margin: 20px;
+}
+#tags {
+    list-style: none;
+
+    li {
+        display: inline-block;
+        margin-bottom: 4px;
+        margin-right: 4px;
+
+        .btn-default { background: #F5F5F5 }
+        a {
+            small {
+                font-size: 70%;
+            }
+        }
+    }
+
+    .weak-tag {
+        a.btn-default {
+            background: #e5e5e5;
+        }
+    }
+
+    #weak-tag-expander a {
+        background: #96D1F3;
     }
 }
 
@@ -154,3 +184,5 @@ footer:hover {
     padding: 10px 0;
     margin: 0;
 }
+
+
