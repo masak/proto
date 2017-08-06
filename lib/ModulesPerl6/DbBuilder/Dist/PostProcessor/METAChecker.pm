@@ -19,34 +19,6 @@ sub process {
     my $repo_url = 'https://github.com/'
         . join '/', grep length, @{ $dist->{_builder} }{qw/repo_user  repo/};
 
-    my @problems;
-    unless ($dist->{_builder}{has_manifest}) {
-        push @problems, problem("dist has no MANIFEST file", 3);
-    }
-
-    if ($dist->{_builder}{no_author_set}) {
-        push @problems, problem("dist has no author(s) specified", 3);
-    }
-
-    if ($dist->{_builder}{has_no_readme}) {
-        push @problems, problem("dist has no readme", 1);
-    }
-
-    if ($dist->{_builder}{mentions_old_tools}) {
-        push @problems, problem("dist mentions discouraged tools (panda, ufo etc.) in the readme", 2);
-    }
-
-    length $dist->{ $_ } or push @problems, problem("required `$_` field is missing", 5)
-        for qw/perl  name  version  description  provides/;
-
-    push @problems, problem("dist does not have any tags", 1)
-        unless @{ $dist->{tags} };
-
-    push @problems, problem("dist does not have a version set", 5)
-        unless ($dist->{version} and $dist->{version} ne '*');
-
-    $dist->{problems} = \@problems;
-
     if ( $repo_url eq $dist->{url} ) {
         log info => "dist source URL is same as META repo URL ($repo_url)";
         return;
@@ -57,6 +29,43 @@ sub process {
 
     log +( $code == 200 ? 'info' : 'error' ),
         "HTTP $code when accessing dist source URL ($dist->{url})";
+
+    return unless $dist->{_builder}{is_fresh};
+
+    my @problems;
+    unless ($dist->{_builder}{has_manifest}) {
+        push @problems, problem "dist has no MANIFEST file", 3;
+    }
+
+    if ($dist->{_builder}{no_author_set}) {
+        push @problems, problem "dist has no author(s) specified", 3;
+    }
+
+    if ($dist->{_builder}{has_no_readme}) {
+        push @problems, problem "dist has no readme", 1;
+    }
+
+    if ($dist->{_builder}{mentions_old_tools}) {
+        push @problems, problem "dist mentions discouraged tools (panda, ufo etc.) in the readme", 2;
+    }
+
+    length $dist->{ $_ }
+        or push @problems, problem "required `$_` field is missing", 5
+    for qw/perl  name  version  description  provides/;
+
+    push @problems, problem "dist does not have any tags", 1
+        unless @{ $dist->{tags} };
+
+    if ($dist->{version}) {
+        push @problems, problem "dist has `*` version (it's invalid)", 5
+            if $dist->{version} eq '*';
+    }
+    else {
+        push @problems, problem "dist does not have a version set", 5
+            unless $dist->{version} and $dist->{version} ne '*';
+    }
+
+    $dist->{problems} = \@problems;
 
     return 1;
 }
