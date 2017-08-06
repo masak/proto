@@ -3,8 +3,9 @@
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>
-      <h2><a href="<%= $dist->{url} %>"><%= $dist->{name} %></a>
-        <b><%= $dist->{description} %></b></h2>
+      <h2><a href="<%= url_for('dist', dist => $dist->{name} ) %>"
+        ><%= $dist->{name} %></a>
+          <b><%= $dist->{description} %></b></h2>
       <ul>
         <li title="Number of likes"
           ><a href="<%= $dist->{url} . '/stargazers' %>"
@@ -46,8 +47,10 @@
         <li title="Last updated on"
           ><i class="glyphicon glyphicon-wrench"></i>
             <%= $dist->{date_updated} %></li>
-        <li class="source">
-          <small><%= $dist->{source} %>/ </small><%= $dist->{author_id} %></li>
+        <li>
+          <a href="<%= $dist->{url} %>"
+            class="source-<%= $dist->{source} %>"><%= $dist->{source} %> / </a>
+            <%= $dist->{author_id} %></li>
       </ul>
     </li>
   % }

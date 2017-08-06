@@ -103,10 +103,15 @@ footer:hover {
             }
 
         }
-        .source {
-            small {
-                color: $text-color-muted;
-            }
+
+        .source-github {
+            vertical-align: middle;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url(/pics/github-icon.png);
+            text-indent: -9999px;
+            overflow: hidden;
         }
 
         .glyphicon-ok {
