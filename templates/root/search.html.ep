@@ -15,7 +15,15 @@
 % }
 
 <p><small>Showing <b><%= scalar items_in 'dists' %></b>
-    <%=  (items_in 'dists') == 1 ? 'result' : 'results' %></small></p>
+    <%=  (items_in 'dists') == 1 ? 'result' : 'results' %></small>
+
+  % if ($has_tag and not $has_q) {
+    <small class="text-muted">❘</small>
+    Looking for more modules? Try
+    <a href="<%= url_for('search')->query('q' => param 'tag') %>">a keyword
+      search for <b><%= param 'tag' %></b> instead</a>.
+  % }
+</p>
 
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
