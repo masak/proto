@@ -1,5 +1,27 @@
 $color-link: #2FA4E7;
 $color-panel-primary-bg: $color-link;
+$text-color-muted: #aaa;
+$line-color-muted: #eee;
+
+.shy-list {
+    margin-left: 0;
+    padding-left: 0;
+    > li {
+        list-style: none;
+    }
+}
+
+.appveyor,
+.travis {
+    display: inline-block;
+    padding-left: 20px;
+    min-height: 16px;
+    background: url(/pics/travis-icon.png) left no-repeat;
+}
+
+.appveyor {
+    background-image: url(/pics/appveyor-icon.png);
+}
 
 #index-search-form {
     padding: 100px 2px;
@@ -27,4 +49,72 @@ footer {
 
 footer:hover {
     opacity: 1;
+}
+
+#dist-list {
+    h2 {
+        font-size: 170%;
+        b {
+            font-size: 70%;
+            font-weight: 600;
+        }
+    }
+
+    > li {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid $line-color-muted;
+    }
+
+    ul {
+        margin-left: 0;
+        padding-left: 0;
+        overflow: hidden;
+        font-size: 90%;
+        text-shadow: 1px 1px 1px rgba(.3, .3, .3, .16);
+        vertical-align: middle;
+
+        li {
+            /*border-right: 1px solid #ddd;*/
+            padding: 0 10px;
+            margin: 0;
+            list-style: none;
+            display: inline-block;
+        }
+        li:last-child {
+            /*border-right: 0;*/
+        }
+        li:first-child {
+            width: 3.5em;
+            padding: 0;
+
+            i {
+                color: darken(yellow, 10%);
+            }
+
+            + li,
+            + li + li {
+                width: 3.5em;
+                padding: 0;
+            }
+            + li + li + li {
+                width: 3.5em;
+                padding: 0 0 0 5px;
+            }
+
+        }
+        .source {
+            small {
+                color: $text-color-muted;
+            }
+        }
+
+        .glyphicon-ok {
+            color: green;
+        }
+        .glyphicon-info-sign,
+        .glyphicon-remove {
+            color: red;
+        }
+    }
 }

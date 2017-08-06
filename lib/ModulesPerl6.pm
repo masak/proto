@@ -82,12 +82,14 @@ sub startup {
     my $r = $self->routes;
 
     # multiple search aliases, because why not?
-    $r->get( $_ )->to('root#index') for (
-        '/',  '/q/#q',  '/s/#q',  '/search/#q',  '/t/#tag', '/tag/#tag'
-    );
+    # $r->get( $_ )->to('root#index') for (
+    #     '/',  '/q/#q',  '/s/#q',  '/search/#q',  '/t/#tag', '/tag/#tag'
+    # );
 
-    # TODO: the /dist/ route currently redirects to repo, because we don't have
-    # a proper dist page yet
+    $r->get('/')->to('root#index')->name('home');
+    $r->get('/search')->to('root#search')->name('search');
+
+
     $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
     $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
     $r->get('/total'     )->to('root#total')->name('total');

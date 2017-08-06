@@ -1,0 +1,54 @@
+% layout 'default';
+
+<ul id="dist-list" class="shy-list">
+  % for my $dist (items_in 'dists') {
+    <li>
+      <h2><a href="<%= $dist->{url} %>"><%= $dist->{name} %></a>
+        <b><%= $dist->{description} %></b></h2>
+      <ul>
+        <li title="Number of likes"
+          ><a href="<%= $dist->{url} . '/stargazers' %>"
+          ><i class="glyphicon glyphicon-star"></i>
+            <%= $dist->{stars} %></a></li>
+        <li title="Number of open Issues"
+          ><a href="<%= $dist->{url} . '/issues' %>"
+          ><i class="glyphicon glyphicon-info-sign"></i>
+            <%= $dist->{issues} %></a></li>
+        <li title="Travis status">
+          <a class="travis" href="<%= $dist->{travis_status} eq 'not set up'
+            ? 'https://docs.travis-ci.com/user/languages/perl6'
+            : $dist->{travis_url} %>"
+          >
+            % if      ($dist->{travis_status} eq 'passing') {
+              <i class="glyphicon glyphicon-ok"></i>
+            % } elsif ($dist->{travis_status} eq 'failing') {
+              <i class="glyphicon glyphicon-remove"></i>
+            % } else {
+              <i class="glyphicon glyphicon-question-sign"></i>
+            % }
+          </a>
+        </li>
+        <li title="AppVeyor status">
+          <a class="appveyor" href="<%=
+            $dist->{appveyor_status} eq 'not set up'
+            ? 'https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/'
+            : $dist->{appveyor_url} %>"
+          >
+            % if      ($dist->{appveyor_status} eq 'passing') {
+              <i class="glyphicon glyphicon-ok"></i>
+            % } elsif ($dist->{appveyor_status} eq 'failing') {
+              <i class="glyphicon glyphicon-remove"></i>
+            % } else {
+              <i class="glyphicon glyphicon-question-sign"></i>
+            % }
+          </a>
+        </li>
+        <li title="Last updated on"
+          ><i class="glyphicon glyphicon-wrench"></i>
+            <%= $dist->{date_updated} %></li>
+        <li class="source">
+          <small><%= $dist->{source} %>/ </small><%= $dist->{author_id} %></li>
+      </ul>
+    </li>
+  % }
+</ul>
