@@ -53,7 +53,7 @@
     <footer>
       <hr>
       <p>For feedback and patches, please contact us through the
-        <a href="https://perl6.org/community/irc">#perl6 IRC
+        <a href="https://webchat.freenode.net/?channels=#perl6">#perl6 IRC
         channel</a>, or send an email to the perl6-compiler@perl.org mailing
         list.
       </p>
