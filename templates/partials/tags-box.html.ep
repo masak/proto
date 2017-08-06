@@ -1,4 +1,4 @@
-<ul id="tags" class="well well-sm"><li><a href="/" class="btn btn-xs <%=
+<ul class="tags-list well well-sm"><li><a href="/" class="btn btn-xs <%=
       stash('tag') ? 'btn-default' : 'btn-primary'%>">ALL
     <small><%= stash 'dists_num' %></small></a></li>
   % my $is_active_weak_tag = stash 'is_active_weak_tag';

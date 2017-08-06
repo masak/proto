@@ -66,10 +66,10 @@ nav.navbar {
 }
 
 
-.page_index #tags {
+.page_index .tags-list {
     margin: 20px;
 }
-#tags {
+.tags-list {
     list-style: none;
 
     li {
@@ -123,6 +123,7 @@ footer:hover {
 
     ul {
         margin-left: 0;
+        margin-bottom: 10px;
         padding-left: 0;
         overflow: hidden;
         font-size: 90%;

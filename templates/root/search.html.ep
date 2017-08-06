@@ -66,6 +66,13 @@
             class="source-<%= $dist->{source} %>"><%= $dist->{source} %> / </a>
             <%= $dist->{author_id} %></li>
       </ul>
+
+      <div class="btn-group">
+        % for (items_in $dist->{tags}) {
+          <a href="<%= url_for tag => tag => $_ %>"
+            class="btn btn-xs btn-default"><%= $_ %></a>
+        % }
+      </div>
     </li>
   % }
 </ul>
