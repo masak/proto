@@ -32,6 +32,7 @@ my $build = Module::Build->new(
       'Import::Into'                     => '0',
       'JSON::Meth'                       => '1.001006',
       'List::Util'                       => '1.45',
+      'List::UtilsBy'                    => '0.10',
       'LWP::UserAgent'                   => '0',
       'Mew'                              => '1.001006',
       'Mojo::Base'                       => '0',

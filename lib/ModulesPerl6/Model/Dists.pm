@@ -139,6 +139,28 @@ sub salvage_build {
     return 1;
 }
 
+sub tags {
+    my $self = shift;
+    my %tags;
+    for ($self->find->each) {
+        $tags{$_}++ for @{ $_->{tags} };
+    }
+
+    my @tags = map +{
+        tag        => $_,
+        count      => $tags{$_},
+        is_weak    => $tags{$_} < 3,
+    }, sort keys %tags;
+
+    +{
+        all      => \@tags,
+        by_count => [
+            ( grep { $_->{count} >= 3 } @tags ),
+            ( grep { $_->{count}  < 3 } @tags ),
+        ],
+    }
+}
+
 1;
 
 __END__

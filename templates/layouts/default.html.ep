@@ -10,34 +10,70 @@
   <link href="//perl6.org/favicon.ico" rel="shortcut icon">
   %= asset "app.css";
 </head>
-<body>
+<body<%== stash('body_class') ? ' class="' . stash('body_class') . '"' : '' %>>
+  <nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed"
+          data-toggle="collapse" data-target="#bs-navbar-collapse-1"
+          aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+
+      <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a class="navbar-brand" href="<%= url_for 'home' %>"
+            ><i class="glyphicon glyphicon-home"></i></a></li>
+          <li><a href="https://github.com/ugexe/zef/">
+            <i class="glyphicon glyphicon-compressed"></i>
+              Module installer</a></li>
+          <li><a href="http://docs.perl6.org/language/modules-core">
+            <i class="glyphicon glyphicon-apple"></i> Core modules</a></li>
+          <li><a href="http://finanalyst.github.io/ModuleCitation/">
+            <i class="glyphicon glyphicon-heart"></i> Citations</a></li>
+          <li><a href="http://doc.perl6.org/language/modules">
+            <i class="glyphicon glyphicon-wrench"></i> Create a module</a></li>
+          <li><a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">
+            <i class="glyphicon glyphicon-star"></i> Most wanted</a></li>
+          <li><a href="https://webchat.freenode.net/?channels=#perl6">
+            <i class="glyphicon glyphicon-user"></i> Chat with us</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <p id="donation-bar">Help language development. <a href="https://donate.perlfoundation.org/">Donate to The Perl Foundation</a></p>
+
   <div class="container">
     <%= content %>
-    <footer class="panel panel-default">
-      <div class="panel-body suckin-btm">
-        <p>For feedback and patches, please contact us through the
-          <a href="https://perl6.org/community/irc">#perl6 IRC
-          channel</a>, or send an email to the perl6-compiler@perl.org mailing
-          list.
-        </p>
-        <p class="text-muted">
-          <small>
-            This page was generated from the files in the
-            <a href="http://github.com/perl6/modules.perl6.org/"
-              >modules.perl6.org repository</a>
-              on <i class="build_last_updated"><%=
-                localtime(
-                  stash('last_updated')
-                    ? stash('last_updated')
-                    : build_stats->stats('last_updated')->{last_updated}
-                )
-                %></i>.
-              <a href="/update.log" class="btn btn-primary btn-sm">
-                <i class="glyphicon glyphicon-log-in"></i>
-                view build log</a>
-          </small>
-        </p>
-      </div>
+    <footer>
+      <hr>
+      <p>For feedback and patches, please contact us through the
+        <a href="https://perl6.org/community/irc">#perl6 IRC
+        channel</a>, or send an email to the perl6-compiler@perl.org mailing
+        list.
+      </p>
+      <p class="text-muted">
+        <small>
+          This page was generated from the files in the
+          <a href="http://github.com/perl6/modules.perl6.org/"
+            >modules.perl6.org repository</a>
+            on <i class="build_last_updated"><%=
+              localtime(
+                stash('last_updated')
+                  ? stash('last_updated')
+                  : build_stats->stats('last_updated')->{last_updated}
+              )
+              %></i>.
+            <a href="/update.log">
+              <i class="glyphicon glyphicon-log-in"></i>
+              view build log</a>
+        </small>
+      </p>
     </footer>
   </div>
 

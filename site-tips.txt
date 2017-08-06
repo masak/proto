@@ -6,10 +6,11 @@
 # ...that also means you can use HTML code in your tips
 # ********************************
 # ********************************
-You can link to a search query, like so: <a href="https://modules.perl6.org/#q=Test">https://modules.perl6.org/#q=Test</a>
+You can link to a search query, like so: <a href="https://modules.perl6.org/#q=Test">https://modules.perl6.org/s/Test</a>
 You can link to a specific tag, like so: <a href="https://modules.perl6.org/tag/Web">https://modules.perl6.org/tag/Web</a>
 This site has JSON API; just take the URL you want and make it end with <kbd>/.json</kbd>, e.g: <a href="https://modules.perl6.org/tag/Web/.json">https://modules.perl6.org/tag/Web/.json</a>
 Go directly to a module's repository using <kbd>/repo/</kbd>: <a href="https://modules.perl6.org/repo/Pastebin::Gist">https://modules.perl6.org/repo/Pastebin::Gist</a>
 View total count of modules in the database without parsing HTML at <a href="https://modules.perl6.org/total">https://modules.perl6.org/total</a>
 View a todo list for modules with plenty of LHF at <a href="https://modules.perl6.org/todo">https://modules.perl6.org/todo</a>
 View a todo list for a specific module author (like you!) at, e.g: <a href="https://modules.perl6.org/todo/perl6-community-modules">https://modules.perl6.org/todo/perl6-community-modules</a>
+Feelin' lucky? Use <kbd>/l/</kbd> end point to follow first search result, e.g. <a href="https://modules.perl6.org/l/debugger">https://modules.perl6.org/l/debugger</a>
