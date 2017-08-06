@@ -17,5 +17,9 @@
       </div>
     </div>
   % end
+
+  <p class="text-center">
+    <i class="glyphicon glyphicon-info-sign"></i> <%== site_tips->tip %>
+  </p>
 </div>
 
