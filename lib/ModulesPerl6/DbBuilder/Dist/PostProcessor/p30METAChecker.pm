@@ -6,6 +6,7 @@ use base 'ModulesPerl6::DbBuilder::Dist::PostProcessor';
 use Mojo::UserAgent;
 use Mojo::Util qw/b64_decode/;
 use ModulesPerl6::DbBuilder::Log;
+use List::UtilsBy qw/uniq_by/;
 use experimental 'postderef';
 
 sub problem {
@@ -58,7 +59,7 @@ sub _check_todo_problems {
         push @problems, problem 'dist does not have a version set', 5;
     }
 
-    $dist->{problems} = \@problems;
+    $dist->{problems} = [uniq_by { $_->{problem} } @problems];
 }
 
 sub _check_todo_problem_author {
@@ -77,28 +78,13 @@ sub _check_todo_problem_readme {
     my ($readme) = grep $_->{name} =~ /^README/, @$files
         or return problem 'dist has no README', 1;
 
-    my $content = eval {
-        Mojo::UserAgent->new( max_redirects => 5 )
-            ->get( $readme->{url} )->result->json
-    };
-    if ($@) {
-        log error => "Failed to fetch README content from $readme->{url}: $@";
-        return;
-    }
+    # If we failed to fetch the README content, return any cached README
+    # problems, as otherwise we'd be flopping on reporting these README issues,
+    # whenever network problems occur.
+    return grep $_->{problem} =~ /\bREADME\b/, ($dist->{problems} || [])->@*
+        if $readme->{error};
 
-    # TODO XXX: the JSON+decode step is valid for GitHub, but
-    # if other dist sources are taught to provide READMEs, they
-    # may have other mechanism that will need to be taken care of
-    # here. You can use $dist->{dist_source} to find out which
-    # dist source the dist came from.
-
-    # Possible encodings are 'utf-8' and 'base64', per
-    # https://developer.github.com/v3/git/blobs/#parameters
-    $content = $content->{encoding} eq 'base64'
-        ? (b64_decode $content->{content})
-        :             $content->{content};
-
-    return unless $content =~ /\b(panda|ufo)\b/;
+    return unless $readme->{content} =~ /\b(panda|ufo)\b/;
     problem 'dist mentions discouraged tools (panda or ufo) in the README', 2
 }
 
