@@ -68,9 +68,9 @@
           <a href="http://github.com/perl6/modules.perl6.org/"
             >modules.perl6.org repository</a>
             on <i class="build_last_updated">
-            % my $last_update = stash('last_updated')
+            % my $last_up = stash('last_updated')
             % || build_stats->stats('last_updated')->{last_updated};
-            <%= $last_update ? localtime($last_update) : '(unknown date)'
+            <%= $last_up ? scalar(localtime $last_up) : '(unknown date)'
               %></i>.
             <a href="/update.log">
               <i class="glyphicon glyphicon-log-in"></i>
