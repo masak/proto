@@ -1,6 +1,6 @@
 % layout 'default';
 
-<header class="panel panel-primary lead">
+<header class="panel panel-primary">
   <div class="panel-heading">
       <h1 class="panel-title">Perl&nbsp;6 Modules</h1>
   </div>
@@ -10,20 +10,17 @@
         width=291 height=273></a>
 
     <p>Below you can find a list of the <span class="total_dist_count"
-        ><%= stash 'dists_num' %></span>
-        known external Perl 6 modules. The <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a> column shows results of testing each module using <a href="http://rakudo.org/">Rakudo</a>
-        (currently <%= stash 'has_travis' %>).
-        The Appveyor column shows which modules are configured to be tested on Windows (currently <%= stash 'has_appveyor' %>).
-        These modules can be installed with <a href="https://github.com/ugexe/zef/">zef</a>, a module management tool
-      that comes with <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo
-        Star</a>.
+        ><%= stash 'dists_num' %></span> known external Perl 6 modules.
+        These modules can be installed with
+        <a href="https://github.com/ugexe/zef/">zef</a>, a module
+        management tool that comes with
+        <a href="http://rakudo.org/how-to-get-rakudo/">Rakudo Star</a>.
     </p>
 
-    <p>Some standard modules are included with Rakudo. Among them
-       are <a href="http://docs.perl6.org/language/testing"><i>Test</i> for testing</a>
-       and <a href="http://docs.perl6.org/language/nativecall"><i>NativeCall</i> for
-       using C libraries</a>.  See a list of all core modules
-       <a href="http://docs.perl6.org/language/modules-core">here</a>.
+    <p>Some <a href="http://docs.perl6.org/language/modules-core">standard modules</a> are included with Rakudo. Among them
+       are <a href="http://docs.perl6.org/language/testing"><i>Test</i>
+       for testing</a> and <a href="http://docs.perl6.org/language/nativecall"
+        ><i>NativeCall</i> for using C libraries</a>.
     </p>
 
     <p>If you want to contribute your own module, please read
@@ -33,6 +30,13 @@
         to the <a href="https://github.com/perl6/perl6-most-wanted/blob/master/most-wanted/modules.md">Most Wanted Modules</a>.
     </p>
 
+    <p>
+        There are two columns showing the results of testing of modules
+        on <a href="https://docs.travis-ci.com/user/languages/perl6">Travis</a>
+        (currently <%= stash 'has_travis' %>).
+        and <a href="https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/">Appveyor</a>
+        (currently <%= stash 'has_appveyor' %>).
+    </p>
   </div>
 </header>
 
