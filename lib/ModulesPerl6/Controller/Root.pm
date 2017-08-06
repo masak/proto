@@ -56,6 +56,7 @@ sub search {
         ),
         tags  => $tags->{by_count},
         dists => \@dists,
+        body_class => 'page_search',
     );
 
     $self->respond_to(

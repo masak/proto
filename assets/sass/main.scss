@@ -10,6 +10,12 @@ nav.navbar {
     }
 }
 
+@media (min-width: 768px) {
+    .page_search [name="q"]{
+        min-width: 30em;
+    }
+}
+
 .page_index {
     .navbar {
         .navbar-nav {
