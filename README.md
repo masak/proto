@@ -46,20 +46,11 @@ that needs to update database information for all dists, include string
 `[REBUILD]` (including the brackets) as the first thing in your commit
 message title. That will clear the cache and cause full rebuild.
 
-If you made a change to the *structure* of the database, you'll need
-to generate a new database file (the tables are created by deploy
-from DBIC). To propagate this change to the live site, someone will
-need to generate a new database file:
+If you made a change to the *structure* of the database, specify `[NEWDB]`
+as the first thing in the commit's title, to re-deploy site's database.
+When testing locally, you can just delete existing database file
+(the tables will created by deploy from DBIC automatically).
 
-    bin/build-project-list.pl --interval=0 --db-file=new.db
-
-And then swap old database with the new one:
-
-    cp modulesperl6.db old-db.db.bak;
-    cp new.db modulesperl6.db;
-
-And then restart the site.
-    
 #### Browser Support
 
 We support the current and previous major releases of Chrome, Firefox, Internet Explorer (Edge), and Safari. Please test layout changes. Lacking actual browsers to test in, you can use [browsershots.org](http://browsershots.org)

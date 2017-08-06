@@ -12,6 +12,7 @@ after=$(git rev-parse HEAD)
 cp update-modules.perl6.org ../
 
 DO_REBUILD=0
+db_file="modulesperl6.db"
 if [ "$before" != "$after" ]
 then
     echo "Got new commits"
@@ -19,8 +20,20 @@ then
         echo "Full database rebuild triggered"
         DO_REBUILD=1
     fi
+    if [[ `git log "$before"..."$after" --oneline` =~ '[NEWDB]' ]]; then
+        db_file=$(mktemp)
+        echo "New database creation requested; using $db_file as temp db"
+    fi
 fi
 
 log_file=$(mktemp);
-FULL_REBUILD=$DO_REBUILD perl bin/build-project-list.pl --restart-app > $log_file 2>&1 && cp $log_file public/update.log
+FULL_REBUILD=$DO_REBUILD perl bin/build-project-list.pl --restart-app \
+    --db-file="$db_file" > "$log_file" 2>&1 && cp "$log_file" public/update.log
+
+if [ "$db_file" != "modulesperl6.db" ]
+then
+    echo "Moving temp db to regular place"
+    mv $db_file modulesperl6.db
+fi
+
 rm $log_file;
