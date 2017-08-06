@@ -12,6 +12,9 @@
   % end
 % }
 
+<p><small>Showing <b><%= scalar items_in 'dists' %></b>
+    <%=  (items_in 'dists') == 1 ? 'result' : 'results' %></small></p>
+
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>
