@@ -1,8 +1,7 @@
 % layout 'default';
 
-% if (length param 'tag') {
-  %= include 'partials/tags-box'
-% } else {
+% my ($has_q, $has_tag) = (length(param 'q'), length(param 'tag'));
+% if ($has_q or (not $has_q and not $has_tag)) {
   %= form_for search => class => "form-inline well well-sm" => begin
     <div class="form-group">
       <%= text_field q => class => 'form-control',
@@ -10,6 +9,9 @@
     </div>
     %= submit_button Search => class => 'btn btn-default'
   % end
+% }
+% if ($has_tag or (not $has_q and not $has_tag)) {
+  %= include 'partials/tags-box'
 % }
 
 <p><small>Showing <b><%= scalar items_in 'dists' %></b>
