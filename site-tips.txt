@@ -13,3 +13,4 @@ Go directly to a module's repository using <kbd>/repo/</kbd>: <a href="https://m
 View total count of modules in the database without parsing HTML at <a href="https://modules.perl6.org/total">https://modules.perl6.org/total</a>
 View a todo list for modules with plenty of LHF at <a href="https://modules.perl6.org/todo">https://modules.perl6.org/todo</a>
 View a todo list for a specific module author (like you!) at, e.g: <a href="https://modules.perl6.org/todo/perl6-community-modules">https://modules.perl6.org/todo/perl6-community-modules</a>
+Feelin' lucky? Use <kbd>/l/</kbd> end point to follow first search result, e.g.https://modules.perl6.org/l/debugger
