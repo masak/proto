@@ -3,8 +3,11 @@ $color-panel-primary-bg: $color-link;
 $text-color-muted: #aaa;
 $line-color-muted: #eee;
 
-nav.navbar div.container a:hover {
-    background: $line-color-muted;
+nav.navbar {
+    margin-bottom: 0;
+    div.container a:hover {
+        background: $line-color-muted;
+    }
 }
 
 .page_index {
@@ -144,4 +147,10 @@ footer:hover {
             color: red;
         }
     }
+}
+
+#donation-bar {
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
 }

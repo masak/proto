@@ -46,6 +46,8 @@
     </div>
   </nav>
 
+  <p id="donation-bar">Help language development. <a href="https://donate.perlfoundation.org/">Donate to The Perl Foundation</a></p>
+
   <div class="container">
     <%= content %>
     <footer>
