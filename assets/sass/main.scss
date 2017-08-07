@@ -21,6 +21,10 @@ nav.navbar {
 }
 
 .page_index {
+    h1 {
+        text-shadow: 1px 1px 1px rgba(.3, .3, .3, .2);
+    }
+
     .navbar {
         .navbar-nav {
             display: inline-block;
@@ -219,6 +223,11 @@ footer:hover {
     text-align: center;
     padding: 10px 0;
     margin: 0;
+    text-shadow: 1px 1px 1px rgba(.3, .3, .3, .16);
+
+    a {
+        text-shadow: 1px 1px 1px rgba(.3, .3, .3, .1);
+    }
 }
 
 .problem-severity-1 {
