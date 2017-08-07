@@ -9,8 +9,14 @@ html {
 
 nav.navbar {
     margin-bottom: 0;
-    div.container a:hover {
-        background: $line-color-muted;
+
+    div.container {
+        a {
+            color: #333;
+        }
+        a:hover {
+            background: $line-color-muted;
+        }
     }
 }
 
