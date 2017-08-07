@@ -13,10 +13,6 @@
         </tr>
       </thead>
       <tbody>
-        % my $severity_class = sub {
-        %     my $s = shift->{severity};
-        %     $s <= 1 ? 'success' : $s <= 3 ? 'warning' : 'danger'
-        % };
         % my $severity_icon = sub {
         %     my $s = shift->{severity};
         %       $s <= 1 ? 'glyphicon glyphicon-thumbs-down'
