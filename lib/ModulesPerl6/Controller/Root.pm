@@ -21,6 +21,9 @@ sub _parse_search_options {
     $q =~ s/ \s*\b author: (?: (['"]?)(.+)\1) \s*//xig
         and $opts{author} = +{ type => $1||"'", q => CORE::fc $2 };
 
+    $q =~ s/ \s*\b from: (.+) \s*//xig
+        and $opts{dist_source} = $1;
+
     return (\%opts, $q);
 }
 
@@ -43,6 +46,9 @@ sub search {
 
         @dists = grep CORE::fc($_->{author_id}) eq $opts->{author}{q}, @dists
             if $opts->{author} and $opts->{author}{type} eq '"';
+
+        @dists = grep lc($_->{dist_source}) eq $opts->{dist_source}, @dists,
+            if $opts->{dist_source};
     }
     else {
         @dists = $self->dists->find->each;
