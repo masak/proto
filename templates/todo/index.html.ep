@@ -1,10 +1,6 @@
 % layout 'default';
 
-<header class="panel panel-primary lead">
-  <div class="panel-heading">
-      <h1 class="panel-title">Perl&nbsp;6 Module Todo</h1>
-  </div>
-</header>
+<h2><%= lang_name %> Module Todo</h2>
 
 <div class="panel panel-default">
   <div class="table-responsive">
