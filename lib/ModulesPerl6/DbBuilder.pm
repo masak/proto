@@ -152,7 +152,10 @@ sub _metas {
         log info => "Limiting build to $limit dists due to explicit request";
     }
 
-    return @metas;
+    # We reverse the list, since users tend to add their modules to the
+    # bottom of the list, by reversing it, we can load new modules to the site
+    # at the start of the run, instead of at the end.
+    return reverse @metas;
 }
 
 sub _remove_old_dists {
