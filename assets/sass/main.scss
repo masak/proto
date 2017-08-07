@@ -80,6 +80,19 @@ nav.navbar {
     }
 }
 
+@media (max-width: 768px) {
+    #index-search-form {
+        padding-top: 0;
+
+        form {
+            min-width: 190px;
+            display: block;
+            padding: 146px 10px 0;
+            background-position: top;
+        }
+    }
+}
+
 
 .page_index .tags-list {
     margin: 20px;

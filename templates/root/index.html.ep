@@ -7,11 +7,11 @@
       <%= text_field q => class => 'form-control', autofocus => undef,
         placeholder => 'Type a module name or search term' %>
     </div>
-    <div class="row form-group">
-      <div class="col-sm-6">
+    <div class="row">
+      <div class="col-sm-6 form-group">
         %= submit_button Search => class => 'btn btn-primary btn-block'
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-6 form-group">
         <%= submit_button "I'm feeling lucky" => name => 'lucky',
           class => 'btn btn-default btn-block' %>
       </div>
