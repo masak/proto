@@ -34,8 +34,10 @@ sub _fetch_content_for_first_readme {
     or return;
 
     my $content = eval {
-        Mojo::UserAgent->new( max_redirects => 5 )
-            ->get( $readme->{url} )->result->json
+        my $j = Mojo::UserAgent->new( max_redirects => 5 )
+            ->get( $readme->{url} )->result->json;
+        defined $j->{content} or die $j->{message};
+        $j;
     };
     if ($@) {
         log error => "ERROR fetching README content: $@";
