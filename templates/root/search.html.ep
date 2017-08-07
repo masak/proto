@@ -84,7 +84,9 @@
           <a href="<%= $dist->{url} %>"
             class="source-<%= $dist->{dist_source} %>"
               ><%= $dist->{dist_source} %> / </a>
-            <%= $dist->{author_id} %></li>
+          <a href="<%= url_for('search')->query(
+              q => 'author:"' . $dist->{author_id} . '"'
+            ) %>"><%= $dist->{author_id} %></a></li>
       </ul>
 
       % if (items_in $dist->{tags}) {

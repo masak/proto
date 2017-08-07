@@ -178,7 +178,9 @@ sub _get_author {
     my ( $self, $dist ) = @_;
     my $author = $dist->{author} // $dist->{authors} // 'N/A';
     $author = $author->[0] if ref $author eq 'ARRAY';
-    return $author;
+
+    # Remove double quotes; we use them in places; e.g. for exact author search
+    return $author =~ tr/"/'/r;
 }
 
 sub load { ... }
