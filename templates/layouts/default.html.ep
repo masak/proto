@@ -26,7 +26,7 @@
 
       <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
         <ul class="nav navbar-nav">
-          <li><a class="navbar-brand" href="<%= url_for 'home' %>"
+          <li><a href="<%= url_for 'home' %>"
             ><i class="glyphicon glyphicon-home"></i></a></li>
           <li><a href="https://github.com/ugexe/zef/">
             <i class="glyphicon glyphicon-compressed"></i>
