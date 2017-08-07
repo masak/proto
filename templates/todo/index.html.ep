@@ -15,9 +15,9 @@
       <tbody>
         % my $severity_icon = sub {
         %     my $s = shift->{severity};
-        %       $s <= 1 ? 'glyphicon glyphicon-thumbs-down'
-        %     : $s <= 3 ? 'glyphicon glyphicon-warning-sign'
-        %               : 'glyphicon glyphicon-fire'
+        %       $s <= 1 ? 'glyphicon glyphicon-thumbs-down text-info'
+        %     : $s <= 3 ? 'glyphicon glyphicon-warning-sign text-warning'
+        %               : 'glyphicon glyphicon-fire text-danger'
         % };
         % for my $dist (items_in 'dists') {
         %   my @problems = items_in $dist->{problems};
