@@ -2,6 +2,7 @@ $color-link: #2FA4E7;
 $color-panel-primary-bg: $color-link;
 $text-color-muted: #aaa;
 $line-color-muted: #eee;
+$text-color-body: #333;
 
 html {
     overflow-y: scroll;
@@ -12,7 +13,7 @@ nav.navbar {
 
     div.container {
         a {
-            color: #333;
+            color: $text-color-body;
         }
         a:hover {
             background: $line-color-muted;
@@ -173,7 +174,8 @@ footer:hover {
             list-style: none;
             display: inline-block;
         }
-        li:last-child {
+        li:last-child a:last-child {
+            color: $text-color-body;
         }
         li:first-child {
             width: 3.5em;
