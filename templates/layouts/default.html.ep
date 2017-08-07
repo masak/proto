@@ -37,7 +37,7 @@
             ><a href="https://docs.perl6.org">
             <i class="glyphicon glyphicon-book"></i>
               Language docs</a></li>
-          <li class="hidden-sm"
+          <li class="hidden-md hidden-sm"
             ><a href="http://finanalyst.github.io/ModuleCitation/">
               <i class="glyphicon glyphicon-heart"></i> Citations</a></li>
           <li><a href="http://doc.perl6.org/language/modules">
@@ -46,6 +46,8 @@
             <i class="glyphicon glyphicon-star"></i> Most wanted</a></li>
           <li><a href="https://webchat.freenode.net/?channels=#perl6">
             <i class="glyphicon glyphicon-user"></i> Chat with us</a></li>
+          <li><a href="<%= url_for 'help' %>"
+            ><i class="glyphicon glyphicon-question-sign"></i></a></li>
         </ul>
       </div>
     </div>

@@ -89,9 +89,10 @@ sub startup {
     $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
     $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
     $r->get('/total'     )->to('root#total')->name('total');
+    $r->get('/help'      )->to('root#help' )->name('help');
 
-    $r->get('/todo'        )->to('todo#index');
-    $r->get('/todo/:author')->to('todo#author')->name('author');
+    $r->get('/todo'        )->to('todo#index' )->name('todo');
+    $r->get('/todo/:author')->to('todo#author')->name('todo_auth');
 }
 
 1;

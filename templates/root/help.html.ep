@@ -1,0 +1,97 @@
+% layout 'default';
+% title 'Help';
+
+<h2>Site Help</h2>
+<p class="lead">This page will tell you about all the useful features of
+  the site.</p>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Search features</h3>
+  </div>
+  <div class="panel-body">
+    <h4><kbd>from:github</kbd></h4>
+    <p>Limit search results to a particular dist
+      source. Valid values are <code>github</code> and <code>gitlab</code>,
+      with <code>cpan</code> planned to be available in the future.</p>
+    <p>Example: <code><a
+      href="<%= url_for('search')->query('q' => 'Test from:github') %>"
+      >WWW from:github</a></code> or <code><a
+      href="<%= url_for('search')->query('q' => 'from:gitlab') %>"
+      >from:gitlab</a></code></p>
+
+    <hr>
+
+    <h4><kbd>author:camelia</kbd></h4>
+    <p>Limit search results to a particular author. To include spaces, use
+      single quotes. The feature searches by partial case-insensitive match.
+      Use double quotes for exact case-insensitive match. The author name used
+      is the first name used in a distribution's META file <code>authors</code>
+      field.</p>
+
+    <p>Example: <a
+        href="<%= url_for('search')->query('q' => 'Test author:zoffix') %>"
+        >Test author:zoffix</a> or <a
+        href="<%= url_for('search')->query('q' => "author:'Zoffix Z'") %>"
+        >author:'Zoffix Z'</a> or <a
+        href="<%= url_for('search')->query('q' => 'author:"Zoffix Znet"') %>"
+        >author:"Zoffix Znet"</a></p>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Distributions problems</h3>
+  </div>
+  <div class="panel-body">
+    <p>You can view problems identified in your distributions, or view
+      them for other's modules and help the authors fix them.</p>
+
+    <h4><kbd>/todo/</kbd></h4>
+    <p>Visit the <a href="<%= url_for 'todo' %>">/todo/</a> end point to view
+      the problems for all the modules on the site.</p>
+
+    <hr>
+
+    <h4><kbd>/todo/<i>author</i></kbd></h4>
+    <p>Visit the <a href="<%= url_for todo_auth => author => 'zoffix' %>"
+      >/todo/<i>some-author</i></a> end point to view the probems for
+      modules of a particular author. The author name checked against
+      is the first name used in a distribution's META file <code>authors</code>
+      field and the match can be partial.</p>
+
+    <p>Example: <a href="<%= url_for todo_auth => author => 'zoffix' %>"
+      >/todo/zoffix</a></p>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Continuous Integration Testing</h3>
+  </div>
+  <div class="panel-body">
+    <h4>Travis</h4>
+    <p>To make the site show <a href="https://travis-ci.org/">Travis</a>
+      status for your module, follow
+      <a href="https://docs.travis-ci.com/user/languages/perl6">the
+        Travis setup guide</a> to enable Travis on your module. Be sure to
+      both, include the <code>.travis.yml</code> file and enable the
+      repository on your
+      <kbd>https://travis-ci.org/profile/$YOUR-USERNAME/</kbd> page.
+      If your repo is missing on that page, just click <i>Sync
+      account</i> button on the top right of the page.</p>
+
+    <hr>
+
+    <h4>AppVeyor</h4>
+    <p>To make the site show <a href="https://www.appveyor.com/">AppVeyor</a>
+      status for your module, follow
+      <a href="https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/">the
+        AppVeyor guide</a> to enable AppVeyor on your module. If your
+        AppVeyor username and repository names do not match those of GitHub,
+        you'll need to include the
+        <a href="https://www.appveyor.com/docs/status-badges/">AppVeyor
+          badge</a> in your README file, so
+        that the site can find the URL to the project.</p>
+  </div>
+</div>
