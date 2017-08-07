@@ -31,7 +31,7 @@ sub _fetch_content_for_first_readme {
     my $self = shift;
     my $dist = $self->_dist;
 
-    my ($readme) = grep $_->{name} =~ /^README/,
+    my ($readme) = grep $_->{name} =~ /^README/i,
         ($dist->{_builder}{files} || [])->@*
     or return;
 

@@ -98,7 +98,7 @@ sub _project_url_from_readme {
     my $self = shift;
     my $dist = $self->_dist;
 
-    my ($readme) = grep $_->{name} =~ /^README/,
+    my ($readme) = grep $_->{name} =~ /^README/i,
         ($dist->{_builder}{files} || [])->@*;
 
     if (not $readme or $readme->{error}) {

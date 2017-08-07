@@ -75,7 +75,7 @@ sub _check_todo_problem_author {
 sub _check_todo_problem_readme {
     my ($self, $dist, $files) = @_;
 
-    my ($readme) = grep $_->{name} =~ /^README/, @$files
+    my ($readme) = grep $_->{name} =~ /^README/i, @$files
         or return problem 'Missing README file', 1;
 
     # If we failed to fetch the README content, return any cached README
