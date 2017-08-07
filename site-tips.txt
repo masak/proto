@@ -15,3 +15,5 @@ View a todo list for modules with plenty of LHF at <a href="https://modules.perl
 View a todo list for a specific module author (like you!) at, e.g: <a href="https://modules.perl6.org/todo/perl6-community-modules">https://modules.perl6.org/todo/perl6-community-modules</a>
 Feelin' lucky? Use <kbd>/l/</kbd> end point to follow first search result, e.g. <a href="https://modules.perl6.org/l/debugger">https://modules.perl6.org/l/debugger</a>
 Use <kbd>author:'some name'</kbd> to limit your search to a particular author, e.g. <a href="https://modules.perl6.org/s/WWW%20author:zoffix">WWW author:zoffix</a>. Use double quotes for exact case-insensitive match.
+Use <kbd>from:<i>source</i></kbd> to limit your search to a particular dist source, e.g. <a href="https://modules.perl6.org/s/from:gitlab">from:gitlab</a> or <a href="https://modules.perl6.org/s/Test%20from:github">Test from:github</a>
+This site has a <a href="/help">help page</a>. Check it out to learn all the awesome features!
