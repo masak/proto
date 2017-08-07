@@ -2,27 +2,30 @@ package ModulesPerl6::Controller::Todo;
 
 use Mojo::Base 'Mojolicious::Controller';
 
-use Mojo::URL;
-use POSIX qw/strftime/;
+use List::UtilsBy qw/sort_by  nsort_by/;
+use List::Util qw/sum/;
 use experimental 'postderef';
 
 sub index {
     my $self = shift;
 
-    my $dists = $self->dists->find;
-    @$dists = grep { @{$_->{problems}} } @$dists; # XXX Do it on the DB level?
-
-    $self->respond_to(
-        html => { dists => $dists, template => 'todo/index' },
-        json => { json => { dists => $dists } },
-    );
-}
-
-sub author {
-    my $self = shift;
-    my $author = $self->stash('author');
-    my $dists = $self->dists->find({ author_id => { -like => "%$author%" } });
-    @$dists = grep { @{$_->{problems}} } @$dists; # XXX Do it on the DB level?
+    my $auth = $self->stash('author');;
+    my $dists = $self->dists->find
+        ->grep(sub {
+            scalar $_->{problems}->@*
+            and (not length $auth or $_->{author_id} =~ /\Q$auth\E/i)
+        })
+        ->each(sub {
+            $_->{author_id} =~ s/\s*<[^>]+>|\S+\@\S+//; # toss email addresses
+            $_->{problems}->@*
+            =   nsort_by { -$_->{severity} }
+                 sort_by {  $_->{problem}  }
+                    $_->{problems}->@*
+        })
+        ->sort(sub {
+                sum(map $_->{severity}, $b->{problems}->@*)
+            <=> sum(map $_->{severity}, $a->{problems}->@*)
+        });
 
     $self->respond_to(
         html => { dists => $dists, template => 'todo/index' },

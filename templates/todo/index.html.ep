@@ -4,19 +4,38 @@
 
 <div class="panel panel-default">
   <div class="table-responsive">
-    <table class="table table-condensed table-striped panel-body" id="dists">
+    <table class="table table-condensed" id="todo-issues">
       <thead>
         <tr>
-          <th class="name">Name</th>
-          <th class="problems">Problems</th>
+          <th>Problems</th>
+          <th>Dist Name</th>
+          <th>Author</th>
         </tr>
       </thead>
       <tbody>
-        % for my $dist ( items_in 'dists' ) {
-        % next unless $dist->{problems};
-          <tr>
-            <td class="name">
-              <a href="<%= $dist->{url} %>" class="github"></a>
+        % my $severity_class = sub {
+        %     my $s = shift->{severity};
+        %     $s <= 1 ? 'success' : $s <= 3 ? 'warning' : 'danger'
+        % };
+        % my $severity_icon = sub {
+        %     my $s = shift->{severity};
+        %       $s <= 1 ? 'glyphicon glyphicon-thumbs-down'
+        %     : $s <= 3 ? 'glyphicon glyphicon-warning-sign'
+        %               : 'glyphicon glyphicon-fire'
+        % };
+        % for my $dist (items_in 'dists') {
+        %   my @problems = items_in $dist->{problems};
+          <tr class="dist">
+            % my $first_problem = shift @problems;
+            <td class="problem ">
+              <i class="<%= $severity_icon->($first_problem) %>"></i>
+              <%= $first_problem->{problem} %>
+            </td>
+
+            <td rowspan="<%= scalar items_in $dist->{problems} %>">
+              <a href="<%= $dist->{url} %>"
+                  class="source-<%= $dist->{dist_source} %>"
+                ><%= $dist->{dist_source} %></a>
               <a href="<%= url_for('dist', dist => $dist->{name} ) %>"
                 ><%= $dist->{name} %>
                 % if ( length $dist->{logo} ) {
@@ -24,15 +43,22 @@
                 % }
               </a>
             </td>
-            <td class="desc">
-                <ul>
-                    % for my $p (sort { $b->{severity} <=> $a->{severity} } @{$dist->{problems}}) {
-                        <li>
-                        <span class="problem-severity-<%= $p->{severity} %>"><%= $p->{problem} %></span>
-                    % }
-                </ul>
+
+            <td rowspan="<%= scalar items_in $dist->{problems} %>">
+              % if (length $dist->{author_id}) {
+                <a href="<%= url_for todo => author => $dist->{author_id} %>"
+                  ><%= $dist->{author_id} %></a>
+              % }
             </td>
           </tr>
+          % for (@problems) {
+            <tr>
+              <td class="problem other-problem">
+                <i class="<%= $severity_icon->($_) %>"></i>
+                <%= $_->{problem} %>
+              </td>
+            </tr>
+          % }
         % }
       </tbody>
     </table>

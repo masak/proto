@@ -54,13 +54,13 @@
     <hr>
 
     <h4><kbd>/todo/<i>author</i></kbd></h4>
-    <p>Visit the <a href="<%= url_for todo_auth => author => 'zoffix' %>"
+    <p>Visit the <a href="<%= url_for todo => author => 'zoffix' %>"
       >/todo/<i>some-author</i></a> end point to view the probems for
       modules of a particular author. The author name checked against
       is the first name used in a distribution's META file <code>authors</code>
       field and the match can be partial.</p>
 
-    <p>Example: <a href="<%= url_for todo_auth => author => 'zoffix' %>"
+    <p>Example: <a href="<%= url_for todo => author => 'zoffix' %>"
       >/todo/zoffix</a></p>
   </div>
 </div>

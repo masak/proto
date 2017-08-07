@@ -30,7 +30,7 @@ sub _check_todo_problems {
     my @problems;
     if (my @files = ($dist->{_builder}{files} || [])->@*) {
         push @problems, $self->_check_todo_problem_readme($dist, \@files);
-        push @problems, problem 'dist has no MANIFEST file', 3
+        push @problems, problem 'Missing MANIFEST file', 3
             if $dist->{dist_source} eq 'cpan'
                 and not grep $_ eq 'MANIFEST', @files;
     }
@@ -44,19 +44,19 @@ sub _check_todo_problems {
 
     push @problems, $self->_check_todo_problem_author($dist);
 
-    length $dist->{ $_ }
-        or push @problems, problem "required `$_` field is missing", 5
+    length $dist->{ $_ } or push @problems,
+        problem qq|Missing required "$_" field in META file|, 5
     for qw/perl  name  version  description  provides/;
 
-    push @problems, problem 'dist does not have any tags', 1
+    push @problems, problem 'META file does not have a "tags" field', 1
         unless $dist->{tags}->@*;
 
     if ($dist->{version}) {
-        push @problems, problem "dist has `*` version (it's invalid)", 5
+        push @problems, problem 'Invalid version "*" in META file', 5
             if $dist->{version} eq '*';
     }
     else {
-        push @problems, problem 'dist does not have a version set', 5;
+        push @problems, problem 'No version in META file', 5;
     }
 
     $dist->{problems} = [uniq_by { $_->{problem} } @problems];
@@ -69,14 +69,14 @@ sub _check_todo_problem_author {
     $author = $author->[0] if ref $author eq 'ARRAY';
 
     return if length $author;
-    problem "dist has no author(s) specified", 3
+    problem "No author listed in META file", 3
 }
 
 sub _check_todo_problem_readme {
     my ($self, $dist, $files) = @_;
 
     my ($readme) = grep $_->{name} =~ /^README/, @$files
-        or return problem 'dist has no README', 1;
+        or return problem 'Missing README file', 1;
 
     # If we failed to fetch the README content, return any cached README
     # problems, as otherwise we'd be flopping on reporting these README issues,
@@ -85,7 +85,7 @@ sub _check_todo_problem_readme {
         if $readme->{error};
 
     return unless $readme->{content} =~ /\b(panda|ufo)\b/;
-    problem 'dist mentions discouraged tools (panda or ufo) in the README', 2
+    problem 'README mentions discouraged tools (panda or ufo)', 2
 }
 
 sub _check_meta_url {

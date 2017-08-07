@@ -91,8 +91,7 @@ sub startup {
     $r->get('/total'     )->to('root#total')->name('total');
     $r->get('/help'      )->to('root#help' )->name('help');
 
-    $r->get('/todo'        )->to('todo#index' )->name('todo');
-    $r->get('/todo/:author')->to('todo#author')->name('todo_auth');
+    $r->get('/todo/:author')->to('todo#index', { author => '' })->name('todo');
 }
 
 1;

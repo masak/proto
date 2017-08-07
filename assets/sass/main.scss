@@ -191,20 +191,6 @@ footer:hover {
 
         }
 
-        .source-gitlab,
-        .source-github {
-            vertical-align: middle;
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            background: url(/pics/github-icon.png);
-            text-indent: -9999px;
-            overflow: hidden;
-        }
-        .source-gitlab {
-            background: url(/pics/gitlab-icon.png);
-        }
-
         .glyphicon-ok {
             color: green;
         }
@@ -219,6 +205,20 @@ footer:hover {
     }
 }
 
+.source-gitlab,
+.source-github {
+    vertical-align: middle;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url(/pics/github-icon.png);
+    text-indent: -9999px;
+    overflow: hidden;
+}
+.source-gitlab {
+    background: url(/pics/gitlab-icon.png);
+}
+
 #donation-bar {
     text-align: center;
     padding: 10px 0;
@@ -230,15 +230,19 @@ footer:hover {
     }
 }
 
-.problem-severity-1 {
-    color: #00f;
-}
+#todo-issues {
+    th {
+        border-bottom: 0;
+    }
+    td {
+        vertical-align: middle;
+    }
 
-.problem-severity-3 {
-    color: #dd8300;
-}
+    .problem {
+        font-size: 90%;
+    }
 
-.problem-severity-5 {
-    color: #f00;
-    font-weight: bold;
+    .other-problem {
+        border-top: 0;
+    }
 }
