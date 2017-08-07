@@ -47,7 +47,7 @@
           <li title="Number of open Issues"
             ><i class="glyphicon glyphicon-info-sign"></i> N/A</li>
         % }
-        <li title="Travis status">
+        <li title="Travis status: <%= $dist->{travis_status} %>">
           <a class="travis" href="<%= $dist->{travis_status} eq 'not set up'
             ? 'https://docs.travis-ci.com/user/languages/perl6'
             : $dist->{travis_url} %>"
@@ -61,7 +61,7 @@
             % }
           </a>
         </li>
-        <li title="AppVeyor status">
+        <li title="AppVeyor status: <%= $dist->{appveyor_status} %>">
           <a class="appveyor" href="<%=
             $dist->{appveyor_status} eq 'not set up'
             ? 'https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/'
