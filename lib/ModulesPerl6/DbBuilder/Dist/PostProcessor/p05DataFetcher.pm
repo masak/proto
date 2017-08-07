@@ -4,9 +4,11 @@ use strictures 2;
 use base 'ModulesPerl6::DbBuilder::Dist::PostProcessor';
 
 use Mojo::UserAgent;
-use Mojo::Util qw/b64_decode/;
+use Mojo::File qw/path/;
+use Mojo::Util qw/b64_decode  trim/;
 use ModulesPerl6::DbBuilder::Log;
 use experimental 'postderef';
+use feature 'state';
 
 ############################################################################
 ############################################################################
@@ -33,11 +35,14 @@ sub _fetch_content_for_first_readme {
         ($dist->{_builder}{files} || [])->@*
     or return;
 
+    state $token = trim path($ENV{MODULES_PERL6_GITHUB_TOKEN_FILE})->slurp;
     my $content = eval {
-        my $j = Mojo::UserAgent->new( max_redirects => 5 )
-            ->get( $readme->{url} )->result->json;
-        defined $j->{content} or die $j->{message};
-        $j;
+        my $res_json = Mojo::UserAgent->new( max_redirects => 5 )
+            ->get( $readme->{url} => {
+                Authorization => "token $token"
+            })->result->json;
+        defined $res_json->{content} or die $res_json->{message};
+        $res_json;
     };
     if ($@) {
         log error => "ERROR fetching README content: $@";
