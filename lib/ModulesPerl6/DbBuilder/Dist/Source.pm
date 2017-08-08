@@ -105,12 +105,9 @@ sub _parse_meta {
 sub _fill_missing {
     my ( $self, $dist ) = @_;
 
-    my $old_dist_data;
-    if ( length $dist->{name} ) {
-        $old_dist_data
-        = $self->_dist_db->find({ name => $dist->{name} })->first;
-        $old_dist_data and delete $old_dist_data->{logo};
-    }
+    my $old_dist_data
+    = $self->_dist_db->find({ meta_url => $self->_meta_url })->first;
+    delete $old_dist_data->{logo};
 
     delete @$dist{qw/author_id  stars  issues  date_updated  date_added/};
     %$dist = (

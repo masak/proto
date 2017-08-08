@@ -37,7 +37,7 @@ sub _find {
             ? ( $_ => { -like => "%${ $what->{$_} }%" } )
             : $what->{$_}
                 ? ( $_ => $what->{$_} ) : ()
-    } qw/name  url  author_id  travis_status appveyor_status
+    } qw/name  meta_url  url  author_id  travis_status appveyor_status
         dist_source description/;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
