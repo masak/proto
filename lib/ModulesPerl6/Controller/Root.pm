@@ -2,6 +2,7 @@ package ModulesPerl6::Controller::Root;
 
 use Mojo::Base 'Mojolicious::Controller';
 
+use Mojo::Collection qw/c/;
 use Mojo::URL;
 use ModulesPerl6::Model::CoreModules;
 use List::UtilsBy qw/nsort_by  uniq_by/;
@@ -33,7 +34,7 @@ sub search {
     return $self->lucky if $self->param('lucky');
 
     my @dists;
-    my $core_dists;
+    my $core_dists = c;
     if (length (my $q = $self->param('q'))) {
         (my $opts, $q) = $self->_parse_search_options($q);
 
@@ -52,7 +53,8 @@ sub search {
         @dists = grep lc($_->{dist_source}) eq $opts->{dist_source}, @dists,
             if $opts->{dist_source};
 
-        $core_dists = ModulesPerl6::Model::CoreModules->new->find($q);
+        $core_dists = ModulesPerl6::Model::CoreModules->new->find($q)
+            unless $opts->{author} and $opts->{author}{q} ne 'perl6';
     }
     else {
         @dists = $self->dists->find->each;
