@@ -21,22 +21,22 @@ use constant MODULES => c
         url         => 'https://docs.perl6.org/language/pod#Text',
     };
 
-sub __clone_and_core {
-    shift->each(sub { +{%$_, is_core => 1} })
+sub __clone {
+    shift->each(sub { +{%$_} })
 }
 
-sub all { __clone_and_core MODULES }
+sub all { __clone MODULES }
 
 sub named {
     my ($self, $name) = @_;
-    __clone_and_core MODULES->grep(sub {
+    __clone MODULES->grep(sub {
         CORE::fc($_->{name}) eq CORE::fc($name)
     })
 }
 
 sub find {
     my ($self, $q) = @_;
-    __clone_and_core MODULES->grep(sub {
+    __clone MODULES->grep(sub {
         "$_->{name} $_->{description}" =~ /\Q$q\E/i
     })
 }
