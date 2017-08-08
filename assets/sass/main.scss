@@ -145,7 +145,8 @@ footer:hover {
     opacity: 1;
 }
 
-#dist-list {
+#dist-list,
+#core-dist-list {
     h2 {
         font-size: 170%;
         b {
@@ -208,6 +209,12 @@ footer:hover {
         + div {
             margin-top: 10px;
         }
+    }
+}
+
+#core-dist-list {
+    p {
+        margin-bottom: 0;
     }
 }
 

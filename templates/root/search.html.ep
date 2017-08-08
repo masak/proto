@@ -25,6 +25,22 @@
   % }
 </p>
 
+% if (items_in 'core_dists') {
+  <ul id="core-dist-list" class="shy-list">
+    % for my $dist (items_in 'core_dists') {
+      <li>
+        <h2><a href="<%= $dist->{url} %>">
+          <i class="glyphicon glyphicon-apple"></i> <%= $dist->{name} %></a>
+          <b><%= $dist->{description} %></b></h2>
+        <p class="text-muted">
+          <small><i class="glyphicon glyphicon-info-sign"></i>
+          This is a core module included with the compiler. You do not need to
+          install it.</small></p>
+      </li>
+    % }
+  </ul>
+% }
+
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>
