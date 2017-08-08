@@ -14,7 +14,7 @@
   %= include 'partials/tags-box'
 % }
 
-<p><small>Showing <b><%= scalar items_in 'dists' %></b>
+<p><small>Showing <b><%= items_in('core_dists') + items_in 'dists' %></b>
     <%=  (items_in 'dists') == 1 ? 'result' : 'results' %></small>
 
   % if ($has_tag and not $has_q) {
