@@ -77,6 +77,11 @@ sub startup {
 
     # ROUTES
     my $r = $self->routes;
+
+    $r->any(['BREW'] => '/*coffee' => sub {
+        shift->render(text => 'Short and stout', status => 418)
+    });
+
     $r->get('/')->to('root#index')->name('home');
     $r->get($_)->to('root#search')->name('search')
         for '/search', '/s/#q', '/search/#q';
