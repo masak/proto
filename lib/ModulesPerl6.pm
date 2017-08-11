@@ -78,7 +78,7 @@ sub startup {
     # ROUTES
     my $r = $self->routes;
 
-    $r->any(['BREW'] => '/*coffee' => sub {
+    $r->any(['BREW'] => '/*coffee' => { coffee => '' } => sub {
         shift->render(text => 'Short and stout', status => 418)
     });
 
