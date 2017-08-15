@@ -83,13 +83,13 @@ sub startup {
     });
 
     $r->get('/')->to('root#index')->name('home');
-    $r->get($_)->to('root#search')->name('search')
-        for '/search', '/s/#q', '/search/#q';
-    $r->get($_)->to('root#search')->name('tag') for '/t/#tag', '/tag/#tag';
+    $r->get('/search/#q')->to('root#search')->name('search');
+    $r->get('/tag/#tag' )->to('root#search')->name('tag');
+    $r->get('/lucky/#q' )->to('root#lucky' )->name('lucky');
 
-    $r->get($_)->to('root#lucky')->name('lucky') for '/l/#q', '/lucky/#q';
-
-
+    # A couple of aliases to routes
+    $r->get($_)->to('root#search') for '/search', '/s/#q', '/t/#tag';
+    $r->get('/l/#q')->to('root#lucky')->name('lucky');
 
     $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
     $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
