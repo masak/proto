@@ -112,7 +112,7 @@ sub lucky {
     unless (@dists) {
         my ($mod) = ModulesPerl6::Model::CoreModules->new->find($q)->@*;
         $mod ? return $self->redirect_to($mod->{url})
-             : return $self->reply->not_found;
+             : return $self->redirect_to(search => q => $q);
     }
 
     my $dist = (grep $_->{name} eq $q, @dists)[0]
