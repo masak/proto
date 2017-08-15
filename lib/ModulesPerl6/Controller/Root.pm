@@ -106,8 +106,8 @@ sub lucky {
         return $self->redirect_to($mod->{url})
     }
 
-    my @dists = $self->dists->find({ name        => \$q })->each,
-                $self->dists->find({ description => \$q })->each;
+    my @dists = ($self->dists->find({ name        => \$q })->each,
+                 $self->dists->find({ description => \$q })->each);
 
     unless (@dists) {
         my ($mod) = ModulesPerl6::Model::CoreModules->new->find($q)->@*;
