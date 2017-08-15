@@ -5,8 +5,15 @@
   <img src="/content-pics/camelia-logo.png" id="logo" alt="»ö«"
           class="pull-right" width=291 height=273>
   <h2 class="h1">500&mdash;Server Error</h2>
-  <p class="lead">
-    Something went terribly wrong and we were not able to generate a response.
-    Please <a href="https://perl6.org/community/irc">notify the Perl&nbsp;6 community</a> if this issue persists.
-  </p>
+
+  <div class="lead">
+    <p>Something went terribly wrong and we were not able to generate a
+      response.</p>
+    <hr>
+    <p>Think there is a problem?
+      <a href="https://github.com/perl6/modules.perl6.org/issues/new">Report the Issue on GitHub</a>.
+      <small>If don't have a GitHub account, please mention the problem
+        <a href="https://webchat.freenode.net/?channels=#perl6-dev">on our
+        chat channel</a>.</small></p>
+  </div>
 </div>
