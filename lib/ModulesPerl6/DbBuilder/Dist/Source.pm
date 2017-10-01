@@ -177,7 +177,7 @@ sub _get_author {
     $author = $author->[0] if ref $author eq 'ARRAY';
 
     # Remove double quotes; we use them in places; e.g. for exact author search
-    return $author =~ tr/"/'/r;
+    return (($author//'') =~ tr/"/'/r) || 'N/A';
 }
 
 sub load { ... }
