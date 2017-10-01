@@ -19,8 +19,6 @@ use constant APP               => 'bin/ModulesPerl6.pl';
 use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
-use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
-                                    . '/perl6/ecosystem/master/META.list';
 
 exit_if_another_run_is_active();
 
