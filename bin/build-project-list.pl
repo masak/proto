@@ -19,6 +19,8 @@ use constant APP               => 'bin/ModulesPerl6.pl';
 use constant LOGOS_DIR         => catdir  qw/public  content-pics  dist-logos/;
 use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
                                     . '/perl6/ecosystem/master/META.list';
+use constant META_LIST_FILE    => 'https://raw.githubusercontent.com'
+                                    . '/perl6/ecosystem/master/META.list';
 
 exit_if_another_run_is_active();
 
@@ -38,6 +40,8 @@ GetOptions(
     'limit=i'             => \my $limit,
     'logos-dir=s'         => \$logos_dir,
     'restart-app'         => \my $restart_app,
+    'no-p6c|?'            => \my $no_p6c,
+    'no-cpan|?'           => \my $no_cpan,
 ) or pod2usage 2;
 
 pod2usage 1 if $help;
@@ -52,6 +56,8 @@ ModulesPerl6::DbBuilder->new(
     logos_dir   => $logos_dir,
     meta_list   => $meta_list,
     restart_app => $restart_app,
+    no_p6c      => $no_p6c,
+    no_cpan     => $no_cpan,
 )->run;
 
 

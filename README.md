@@ -107,3 +107,5 @@ Copyright (C) 2014 Jan Henning Thorsen
 * The Camelia image is copyright 2009 by Larry Wall. Permission to use is granted under the [Artistic License 2.0](License), or any subsequent version
 of the Artistic License.
 * GitHub Octocat logo is an exclusive trademark registered in the United States by GitHub, Inc and is used with permission. See [https://github.com/logos](https://github.com/logos) for details
+* A portion of CPAN Perl 6 dist meta fetcher code was reused. Original
+    by Nick Logan, from [github.com/ugexe/Perl6-App--ecogen](https://github.com/ugexe/Perl6-App--ecogen)

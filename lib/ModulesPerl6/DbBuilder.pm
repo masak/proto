@@ -1,13 +1,16 @@
 package ModulesPerl6::DbBuilder;
 
 use Data::GUID;
+use File::Basename        qw/fileparse/;
 use File::Glob            qw/bsd_glob/;
 use File::Path            qw/make_path  remove_tree/;
+use File::Find            qw/find/;
 use File::Spec::Functions qw/catfile/;
 use Mojo::File            qw/path/;
 use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util            qw/trim/;
+use Sort::Versions        qw/versioncmp/;
 use Try::Tiny;
 
 use ModulesPerl6::DbBuilder::Log;
@@ -17,10 +20,15 @@ use ModulesPerl6::Model::Dists;
 use Mew;
 use experimental 'postderef';
 
+use constant CPAN_RSYNC_URL => 'cpan-rsync.perl.org::CPAN/authors/id';
+use constant LOCAL_CPAN_DIR => 'dists-from-CPAN';
+
 has [qw/_app  _db_file  _logos_dir/] => Str;
 has -_interval    => PositiveOrZeroNum;
 has -_limit       => Maybe[ PositiveNum ];
 has -_restart_app => Maybe[ Bool ];
+has -_no_p6c      => Maybe[ Bool ];
+has -_no_cpan     => Maybe[ Bool ];
 has _meta_list    => Str;
 has _model_build_stats => (
     is      => 'lazy',
@@ -117,6 +125,68 @@ sub _deploy_db {
 }
 
 sub _metas {
+    my $self = shift;
+    return
+        ($self->_no_p6c  ? () : $self->_p6c_metas ),
+        ($self->_no_cpan ? () : $self->_cpan_metas);
+}
+
+sub _cpan_metas {
+    my $self = shift;
+
+    log info => 'rsyncing CPAN dists from ' .CPAN_RSYNC_URL;
+    my @command = (qw{
+        /usr/bin/rsync  --prune-empty-dirs  -av
+        --include="/id/*/*/*/Perl6/"
+        --include="/id/*/*/*/Perl6/*.meta"
+        --include="/id/*/*/*/Perl6/*.tar.gz"
+        --include="/id/*/*/*/Perl6/*.tgz"
+        --include="/id/*/*/*/Perl6/*.zip"
+        --exclude="/id/*/*/*/Perl6/*"
+        --exclude="/id/*/*/*/*"
+        --exclude="id/*/*/CHECKSUMS"
+        --exclude="id/*/CHECKSUMS"
+    }, CPAN_RSYNC_URL, LOCAL_CPAN_DIR);
+    qx/@command/;
+    log info => 'rsync done; searching for META files';
+
+
+    my @metas;
+    find sub {
+        no warnings 'substr';
+        for (grep length, substr $File::Find::name, 1+length LOCAL_CPAN_DIR) {
+            push @metas, $_ if /\.meta$/ and !m{^id/P/PS/PSIXDISTS/};
+        }
+    }, LOCAL_CPAN_DIR;
+
+    # exclude trial releases
+    @metas = grep !/
+        -(?!.*-)    # last dash in the filename
+        .*(TRIAL|_) # trial versions
+    /x, @metas;
+
+    my %metas;
+    for (@metas) { # bunch up different versions of the same dist together
+        my ($file, $dir) = fileparse $_, '.meta';
+        my ($name, $version) = $file =~ /(.+)-([^-]+)$/;
+        $metas{$name}{dir} = $dir;
+        push $metas{$name}{versions}->@*, $version;
+    }
+
+    # find which version is latest and use that to build meta URL
+    @metas = map {
+        'cpan://' . catfile $metas{$_}{dir},
+            "$_-" .
+            (reverse sort { versioncmp $a, $b } $metas{$_}{versions}->@*)[0]
+            . '.meta',
+    } sort keys %metas;
+
+    log info => 'Found ' . @metas . ' CPAN dists';
+    use Acme::Dump::And::Dumper;
+    die DnD [ @metas ];
+}
+
+sub _p6c_metas {
     my $self = shift;
     my $meta_list = $self->_meta_list;
 

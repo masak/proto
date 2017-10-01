@@ -47,6 +47,7 @@ my $build = Module::Build->new(
       'POSIX'                            => '0',
       'Pithub'                           => '0.01030',
       'Pod::Usage'                       => '1.67',
+      'Sort::Versions'                   => '1.62',
       'SQL::Translator'                  => '0.11021',
       'Test::Mojo::Role::Debug'          => '1.003004',
       'Test::Mojo::Role::ElementCounter' => '1.001006',
