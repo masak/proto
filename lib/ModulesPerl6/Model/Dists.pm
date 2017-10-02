@@ -62,7 +62,7 @@ sub add {
     for my $dist ( @data ) {
         my @tags = grep length, map trim($_//''),
             @{ delete $dist->{tags} || [] };
-        my @problems = @{delete $dist->{problems}};
+        my @problems = @{(delete $dist->{problems}) || []};
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status}   ||= 'not set up';

@@ -12,31 +12,31 @@ use constant LOCAL_CPAN_DIR => 'dists-from-CPAN';
 
 sub re {
     qr{
-        ^   cpan?://id/\S/\S\S/
-            ([^/]+) # author
-            /Perl6/
-            (\S+) # dist
+        ^   cpan?://
+            (               # file
+                id/\S/\S\S/
+                ([^/]+)     # author
+                /Perl6/
+                (\S+)       # dist
+            )
         $
     }ix;
-
-    # cpan://id/T/TA/TADZIK/Perl6/Acme-Meow-0.1.meta
 }
 
 sub load {
     my $self = shift;
-
-    log info => 'Fetching distro info and commits';
-    my $dist    = $self->_dist or return;
+    my $dist = $self->_dist or return;
+    my ($file, $author, $basename) = $self->_meta_url =~ $self->re;
+    $file = catfile LOCAL_CPAN_DIR, $file;
 
     $dist->{dist_source} = 'cpan';
+    $dist->{author_id} = $author;
 
-    $dist->{author_id} = $dist->{_builder}{repo_user}
-        if $dist->{author_id} eq 'N/A';
+    $dist->{date_updated} = (stat $file)[9]; # mtime
+    $dist->{name} ||= $basename =~ s/-[^-]+$//r;
 
-    $dist->{date_updated} = undef;
-    return if $dist->{name} eq 'N/A';
+    $dist->{_builder}{post}{no_meta_checker} = 1;
 
-    $dist->{_builder}{is_fresh} = 1;
     return $dist;
 }
 

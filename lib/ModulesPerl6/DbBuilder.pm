@@ -75,7 +75,8 @@ sub run {
             # going over GitHub's rate-limit of 5,000 requests per hour.
             # This should likely be moved/adjusted when we have more Dist
             # Sources or if we starting making more/fewer API requests per dist
-            sleep $self->_interval // 0;
+            sleep $self->_interval // 0
+                unless $dist->{meta_url} =~ m{cpan://};
         }
         catch {
             log error=> "Received fatal error while building $metas[$idx]: $_";
