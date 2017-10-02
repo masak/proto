@@ -132,6 +132,10 @@ sub remove_old {
         { "tag_dists.tag" => undef },
         { prefetch => { "tag_dists" => "tag" } },
     )->delete_all;
+    $self->_db->resultset("Problem")->search(
+        { "problem_dists.problem" => undef },
+        { prefetch => { "problem_dists" => "problem" } },
+    )->delete_all;
 
     $num_deleted;
 }
