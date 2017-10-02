@@ -3,7 +3,7 @@ package ModulesPerl6::DbBuilder::Dist::Source::CPAN;
 use base 'ModulesPerl6::DbBuilder::Dist::Source';
 
 use Archive::Any;
-use File::Spec::Functions qw/catfile/;
+use File::Spec::Functions qw/catfile  splitdir/;
 use File::Basename qw/fileparse/;
 use File::Copy qw/move/;
 use File::Glob qw/bsd_glob/;
@@ -13,6 +13,8 @@ use List::Util qw/uniq/;
 use ModulesPerl6::DbBuilder::Log;
 use Mew;
 use Mojo::File qw/path/;
+use Mojo::JSON qw/to_json/;
+use Text::FileTree;
 use experimental 'postderef';
 
 use constant LOCAL_CPAN_DIR => 'dists-from-CPAN';
@@ -22,8 +24,9 @@ sub re {
     qr{
         ^   cpan?://
             (               # file
+                id/
                 (           # dist dir portion
-                    id/[A-Z]/[A-Z]{2}/
+                    [A-Z]/[A-Z]{2}/
                     ([A-Z]+) # author
                 )
                 /Perl6/
@@ -37,18 +40,30 @@ sub load {
     my $self = shift;
     my $dist = $self->_dist or return;
     my ($file, $dist_dir, $author, $basename) = $self->_meta_url =~ $self->re;
-    $dist_dir = catfile UNPACKED_DISTS, $dist_dir, $basename =~ s/.meta$//r;
+    $dist_dir = catfile $dist_dir, $basename =~ s/.meta$//r;
     $file = catfile LOCAL_CPAN_DIR, $file;
 
     $dist->{dist_source} = 'cpan';
     $dist->{author_id} = $author;
     $dist->{date_updated} = (stat $file)[9]; # mtime
     $dist->{name} ||= $basename =~ s/-[^-]+$//r;
-    $dist->{files} = $self->_extract($file, $dist_dir);
+
+    my @files = $self->_extract($file, catfile UNPACKED_DISTS, $dist_dir);
+    $dist->{files} = to_json +{
+        files_dir => $dist_dir,
+        files     => Text::FileTree->new->parse(
+            join "\n", map { catfile grep length, splitdir $_ } @files
+        ),
+    };
 
     $dist->{_builder}{post}{no_meta_checker} = 1;
 
     return $dist;
+}
+
+sub _to_file_tree {
+    my ($self, @files) = @_;
+
 }
 
 sub _extract {
@@ -77,15 +92,22 @@ sub _extract {
 
     my $extraction_dir = tempdir;
     $archive->extract($extraction_dir);
+
+    my @files;
     if ($archive->is_impolite) {
         move $extraction_dir, $dist_dir;
+        @files = $archive->files;
     }
     else {
         move +(bsd_glob "$extraction_dir/*")[0], $dist_dir;
+        @files = map {
+            my @bits = splitdir $_;
+            shift @bits;
+            catfile @bits;
+        } $archive->files;
     }
 
-    my @files = $archive->files;
-    [uniq @files];
+    grep length, uniq @files;
 }
 
 sub _save_logo {}

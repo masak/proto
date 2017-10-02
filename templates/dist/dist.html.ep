@@ -6,9 +6,22 @@
   </small>
 </h2>
 
-<ul>
-  % for (items_in $dist->{files}){
-    <li><%= $_ %></li>
-  % }
-</ul>
+<div class="panel panel-default">
+  <div class="panel-heading"><%= $dist->{files_dir} %></div>
+  <div class="panel-body">
+    <ul class="shy-list files-list">
+    % for (items_in $dist->{files}){
+      <li>
+        <a href="#">
+          <i class="glyphicon <%=
+            $_->{is_dir} ? 'glyphicon-folder-open' : 'glyphicon glyphicon-file'
+          %>"></i>
+
+          <%= $_->{name} %>
+        </a>
+      </li>
+    % }
+    </ul>
+  </div>
+</div>
 

@@ -11,14 +11,11 @@ column         appveyor_status => { data_type => 'text', is_foreign_key => 1 };
 column         appveyor_url  => { data_type => 'text',                     };
 column         url           => { data_type => 'text'                      };
 column         description   => { data_type => 'text'                      };
+column         files         => { data_type => 'text'                      };
 column         stars         => { data_type => 'integer'                   };
 column         issues        => { data_type => 'integer'                   };
 column         date_updated  => { data_type => 'integer'                   };
 column         date_added    => { data_type => 'integer'                   };
-
-has_many files
-    => 'ModulesPerl6::Model::Dists::Schema::Result::File'
-    => 'dist';
 
 has_many tag_dists
     => 'ModulesPerl6::Model::Dists::Schema::Result::TagDist'

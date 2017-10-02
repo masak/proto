@@ -36,3 +36,4 @@ t/03-app/public/sprite.png
 /blib/
 /dists-from-CPAN
 /dists-from-CPAN-unpacked
+/test.pl

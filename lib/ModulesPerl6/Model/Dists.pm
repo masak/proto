@@ -42,11 +42,10 @@ sub _find {
         dist_source description/;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
-            prefetch => [
-                {tag_dists     => 'tag'},
-                {problem_dists => 'problem'},
-                qw/files/,
-            ],
+            prefetch => {
+                tag_dists     => 'tag',
+                problem_dists => 'problem',
+            },
             result_class => 'DBIx::Class::ResultClass::HashRefInflator'
         } : ()
     );
@@ -55,7 +54,6 @@ sub _find {
         # TODO XXX: there got to be a better way to do this?
         $_->{tags}     = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
         $_->{problems} = [ sort map $_->{problem}, @{ delete $_->{problem_dists} } ];
-        $_->{files} = [ sort map $_->{file}, @{delete $_->{files}} ],
         $_->{date_updated_human} = $_->{date_updated}
             ? strftime '%Y-%m-%d', localtime $_->{date_updated} : 'N/A';
         $_
@@ -71,7 +69,6 @@ sub add {
         my @tags = grep length, map trim($_//''),
             @{ delete $dist->{tags} || [] };
         my @problems = @{(delete $dist->{problems}) || []};
-        my @files    = @{(delete $dist->{files   }) || []};
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status}   ||= 'not set up';
@@ -80,6 +77,7 @@ sub add {
         $dist->{date_updated}    ||= 0;
         $dist->{date_added}      ||= 0;
         $dist->{dist_source}     ||= 'unknown';
+        $dist->{files}           //= '{}';
 
         my $res = $db->resultset('Dist')->update_or_create({
             distro_source => { source      => $dist->{dist_source}     },
@@ -91,7 +89,7 @@ sub add {
             dist_build_id => { id => $dist->{build_id} },
             (map +( $_ => $dist->{$_} ),
                 qw/name  meta_url  url  description  stars  issues
-                    date_updated  date_added  appveyor_url/,
+                    date_updated  date_added  appveyor_url  files/,
             ),
         });
 
@@ -99,8 +97,6 @@ sub add {
         $res->add_to_tags({ tag => $_ }) for @tags;
         $db->resultset('ProblemDist')->search({ dist => $res->id })->delete;
         $res->add_to_problems($_) for @problems;
-        $db->resultset('File')->search({ dist => $res->id })->delete;
-        $res->add_to_files({ file => $_ }) for @files;
     }
 
     $self;
