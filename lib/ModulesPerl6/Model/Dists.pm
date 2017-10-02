@@ -7,6 +7,7 @@ use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::Dists::Schema;
 use Mew;
+use POSIX qw/strftime/;
 
 has db_file => Str | InstanceOf['File::Temp'], (
     is      => 'lazy',
@@ -50,6 +51,8 @@ sub _find {
         # TODO XXX: there got to be a better way to do this?
         $_->{tags}     = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
         $_->{problems} = [ sort map $_->{problem}, @{ delete $_->{problem_dists} } ];
+        $_->{date_updated_human} = $_->{date_updated}
+            ? strftime '%Y-%m-%d', localtime $_->{date_updated} : 'N/A';
         $_
     } $res->all : $res;
 }
