@@ -16,6 +16,10 @@ column         issues        => { data_type => 'integer'                   };
 column         date_updated  => { data_type => 'integer'                   };
 column         date_added    => { data_type => 'integer'                   };
 
+has_many files
+    => 'ModulesPerl6::Model::Dists::Schema::Result::File'
+    => 'dist';
+
 has_many tag_dists
     => 'ModulesPerl6::Model::Dists::Schema::Result::TagDist'
     => 'dist';

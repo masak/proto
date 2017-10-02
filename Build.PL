@@ -11,6 +11,7 @@ my $build = Module::Build->new(
     dist_version => '0.1',
     recursive_test_files => 1,
     requires => {
+      'Archive::Any'                     => '0.0945',
       'Carp'                             => '0',
       'DBIx::Class::Candy'               => '0.005000',
       'DBIx::Class::Schema'              => '0',

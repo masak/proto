@@ -6,3 +6,9 @@
   </small>
 </h2>
 
+<ul>
+  % for (items_in $dist->{files}){
+    <li><%= $_ %></li>
+  % }
+</ul>
+
