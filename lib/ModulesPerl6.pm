@@ -74,6 +74,11 @@ sub startup {
         $what = $c->stash($what) // [] unless ref $what;
         return @$what;
     });
+    $self->helper( dist_url_for => sub {
+        my ($c, $d) = @_;
+        $c->url_for(dist =>
+            dist => "$d->{name}:$d->{dist_source}:$d->{author_id}");
+    });
 
     # ROUTES
     my $r = $self->routes;
@@ -91,8 +96,8 @@ sub startup {
     $r->get($_)->to('root#search') for '/search', '/s/#q', '/t/#tag';
     $r->get('/l/#q')->to('root#lucky')->name('lucky');
 
-    $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
-    $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
+    $r->get('/dist/:dist')->to('dist#dist')->name('dist');
+    $r->get('/repo/:dist')->to('root#repo')->name('repo');
     $r->get('/total'     )->to('root#total')->name('total');
     $r->get('/help'      )->to('root#help' )->name('help');
 
