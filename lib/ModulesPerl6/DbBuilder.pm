@@ -182,8 +182,7 @@ sub _cpan_metas {
     } sort keys %metas;
 
     log info => 'Found ' . @metas . ' CPAN dists';
-    use Acme::Dump::And::Dumper;
-    die DnD [ @metas ];
+    return @metas
 }
 
 sub _p6c_metas {

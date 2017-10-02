@@ -218,6 +218,7 @@ footer:hover {
     }
 }
 
+.source-cpan,
 .source-gitlab,
 .source-github {
     vertical-align: middle;
@@ -230,6 +231,9 @@ footer:hover {
 }
 .source-gitlab {
     background: url(/pics/gitlab-icon.png);
+}
+.source-cpan {
+    background: url(/pics/cpan-icon.png);
 }
 
 #donation-bar {
