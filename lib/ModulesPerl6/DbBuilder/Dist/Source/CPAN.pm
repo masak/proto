@@ -5,7 +5,10 @@ use base 'ModulesPerl6::DbBuilder::Dist::Source';
 use Archive::Any;
 use File::Spec::Functions qw/catfile/;
 use File::Basename qw/fileparse/;
+use File::Copy qw/move/;
+use File::Glob qw/bsd_glob/;
 use File::Path qw/make_path  remove_tree/;
+use File::Temp qw/tempdir/;
 use List::Util qw/uniq/;
 use ModulesPerl6::DbBuilder::Log;
 use Mew;
@@ -19,7 +22,7 @@ sub re {
     qr{
         ^   cpan?://
             (               # file
-                (           # dist dir
+                (           # dist dir portion
                     id/[A-Z]/[A-Z]{2}/
                     ([A-Z]+) # author
                 )
@@ -34,33 +37,18 @@ sub load {
     my $self = shift;
     my $dist = $self->_dist or return;
     my ($file, $dist_dir, $author, $basename) = $self->_meta_url =~ $self->re;
+    $dist_dir = catfile UNPACKED_DISTS, $dist_dir, $basename =~ s/.meta$//r;
     $file = catfile LOCAL_CPAN_DIR, $file;
 
     $dist->{dist_source} = 'cpan';
     $dist->{author_id} = $author;
     $dist->{date_updated} = (stat $file)[9]; # mtime
     $dist->{name} ||= $basename =~ s/-[^-]+$//r;
-    $dist->{files} = $self->_extract($file, catfile UNPACKED_DISTS, $dist_dir);
+    $dist->{files} = $self->_extract($file, $dist_dir);
 
     $dist->{_builder}{post}{no_meta_checker} = 1;
 
     return $dist;
-}
-
-sub _save_logo {}
-
-sub _download_meta {
-    my $self = shift;
-    my $path = catfile LOCAL_CPAN_DIR,
-        substr $self->_meta_url, length 'cpan://';
-
-    log info => "Loading META file from $path";
-    if (my $contents = eval { path($path)->slurp }) {
-        return $contents;
-    } else {
-        log error => "Failed to read META file: $@";
-        return;
-    }
 }
 
 sub _extract {
@@ -86,10 +74,36 @@ sub _extract {
     remove_tree $dist_dir;
     make_path   $dist_dir;
     -d $dist_dir or return [];
-    $archive->extract($dist_dir);
+
+    my $extraction_dir = tempdir;
+    $archive->extract($extraction_dir);
+    if ($archive->is_impolite) {
+        move $extraction_dir, $dist_dir;
+    }
+    else {
+        move +(bsd_glob "$extraction_dir/*")[0], $dist_dir;
+    }
+
     my @files = $archive->files;
     [uniq @files];
 }
+
+sub _save_logo {}
+
+sub _download_meta {
+    my $self = shift;
+    my $path = catfile LOCAL_CPAN_DIR,
+        substr $self->_meta_url, length 'cpan://';
+
+    log info => "Loading META file from $path";
+    if (my $contents = eval { path($path)->slurp }) {
+        return $contents;
+    } else {
+        log error => "Failed to read META file: $@";
+        return;
+    }
+}
+
 
 1;
 
