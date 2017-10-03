@@ -17,6 +17,12 @@ function setup_code_highlights() {
         });
         $el.find('.file-content').remove();
     });
+
+    $('.CodeMirror-linenumber').each(function(i, el){
+        var el_id = 'L' + $(el).text();
+        $(el).wrap('<a href="#' + el_id + '"></a>')
+            .css({cursor: 'pointer'}).attr('id', el_id);
+    });
 }
 
 function setup_tags() {
