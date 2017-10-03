@@ -36,6 +36,7 @@ sub startup {
     $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
     $self->asset->process('app.css' => qw{
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
+        /sass/codemirror.scss
         /sass/main.scss
     });
 
@@ -54,6 +55,8 @@ sub startup {
     $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-3.2.1.min.js
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+        /js/codemirror/codemirror.min.js
+        /js/codemirror/perl6-mode.js
         /js/main.js
     });
 

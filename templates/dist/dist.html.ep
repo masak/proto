@@ -6,14 +6,20 @@
   </small>
 </h2>
 
-<div class="panel panel-default">
-  <div class="panel-heading"><%=
-    length $file_prefix ? $file_prefix : $files_dir
-  %><%= '/' unless stash 'show_file' %> </div>
-  <div class="panel-body">
-    % if (stash 'show_file') {
-      <pre><%= $file_content %></pre>
-    % } else {
+% if (stash 'show_file') {
+  <div class="panel panel-default">
+    <div class="panel-heading"><%= $file_prefix %></div>
+    <div class="code-mirror" data-highlight-type="<%= $file_type %>">
+      <pre class="file-content"
+        ><%= $file_content %></pre>
+    </div>
+  </div>
+% } else {
+  <div class="panel panel-default">
+    <div class="panel-heading"><%=
+      length $file_prefix ? $file_prefix : $files_dir
+    %>/</div>
+    <div class="panel-body">
       <ul class="shy-list files-list">
       % for (items_in $dist->{files}){
         <li>
@@ -27,7 +33,6 @@
         </li>
       % }
       </ul>
-    % }
+    </div>
   </div>
-</div>
-
+% }

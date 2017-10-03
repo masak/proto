@@ -70,6 +70,8 @@ sub _fetch_dist {
 
         $self->stash(
             show_file    => 1,
+            file_type    => (($wanted_file =~ /\.(p6|pm6|pm|pl6|pl)$/)
+                ? 'perl6' : 'plain'),
             file_content => decode 'UTF-8', path($wanted_file)->slurp);
     }
     else {
