@@ -9,21 +9,25 @@
 <div class="panel panel-default">
   <div class="panel-heading"><%=
     length $file_prefix ? $file_prefix : $files_dir
-  %>/</div>
+  %><%= '/' unless stash 'show_file' %> </div>
   <div class="panel-body">
-    <ul class="shy-list files-list">
-    % for (items_in $dist->{files}){
-      <li>
-        <a href="<%= dist_url_for $dist, file => $_->{full} %>">
-          <i class="glyphicon <%=
-            $_->{is_dir} ? 'glyphicon-folder-open' : 'glyphicon glyphicon-file'
-          %>"></i>
+    % if (stash 'show_file') {
+      <pre><%= $file_content %></pre>
+    % } else {
+      <ul class="shy-list files-list">
+      % for (items_in $dist->{files}){
+        <li>
+          <a href="<%= dist_url_for $dist, file => $_->{full} %>">
+            <i class="glyphicon <%=
+              $_->{is_dir} ? 'glyphicon-folder-open' : 'glyphicon glyphicon-file'
+            %>"></i>
 
-          <%= $_->{name} %>
-        </a>
-      </li>
+            <%= $_->{name} %>
+          </a>
+        </li>
+      % }
+      </ul>
     % }
-    </ul>
   </div>
 </div>
 

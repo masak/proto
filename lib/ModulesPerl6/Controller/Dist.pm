@@ -3,6 +3,8 @@ package ModulesPerl6::Controller::Dist;
 use File::Spec::Functions qw/catfile  splitdir/;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON qw/from_json/;
+use Mojo::File qw/path/;
+use Mojo::Util qw/decode/;
 use experimental 'postderef';
 
 use constant UNPACKED_DISTS => 'dists-from-CPAN-unpacked';
@@ -65,6 +67,10 @@ sub _fetch_dist {
         # go up one level from `public`; probably should do something saner
         return $self->reply->static(catfile '..', $wanted_file)
             if $args{raw};
+
+        $self->stash(
+            show_file    => 1,
+            file_content => decode 'UTF-8', path($wanted_file)->slurp);
     }
     else {
         $dist->{files} = [
