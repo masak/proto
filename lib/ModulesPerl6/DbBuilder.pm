@@ -138,6 +138,7 @@ sub _cpan_metas {
     log info => 'rsyncing CPAN dists from ' .CPAN_RSYNC_URL;
     my @command = (qw{
         /usr/bin/rsync  --prune-empty-dirs  -av
+        --exclude="/id/P/PS/PSIXDISTS/Perl6"
         --include="/id/*/*/*/Perl6/"
         --include="/id/*/*/*/Perl6/*.meta"
         --include="/id/*/*/*/Perl6/*.tar.gz"
@@ -156,7 +157,7 @@ sub _cpan_metas {
     find sub {
         no warnings 'substr';
         for (grep length, substr $File::Find::name, 1+length LOCAL_CPAN_DIR) {
-            push @metas, $_ if /\.meta$/ and !m{^id/P/PS/PSIXDISTS/};
+            push @metas, $_ if /\.meta$/;
         }
     }, LOCAL_CPAN_DIR;
 
