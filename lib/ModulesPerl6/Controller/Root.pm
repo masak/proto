@@ -72,8 +72,9 @@ sub search {
     }
 
     my $active_tag = uc($self->param('tag') // '');
-    @dists = grep { grep $_ eq $active_tag, @{ $_->{tags} } } @dists
-        if $active_tag;
+    @dists = grep {
+        grep $_ eq $active_tag, $_->{tags}->@*
+    } @dists if $active_tag;
 
     my $tags = $self->dists->tags;
     my %data = (
@@ -84,16 +85,13 @@ sub search {
         ),
         tags  => $tags->{by_count},
         dists => \@dists,
-        core_dists => $core_dists,
+        core_dists => ($active_tag ? c() : $core_dists),
         body_class => 'page_search',
     );
 
     $self->respond_to(
         html => { %data, template => 'root/search' },
-        json => { json => {
-            dists      => \@dists,
-            core_dists => $core_dists->to_array,
-        } },
+        json => { json => { %data{qw/dists  core_dists/} } },
     );
 }
 
