@@ -7,12 +7,14 @@
 </h2>
 
 <div class="panel panel-default">
-  <div class="panel-heading"><%= $dist->{files_dir} %></div>
+  <div class="panel-heading"><%=
+    length $file_prefix ? $file_prefix : $files_dir
+  %>/</div>
   <div class="panel-body">
     <ul class="shy-list files-list">
     % for (items_in $dist->{files}){
       <li>
-        <a href="#">
+        <a href="<%= dist_url_for $dist, file => $_->{full} %>">
           <i class="glyphicon <%=
             $_->{is_dir} ? 'glyphicon-folder-open' : 'glyphicon glyphicon-file'
           %>"></i>

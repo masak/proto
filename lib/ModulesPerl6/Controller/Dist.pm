@@ -1,6 +1,6 @@
 package ModulesPerl6::Controller::Dist;
 
-use File::Spec::Functions qw/catfile/;
+use File::Spec::Functions qw/catfile  splitdir/;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON qw/from_json/;
 use experimental 'postderef';
@@ -30,21 +30,46 @@ sub dist {
     my ($files_dir, $files)
     = (from_json $dist->{files})->@{qw/files_dir  files/};
 
+    my $file_prefix = $self->stash('file');
+    if (length $file_prefix) {
+        my @pieces = splitdir $file_prefix;
+        while (@pieces) {
+            my $piece = shift @pieces;
+            return $self->reply->not_found
+                unless exists $files->{$piece};
+            $files = $files->{$piece};
+        }
+    }
+
+    unless (keys %{ $files || {} }) {
+        # we're either in an empty dir or user wants a file
+
+        my $full = catfile UNPACKED_DISTS, $files_dir,
+            (length $file_prefix ? $file_prefix : ());
+
+        # go up one level from `public`; probably should do something saner
+        $self->reply->static(catfile '..', $full) if -f $full;
+    }
+
     $dist->{files} = [
         sort {
                $b->{is_dir} <=> $a->{is_dir}
             or $a->{name}   cmp $b->{name}
         }
         map {
-            my $raw = catfile UNPACKED_DISTS, $files_dir, $_;
+            my $full = catfile +(length $file_prefix ? $file_prefix : ()), $_;
+            my $real = catfile UNPACKED_DISTS, $files_dir, $full;
             +{
-                raw    => $raw,
-                is_dir => (-d $raw ? 1 : 0),
+                full   => $full,
+                is_dir => (-d $real ? 1 : 0),
                 name   => $_,
             }
         } keys %{ $files || {} }
     ];
-    $self->stash(dist => $dist);
+    $self->stash(
+        dist => $dist,
+        files_dir => $files_dir,
+        file_prefix => $file_prefix);
 }
 
 1;
