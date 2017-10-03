@@ -9,6 +9,17 @@ use constant UNPACKED_DISTS => 'dists-from-CPAN-unpacked';
 
 sub dist {
     my $self = shift;
+    return $self->_fetch_dist;
+}
+
+sub raw {
+    my $self = shift;
+    return $self->_fetch_dist(raw => 1);
+}
+
+sub _fetch_dist {
+    my $self = shift;
+    my %args = @_;
                                   # Foo::Bar:from:author
     my ($wanted, $from, $author) = split /(?<!:):(?!:)/,
         $self->stash('dist'), 3;
@@ -41,31 +52,39 @@ sub dist {
         }
     }
 
+    my $wanted_file;
     unless (keys %{ $files || {} }) {
         # we're either in an empty dir or user wants a file
 
-        my $full = catfile UNPACKED_DISTS, $files_dir,
+        $wanted_file = catfile UNPACKED_DISTS, $files_dir,
             (length $file_prefix ? $file_prefix : ());
-
-        # go up one level from `public`; probably should do something saner
-        $self->reply->static(catfile '..', $full) if -f $full;
+        $wanted_file = undef unless -f $wanted_file;
     }
 
-    $dist->{files} = [
-        sort {
-               $b->{is_dir} <=> $a->{is_dir}
-            or $a->{name}   cmp $b->{name}
-        }
-        map {
-            my $full = catfile +(length $file_prefix ? $file_prefix : ()), $_;
-            my $real = catfile UNPACKED_DISTS, $files_dir, $full;
-            +{
-                full   => $full,
-                is_dir => (-d $real ? 1 : 0),
-                name   => $_,
+    if ($wanted_file) {
+        # go up one level from `public`; probably should do something saner
+        return $self->reply->static(catfile '..', $wanted_file)
+            if $args{raw};
+    }
+    else {
+        $dist->{files} = [
+            sort {
+                   $b->{is_dir} <=> $a->{is_dir}
+                or $a->{name}   cmp $b->{name}
             }
-        } keys %{ $files || {} }
-    ];
+            map {
+                my $full = catfile
+                    +(length $file_prefix ? $file_prefix : ()), $_;
+                my $real = catfile UNPACKED_DISTS, $files_dir, $full;
+                +{
+                    full   => $full,
+                    is_dir => (-d $real ? 1 : 0),
+                    name   => $_,
+                }
+            } keys %{ $files || {} }
+        ];
+    }
+
     $self->stash(
         dist => $dist,
         files_dir => $files_dir,

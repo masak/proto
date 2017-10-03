@@ -99,6 +99,7 @@ sub startup {
 
     $r->get('/dist/:dist/*file' => { file => '' })
         ->to('dist#dist')->name('dist');
+    $r->get('/raw/:dist/*file')->to('dist#raw')->name('raw');
     $r->get('/repo/:dist')->to('root#repo')->name('repo');
     $r->get('/total'     )->to('root#total')->name('total');
     $r->get('/help'      )->to('root#help' )->name('help');
