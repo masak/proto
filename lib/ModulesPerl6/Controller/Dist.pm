@@ -93,10 +93,16 @@ sub _fetch_dist {
         ];
     }
 
+    my @up_dir_parts = splitdir $file_prefix;
+    pop @up_dir_parts;
     $self->stash(
-        dist => $dist,
-        files_dir => $files_dir,
-        file_prefix => $file_prefix);
+        dist        => $dist,
+        files_dir   => $files_dir,
+        file_prefix => $file_prefix,
+        up_dir      => $self->dist_url_for(
+            $dist, file => catfile(@up_dir_parts) // ''
+        ),
+    );
 }
 
 1;

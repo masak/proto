@@ -6,19 +6,23 @@
   </small>
 </h2>
 
-% if (stash 'show_file') {
   <div class="panel panel-default">
-    <div class="panel-heading"><%= $file_prefix %></div>
-    <div class="code-mirror" data-highlight-type="<%= $file_type %>">
+    <div class="panel-heading">
+      % if (length $file_prefix) {
+        <a href="<%= $up_dir %>" class="btn btn-default btn-sm back-button"
+          ><i class="glyphicon glyphicon-arrow-left"></i></a>
+      % }
+% if (stash 'show_file') {
+      <%= $file_prefix %>
+    </div>
+    <div class="code-mirror" data-highlight-type="<%= stash 'file_type' %>">
       <pre class="file-content"
-        ><%= $file_content %></pre>
+        ><%= stash 'file_content' %></pre>
     </div>
   </div>
 % } else {
-  <div class="panel panel-default">
-    <div class="panel-heading"><%=
-      length $file_prefix ? $file_prefix : $files_dir
-    %>/</div>
+      <%= length $file_prefix ? $file_prefix : $files_dir %>/
+    </div>
     <div class="panel-body">
       <ul class="shy-list files-list">
       % for (items_in $dist->{files}){
