@@ -66,7 +66,7 @@ sub _fetch_dist {
     if ($wanted_file) {
         # go up one level from `public`; probably should do something saner
         return $self->reply->static(catfile '..', $wanted_file)
-            if $args{raw};
+            if $args{raw} or -B $wanted_file;
 
         $self->stash(
             show_file    => 1,
