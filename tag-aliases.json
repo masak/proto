@@ -4,6 +4,7 @@
         "filesystem": ["file"],
         "json": ["json-c"],
         "IPv4/IPv6": ["IP", "IPv4", "IPv6", "IP address"],
+        "serialization": ["serialisation"],
         "testing": ["test"],
         "utils": ["util", "utilities", "utility"],
         "users": ["user"],
