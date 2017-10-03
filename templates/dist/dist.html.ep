@@ -21,7 +21,7 @@
     </div>
   </div>
 % } else {
-      <%= length $file_prefix ? $file_prefix : $files_dir %>/
+      <%= length $file_prefix ? $file_prefix : $distro_str %>/
     </div>
     <div class="panel-body">
       <ul class="shy-list files-list">

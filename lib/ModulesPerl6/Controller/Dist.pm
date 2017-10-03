@@ -98,6 +98,7 @@ sub _fetch_dist {
     $self->stash(
         dist        => $dist,
         files_dir   => $files_dir,
+        distro_str  => (splitdir $files_dir)[-1],
         file_prefix => $file_prefix,
         up_dir      => $self->dist_url_for(
             $dist, file => catfile(@up_dir_parts) // ''

@@ -277,6 +277,16 @@ footer:hover {
     .glyphicon-file {
         color: #CCC;
     }
+
+    a {
+        display: block;
+        text-decoration: none;
+        padding: 3px;
+        border-radius: 3px;
+    }
+    a:hover {
+        background: #f3f3f3;
+    }
 }
 
 .CodeMirror {
