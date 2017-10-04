@@ -11,6 +11,7 @@ column         appveyor_status => { data_type => 'text', is_foreign_key => 1 };
 column         appveyor_url  => { data_type => 'text',                     };
 column         url           => { data_type => 'text'                      };
 column         description   => { data_type => 'text'                      };
+column         files         => { data_type => 'text'                      };
 column         stars         => { data_type => 'integer'                   };
 column         issues        => { data_type => 'integer'                   };
 column         date_updated  => { data_type => 'integer'                   };

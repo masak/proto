@@ -1,0 +1,17 @@
+% layout 'default';
+
+<h2>Disambiguation Page</h2>
+
+<p>Your query <kbd><%= $wanted %></kbd> matches more than one result:</p>
+
+<ul>
+  % for (items_in 'dists') {
+    <li><a href="<%= dist_url_for $_ %>"><%= $_->{name} %></a>
+      by <a href="<%= url_for search => q => qq|author:"$_->{author_id}"| %>"
+        ><%= $_->{author_id} %></a>
+          from <a href="<%= url_for search =>
+            q => qq|from:"$_->{dist_source}"| %>"
+              ><%= $_->{dist_source} %></a></li>
+  % }
+</ul>
+

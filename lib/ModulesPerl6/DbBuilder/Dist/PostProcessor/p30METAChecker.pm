@@ -17,6 +17,7 @@ sub problem {
 sub process {
     my $self = shift;
     my $dist = $self->_dist;
+    return if $dist->{_builder}{post}{no_meta_checker};
 
     $self->_check_meta_url($dist);
     $self->_check_todo_problems($dist);

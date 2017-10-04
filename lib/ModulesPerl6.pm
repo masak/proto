@@ -36,6 +36,7 @@ sub startup {
     $self->plugin( AssetPack => { pipes => [qw/Sass JavaScript Combine/] });
     $self->asset->process('app.css' => qw{
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
+        /sass/codemirror.scss
         /sass/main.scss
     });
 
@@ -54,6 +55,8 @@ sub startup {
     $self->asset->process('app.js'  => qw{
         https://code.jquery.com/jquery-3.2.1.min.js
         https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+        /js/codemirror/codemirror.min.js
+        /js/codemirror/perl6-mode.js
         /js/main.js
     });
 
@@ -74,6 +77,12 @@ sub startup {
         $what = $c->stash($what) // [] unless ref $what;
         return @$what;
     });
+    $self->helper( dist_url_for => sub {
+        my ($c, $d, @args) = @_;
+        $c->url_for(dist =>
+            dist => "$d->{name}:$d->{dist_source}:$d->{author_id}",
+            @args);
+    });
 
     # ROUTES
     my $r = $self->routes;
@@ -91,8 +100,10 @@ sub startup {
     $r->get($_)->to('root#search') for '/search', '/s/#q', '/t/#tag';
     $r->get('/l/#q')->to('root#lucky')->name('lucky');
 
-    $r->get('/dist/:dist')->to('root#repo' )->name('dist' );
-    $r->get('/repo/:dist')->to('root#repo' )->name('repo' );
+    $r->get('/dist/:dist/*file' => { file => '' })
+        ->to('dist#dist')->name('dist');
+    $r->get('/raw/:dist/*file')->to('dist#raw')->name('raw');
+    $r->get('/repo/:dist')->to('root#repo')->name('repo');
     $r->get('/total'     )->to('root#total')->name('total');
     $r->get('/help'      )->to('root#help' )->name('help');
 

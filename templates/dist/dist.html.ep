@@ -1,0 +1,46 @@
+% layout 'default';
+
+<h2><%= $dist->{name} %>
+  <small><%= $dist->{dist_source} %>:<%= $dist->{author_id} %>
+    <small>last updated on <%= $dist->{date_updated_human} %></small>
+  </small>
+</h2>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      % if (length $file_prefix) {
+        <a href="<%= $up_dir %>" class="btn btn-default btn-sm back-button"
+          ><i class="glyphicon glyphicon-arrow-left"></i></a>
+      % }
+% if (stash 'show_file') {
+      <%= $file_prefix %>
+    </div>
+    <div class="code-mirror" data-highlight-type="<%= stash 'file_type' %>">
+      <pre class="file-content"
+        ><%= stash 'file_content' %></pre>
+    </div>
+  </div>
+% } else {
+      <%= length $file_prefix ? $file_prefix : $distro_str %>/
+    </div>
+    <div class="panel-body">
+      <ul class="shy-list files-list">
+      % for (items_in $dist->{files}){
+        <li>
+          <a href="<%= dist_url_for $dist, file => $_->{full} %>">
+            <i class="glyphicon <%=
+              $_->{is_dir} ? 'glyphicon-folder-open' : 'glyphicon glyphicon-file'
+            %>"></i>
+
+            <%= $_->{name} %>
+          </a>
+        </li>
+      % }
+      </ul>
+    </div>
+  </div>
+% }
+
+% if (my $readme = stash 'readme') {
+  <%== $readme %>
+% }

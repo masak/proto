@@ -38,6 +38,8 @@ GetOptions(
     'limit=i'             => \my $limit,
     'logos-dir=s'         => \$logos_dir,
     'restart-app'         => \my $restart_app,
+    'no-p6c|?'            => \my $no_p6c,
+    'no-cpan|?'           => \my $no_cpan,
 ) or pod2usage 2;
 
 pod2usage 1 if $help;
@@ -52,6 +54,8 @@ ModulesPerl6::DbBuilder->new(
     logos_dir   => $logos_dir,
     meta_list   => $meta_list,
     restart_app => $restart_app,
+    no_p6c      => $no_p6c,
+    no_cpan     => $no_cpan,
 )->run;
 
 

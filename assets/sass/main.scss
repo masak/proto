@@ -8,6 +8,12 @@ html {
     overflow-y: scroll;
 }
 
+h2, h3, h4, h5, h6 {
+    code {
+        background: none;
+    }
+}
+
 nav.navbar {
     margin-bottom: 0;
 
@@ -218,6 +224,7 @@ footer:hover {
     }
 }
 
+.source-cpan,
 .source-gitlab,
 .source-github {
     vertical-align: middle;
@@ -230,6 +237,9 @@ footer:hover {
 }
 .source-gitlab {
     background: url(/pics/gitlab-icon.png);
+}
+.source-cpan {
+    background: url(/pics/cpan-icon.png);
 }
 
 #donation-bar {
@@ -259,3 +269,39 @@ footer:hover {
         border-top: 0;
     }
 }
+
+#donation-bar {
+    border-bottom: 1px solid rgba(.1, .1, .1, .05);
+}
+
+.files-list {
+    margin-bottom: 0;
+
+    .glyphicon {
+        margin-right: 5px;
+    }
+    .glyphicon-file {
+        color: #CCC;
+    }
+
+    a {
+        display: block;
+        text-decoration: none;
+        padding: 3px;
+        border-radius: 3px;
+    }
+    a:hover {
+        background: #f3f3f3;
+    }
+}
+
+.CodeMirror {
+    border: 1px solid #eee;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.back-button {
+    margin-right: 10px;
+}
+

@@ -7,6 +7,7 @@ use Mojo::Collection qw/c/;
 use Mojo::Util       qw/trim/;
 use ModulesPerl6::Model::Dists::Schema;
 use Mew;
+use POSIX qw/strftime/;
 
 has db_file => Str | InstanceOf['File::Temp'], (
     is      => 'lazy',
@@ -41,7 +42,10 @@ sub _find {
         dist_source description/;
     my $res = $self->_db->resultset('Dist')->search($what,
         $is_hri ? {
-            prefetch => { tag_dists => 'tag', problem_dists => 'problem' },
+            prefetch => {
+                tag_dists     => 'tag',
+                problem_dists => 'problem',
+            },
             result_class => 'DBIx::Class::ResultClass::HashRefInflator'
         } : ()
     );
@@ -50,6 +54,8 @@ sub _find {
         # TODO XXX: there got to be a better way to do this?
         $_->{tags}     = [ sort map $_->{tag}{tag}, @{ delete $_->{tag_dists} } ];
         $_->{problems} = [ sort map $_->{problem}, @{ delete $_->{problem_dists} } ];
+        $_->{date_updated_human} = $_->{date_updated}
+            ? strftime '%Y-%m-%d', localtime $_->{date_updated} : 'N/A';
         $_
     } $res->all : $res;
 }
@@ -62,7 +68,7 @@ sub add {
     for my $dist ( @data ) {
         my @tags = grep length, map trim($_//''),
             @{ delete $dist->{tags} || [] };
-        my @problems = @{delete $dist->{problems}};
+        my @problems = @{(delete $dist->{problems}) || []};
 
         $_ = trim $_//'' for values %$dist;
         $dist->{travis_status}   ||= 'not set up';
@@ -71,6 +77,7 @@ sub add {
         $dist->{date_updated}    ||= 0;
         $dist->{date_added}      ||= 0;
         $dist->{dist_source}     ||= 'unknown';
+        $dist->{files}           //= '{}';
 
         my $res = $db->resultset('Dist')->update_or_create({
             distro_source => { source      => $dist->{dist_source}     },
@@ -82,7 +89,7 @@ sub add {
             dist_build_id => { id => $dist->{build_id} },
             (map +( $_ => $dist->{$_} ),
                 qw/name  meta_url  url  description  stars  issues
-                    date_updated  date_added  appveyor_url/,
+                    date_updated  date_added  appveyor_url  files/,
             ),
         });
 
@@ -128,6 +135,10 @@ sub remove_old {
     $self->_db->resultset("Tag")->search(
         { "tag_dists.tag" => undef },
         { prefetch => { "tag_dists" => "tag" } },
+    )->delete_all;
+    $self->_db->resultset("Problem")->search(
+        { "problem_dists.problem" => undef },
+        { prefetch => { "problem_dists" => "problem" } },
     )->delete_all;
 
     $num_deleted;
