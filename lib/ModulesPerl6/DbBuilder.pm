@@ -128,8 +128,8 @@ sub _deploy_db {
 sub _metas {
     my $self = shift;
     return
-        ($self->_no_p6c  ? () : $self->_p6c_metas ),
-        ($self->_no_cpan ? () : $self->_cpan_metas);
+        ($self->_no_cpan ? () : $self->_cpan_metas),
+        ($self->_no_p6c  ? () : $self->_p6c_metas );
 }
 
 sub _cpan_metas {
