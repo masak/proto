@@ -52,22 +52,24 @@
           <b><%= $dist->{description} %></b></h2>
       <ul>
         % if ($dist->{dist_source} eq 'github') {
-          <li title="Number of likes"
+          <li title="Number of likes" data-toggle="tooltip"
             ><a href="<%= $dist->{url} . '/stargazers' %>"
             ><i class="glyphicon glyphicon-star"></i>
               <%= $dist->{stars} %></a></li>
-          <li title="Number of open Issues"
+          <li title="Number of open Issues" data-toggle="tooltip"
             ><a href="<%= $dist->{url} . '/issues' %>"
             ><i class="glyphicon glyphicon-info-sign"></i>
               <%= $dist->{issues} %></a></li>
         % } else {
-          <li title="Number of likes"
+          <li title="Number of likes" data-toggle="tooltip"
             ><i class="glyphicon glyphicon-star"></i> N/A</li>
-          <li title="Number of open Issues"
+          <li class="issues"
+            title="Number of open Issues" data-toggle="tooltip"
             ><i class="glyphicon glyphicon-info-sign"></i> N/A</li>
         % }
-        <li title="Travis status: <%= $dist->{travis_status} %>">
-          <a class="travis" href="<%= $dist->{travis_status} eq 'not set up'
+        <li class="travis" title="Travis status: <%= $dist->{travis_status} %>"
+          data-toggle="tooltip">
+          <a href="<%= $dist->{travis_status} eq 'not set up'
             ? 'https://docs.travis-ci.com/user/languages/perl6'
             : $dist->{travis_url} %>"
           >
@@ -80,8 +82,10 @@
             % }
           </a>
         </li>
-        <li title="AppVeyor status: <%= $dist->{appveyor_status} %>">
-          <a class="appveyor" href="<%=
+        <li class="appveyor"
+          title="AppVeyor status: <%= $dist->{appveyor_status} %>"
+          data-toggle="tooltip">
+          <a href="<%=
             $dist->{appveyor_status} eq 'not set up'
             ? 'https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/'
             : $dist->{appveyor_url}
@@ -96,7 +100,7 @@
             % }
           </a>
         </li>
-        <li title="Last updated on"
+        <li title="Last updated on" data-toggle="tooltip"
           ><i class="glyphicon glyphicon-wrench"></i>
             <%= $dist->{date_updated} %></li>
         <li>

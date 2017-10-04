@@ -62,9 +62,9 @@ nav.navbar {
     }
 }
 
-.appveyor,
-.travis,
-.github {
+.appveyor a,
+.travis a,
+.github a {
     display: inline-block;
     padding-left: 20px;
     min-height: 16px;
@@ -72,10 +72,10 @@ nav.navbar {
     vertical-align: middle;
 }
 
-.appveyor {
+.appveyor a {
     background-image: url(/pics/appveyor-icon.png);
 }
-.github {
+.github a {
     background-image: url(/pics/github-icon.png);
 }
 
@@ -191,17 +191,16 @@ footer:hover {
             i {
                 color: darken(yellow, 10%);
             }
+        }
 
-            + li,
-            + li + li {
-                width: 3.5em;
-                padding: 0;
-            }
-            + li + li + li {
-                width: 3.5em;
-                padding: 0 0 0 5px;
-            }
-
+        li.issues,
+        li.travis {
+            width: 3.5em;
+            padding: 0;
+        }
+        li.appveyor {
+            width: 3.5em;
+            padding: 0 0 0 5px;
         }
 
         .glyphicon-ok {
@@ -326,3 +325,6 @@ footer:hover {
     margin-right: 10px;
 }
 
+.tooltip {
+    position: absolute;
+}
