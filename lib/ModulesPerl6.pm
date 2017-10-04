@@ -100,14 +100,14 @@ sub startup {
     $r->get($_)->to('root#search') for '/search', '/s/#q', '/t/#tag';
     $r->get('/l/#q')->to('root#lucky')->name('lucky');
 
-    $r->get('/dist/:dist/*file' => { file => '' })
+    $r->get('/dist/#dist/*file' => { file => '' })
         ->to('dist#dist')->name('dist');
-    $r->get('/raw/:dist/*file')->to('dist#raw')->name('raw');
-    $r->get('/repo/:dist')->to('root#repo')->name('repo');
+    $r->get('/raw/#dist/*file')->to('dist#raw')->name('raw');
+    $r->get('/repo/#dist')->to('root#repo')->name('repo');
     $r->get('/total'     )->to('root#total')->name('total');
     $r->get('/help'      )->to('root#help' )->name('help');
 
-    $r->get('/todo/:author')->to('todo#index', { author => '' })->name('todo');
+    $r->get('/todo/#author')->to('todo#index', { author => '' })->name('todo');
 }
 
 1;
