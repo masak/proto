@@ -44,38 +44,47 @@
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>
-      <h2><i title="<%= <%= $dist->{dist_source} %>"></i>
+      <h2><i class="icon-24-<%= $dist->{dist_source} %>"
+          data-toggle="tooltip"
+          title="Hosted on <%= <%= $dist->{dist_source} %>"></i>
         <a href="<%= dist_url_for $dist %>"
         ><%= $dist->{name} %></a>
           <b><%= $dist->{description} %></b></h2>
       <ul>
         % if ($dist->{dist_source} eq 'github') {
-          <li><a href="<%= $dist->{url} . '/stargazers' %>"
-            ><i class="glyphicon-star"></i>
+          <li title="Number of likes" data-toggle="tooltip"
+            ><a href="<%= $dist->{url} . '/stargazers' %>"
+            ><i class="glyphicon glyphicon-star"></i>
               <%= $dist->{stars} %></a></li>
           <li title="Number of open Issues" data-toggle="tooltip"
             ><a href="<%= $dist->{url} . '/issues' %>"
-            ><i class="glyphicon-info-sign"></i>
+            ><i class="glyphicon glyphicon-info-sign"></i>
               <%= $dist->{issues} %></a></li>
         % } else {
-          <li><i class="glyphicon-star"></i> N/A</li>
-          <li><i class="glyphicon-info-sign"></i> N/A</li>
+          <li title="Number of likes" data-toggle="tooltip"
+            ><i class="glyphicon glyphicon-star"></i> N/A</li>
+          <li class="issues"
+            title="Number of open Issues" data-toggle="tooltip"
+            ><i class="glyphicon glyphicon-info-sign"></i> N/A</li>
         % }
-        <li class="travis" title="<%= $dist->{travis_status} %>">
+        <li class="travis" title="Travis status: <%= $dist->{travis_status} %>"
+          data-toggle="tooltip">
           <a href="<%= $dist->{travis_status} eq 'not set up'
             ? 'https://docs.travis-ci.com/user/languages/perl6'
             : $dist->{travis_url} %>"
           >
             % if      ($dist->{travis_status} eq 'passing') {
-              <i class="glyphicon-ok"></i>
+              <i class="glyphicon glyphicon-ok"></i>
             % } elsif ($dist->{travis_status} eq 'failing') {
-              <i class="glyphicon-remove"></i>
+              <i class="glyphicon glyphicon-remove"></i>
             % } else {
-              <i class="glyphicon-question-sign"></i>
+              <i class="glyphicon glyphicon-question-sign"></i>
             % }
           </a>
         </li>
-        <li class="appveyor" title="<%= $dist->{appveyor_status} %>">
+        <li class="appveyor"
+          title="AppVeyor status: <%= $dist->{appveyor_status} %>"
+          data-toggle="tooltip">
           <a href="<%=
             $dist->{appveyor_status} eq 'not set up'
             ? 'https://www.learningperl6.com/2017/05/01/rakudo-in-chocolatey-makes-appveyor-easier/'
@@ -83,15 +92,16 @@
               || url_for 'dist', dist => $dist->{name} %>"
           >
             % if      ($dist->{appveyor_status} eq 'passing') {
-              <i class="glyphicon-ok"></i>
+              <i class="glyphicon glyphicon-ok"></i>
             % } elsif ($dist->{appveyor_status} eq 'failing') {
-              <i class="glyphicon-remove"></i>
+              <i class="glyphicon glyphicon-remove"></i>
             % } else {
-              <i class="glyphicon-question-sign"></i>
+              <i class="glyphicon glyphicon-question-sign"></i>
             % }
           </a>
         </li>
-        <li><i class="glyphicon-wrench"></i>
+        <li title="Last updated on" data-toggle="tooltip"
+          ><i class="glyphicon glyphicon-wrench"></i>
             <%= $dist->{date_updated} %></li>
         <li>
           <a href="<%= $dist->{url} %>"
@@ -105,7 +115,8 @@
       % if (items_in $dist->{tags}) {
         <div class="btn-group">
           % for (items_in $dist->{tags}) {
-            <a href="<%= url_for tag => tag => $_ %>"><%= $_ %></a>
+            <a href="<%= url_for tag => tag => $_ %>"
+              class="btn btn-xs btn-default"><%= $_ %></a>
           % }
         </div>
       % }
