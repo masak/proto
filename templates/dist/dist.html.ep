@@ -1,5 +1,13 @@
 % layout 'default';
 
+%= form_for search => class => "form-inline well well-sm search-form" => begin
+  <div class="form-group">
+    <%= text_field q => class => 'form-control',
+      placeholder => 'Type a module name or search term' %>
+  </div>
+  %= submit_button Search => class => 'btn btn-default'
+% end
+
 <h2><%= $dist->{name} %>
   <small><%= $dist->{dist_source} %>:<%= $dist->{author_id} %>
     <small>last updated on <%= $dist->{date_updated_human} %></small>

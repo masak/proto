@@ -28,7 +28,7 @@ nav.navbar {
 }
 
 @media (min-width: 768px) {
-    .page_search [name="q"]{
+    .search-form [name="q"] {
         min-width: 30em;
     }
 }
