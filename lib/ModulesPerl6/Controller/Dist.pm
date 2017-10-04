@@ -115,7 +115,7 @@ sub _try_showing_readme {
     my ($self, $files_dir) = @_;
     my ($readme) = bsd_glob +(catfile UNPACKED_DISTS, $files_dir)
         . '/README.{md,markdown}';
-    $readme or return;
+    -r $readme or return;
 
     my $data = HTML::Strip->new(auto_reset => 1)->parse(
         decode 'UTF-8', path($readme)->slurp
