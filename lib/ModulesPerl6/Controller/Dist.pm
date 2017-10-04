@@ -2,13 +2,12 @@ package ModulesPerl6::Controller::Dist;
 
 use File::Glob qw/bsd_glob :nocase/;
 use File::Spec::Functions qw/catfile  splitdir/;
-use HTML::Strip;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::DOM;
 use Mojo::JSON qw/from_json/;
 use Mojo::File qw/path/;
 use Mojo::URL;
-use Mojo::Util qw/decode/;
+use Mojo::Util qw/decode  xml_escape/;
 use Text::MultiMarkdown qw/markdown/;
 use experimental 'postderef';
 
@@ -119,7 +118,7 @@ sub _try_showing_readme {
         . '/README.{md,markdown}';
     -r $readme or return;
 
-    my $data = HTML::Strip->new(auto_reset => 1)->parse(
+    my $data = (
         decode 'UTF-8', path($readme)->slurp
     ) =~ s/^```([a-z6]*)$ (.+?) ^```$/
         __process_markdown_code_blocks($1, $2)
@@ -143,6 +142,10 @@ sub __postprocess_markdown_render {
         $_->{id} = lc $_->all_text =~ s/\W/-/gr;
     });
 
+    $dom->find('script,style')->each(sub {
+        $_->remove
+    });
+
     $dom
 }
 
@@ -156,6 +159,8 @@ sub __process_markdown_code_blocks {
     }
     $indent = 0 unless defined $indent;
     $code =~ s/^\h{$indent}//gm;
+    # $code = xml_escape $code;
+    # print $code;
 
     qq{<div class="code-mirror" data-no-line-numbers="true"
         data-highlight-type="$lang"

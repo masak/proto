@@ -28,7 +28,6 @@ my $build = Module::Build->new(
       'File::Temp'                       => '0',
       'FindBin'                          => '0',
       'Getopt::Long'                     => '2.48',
-      'HTML::Strip'                      => '2.10',
       'IO::Handle'                       => '0',
       'IO::Socket::SSL'                  => '2.051',
       'IPC::Open3'                       => '0',
