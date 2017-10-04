@@ -35,8 +35,9 @@ sub search {
 
     my @dists;
     my $core_dists = c;
+    my $opts;
     if (length (my $q = $self->param('q'))) {
-        (my $opts, $q) = $self->_parse_search_options($q);
+        ($opts, my $q) = $self->_parse_search_options($q);
 
         @dists = length $q
             ? (uniq_by { $_->{meta_url} } (
@@ -85,7 +86,11 @@ sub search {
         ),
         tags  => $tags->{by_count},
         dists => \@dists,
-        core_dists => ($active_tag ? c() : $core_dists),
+        core_dists => (
+               $active_tag
+            || $opts->{author}
+            || ($opts->{dist_source} && lc $opts->{dist_source} ne 'core')
+            ? c() : $core_dists),
         body_class => 'page_search',
     );
 
