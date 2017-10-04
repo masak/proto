@@ -167,6 +167,10 @@ footer:hover {
         border-bottom: 1px solid $line-color-muted;
     }
 
+    ul, .btn-group {
+        visibility: hidden;
+    }
+
     ul {
         margin-left: 0;
         padding-left: 0;
