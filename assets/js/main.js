@@ -1,6 +1,9 @@
 $(function(){
     setup_tags();
     setup_code_highlights();
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 });
 
 function setup_code_highlights() {

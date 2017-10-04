@@ -44,7 +44,10 @@
 <ul id="dist-list" class="shy-list">
   % for my $dist (items_in 'dists') {
     <li>
-      <h2><a href="<%= dist_url_for $dist %>"
+      <h2><i class="icon-24-<%= $dist->{dist_source} %>"
+          data-toggle="tooltip"
+          title="Hosted on <%= <%= $dist->{dist_source} %>"></i>
+        <a href="<%= dist_url_for $dist %>"
         ><%= $dist->{name} %></a>
           <b><%= $dist->{description} %></b></h2>
       <ul>

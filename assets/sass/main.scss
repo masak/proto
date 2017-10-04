@@ -242,6 +242,27 @@ footer:hover {
     background: url(/pics/cpan-icon.png);
 }
 
+.icon-24-cpan,
+.icon-24-gitlab,
+.icon-24-github {
+    box-sizing: content-box;
+    vertical-align: middle;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    top: -2px;
+    background: url(/pics/github-icon-24.png) center no-repeat;
+    text-indent: -9999px;
+    overflow: hidden;
+}
+.icon-24-gitlab {
+    background-image: url(/pics/gitlab-icon-24.png);
+}
+.icon-24-cpan {
+    background-image: url(/pics/cpan-icon-24.png);
+}
+
 #donation-bar {
     text-align: center;
     padding: 10px 0;
