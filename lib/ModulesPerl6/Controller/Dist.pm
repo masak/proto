@@ -139,6 +139,9 @@ sub __postprocess_markdown_render {
         my $url = Mojo::URL->new($_->{href});
         $_->{href} = '#' if $url->scheme eq 'javascript';
     });
+    $dom->find('h1,h2,h3,h4,h5,h6')->each(sub {
+        $_->{id} = lc $_->all_text =~ s/\W/-/gr;
+    });
 
     $dom
 }
