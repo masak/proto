@@ -7,7 +7,7 @@ use Mojo::DOM;
 use Mojo::JSON qw/from_json/;
 use Mojo::File qw/path/;
 use Mojo::URL;
-use Mojo::Util qw/decode  xml_escape/;
+use Mojo::Util qw/decode/;
 use Text::MultiMarkdown qw/markdown/;
 use experimental 'postderef';
 
@@ -159,8 +159,6 @@ sub __process_markdown_code_blocks {
     }
     $indent = 0 unless defined $indent;
     $code =~ s/^\h{$indent}//gm;
-    # $code = xml_escape $code;
-    # print $code;
 
     qq{<div class="code-mirror" data-no-line-numbers="true"
         data-highlight-type="$lang"
