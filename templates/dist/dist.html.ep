@@ -40,3 +40,7 @@
     </div>
   </div>
 % }
+
+% if (my $readme = stash 'readme') {
+  <%== $readme %>
+% }

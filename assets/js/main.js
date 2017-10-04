@@ -7,7 +7,7 @@ function setup_code_highlights() {
     $('.code-mirror').each(function(i,el){
         var $el = $(el);
         var mirror = CodeMirror(el, {
-            lineNumbers:    true,
+            lineNumbers:    $el.attr('data-no-line-numbers') ? 0 : 1,
             lineWrapping:   true,
             mode:           $el.attr('data-highlight-type'),
             viewportMargin: Infinity,

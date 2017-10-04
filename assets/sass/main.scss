@@ -8,6 +8,12 @@ html {
     overflow-y: scroll;
 }
 
+h2, h3, h4, h5, h6 {
+    code {
+        background: none;
+    }
+}
+
 nav.navbar {
     margin-bottom: 0;
 
@@ -292,6 +298,7 @@ footer:hover {
 .CodeMirror {
     border: 1px solid #eee;
     height: auto;
+    margin-bottom: 20px;
 }
 
 .back-button {

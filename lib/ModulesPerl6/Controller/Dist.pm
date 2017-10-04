@@ -1,10 +1,13 @@
 package ModulesPerl6::Controller::Dist;
 
+use File::Glob qw/bsd_glob :nocase/;
 use File::Spec::Functions qw/catfile  splitdir/;
+use HTML::Strip;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON qw/from_json/;
 use Mojo::File qw/path/;
 use Mojo::Util qw/decode/;
+use Text::MultiMarkdown qw/markdown/;
 use experimental 'postderef';
 
 use constant UNPACKED_DISTS => 'dists-from-CPAN-unpacked';
@@ -93,6 +96,8 @@ sub _fetch_dist {
         ];
     }
 
+    $self->_try_showing_readme($files_dir) unless $file_prefix;
+
     my @up_dir_parts = splitdir $file_prefix;
     pop @up_dir_parts;
     $self->stash(
@@ -104,6 +109,37 @@ sub _fetch_dist {
             $dist, file => catfile(@up_dir_parts) // ''
         ),
     );
+}
+
+sub _try_showing_readme {
+    my ($self, $files_dir) = @_;
+    my ($readme) = bsd_glob +(catfile UNPACKED_DISTS, $files_dir)
+        . '/README.{md,markdown}';
+    $readme or return;
+
+    my $data = HTML::Strip->new(auto_reset => 1)->parse(
+        decode 'UTF-8', path($readme)->slurp
+    ) =~ s/^```([a-z6]*)$ (.+?) ^```$/
+        __process_markdown_code_blocks($1, $2)
+    /smiregx;
+
+    $self->stash(readme => markdown $data);
+}
+
+sub __process_markdown_code_blocks {
+    my ($lang, $code) = @_;
+
+    # strip out leading indent to avoid glitchy Code Mirror JS highlighter
+    my $indent;
+    for ($code =~ /^(\h*)\S/gm) {
+       $indent = length if not defined $indent or $indent > length;
+    }
+    $indent = 0 unless defined $indent;
+    $code =~ s/^\h{$indent}//gm;
+
+    qq{<div class="code-mirror" data-no-line-numbers="true"
+        data-highlight-type="$lang"
+        ><pre class="file-content">$code</pre></div>}
 }
 
 1;
