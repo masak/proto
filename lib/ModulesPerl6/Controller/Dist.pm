@@ -4,8 +4,10 @@ use File::Glob qw/bsd_glob :nocase/;
 use File::Spec::Functions qw/catfile  splitdir/;
 use HTML::Strip;
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::DOM;
 use Mojo::JSON qw/from_json/;
 use Mojo::File qw/path/;
+use Mojo::URL;
 use Mojo::Util qw/decode/;
 use Text::MultiMarkdown qw/markdown/;
 use experimental 'postderef';
@@ -123,7 +125,22 @@ sub _try_showing_readme {
         __process_markdown_code_blocks($1, $2)
     /smiregx;
 
-    $self->stash(readme => markdown $data);
+    $self->stash(readme => __postprocess_markdown_render(markdown $data));
+}
+
+sub __postprocess_markdown_render {
+    my ($data) = @_;
+    my $dom = Mojo::DOM->new($data);
+    $dom->find('img')->each(sub {
+        my $url = Mojo::URL->new($_->{src});
+        $_->{src} = '#' if $url->scheme('javascript');
+    });
+    $dom->find('a')->each(sub {
+        my $url = Mojo::URL->new($_->{href});
+        $_->{href} = '#' if $url->scheme('javascript');
+    });
+
+    $dom
 }
 
 sub __process_markdown_code_blocks {
