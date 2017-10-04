@@ -133,11 +133,11 @@ sub __postprocess_markdown_render {
     my $dom = Mojo::DOM->new($data);
     $dom->find('img')->each(sub {
         my $url = Mojo::URL->new($_->{src});
-        $_->{src} = '#' if $url->scheme('javascript');
+        $_->{src} = '#' if $url->scheme eq 'javascript';
     });
     $dom->find('a')->each(sub {
         my $url = Mojo::URL->new($_->{href});
-        $_->{href} = '#' if $url->scheme('javascript');
+        $_->{href} = '#' if $url->scheme eq 'javascript';
     });
 
     $dom
