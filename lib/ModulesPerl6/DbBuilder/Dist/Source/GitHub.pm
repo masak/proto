@@ -56,18 +56,16 @@ sub load {
     my $self = shift;
 
     log info => 'Fetching distro info and commits';
-    my $dist    = $self->_dist or return;
-    my $repo    = $self->_repo($self->_pithub->repos->get)           or return;
-    # uncoverable branch true
-    # uncoverable condition left
-    # uncoverable condition false
-    my $commit_request = $self->_pithub->repos->commits;
-    my $commits = $self->_repo($commit_request->list)                or return;
+    my $dist           = $self->_dist or return;
+    my $repo           = $self->_repo($self->_pithub->repos->get) or return;
+    my $commit_request = $self->_pithub->repos->commits->list;
+    my $commits        = $self->_repo($commit_request) or return;
 
-    {
-        my $remaining = $commit_request->response->header('X-RateLimit-Remaining');
-        my $refresh   = $commit_request->response->header('X-RateLimit-Reset') - time;
-        log info => "Rate limiter info: $remaining requests remaining, reset in $refresh seconds)";
+    for ($commit_request->response) {
+        my $remaining = $_->header('X-RateLimit-Remaining');
+        my $refresh   = $_->header('X-RateLimit-Reset') - time;
+        log info => "Rate limiter info: $remaining requests remaining "
+            . "(reset in $refresh seconds)";
     }
 
     %$dist      = (
