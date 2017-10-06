@@ -61,7 +61,14 @@ sub load {
     # uncoverable branch true
     # uncoverable condition left
     # uncoverable condition false
-    my $commits = $self->_repo($self->_pithub->repos->commits->list) or return;
+    my $commit_request = $self->_pithub->repos->commits;
+    my $commits = $self->_repo($commit_request->list)                or return;
+
+    {
+        my $remaining = $commit_request->response->header('X-RateLimit-Remaining');
+        my $refresh   = $commit_request->response->header('X-RateLimit-Reset') - time;
+        log info => "Rate limiter info: $remaining requests remaining, reset in $refresh seconds)";
+    }
 
     %$dist      = (
         %$dist,
